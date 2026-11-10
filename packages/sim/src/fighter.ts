@@ -571,6 +571,10 @@ function moveFrameEffects(f: Fighter): void {
       f.vy = 0;
       f.fastFalling = false;
     }
+  } else if (move.dash && frame === move.startup + move.active + 1) {
+    // Fim da investida: freia para a velocidade normal (não escorrega para fora do palco).
+    const max = f.grounded ? f.stats.walkSpeed : f.stats.airSpeed;
+    f.vx = Math.max(-max, Math.min(max, f.vx));
   }
   if (move.impulse?.frame === frame) {
     if (move.impulse.x !== undefined) f.vx = f.facing * move.impulse.x;

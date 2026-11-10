@@ -106,6 +106,15 @@ describe('especial', () => {
     expect(f.x - x0).toBe(px(15) * 8);
   });
 
+  it('investida freia no fim: não escorrega longe', () => {
+    const f = onGround(0, DASHER);
+    run([f], [SPECIAL]);
+    run([f], [0], 17);
+    expect(f.vx).toBe(px(15));
+    run([f], [0]);
+    expect(Math.abs(f.vx)).toBeLessThanOrEqual(DEFAULT_STATS.walkSpeed);
+  });
+
   it('investida acerta quem está no caminho', () => {
     const a = onGround(0, DASHER);
     const b = onGround(1, DASHER, 150);
