@@ -40,7 +40,7 @@ Objetivo: projeto configurado, regras do jogo escritas e um link público funcio
 - [x] Vite + TypeScript strict + ESLint/Prettier + Vitest.
 - [x] `docs/GDD.md` de 1 página: regras da partida (3 stocks, tempo limite), controles, lista do moveset base e formato da ficha de personagem.
 - [ ] Planilha dos 16 amigos: apelido, traço mais caricato, bordão, ideia de especial, ideia de provocação, cores.
-- [ ] Escolher os 2 primeiros personagens: os dois mais caricatos e com especiais bem diferentes entre si.
+- [x] Escolher os 2 primeiros personagens: os dois mais caricatos e com especiais bem diferentes entre si.
 - [ ] Combinar com o grupo o uso da imagem de cada um no jogo.
 - [x] Deploy contínuo desde o dia 1, para mandar link a cada etapa.
 
