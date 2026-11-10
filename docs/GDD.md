@@ -18,10 +18,14 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 
 ## Movimento
 
-- Andar, pulo, **1 pulo aéreo** (recarrega ao tocar chão ou parede), wall jump.
-- **Fast fall:** ↓ no ar acelera a queda.
-- **Plataformas atravessáveis:** ↓ em cima delas para descer.
-- **Esquiva:** no chão é um dash curto; no ar é um dodge com invencibilidade curta, 1 por vez no ar.
+- Andar, pulo, **1 pulo aéreo** (recarrega ao tocar o chão ou ao dar wall jump), wall jump.
+- **Pulo curto:** soltar o pulo enquanto sobe corta a subida pela metade.
+- **Wall jump:** encostado na lateral de um bloco sólido, no ar, segurando na direção dele o lutador desliza devagar; pulo arremessa para longe da parede. Até 3 por vez no ar.
+- **Fast fall:** ↓ no ar, depois do ápice, acelera a queda.
+- **Plataformas atravessáveis:** passa por baixo pulando; ↓ em cima delas para descer.
+- **Esquiva:** no chão é um dash curto (9 ticks, recarga de 18; pulo cancela o dash). No ar é um dodge em qualquer das 8 direções (ou parado), sem gravidade, com 12 ticks de invencibilidade, 1 por vez no ar.
+- **Tolerâncias:** pulo até 5 ticks depois de sair da borda (coyote time) e pulo apertado até 6 ticks antes de poder pular fica guardado (buffer).
+- **Unidades no `sim`:** inteiros em subpixel (1 px = 100 subpx), para o resultado ser igual em todo navegador.
 - **Borda (ledge):** encostar na quina da plataforma principal agarra; dali sobe, pula ou solta.
 
 ## Controles
