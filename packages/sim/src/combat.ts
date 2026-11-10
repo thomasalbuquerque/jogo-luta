@@ -15,7 +15,7 @@ export function hurtbox(f: Fighter): Box {
 
 /** Pode ser acertado agora (fora de KO e sem invencibilidade). */
 export function canBeHit(f: Fighter): boolean {
-  return f.invulnTicks === 0;
+  return f.state !== 'ko' && f.invulnTicks === 0;
 }
 
 /** Hitboxes ligadas neste tick, em coordenadas do mundo (subpx). */

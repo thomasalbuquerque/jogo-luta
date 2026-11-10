@@ -109,7 +109,7 @@ export const MOVES: Readonly<Record<MoveId, MoveDef>> = {
     damage: 7,
     angle: 80,
     baseKnockback: px(10),
-    knockbackScale: px(0.12),
+    knockbackScale: px(0.16),
   },
   // Golpe em volta do corpo.
   neutralAir: {
@@ -170,7 +170,7 @@ export const MOVES: Readonly<Record<MoveId, MoveDef>> = {
     damage: 8,
     angle: 80,
     baseKnockback: px(9),
-    knockbackScale: px(0.14),
+    knockbackScale: px(0.17),
   },
   // Para no ar, cai reto e, ao pousar, solta uma onda dos dois lados.
   groundPound: {

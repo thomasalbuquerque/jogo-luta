@@ -10,8 +10,11 @@ export interface Spawn {
 export interface Stage {
   id: string;
   solids: readonly Solid[];
+  /** Onde cada jogador começa a luta. */
   spawns: readonly Spawn[];
-  /** Sair desta caixa = KO (na Etapa 1, só volta ao spawn). */
+  /** Onde cada jogador reaparece depois de um KO (no alto do mapa). */
+  respawns: readonly Spawn[];
+  /** Sair inteiro desta caixa = KO. */
   blastZone: Box;
 }
 
@@ -21,8 +24,8 @@ function solid(kind: Solid['kind'], x: number, y: number, w: number, h: number):
 
 /**
  * Mapa de teste: plataforma principal grossa (as laterais servem de parede para
- * wall jump) e 2 plataformas atravessáveis acima dela. Origem no centro do topo
- * da plataforma principal.
+ * wall jump e as quinas de cima são bordas que dá para agarrar) e 2 plataformas
+ * atravessáveis acima dela. Origem no centro do topo da plataforma principal.
  */
 export const TEST_STAGE: Stage = {
   id: 'test',
@@ -36,6 +39,12 @@ export const TEST_STAGE: Stage = {
     { x: px(200), y: 0 },
     { x: px(-320), y: px(-150) },
     { x: px(320), y: px(-150) },
+  ],
+  respawns: [
+    { x: px(-100), y: px(-420) },
+    { x: px(100), y: px(-420) },
+    { x: px(-260), y: px(-420) },
+    { x: px(260), y: px(-420) },
   ],
   blastZone: { x: px(-1300), y: px(-1000), w: px(2600), h: px(1800) },
 };

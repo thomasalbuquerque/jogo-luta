@@ -88,7 +88,7 @@ export const LEDGE_MIN_TICKS = 6;
 export const LEDGE_REGRAB_TICKS = 30;
 
 /** Quanto o knockback perde por tick, ao longo da direção do arremesso (subpx/tick). */
-export const KNOCKBACK_DECAY = px(0.5);
+export const KNOCKBACK_DECAY = px(0.38);
 /** Freio horizontal mínimo do knockback deslizando no chão. */
 export const KNOCKBACK_GROUND_DECAY = px(1.5);
 
@@ -107,13 +107,18 @@ export type FighterState =
   | 'attack'
   | 'landing'
   | 'ledge'
-  | 'hitstun';
+  | 'hitstun'
+  | 'ko';
 
 export interface Fighter extends Body {
   id: number;
   stats: FighterStats;
   /** Dano acumulado, em %. Quanto maior, mais longe voa. */
   damage: number;
+  /** Vidas restantes. Com 0 e em KO, está fora da luta. */
+  stocks: number;
+  /** Ticks em KO até reaparecer. */
+  respawnTicks: number;
   state: FighterState;
   /** Ticks no estado atual (0 no tick em que entrou). */
   stateTicks: number;
@@ -173,6 +178,8 @@ export function createFighter(
     id,
     stats,
     damage: 0,
+    stocks: 1,
+    respawnTicks: 0,
     x: 0,
     y: 0,
     w: stats.width,
@@ -484,7 +491,28 @@ function moveFrameEffects(f: Fighter): void {
   }
 }
 
-/** Pouso no meio de um aéreo: parado alguns ticks. */
+/** Saiu da blast zone: perde 1 stock e sai de cena até reaparecer (se ainda tiver stock). */
+export function knockOut(f: Fighter, respawnDelay: number): void {
+  f.stocks = Math.max(0, f.stocks - 1);
+  f.damage = 0;
+  f.vx = 0;
+  f.vy = 0;
+  f.kbx = 0;
+  f.kby = 0;
+  f.hitstop = 0;
+  f.move = null;
+  f.respawnTicks = respawnDelay;
+  enterState(f, 'ko');
+}
+
+/** Reaparece no ponto dado, com 0% e invencível por `invulnTicks`. */
+export function respawn(f: Fighter, point: Spawn, invulnTicks: number): void {
+  placeAtSpawn(f, point);
+  f.damage = 0;
+  f.respawnTicks = 0;
+  f.invulnTicks = invulnTicks;
+}
+
 /**
  * Levou um golpe: perde o golpe em andamento e fica sem agir por `ticks`.
  * Ser acertado devolve pulo aéreo, dodge e recuperação, para dar chance de voltar.
@@ -506,6 +534,7 @@ function stepHitstun(f: Fighter, input: InputMask, prev: InputMask): void {
   moveHorizontally(f, 0, false);
 }
 
+/** Pouso no meio de um aéreo: parado alguns ticks. */
 function stepLanding(f: Fighter, input: InputMask, prev: InputMask): void {
   if (f.stateTicks >= f.stateDuration) {
     finishAction(f, input, prev);
@@ -631,6 +660,11 @@ export function stepFighter(f: Fighter, input: InputMask, solids: readonly Solid
   // apertado durante o congelamento vale como aperto quando ele acaba.
   if (f.hitstop > 0) {
     f.hitstop--;
+    return;
+  }
+  // Em KO o lutador está fora de cena; quem conta o respawn é o jogo.
+  if (f.state === 'ko') {
+    f.prevInput = input;
     return;
   }
   const prev = f.prevInput;
