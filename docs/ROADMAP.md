@@ -71,7 +71,7 @@ Objetivo: uma luta 1x1 de retângulos com começo, meio e fim.
 - [x] Hitstun e hitstop (congelamento curto no impacto).
 - [x] Blast zones: saiu da tela = KO. Stocks e respawn com invencibilidade.
 - [x] Moveset base: 3 leves no chão (neutro, lado, baixo), 3 aéreos (neutro, lado, baixo), golpe de recuperação para cima e ground pound. O botão Especial fica reservado para o especial de cada personagem (e o ground pound).
-- [ ] Visualizador de hitbox e hurtbox no modo debug.
+- [x] Visualizador de hitbox e hurtbox no modo debug.
 - [x] Testes unitários do `sim`: knockback, KO, troca de estados.
 
 **Pronto quando:** depois de uma luta, dá vontade de jogar outra.
