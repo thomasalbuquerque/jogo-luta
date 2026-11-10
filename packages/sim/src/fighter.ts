@@ -59,6 +59,7 @@ export type FighterState =
   | 'ledge'
   | 'hitstun'
   | 'grabbed'
+  | 'taunt'
   | 'ko';
 
 export interface Fighter extends Body {
@@ -432,6 +433,10 @@ function controlFree(f: Fighter, input: InputMask, prev: InputMask): void {
 
   if (f.jumpBufferTicks > 0 && tryJump(f, input)) return;
   if (tryAttack(f, input)) return;
+  if (f.grounded && isPressed(input, prev, Button.TAUNT)) {
+    enterState(f, 'taunt', characterOf(f).taunt.durationTicks);
+    return;
+  }
 
   cutJump(f, input);
 
@@ -658,6 +663,18 @@ function stepHitstun(f: Fighter, input: InputMask, prev: InputMask): void {
   moveHorizontally(f, 0, false);
 }
 
+/**
+ * Provocação: parado até a animação acabar (só desfaz levando golpe ou saindo do
+ * chão). Sem efeito de jogo: o resto é animação e áudio.
+ */
+function stepTaunt(f: Fighter, input: InputMask, prev: InputMask): void {
+  if (f.stateTicks >= f.stateDuration || !f.grounded) {
+    finishAction(f, input, prev);
+    return;
+  }
+  moveHorizontally(f, 0, false);
+}
+
 /** Pouso no meio de um aéreo: parado alguns ticks. */
 function stepLanding(f: Fighter, input: InputMask, prev: InputMask): void {
   if (f.stateTicks >= f.stateDuration) {
@@ -837,6 +854,9 @@ export function stepFighter(
       break;
     case 'landing':
       stepLanding(f, input, prev);
+      break;
+    case 'taunt':
+      stepTaunt(f, input, prev);
       break;
     case 'ledge':
       stepLedge(f, input);
