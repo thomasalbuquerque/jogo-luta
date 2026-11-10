@@ -1,0 +1,20 @@
+{
+  "name": "@jogo-luta/game",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@jogo-luta/sim": "workspace:*",
+    "phaser": "~3.90.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "vite": "^8.3.7"
+  }
+}

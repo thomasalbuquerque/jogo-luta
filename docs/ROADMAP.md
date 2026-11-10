@@ -15,12 +15,12 @@ O jogo fica completo e divertido no modo local, com 2 personagens, antes de qual
 
 Cada fase só começa quando o marco da anterior foi atingido.
 
-| Fase | Etapas | Marco para passar |
-| --- | --- | --- |
-| 1. Núcleo local | 0 Fundação · 1 Movimento · 2 Combate base · 3 Personagens (2) | A luta de retângulos já é divertida |
-| 2. Arte e polimento | 4 Arte com IA · 5 Game feel e áudio · 6 Menus e HUD | **Jogo local completo, link enviado ao grupo** |
-| 3. Online | 7 Determinismo · 8 Online 1x1 · 9 Online 2x2 | 10 partidas online sem dessincronizar |
-| 4. Conteúdo | 10 Elenco completo · 11 Balanceamento e deploy | 16 jogáveis e o grupo joga sem explicação |
+| Fase                | Etapas                                                        | Marco para passar                              |
+| ------------------- | ------------------------------------------------------------- | ---------------------------------------------- |
+| 1. Núcleo local     | 0 Fundação · 1 Movimento · 2 Combate base · 3 Personagens (2) | A luta de retângulos já é divertida            |
+| 2. Arte e polimento | 4 Arte com IA · 5 Game feel e áudio · 6 Menus e HUD           | **Jogo local completo, link enviado ao grupo** |
+| 3. Online           | 7 Determinismo · 8 Online 1x1 · 9 Online 2x2                  | 10 partidas online sem dessincronizar          |
+| 4. Conteúdo         | 10 Elenco completo · 11 Balanceamento e deploy                | 16 jogáveis e o grupo joga sem explicação      |
 
 ## Regra de commits (vale para todas as etapas)
 
@@ -36,9 +36,9 @@ Cada tarefa vira vários commits pequenos, e todo dia de trabalho termina com pu
 
 Objetivo: projeto configurado, regras do jogo escritas e um link público funcionando.
 
-- [ ] Monorepo com pnpm workspaces: `packages/sim` (lógica pura, sem Phaser), `packages/game` (Phaser, render, input, áudio) e, mais tarde, `packages/server`.
-- [ ] Vite + TypeScript strict + ESLint/Prettier + Vitest.
-- [ ] `docs/GDD.md` de 1 página: regras da partida (3 stocks, tempo limite), controles, lista do moveset base e formato da ficha de personagem.
+- [x] Monorepo com pnpm workspaces: `packages/sim` (lógica pura, sem Phaser), `packages/game` (Phaser, render, input, áudio) e, mais tarde, `packages/server`.
+- [x] Vite + TypeScript strict + ESLint/Prettier + Vitest.
+- [x] `docs/GDD.md` de 1 página: regras da partida (3 stocks, tempo limite), controles, lista do moveset base e formato da ficha de personagem.
 - [ ] Planilha dos 16 amigos: apelido, traço mais caricato, bordão, 2 ideias de especial, ideia de provocação, cores.
 - [ ] Escolher os 2 primeiros personagens: os dois mais caricatos e com especiais bem diferentes entre si.
 - [ ] Combinar com o grupo o uso da imagem de cada um no jogo.

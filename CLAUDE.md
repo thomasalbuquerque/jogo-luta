@@ -61,10 +61,12 @@ docs/
 
 ```
 pnpm install          instalar dependências
-pnpm dev              rodar o jogo (Vite)
-pnpm test             testes (Vitest)
-pnpm lint             ESLint
-pnpm build            build de produção
+pnpm dev              rodar o jogo (Vite, http://localhost:5173)
+pnpm test             testes (Vitest, todos os pacotes)
+pnpm lint             ESLint + checagem do Prettier
+pnpm format           formatar com Prettier
+pnpm typecheck        tsc em todos os pacotes
+pnpm build            build de produção (packages/game/dist)
 ```
 
-(Ajustar esta seção quando os scripts forem criados na Etapa 0.)
+Deploy: todo push na `main` roda `.github/workflows/deploy.yml` (lint, testes, build) e publica no GitHub Pages: https://thomasalbuquerque.github.io/jogo-luta/
