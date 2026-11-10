@@ -1,33 +1,31 @@
-# Arte — passo a passo no ChatGPT (Etapa 4)
+# Arte — passo a passo (Etapa 4)
 
-Este arquivo diz exatamente o que fazer no ChatGPT para gerar a arte do jogo: o que anexar, o que
+Este arquivo diz exatamente o que fazer para gerar a arte do jogo: onde clicar, o que anexar, o que
 colar, o que conferir e onde salvar cada imagem. No fim estão o guia de estilo (o porquê de cada
 regra) e o modelo de ficha para os próximos personagens.
 
 ## Visão geral
 
-Você vai abrir **4 conversas** no ChatGPT, uma de cada vez:
+| Parte | O quê            | O que sai                                                             | Imagens | Situação |
+| ----- | ---------------- | --------------------------------------------------------------------- | ------- | -------- |
+| 1     | Estilo do jogo   | `style.png` (boneco no estilo do jogo) e `shape.png` (molde do corpo) | 2       | ✅ feita |
+| 2     | Schummaki        | Conceito, cabeças com expressões, peças do corpo, efeitos, figurinha  | 5       |          |
+| 3     | João Frango      | Igual à parte 2                                                       | 5       |          |
+| 4     | Cenário (a laje) | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       |          |
 
-| Parte | Conversa         | O que sai                                                            | Imagens |
-| ----- | ---------------- | -------------------------------------------------------------------- | ------- |
-| 1     | Estilo do jogo   | Um boneco genérico no estilo do jogo + o molde do corpo              | 2       |
-| 2     | Schummaki        | Conceito, cabeças com expressões, peças do corpo, efeitos, figurinha | 5       |
-| 3     | João Frango      | Igual à parte 2                                                      | 5       |
-| 4     | Cenário (a laje) | Arte do mapa, 3 camadas de fundo, peças do palco                     | 5       |
+As partes 2 a 4 podem ser feitas por dois caminhos. Os dois usam as mesmas imagens de referência e
+salvam com os mesmos nomes:
 
-Todas as mensagens seguem o mesmo esquema:
+- **[Caminho A — Firefly](#caminho-a--firefly-gpt-image-15)**, com o modelo GPT Image 1.5 (o que
+  você está usando). Cada imagem é um pedido separado: você anexa as referências e cola um texto
+  curto.
+- **[Caminho B — ChatGPT](#caminho-b--chatgpt)**. Uma conversa por personagem. Serve quando houver
+  cota de imagens no ChatGPT.
 
-- **A primeira mensagem de cada conversa não gera imagem.** Ela só passa as regras (e as fotos). O
-  ChatGPT responde "OK".
-- **Cada mensagem seguinte gera 1 imagem.** Você confere, baixa e salva com o nome indicado antes de
-  mandar a próxima.
-- **Se a imagem vier errada,** mande a correção da tabela [Se der errado](#se-der-errado) em vez de
-  seguir.
-- **Se o ChatGPT avisar que acabou o limite de imagens do dia,** pare e continue no dia seguinte na
-  mesma conversa.
+**Não misture os caminhos no mesmo personagem.** Comece e termine cada um no mesmo lugar, porque
+cada ferramenta desenha um pouco diferente.
 
-Os textos para colar estão em inglês porque o gerador segue melhor instruções técnicas assim. Você
-pode conversar com ele em português nas correções.
+Os textos para colar estão em inglês porque o gerador segue melhor instruções técnicas assim.
 
 ## Parte 0 — Antes de começar
 
@@ -35,22 +33,310 @@ pode conversar com ele em português nas correções.
 2. Separe 2 ou 3 fotos de cada amigo: rosto de frente bem iluminado, rosto de perfil e corpo
    inteiro. Sem óculos escuros e sem filtro.
 3. Guarde as fotos **fora** da pasta do projeto. O repositório é público.
-4. Crie a pasta `art/` na raiz do projeto. É lá que você vai salvar as imagens geradas (sempre em
-   PNG, no tamanho original).
+4. As imagens geradas vão para a pasta `art/` na raiz do projeto, sempre em PNG e no tamanho
+   original.
 
-## Parte 1 — Estilo do jogo (só uma vez)
+## Parte 1 — Estilo do jogo ✅
 
-Esta conversa cria duas imagens que servem de referência para todas as outras:
+Feita no ChatGPT. As duas imagens servem de referência para todas as outras e **não devem ser
+refeitas**: trocar o estilo no meio deixa os personagens com cara de jogos diferentes.
 
-- **`estilo.png`:** um boneco genérico desenhado no estilo do jogo. Não é nenhum amigo, para que o
-  estilo passe para os outros personagens sem levar junto o rosto dele.
-- **`molde.png`:** um manequim cinza, inteiro e separado em peças. Todos os amigos "vestem" esse
-  molde, então todos ficam com o mesmo tamanho e cabem no mesmo esqueleto de animação.
+- **`art/style/style.png`:** um boneco genérico desenhado no estilo do jogo. Não é nenhum amigo,
+  para que o estilo passe para os outros personagens sem levar junto o rosto dele.
+- **`art/style/shape.png`:** um manequim cinza, inteiro e separado em peças. Ele define a lista de
+  peças do esqueleto de animação.
 
-Depois que essas duas imagens estiverem aprovadas, **não refaça**: trocar o estilo no meio deixa os
-personagens com cara de jogos diferentes.
+O `shape.png` saiu diferente do pedido: está de frente (não em 3/4), com a cabeça um pouco menor e
+o corpo mais fino que o do `style.png`, sobre um fundo escuro. Não precisa refazer. Ele é só
+referência e nunca entra no jogo, e os textos das peças já pedem cabeça, tronco e quadril em 3/4 e
+mandam seguir as proporções do conceito do personagem, não as do manequim.
 
-### 1.1 Primeira mensagem (não gera imagem)
+Os textos usados na parte 1 estão no [Caminho B](#caminho-b--chatgpt), caso um dia precise refazer.
+
+## Caminho A — Firefly (GPT Image 1.5)
+
+### Como gerar uma imagem no Firefly
+
+Todo passo deste caminho segue o mesmo roteiro. Os nomes dos botões estão como na ajuda da Adobe; no
+Firefly em português eles podem aparecer traduzidos.
+
+1. Abra o Firefly (firefly.adobe.com), clique em **Generate** no painel da esquerda e depois em
+   **Generate image**.
+2. Em **Model**, na parte _Partner models_, escolha **GPT Image 1.5**. É ele que aceita **Reference
+   images** (até 6). Na primeira vez o Firefly pede para confirmar que o modelo não é da Adobe:
+   clique em OK. Use esse mesmo modelo no jogo inteiro.
+3. Em **Aspect ratio**, escolha o formato que o passo indica: **Wide (4:3)** ou **Square (1:1)**.
+4. Em **Reference images**, envie as imagens que o passo indica.
+5. Cole o texto do passo no campo **Prompt** e clique em **Generate**.
+6. Escolha o melhor resultado, baixe em PNG e salve com o nome indicado.
+
+O que muda em relação ao ChatGPT:
+
+- **Não existe conversa.** O Firefly não lembra da imagem anterior. Por isso todo passo manda
+  anexar as referências de novo, e cada texto já traz tudo o que precisa.
+- **O campo de texto aceita uns 1.000 caracteres.** Os textos deste caminho já cabem. Se escrever
+  um novo, mantenha curto: as imagens de referência fazem a maior parte do trabalho.
+- **Não há fundo transparente.** Os textos pedem fundo magenta liso (#FF00FF). O Claude remove
+  depois; se preferir, o Photoshop também tira, com _Remover plano de fundo_.
+- **Cada geração gasta créditos da Adobe.** Se a imagem saiu quase certa, corrija em vez de gerar
+  de novo do zero (veja [Se der errado no Firefly](#se-der-errado-no-firefly)).
+
+### Parte 2 — Schummaki (Firefly)
+
+#### 2.1 Conceito → `1-conceito.png`
+
+**Formato:** Wide (4:3). **Referências:** `style.png` + 2 ou 3 fotos do Schummaki.
+
+```text
+Character concept sheet of my friend from the attached photos, drawn in the exact style of the attached cartoon reference (do not copy that character's face). Keep his real face shape, hair, nose, eyebrows and facial hair; exaggerate his most distinctive features by about 30%.
+Character: Schummaki, car lover from the coast, solid build, determined grin. Petrol-blue (#1F6F78) racing-style zip jacket with graphite side panels and two silver stripes, no logos; graphite cap; silver fingerless driving gloves; graphite board shorts; petrol-blue sneakers. No red suit, no helmet.
+The same character 3 times side by side, same scale, feet aligned: front view, 3/4 view facing right, side profile facing right. Neutral standing pose.
+Big head (3 heads tall), bold dark plum-brown outline, flat 2-tone cel shading, light from above. Plain light-gray background. No text, logos or numbers.
+```
+
+**Confira:** dá para reconhecer o amigo? Se não, use a correção "Não parece o amigo". Este é o
+desenho que define o personagem; as próximas imagens copiam dele.
+
+**Salve como:** `art/schummaki/1-conceito.png`. **Mande para o amigo aprovar antes de seguir.**
+
+#### 2.2 Cabeças com expressões → `2-cabecas.png`
+
+**Formato:** Square (1:1). **Referências:** `1-conceito.png` + 1 ou 2 fotos do rosto dele.
+
+```text
+Head expression sheet of the character in the attached concept sheet: same design, same style. Use the attached photos only for facial likeness.
+4 heads only, cut at the neck, all in 3/4 view facing right, same size, in a 2x2 grid with space between them:
+1. Fight-ready: confident smirk.
+2. Hurt: eyes squeezed shut, teeth clenched.
+3. Taunt: mouth wide open shouting, eyebrows raised.
+4. KO: dizzy spiral eyes, tongue slightly out.
+Bold dark plum-brown outline, flat 2-tone cel shading, light from above. Solid flat magenta (#FF00FF) background. No text.
+```
+
+**Confira:** 4 cabeças iguais ao conceito, todas viradas para a direita. Elas viram as cabeças do
+jogo: ao levar golpe, provocar ou cair, o jogo troca a cabeça inteira.
+
+**Salve como:** `art/schummaki/2-cabecas.png`
+
+#### 2.3 Peças do corpo → `3-pecas.png`
+
+**Formato:** Square (1:1). **Referências:** `1-conceito.png` + `shape.png`.
+
+```text
+Cut-out animation parts of the character in the attached concept sheet, wearing the same outfit. Use the attached gray mannequin only as the list of parts and how they are split; keep the proportions of the concept sheet.
+Parts, each separate with space between them, none touching: head and torso and hips (each in 3/4 view facing right); upper arm; forearm; fist; open hand; thigh; shin; shoe. Extra: two hands gripping an invisible steering wheel.
+Rounded, slightly extended joint ends so the parts overlap when rotated. Every part complete and straight, nothing cut off.
+Bold dark plum-brown outline, flat 2-tone cel shading, light from above. Solid flat magenta (#FF00FF) background. No text, no labels.
+```
+
+**Confira:** as peças do manequim, agora com a roupa dele, mais as 2 mãos segurando o volante.
+Nada encostando, nada cortado. Basta 1 de cada peça de braço e perna: o braço e a perna de trás
+usam a mesma peça, escurecida na animação.
+
+**Salve como:** `art/schummaki/3-pecas.png`
+
+#### 2.4 Efeitos do especial → `4-efeitos.png`
+
+**Formato:** Square (1:1). **Referências:** `1-conceito.png`.
+
+```text
+Effects sheet for the special move of the character in the attached concept sheet, same outline and colors: 4 tire-smoke puffs in different sizes (light gray); 2 horizontal speed-streak shapes; 1 burnt-rubber skid mark seen from the side. Each item separate, with space between them.
+Bold dark plum-brown outline, flat 2-tone cel shading. Solid flat magenta (#FF00FF) background. No text.
+```
+
+**Salve como:** `art/schummaki/4-efeitos.png`
+
+#### 2.5 Figurinha → `5-figurinha.png`
+
+É o retrato da tela de seleção e do placar. Pode ficar para depois, se os créditos apertarem.
+
+**Formato:** Square (1:1). **Referências:** `1-conceito.png` + 1 foto do rosto dele.
+
+```text
+Portrait sticker of the character in the attached concept sheet, same design and style; use the attached photo only for facial likeness. Bust (head and shoulders), 3/4 view facing right, confident expression, inside a die-cut sticker: thick off-white border following the silhouette, over a round badge in the main color of his outfit.
+Bold dark plum-brown outline, flat 2-tone cel shading. Solid flat magenta (#FF00FF) background outside the sticker. No text.
+```
+
+**Salve como:** `art/schummaki/5-figurinha.png`
+
+### Parte 3 — João Frango (Firefly)
+
+Os mesmos 5 passos da parte 2, com os textos do João. Salve em `art/joao-frango/`.
+
+#### 3.1 Conceito → `1-conceito.png`
+
+**Formato:** Wide (4:3). **Referências:** `style.png` + 2 ou 3 fotos do João.
+
+```text
+Character concept sheet of my friend from the attached photos, drawn in the exact style of the attached cartoon reference (do not copy that character's face). Keep his real face shape, hair, nose, eyebrows and facial hair; exaggerate his most distinctive features by about 30%.
+Character: João Frango, sleepy restaurant owner from Rio, slim build, half-closed sleepy eyes, easygoing smile. Off-white chef apron over an orange (#F28C28) t-shirt; corn-yellow (#F6C945) cap with a red-orange chicken comb sticking out on top; casual shorts; flip-flops. No text on the apron.
+The same character 3 times side by side, same scale, feet aligned: front view, 3/4 view facing right, side profile facing right. Neutral standing pose.
+Big head (3 heads tall), bold dark plum-brown outline, flat 2-tone cel shading, light from above. Plain light-gray background. No text, logos or numbers.
+```
+
+**Salve como:** `art/joao-frango/1-conceito.png`. **Mande para o amigo aprovar antes de seguir.**
+
+#### 3.2 Cabeças com expressões → `2-cabecas.png`
+
+**Formato:** Square (1:1). **Referências:** `1-conceito.png` do João + 1 ou 2 fotos do rosto dele.
+
+```text
+Head expression sheet of the character in the attached concept sheet: same design, same style. Use the attached photos only for facial likeness.
+4 heads only, cut at the neck, all in 3/4 view facing right, same size, in a 2x2 grid with space between them:
+1. Fight-ready: confident smirk.
+2. Hurt: eyes squeezed shut, teeth clenched.
+3. Taunt: mouth wide open shouting, eyebrows raised.
+4. KO: dizzy spiral eyes, tongue slightly out.
+Bold dark plum-brown outline, flat 2-tone cel shading, light from above. Solid flat magenta (#FF00FF) background. No text.
+```
+
+**Salve como:** `art/joao-frango/2-cabecas.png`
+
+#### 3.3 Peças do corpo → `3-pecas.png`
+
+**Formato:** Square (1:1). **Referências:** `1-conceito.png` do João + `shape.png`.
+
+```text
+Cut-out animation parts of the character in the attached concept sheet, wearing the same outfit. Use the attached gray mannequin only as the list of parts and how they are split; keep the proportions of the concept sheet.
+Parts, each separate with space between them, none touching: head and torso and hips (each in 3/4 view facing right); upper arm; forearm; fist; open hand; thigh; shin; foot with flip-flop. Extra: two hands cupped as if around the mouth, shouting.
+Rounded, slightly extended joint ends so the parts overlap when rotated. Every part complete and straight, nothing cut off.
+Bold dark plum-brown outline, flat 2-tone cel shading, light from above. Solid flat magenta (#FF00FF) background. No text, no labels.
+```
+
+**Salve como:** `art/joao-frango/3-pecas.png`
+
+#### 3.4 Efeitos do especial → `4-efeitos.png`
+
+**Formato:** Square (1:1). **Referências:** `1-conceito.png` do João.
+
+```text
+Effects sheet for the special move of the character in the attached concept sheet, same outline and colors: a whole golden roast chicken flying to the right, side view, in 3 slightly different rotation frames; 3 small steam puffs; 1 short motion-trail shape. Each item separate, with space between them.
+Bold dark plum-brown outline, flat 2-tone cel shading. Solid flat magenta (#FF00FF) background. No text.
+```
+
+**Salve como:** `art/joao-frango/4-efeitos.png`
+
+#### 3.5 Figurinha → `5-figurinha.png`
+
+**Formato:** Square (1:1). **Referências:** `1-conceito.png` do João + 1 foto do rosto dele.
+
+```text
+Portrait sticker of the character in the attached concept sheet, same design and style; use the attached photo only for facial likeness. Bust (head and shoulders), 3/4 view facing right, confident expression, inside a die-cut sticker: thick off-white border following the silhouette, over a round badge in the main color of his outfit.
+Bold dark plum-brown outline, flat 2-tone cel shading. Solid flat magenta (#FF00FF) background outside the sticker. No text.
+```
+
+**Salve como:** `art/joao-frango/5-figurinha.png`
+
+### Parte 4 — Cenário: a laje (Firefly)
+
+O primeiro mapa é a laje de um prédio no litoral, no fim da tarde, com vista para os morros e o mar.
+O topo do prédio é a plataforma principal da luta (as paredes dos lados servem para o wall jump), e
+as 2 plataformas finas flutuam acima dela, como no mapa de teste. Salve tudo em
+`art/cenario-laje/`.
+
+O Firefly vai no máximo até o formato 4:3, e as camadas do fundo precisam ser bem mais largas que a
+tela. Isso se resolve depois: o Claude repete e emenda as camadas, ou o Photoshop alarga com
+_Expansão generativa_.
+
+#### 4.1 Arte do mapa → `1-mapa.png`
+
+**Formato:** Wide (4:3). **Referências:** `style.png`.
+
+```text
+Stage art for a 2D platform fighting game, side view, in the style of the attached cartoon reference but softer: lighter, less saturated, thin outlines, flat shapes, gradient only in the sky. No characters.
+A rooftop ("laje") of a simple concrete building in a Brazilian coastal town at golden hour. In the center, the main platform: the flat rooftop of the building, a block about twice as wide as tall, with plain walls on both sides. Above it, two thin floating wooden plank platforms, one on the left and one on the right. Behind: neighboring rooftops with blue water tanks, TV antennas and a clothesline; further back, green hills and the sea; warm orange-pink sky. No text.
+```
+
+**Confira:** é o mapa inteiro, montado. Ele serve de referência para as próximas 4 imagens.
+
+#### 4.2 a 4.4 Camadas do fundo
+
+O fundo do jogo é feito de 3 camadas que se movem em velocidades diferentes (o efeito de
+profundidade, chamado parallax). Uma geração por camada.
+
+**Formato:** Wide (4:3). **Referências:** `1-mapa.png`.
+
+**4.2 Céu → `2-ceu.png`**
+
+```text
+Using the attached stage art, draw only the sky and the sun, filling the whole image, with the same colors and style. Nothing else: no buildings, no hills, no sea. No text.
+```
+
+**4.3 Morros e mar → `3-longe.png`**
+
+```text
+Using the attached stage art, draw only the far layer: the green hills and the sea along the bottom half, with the same colors and style. Everything above the hills is solid flat magenta (#FF00FF). No buildings, no text.
+```
+
+**4.4 Lajes vizinhas → `4-meio.png`**
+
+```text
+Using the attached stage art, draw only the middle layer: the neighboring rooftops, blue water tanks, TV antennas and clothesline along the bottom part, with the same colors and style. Everything above them is solid flat magenta (#FF00FF). No main building, no floating platforms, no text.
+```
+
+#### 4.5 Peças do palco → `5-pecas.png`
+
+As proporções importam: o jogo já tem as caixas de colisão (topo do prédio 900 × 420 px, plataformas
+230 × 16 px).
+
+**Formato:** Wide (4:3). **Referências:** `1-mapa.png`.
+
+```text
+Using the attached stage art for style and colors, draw the stage pieces separately, with space between them, on a solid flat magenta (#FF00FF) background:
+1. The main platform: the top of the building as one block about 2.1 times wider than tall. The rooftop surface is a perfectly flat, straight top edge with nothing on it. Plain walls on both sides; the bottom fades into shadow.
+2. One thin floating wooden plank platform about 14 times wider than tall, with two small metal brackets underneath.
+3. Separate decorations: a small brick barbecue grill, a blue water tank, a plastic chair, a cooler box.
+No text.
+```
+
+**Confira:** o topo do prédio é uma linha reta (é onde os lutadores pisam) e não tem nada em cima.
+
+### Personagem novo no Firefly
+
+Copie os textos da parte 2 e troque só o que é do Schummaki:
+
+- **Conceito (2.1):** troque a linha que começa com `Character:` pela descrição do novo amigo, em
+  inglês, no mesmo tamanho (nome, de onde é, físico, expressão, roupa peça por peça com as cores, o
+  que evitar). A ficha da [Referência](#ficha-para-um-personagem-novo) ajuda a pensar no que
+  escrever.
+- **Peças (2.3):** troque o que vem depois de `Extra:` pelas mãos especiais dele (ou apague o
+  `Extra:`), e `shoe` pelo calçado dele.
+- **Efeitos (2.4):** troque a lista de itens pelos efeitos do especial dele.
+- **Cabeças (2.2) e figurinha (2.5):** iguais para todos, não mude nada.
+
+Antes de gerar, confira se o texto passou de 1.000 caracteres (o Firefly corta o excesso).
+
+### Se der errado no Firefly
+
+Primeiro, tente gerar de novo com o mesmo texto: cada geração sai um pouco diferente. Se a imagem
+saiu quase certa, corrija só o defeito: anexe **a imagem com defeito** em _Reference images_ (mais
+as fotos, quando o problema é o rosto) e mande só a frase da tabela.
+
+| Problema                             | Anexe                       | Mande                                                                                                                                                                   |
+| ------------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Não parece o amigo                   | A imagem + 2 fotos do rosto | `Edit the attached cartoon: redo only the face so it clearly looks like the man in the attached photos (nose, eyebrows, jaw, hairline). Keep everything else the same.` |
+| Ficou genérico, parecendo outro jogo | A imagem                    | `Edit the attached cartoon: bigger head (1/3 of the height), stronger caricature of his most distinctive features, flat 2-tone shading. Keep everything else the same.` |
+| Fundo xadrez, sujo ou com sombra     | A imagem                    | `Edit the attached image: replace the whole background with solid flat magenta (#FF00FF). Keep everything else the same.`                                               |
+| Peças encostando ou cortadas         | A imagem                    | `Redo the attached parts sheet with more empty space between all parts, every part complete, with rounded joint ends. Same character, same style.`                      |
+| Apareceu texto ou logo               | A imagem                    | `Edit the attached image: remove all text, letters, numbers and logos. Keep everything else the same.`                                                                  |
+| Virado para o lado errado            | A imagem                    | `Edit the attached image: turn it to a 3/4 view facing right. Keep everything else the same.`                                                                           |
+| Luz vindo de um lado                 | A imagem                    | `Edit the attached image: light from straight above, shadows only under the chin, arms and lower parts. Keep everything else the same.`                                 |
+
+Para defeitos pequenos (um logo, um dedo a mais, uma peça cortada), o **Photoshop** costuma ser mais
+barato: selecione a área com o laço, use o _Preenchimento generativo_ e descreva o que deve ficar
+ali. Para tirar o fundo, use _Remover plano de fundo_.
+
+## Caminho B — ChatGPT
+
+No ChatGPT cada personagem tem uma conversa própria. A primeira mensagem passa as regras e não
+gera imagem; cada mensagem seguinte gera 1 imagem. Se o ChatGPT avisar que acabou o limite de
+imagens do dia, pare e continue no dia seguinte na mesma conversa.
+
+### Parte 1 — Estilo do jogo (já feita)
+
+Os textos que criaram o `style.png` e o `shape.png`. Só use se precisar refazer a parte 1.
+
+#### 1.1 Primeira mensagem (não gera imagem)
 
 Abra uma **conversa nova**. Não anexe nada. Cole:
 
@@ -74,7 +360,7 @@ I'm making a 2D platform fighting game where my 16 friends are the characters. I
 
 **Confira:** ele responde "OK" e um resumo. Se gerar uma imagem mesmo assim, ignore e siga.
 
-### 1.2 Boneco do estilo → `estilo.png`
+#### 1.2 Boneco do estilo → `style.png`
 
 Cole:
 
@@ -88,9 +374,9 @@ Plain flat light-gray background (#E6E6E6). Wide landscape image. No text.
 **Confira:** cabeça grande (1/3 da altura), contorno marrom-escuro (não preto), sombra chapada sem
 degradê, nenhum texto. Se gostar do visual, este é o estilo do jogo inteiro.
 
-**Salve como:** `art/estilo/estilo.png`
+**Salve como:** `art/style/style.png`
 
-### 1.3 Molde do corpo → `molde.png`
+#### 1.3 Molde do corpo → `shape.png`
 
 Cole:
 
@@ -108,21 +394,21 @@ Transparent background. No text, no numbers, no labels.
 e sem nada cortado na borda. Só existe 1 braço e 1 perna: o braço e a perna de trás usam a mesma
 peça, escurecida na animação.
 
-**Salve como:** `art/estilo/molde.png`
+**Salve como:** `art/style/shape.png`
 
 Pronto: a parte 1 nunca mais se repete.
 
-## Parte 2 — Schummaki (e o roteiro de todo personagem)
+### Parte 2 — Schummaki (ChatGPT)
 
 Os passos abaixo valem para qualquer amigo; só a primeira mensagem muda. Cada personagem tem a sua
 conversa, para o rosto de um não passar para o outro.
 
-### 2.1 Primeira mensagem (não gera imagem)
+#### 2.1 Primeira mensagem (não gera imagem)
 
-Abra uma **conversa nova** e **anexe 3 coisas**: `estilo.png`, `molde.png` e as 2–3 fotos do amigo.
+Abra uma **conversa nova** e **anexe 3 coisas**: `style.png`, `shape.png` e as 2–3 fotos do amigo.
 Cole a mensagem do personagem:
 
-#### Mensagem do Schummaki
+##### Mensagem do Schummaki
 
 ```text
 [BLOCO DE ESTILO]
@@ -154,11 +440,11 @@ Props and effects for the effects sheet: 4 tire-smoke puffs in different sizes (
 Avoid: red racing suit or red as a main color, helmets, racing numbers, names, sponsor logos, and any resemblance to a famous racing driver beyond what is in the photos.
 
 [INSTRUÇÕES]
-Attached: (1) the style anchor, for style only — do not copy its face; (2) the body template, for proportions and part layout; (3) photos of my friend, for likeness.
+Attached: (1) the style anchor, for style only — do not copy its face; (2) the body template, only as the list of animation parts; (3) photos of my friend, for likeness.
 Do not generate any image yet. Reply only "OK" and list the 3 most distinctive facial features you see in the photos, which you will exaggerate.
 ```
 
-#### Mensagem do João Frango
+##### Mensagem do João Frango
 
 ```text
 [BLOCO DE ESTILO]
@@ -190,7 +476,7 @@ Props and effects for the effects sheet: the roast chicken projectile, side view
 Avoid: restaurant names, text or logos on the apron or cap.
 
 [INSTRUÇÕES]
-Attached: (1) the style anchor, for style only — do not copy its face; (2) the body template, for proportions and part layout; (3) photos of my friend, for likeness.
+Attached: (1) the style anchor, for style only — do not copy its face; (2) the body template, only as the list of animation parts; (3) photos of my friend, for likeness.
 Do not generate any image yet. Reply only "OK" and list the 3 most distinctive facial features you see in the photos, which you will exaggerate.
 ```
 
@@ -201,14 +487,14 @@ Para um amigo novo, copie uma dessas mensagens e troque só o trecho entre `[FIC
 reconhece (a sobrancelha, o queixo, o cabelo), responda corrigindo, por exemplo: _"O mais marcante é
 o queixo comprido, exagere isso."_
 
-### 2.2 Conceito → `1-conceito.png`
+#### 2.2 Conceito → `1-conceito.png`
 
 Cole:
 
 ```text
 Create the CHARACTER CONCEPT SHEET.
 The same character 3 times, side by side, same scale, feet on the same baseline: front view; 3/4 view facing right; full side profile facing right. Neutral standing pose, arms relaxed.
-Same proportions as the body template (3 heads tall). The face must clearly look like my friend in the photos.
+Same proportions as the style anchor (3 heads tall). The face must clearly look like my friend in the photos.
 Plain flat light-gray background (#E6E6E6). Wide landscape image. No text.
 ```
 
@@ -219,7 +505,7 @@ ficar bom. Este é o desenho que define o personagem.
 
 **Mande para o amigo aprovar antes de seguir.**
 
-### 2.3 Cabeças com expressões → `2-cabecas.png`
+#### 2.3 Cabeças com expressões → `2-cabecas.png`
 
 **Anexe** `1-conceito.png` de novo. O ChatGPT lembra das imagens anteriores da conversa, mas vai
 perdendo a fidelidade depois de vários pedidos; o anexo segura o desenho aprovado. Cole:
@@ -239,14 +525,14 @@ jogo: ao levar golpe, provocar ou cair, o jogo troca a cabeça inteira.
 
 **Salve como:** `art/<personagem>/2-cabecas.png`
 
-### 2.4 Peças do corpo → `3-pecas.png`
+#### 2.4 Peças do corpo → `3-pecas.png`
 
-**Anexe** `1-conceito.png` e `molde.png`. Cole:
+**Anexe** `1-conceito.png` e `shape.png`. Cole:
 
 ```text
-Use the attached concept sheet as the definitive design and the attached body template as the exact layout. Create the CUT-OUT ANIMATION PARTS for this character, wearing the outfit from the concept sheet.
-Follow the body template exactly: same layout, same part list, same part sizes and proportions.
-Parts: head (fight-ready expression, 3/4 facing right, with hair/cap); torso; hips; upper arm; forearm; fist; open hand; thigh; shin; shoe. Plus the extra parts listed in the character sheet, if any.
+Use the attached concept sheet as the definitive design and the attached body template only as the list of parts and how they are split. Create the CUT-OUT ANIMATION PARTS for this character, wearing the outfit from the concept sheet.
+Keep the proportions of the concept sheet, not of the mannequin.
+Parts: head (fight-ready expression, with hair/cap), torso and hips, each in 3/4 view facing right; upper arm; forearm; fist; open hand; thigh; shin; shoe. Plus the extra parts listed in the character sheet, if any.
 Clothes follow the parts: sleeves on the arm parts, pants or shorts on the hips and leg parts, accessories on the part they belong to.
 Rounded, slightly extended joint ends; every part complete and straight; generous empty space between parts, none touching.
 Transparent background. No text, no labels.
@@ -257,7 +543,7 @@ encostando, nada cortado.
 
 **Salve como:** `art/<personagem>/3-pecas.png`
 
-### 2.5 Efeitos do especial → `4-efeitos.png`
+#### 2.5 Efeitos do especial → `4-efeitos.png`
 
 **Anexe** `1-conceito.png`. Cole:
 
@@ -272,7 +558,7 @@ assado no João).
 
 **Salve como:** `art/<personagem>/4-efeitos.png`
 
-### 2.6 Figurinha → `5-figurinha.png`
+#### 2.6 Figurinha → `5-figurinha.png`
 
 É o retrato da tela de seleção e do placar. Pode ficar para depois, se o limite do dia apertar.
 
@@ -287,24 +573,24 @@ Square image, transparent background outside the sticker. No text.
 **Salve como:** `art/<personagem>/5-figurinha.png`
 
 **Se o personagem começar a mudar de cara** no meio da conversa, não insista nela: abra uma conversa
-nova, anexe `estilo.png`, `molde.png`, `1-conceito.png` e as fotos, cole a mesma primeira mensagem
+nova, anexe `style.png`, `shape.png`, `1-conceito.png` e as fotos, cole a mesma primeira mensagem
 (2.1) e continue do passo em que parou.
 
-## Parte 3 — João Frango
+### Parte 3 — João Frango (ChatGPT)
 
 Repita a parte 2 inteira numa conversa nova, usando a mensagem do **João Frango** no passo 2.1 e
 salvando em `art/joao-frango/`.
 
-## Parte 4 — Cenário: a laje
+### Parte 4 — Cenário: a laje (ChatGPT)
 
 O primeiro mapa é a laje de um prédio no litoral, no fim da tarde, com vista para os morros e o mar.
 O topo do prédio é a plataforma principal da luta (as paredes dos lados servem para o wall jump), e
 as 2 plataformas finas flutuam acima dela, como no mapa de teste. Para outro tema, troque só a
 descrição do lugar nas mensagens 4.2 e 4.6.
 
-### 4.1 Primeira mensagem (não gera imagem)
+#### 4.1 Primeira mensagem (não gera imagem)
 
-Abra uma **conversa nova** e **anexe** `estilo.png`. Cole:
+Abra uma **conversa nova** e **anexe** `style.png`. Cole:
 
 ```text
 [BLOCO DE ESTILO]
@@ -326,7 +612,7 @@ Attached: the style anchor, for line and color reference.
 We will create the first stage of the game. Do not generate any image yet. Reply only "OK".
 ```
 
-### 4.2 Arte do mapa → `1-mapa.png`
+#### 4.2 Arte do mapa → `1-mapa.png`
 
 Cole:
 
@@ -341,7 +627,7 @@ No characters, no text.
 
 **Salve como:** `art/cenario-laje/1-mapa.png`
 
-### 4.3 a 4.5 Camadas do fundo
+#### 4.3 a 4.5 Camadas do fundo
 
 O fundo do jogo é feito de 3 camadas que se movem em velocidades diferentes (o efeito de
 profundidade, chamado parallax). Uma mensagem por camada. **Anexe** `1-mapa.png` em cada uma.
@@ -366,7 +652,7 @@ Using the attached key art, create only the MID layer: the neighboring rooftops,
 
 **Salve em:** `art/cenario-laje/`, com os nomes acima.
 
-### 4.6 Peças do palco → `5-pecas.png`
+#### 4.6 Peças do palco → `5-pecas.png`
 
 As proporções importam: o jogo já tem as caixas de colisão (topo do prédio 900 × 420 px, plataformas
 230 × 16 px). **Anexe** `1-mapa.png`. Cole:
@@ -383,7 +669,7 @@ No text.
 
 **Salve como:** `art/cenario-laje/5-pecas.png`
 
-## Se der errado
+### Se der errado no ChatGPT
 
 Mande só a frase da tabela, na mesma conversa. O ChatGPT ajusta a última imagem.
 
@@ -394,8 +680,8 @@ Mande só a frase da tabela, na mesma conversa. O ChatGPT ajusta a última image
 | Fundo xadrez cinza desenhado (transparência falsa) | `The background is a drawn checkerboard, not real transparency. Redo the same image on a solid flat magenta (#FF00FF) background, no shadows on it, nothing else changed.` |
 | Peças encostando ou cortadas                       | `Some parts touch each other or are cut off. Redo with more empty space between all parts, every part complete, with rounded joint ends.`                                  |
 | Apareceu texto ou logo                             | `Remove all text, letters, numbers and logos. Change nothing else.`                                                                                                        |
-| Proporção mudou                                    | `Match the body template exactly: same head size, same limb lengths, 3 heads tall.`                                                                                        |
-| Virado para o lado errado                          | `Redo in 3/4 view facing right, like the body template. Change nothing else.`                                                                                              |
+| Proporção mudou                                    | `Match the concept sheet exactly: same head size, same limb lengths, 3 heads tall.`                                                                                        |
+| Virado para o lado errado                          | `Redo in 3/4 view facing right. Change nothing else.`                                                                                                                      |
 | Luz vindo de um lado                               | `Light must come from straight above, not from the side, so the art can be mirrored. Redo the shading only.`                                                               |
 | Estilo mudando depois de muitas mensagens          | Copie de novo o trecho `[BLOCO DE ESTILO]` da primeira mensagem e cole sozinho.                                                                                            |
 
@@ -407,7 +693,7 @@ No fim, a pasta `art/` fica assim (só as versões aprovadas):
 
 ```text
 art/
-  estilo/          estilo.png, molde.png
+  style/           style.png, shape.png
   schummaki/       1-conceito.png, 2-cabecas.png, 3-pecas.png, 4-efeitos.png, 5-figurinha.png
   joao-frango/     (mesmos nomes)
   cenario-laje/    1-mapa.png, 2-ceu.png, 3-longe.png, 4-meio.png, 5-pecas.png
