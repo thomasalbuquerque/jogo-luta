@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { DebugScene } from './scenes/DebugScene';
 import { FightScene } from './scenes/FightScene';
+import { HudScene } from './scenes/HudScene';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -12,7 +13,7 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [FightScene, DebugScene],
+  scene: [FightScene, HudScene, DebugScene],
 });
 
 // Só em dev: permite inspecionar o jogo pelo console (window.__game).

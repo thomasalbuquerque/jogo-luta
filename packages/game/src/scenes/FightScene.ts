@@ -67,6 +67,7 @@ export class FightScene extends Phaser.Scene {
     cam.setZoom(target.zoom);
     cam.centerOn(target.x, target.y);
 
+    this.scene.launch('hud');
     this.scene.launch('debug');
   }
 
