@@ -55,6 +55,8 @@ export interface MoveDef {
   landingLag: number;
   /** Vira para o lado do ←/→ apertado ao começar. */
   turns: boolean;
+  /** No chão, deixa andar com ←/→ durante o golpe. Sem isso, o lutador para. No ar sempre dá para mirar. */
+  canWalk: boolean;
   /** Impulso num frame: x para a frente, y negativo para cima (subpx/tick). */
   impulse?: { frame: number; x?: number; y?: number };
   /** Parado no ar (sem gravidade) durante o startup. */
@@ -69,8 +71,14 @@ function box(x: number, y: number, w: number, h: number): HitboxDef {
   return { x: px(x), y: px(y), w: px(w), h: px(h) };
 }
 
-const GROUND = { aerial: false, landingLag: 0, turns: false, knockbackDir: 'facing' } as const;
-const AIR = { aerial: true, turns: false, knockbackDir: 'facing' } as const;
+const GROUND = {
+  aerial: false,
+  landingLag: 0,
+  turns: false,
+  canWalk: false,
+  knockbackDir: 'facing',
+} as const;
+const AIR = { aerial: true, turns: false, canWalk: false, knockbackDir: 'facing' } as const;
 
 export const MOVES: Readonly<Record<MoveId, MoveDef>> = {
   // Rápido, curto alcance: abre combo.
@@ -78,7 +86,7 @@ export const MOVES: Readonly<Record<MoveId, MoveDef>> = {
     ...GROUND,
     startup: 4,
     active: 3,
-    recovery: 10,
+    recovery: 7,
     hitboxes: [{ from: 5, to: 7, boxes: [box(40, -10, 44, 30)] }],
     damage: 5,
     angle: 30,
@@ -91,7 +99,7 @@ export const MOVES: Readonly<Record<MoveId, MoveDef>> = {
     turns: true,
     startup: 7,
     active: 4,
-    recovery: 16,
+    recovery: 12,
     impulse: { frame: 5, x: px(10) },
     hitboxes: [{ from: 8, to: 11, boxes: [box(44, -6, 52, 34)] }],
     damage: 8,
@@ -104,7 +112,7 @@ export const MOVES: Readonly<Record<MoveId, MoveDef>> = {
     ...GROUND,
     startup: 6,
     active: 4,
-    recovery: 18,
+    recovery: 14,
     hitboxes: [{ from: 7, to: 10, boxes: [box(38, 34, 64, 24)] }],
     damage: 7,
     angle: 80,

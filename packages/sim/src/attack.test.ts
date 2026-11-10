@@ -40,13 +40,27 @@ describe('ataques', () => {
     expect(f.move).toBeNull();
   });
 
-  it('anda durante golpe no chão, mas não vira', () => {
+  it('golpe no chão para o lutador e não vira', () => {
     const f = onGround();
     run(f, ATTACK);
     run(f, LEFT, 5);
     expect(f.facing).toBe(1);
-    expect(f.vx).toBeLessThan(0);
-    expect(f.state).toBe('attack');
+    expect(f.vx).toBe(0);
+  });
+
+  it('golpe com canWalk deixa andar no chão, sem virar', () => {
+    const move = MOVES.neutralLight;
+    move.canWalk = true;
+    try {
+      const f = onGround();
+      run(f, ATTACK);
+      run(f, LEFT, 5);
+      expect(f.state).toBe('attack');
+      expect(f.facing).toBe(1);
+      expect(f.vx).toBeLessThan(0);
+    } finally {
+      move.canWalk = false;
+    }
   });
 
   it('leve lado vira para o lado apertado e avança', () => {
