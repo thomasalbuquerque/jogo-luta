@@ -330,3 +330,59 @@ describe('bloco teleporte', () => {
 function toPxX(f: Fighter): number {
   return (f.x + f.w / 2) / 100;
 }
+
+const COUNTER = character('t-counter', {
+  name: 'Devolve',
+  startup: 3,
+  active: 20,
+  recovery: 20,
+  blocks: [
+    { type: 'counter', hit: { damage: 10, angle: 45, baseKnockback: 12, knockbackScale: 0.2 } },
+  ],
+});
+
+describe('bloco contra-ataque', () => {
+  it('quem bate durante a janela leva o golpe; quem contra-ataca não leva nada', () => {
+    const a = onGround(0, COUNTER);
+    const b = onGround(1, BASE_CHARACTER_ID, 60);
+    b.facing = -1;
+    run([a, b], [SPECIAL, 0]);
+    run([a, b], [0, 0], 4);
+    run([a, b], [0, Button.ATTACK]);
+    run([a, b], [0, 0], 10);
+    expect(a.damage).toBe(0);
+    expect(b.damage).toBe(10);
+    expect(b.state).toBe('hitstun');
+    expect(b.kbx).toBeGreaterThan(0); // para longe de quem contra-atacou
+    // a janela fecha depois de contra-atacar
+    expect(moveFrame(a)).toBeGreaterThanOrEqual(3 + 20);
+  });
+
+  it('errar deixa exposto no recovery', () => {
+    const a = onGround(0, COUNTER);
+    const b = onGround(1, BASE_CHARACTER_ID, 60);
+    b.facing = -1;
+    run([a, b], [SPECIAL, 0]);
+    run([a, b], [0, 0], 23);
+    expect(moveFrame(a)).toBe(24);
+    run([a, b], [0, Button.ATTACK]);
+    run([a, b], [0, 0], 10);
+    expect(a.damage).toBeGreaterThan(0);
+    expect(b.damage).toBe(0);
+  });
+
+  it('devolve projétil: vira o dono e volta', () => {
+    const a = onGround(0, COUNTER);
+    run([a], [SPECIAL]);
+    run([a], [0], 4);
+    const shot = spawnProjectile(a, { ...shotDef(), offsetX: 0 });
+    shot.owner = 1;
+    shot.vx = -px(10);
+    const shots = [shot];
+    resolveProjectileHits([a], shots);
+    expect(a.damage).toBe(0);
+    expect(shots).toHaveLength(1);
+    expect(shot.owner).toBe(0);
+    expect(shot.vx).toBe(px(10));
+  });
+});

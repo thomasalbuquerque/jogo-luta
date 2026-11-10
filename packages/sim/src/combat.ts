@@ -10,7 +10,7 @@ import {
   type Fighter,
 } from './fighter';
 import { idiv } from './math';
-import { hitboxesAt, type HitProps, type MoveId } from './moves';
+import { hitboxesAt, isActiveFrame, type HitProps, type MoveId } from './moves';
 import { overlaps, type Box } from './physics';
 import { projectileSide, type Projectile } from './projectile';
 import { cosDeg, sinDeg, TRIG_ONE } from './trig';
@@ -46,6 +46,18 @@ export interface Hit {
   attacker: number;
   victim: number;
   move: MoveId;
+  /**
+   * `hit`: acerto normal. `counter`: o alvo estava no contra-ataque, então quem
+   * leva é quem bateu (`attacker` é quem contra-ataca).
+   */
+  kind: 'hit' | 'counter';
+}
+
+/** Está na janela do contra-ataque (bloco `counter`, frames ativos do especial). */
+export function isCountering(f: Fighter): boolean {
+  if (f.state !== 'attack') return false;
+  const move = currentMove(f);
+  return move?.counter !== undefined && isActiveFrame(move, moveFrame(f));
 }
 
 /**
@@ -60,8 +72,11 @@ export function findHits(fighters: readonly Fighter[]): Hit[] {
     for (const v of fighters) {
       if (v === a || !canBeHit(v) || (a.moveHits & (1 << v.id)) !== 0) continue;
       const hurt = hurtbox(v);
-      if (boxes.some((b) => overlaps(b, hurt))) {
-        hits.push({ attacker: a.id, victim: v.id, move: a.move });
+      if (!boxes.some((b) => overlaps(b, hurt))) continue;
+      if (isCountering(v)) {
+        hits.push({ attacker: v.id, victim: a.id, move: 'special', kind: 'counter' });
+      } else {
+        hits.push({ attacker: a.id, victim: v.id, move: a.move, kind: 'hit' });
       }
     }
   }
@@ -137,20 +152,44 @@ export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): vo
   victim.hitstop = Math.max(victim.hitstop, stop);
 }
 
+/**
+ * Contra-ataque: quem bateu (`striker`) leva o acerto do bloco `counter`, e quem
+ * contra-atacou pula para o recovery do especial.
+ */
+export function applyCounter(counterer: Fighter, striker: Fighter): void {
+  const counter = moveDef(counterer, 'special').counter;
+  if (!counter) return;
+  striker.moveHits |= 1 << counterer.id;
+  const damage = dealtDamage(counterer, counter.damage);
+  const stop = launch(striker, counter, knockbackSide(counterer, striker, counter), damage);
+  counterer.hitstop = Math.max(counterer.hitstop, stop);
+  striker.hitstop = Math.max(striker.hitstop, stop);
+  endCounterWindow(counterer);
+}
+
+/** Fecha a janela do contra-ataque: o próximo frame já é o recovery. */
+function endCounterWindow(f: Fighter): void {
+  const move = f.state === 'attack' ? currentMove(f) : null;
+  if (move?.counter) f.stateTicks = Math.max(f.stateTicks, move.startup + move.active - 1);
+}
+
 /** Procura e aplica os acertos do tick. */
 export function resolveHits(fighters: readonly Fighter[]): Hit[] {
   const hits = findHits(fighters);
   for (const h of hits) {
     const attacker = fighters.find((f) => f.id === h.attacker);
     const victim = fighters.find((f) => f.id === h.victim);
-    if (attacker && victim) applyHit(attacker, victim, h.move);
+    if (!attacker || !victim) continue;
+    if (h.kind === 'counter') applyCounter(attacker, victim);
+    else applyHit(attacker, victim, h.move);
   }
   return hits;
 }
 
 /**
  * Projéteis que encostam num lutador (que não seja o dono) acertam e somem.
- * Só o alvo congela no impacto: quem soltou está longe.
+ * Só o alvo congela no impacto: quem soltou está longe. Quem está no
+ * contra-ataque devolve o projétil (vira o dono dele).
  */
 export function resolveProjectileHits(
   fighters: readonly Fighter[],
@@ -160,6 +199,14 @@ export function resolveProjectileHits(
   for (const p of projectiles) {
     const victim = fighters.find((v) => v.id !== p.owner && canBeHit(v) && overlaps(p, hurtbox(v)));
     if (!victim) {
+      projectiles[alive++] = p;
+      continue;
+    }
+    if (isCountering(victim)) {
+      p.owner = victim.id;
+      p.vx = 0 - p.vx;
+      p.facing = p.facing === 1 ? -1 : 1;
+      endCounterWindow(victim);
       projectiles[alive++] = p;
       continue;
     }
