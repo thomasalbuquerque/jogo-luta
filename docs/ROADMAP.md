@@ -42,7 +42,7 @@ Objetivo: projeto configurado, regras do jogo escritas e um link público funcio
 - [ ] Planilha dos 16 amigos: apelido, traço mais caricato, bordão, 2 ideias de especial, ideia de provocação, cores.
 - [ ] Escolher os 2 primeiros personagens: os dois mais caricatos e com especiais bem diferentes entre si.
 - [ ] Combinar com o grupo o uso da imagem de cada um no jogo.
-- [ ] Deploy contínuo desde o dia 1, para mandar link a cada etapa.
+- [x] Deploy contínuo desde o dia 1, para mandar link a cada etapa.
 
 **Pronto quando:** uma cena vazia do Phaser abre num link público.
 
