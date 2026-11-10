@@ -32,14 +32,14 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 
 Rascunho; o remapeamento entra na Etapa 6. Gamepad (Gamepad API) é o recomendado.
 
-| Ação       | Jogador 1 | Jogador 2 | Gamepad (padrão)       |
-| ---------- | --------- | --------- | ---------------------- |
-| Direções   | W A S D   | Setas     | Analógico esq. / D-pad |
-| Pular      | Espaço    | J         | A                      |
-| Ataque     | V         | K         | X                      |
-| Especial   | B         | L         | B                      |
-| Esquiva    | F         | I         | RB / RT                |
-| Provocação | R         | U         | Y                      |
+| Ação       | Jogador 1  | Jogador 2 | Gamepad (padrão)       |
+| ---------- | ---------- | --------- | ---------------------- |
+| Direções   | W A S D    | Setas     | Analógico esq. / D-pad |
+| Pular      | Espaço     | J         | A                      |
+| Ataque     | V          | K         | X                      |
+| Especial   | B          | L         | B                      |
+| Esquiva    | Shift esq. | I         | RB / RT                |
+| Provocação | R          | U         | Y                      |
 
 **Input como dado:** a cada tick, cada jogador vira uma bitmask. O `sim` só enxerga isso.
 

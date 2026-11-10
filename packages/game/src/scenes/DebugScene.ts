@@ -60,7 +60,7 @@ export class DebugScene extends Phaser.Scene {
           .join(' ');
         return `P${String(f.id + 1)} ${f.state.padEnd(9)} vx ${vx} vy ${vy}  ${flags}  [${inputLabel(fight.lastInputs[f.id] ?? 0)}]`;
       }),
-      'P1: WASD, Espaço pula, F esquiva   P2: setas, J pula, I esquiva   ` debug',
+      'P1: WASD, Espaço pula, Shift esq. esquiva   P2: setas, J pula, I esquiva   ` debug',
     ];
     this.text.setText(lines);
   }
