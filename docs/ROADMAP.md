@@ -38,7 +38,7 @@ Objetivo: projeto configurado, regras do jogo escritas e um link público funcio
 
 - [ ] Monorepo com pnpm workspaces: `packages/sim` (lógica pura, sem Phaser), `packages/game` (Phaser, render, input, áudio) e, mais tarde, `packages/server`.
 - [ ] Vite + TypeScript strict + ESLint/Prettier + Vitest.
-- [ ] `docs/GDD.md` de 1 página: regras da partida (3 stocks, tempo limite), controles, lista do moveset base e formato da ficha de personagem.
+- [x] `docs/GDD.md` de 1 página: regras da partida (3 stocks, tempo limite), controles, lista do moveset base e formato da ficha de personagem.
 - [ ] Planilha dos 16 amigos: apelido, traço mais caricato, bordão, 2 ideias de especial, ideia de provocação, cores.
 - [ ] Escolher os 2 primeiros personagens: os dois mais caricatos e com especiais bem diferentes entre si.
 - [ ] Combinar com o grupo o uso da imagem de cada um no jogo.
