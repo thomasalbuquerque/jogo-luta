@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
 import {
   activeHitboxes,
+  Button,
   createGame,
   FixedStepLoop,
   getStage,
   hurtbox,
+  isPressed,
   stepGame,
   SUBPX,
   toPx,
@@ -25,6 +27,8 @@ const HURTBOX_INVULN_COLOR = 0x9aa0a6;
 /** Pulo de posição maior que isso entre ticks (respawn) não é interpolado. */
 const TELEPORT_PX = 150;
 const CAMERA_RATE = 5;
+/** Ticks depois do fim da luta antes de aceitar revanche (evita apertar sem querer). */
+const REMATCH_DELAY_TICKS = 60;
 /** Enquadramento da câmera quando ninguém está em cena. */
 const STAGE_VIEW: Rect = { x: -450, y: -200, w: 900, h: 200 };
 
@@ -41,6 +45,8 @@ export class FightScene extends Phaser.Scene {
   state!: GameState;
   /** Último input enviado ao sim, por jogador (para o overlay de debug). */
   lastInputs: InputMask[] = [];
+  /** Ticks desde que a luta acabou. */
+  overTicks = 0;
 
   private readonly loop = new FixedStepLoop();
   private controls!: InputManager;
@@ -57,6 +63,9 @@ export class FightScene extends Phaser.Scene {
     this.controls = new InputManager();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.controls.destroy();
+    });
+    this.input.keyboard?.on('keydown-ENTER', () => {
+      if (this.canRematch()) this.newMatch();
     });
 
     this.drawStage();
@@ -79,16 +88,33 @@ export class FightScene extends Phaser.Scene {
     this.updateCamera(alpha, delta);
   }
 
-  /** Começa uma luta nova. */
+  /** Começa uma luta nova (início e revanche). */
   newMatch(): void {
     this.state = createGame(2);
     this.prev = this.state.fighters.map((f) => ({ x: f.x, y: f.y }));
+    this.overTicks = 0;
     this.loop.reset();
+  }
+
+  canRematch(): boolean {
+    return this.state.phase === 'over' && this.overTicks >= REMATCH_DELAY_TICKS;
   }
 
   private tick(): void {
     for (const [i, f] of this.state.fighters.entries()) this.prev[i] = { x: f.x, y: f.y };
+    const prevInputs = this.lastInputs;
     this.lastInputs = this.controls.sample(this.state.fighters.length);
+
+    if (this.state.phase === 'over') {
+      this.overTicks++;
+      const pressed = this.lastInputs.some((m, i) =>
+        isPressed(m, prevInputs[i] ?? 0, Button.ATTACK | Button.JUMP),
+      );
+      if (pressed && this.canRematch()) {
+        this.newMatch();
+        return;
+      }
+    }
     stepGame(this.state, this.lastInputs);
   }
 

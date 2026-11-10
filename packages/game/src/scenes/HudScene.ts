@@ -16,6 +16,7 @@ export class HudScene extends Phaser.Scene {
   private panels: { damage: Phaser.GameObjects.Text; stocks: Phaser.GameObjects.Text }[] = [];
   private clock!: Phaser.GameObjects.Text;
   private result!: Phaser.GameObjects.Text;
+  private hint!: Phaser.GameObjects.Text;
 
   constructor() {
     super('hud');
@@ -63,6 +64,15 @@ export class HudScene extends Phaser.Scene {
         strokeThickness: 10,
       })
       .setOrigin(0.5);
+    this.hint = this.add
+      .text(width / 2, height / 2 + 30, 'Ataque, Pulo ou Enter: revanche', {
+        fontFamily: FONT,
+        fontSize: '24px',
+        color: '#e9ecef',
+        stroke: '#000000',
+        strokeThickness: 5,
+      })
+      .setOrigin(0.5);
   }
 
   override update(): void {
@@ -87,5 +97,6 @@ export class HudScene extends Phaser.Scene {
     } else {
       this.result.setColor('#ffffff');
     }
+    this.hint.setVisible(fight.canRematch());
   }
 }
