@@ -90,7 +90,7 @@ export class FightScene extends Phaser.Scene {
 
   /** Começa uma luta nova (início e revanche). */
   newMatch(): void {
-    this.state = createGame(2);
+    this.state = createGame();
     this.prev = this.state.fighters.map((f) => ({ x: f.x, y: f.y }));
     this.overTicks = 0;
     this.loop.reset();

@@ -77,7 +77,7 @@ describe('game', () => {
   });
 
   it('em KO não leva golpe; sem stock, não volta mais', () => {
-    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    const g = createGame({ rules: { stocks: 1, timeLimitTicks: 0 } });
     const f = fighter(g, 0);
     f.x = px(2000);
     stepGame(g, [0, 0]);
@@ -156,7 +156,7 @@ function throwOut(f: Fighter): void {
 
 describe('fim da partida', () => {
   it('perder o último stock acaba a luta; o outro vence', () => {
-    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    const g = createGame({ rules: { stocks: 1, timeLimitTicks: 0 } });
     throwOut(fighter(g, 0));
     stepGame(g, [0, 0]);
     expect(g.phase).toBe('over');
@@ -164,7 +164,7 @@ describe('fim da partida', () => {
   });
 
   it('com a luta acabada, nada mais se mexe', () => {
-    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    const g = createGame({ rules: { stocks: 1, timeLimitTicks: 0 } });
     throwOut(fighter(g, 1));
     stepGame(g, [0, 0]);
     const snap = JSON.stringify(g.fighters);
@@ -174,7 +174,7 @@ describe('fim da partida', () => {
   });
 
   it('os dois perdem o último stock no mesmo tick: empate', () => {
-    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    const g = createGame({ rules: { stocks: 1, timeLimitTicks: 0 } });
     throwOut(fighter(g, 0));
     throwOut(fighter(g, 1));
     stepGame(g, [0, 0]);
@@ -190,7 +190,7 @@ describe('fim da partida', () => {
   });
 
   it('fim do tempo: vence quem tem mais stocks', () => {
-    const g = createGame(2, TEST_STAGE, { stocks: 3, timeLimitTicks: 5 });
+    const g = createGame({ rules: { stocks: 3, timeLimitTicks: 5 } });
     fighter(g, 0).stocks = 2;
     fighter(g, 1).damage = 150;
     for (let i = 0; i < 5; i++) stepGame(g, [0, 0]);
@@ -199,7 +199,7 @@ describe('fim da partida', () => {
   });
 
   it('fim do tempo com stocks iguais: vence quem tem menos %', () => {
-    const g = createGame(2, TEST_STAGE, { stocks: 3, timeLimitTicks: 5 });
+    const g = createGame({ rules: { stocks: 3, timeLimitTicks: 5 } });
     fighter(g, 0).damage = 40;
     fighter(g, 1).damage = 41;
     for (let i = 0; i < 5; i++) stepGame(g, [0, 0]);
@@ -207,7 +207,7 @@ describe('fim da partida', () => {
   });
 
   it('empate total: morte súbita com 1 stock e 300%, e o próximo KO decide', () => {
-    const g = createGame(2, TEST_STAGE, { stocks: 3, timeLimitTicks: 5 });
+    const g = createGame({ rules: { stocks: 3, timeLimitTicks: 5 } });
     for (let i = 0; i < 5; i++) stepGame(g, [0, 0]);
     expect(g.phase).toBe('fight');
     expect(g.suddenDeath).toBe(true);

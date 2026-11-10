@@ -80,7 +80,7 @@ Objetivo: uma luta 1x1 de retângulos com começo, meio e fim.
 
 Objetivo: trocar ou criar um personagem é editar um arquivo, não escrever código.
 
-- [ ] Schema da ficha de personagem (tipo TS + validação com zod): peso, velocidade, altura do pulo, ajustes nos golpes base, especial, provocação e ids de animação.
+- [x] Schema da ficha de personagem (tipo TS + validação com zod): peso, velocidade, altura do pulo, ajustes nos golpes base, especial, provocação e ids de animação.
 - [ ] Biblioteca de blocos de especial reutilizáveis: projétil, investida, ataque em área, contra-ataque, buff temporário, teleporte, agarrão. Um especial = combinação de blocos + números.
 - [ ] Provocação: animação + áudio, sem efeito de jogo (ou um efeito cômico pequeno).
 - [ ] Schummaki e João Frango completos em retângulo: stats, especial e provocação.

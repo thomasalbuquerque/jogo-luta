@@ -1,3 +1,4 @@
+import { BASE_CHARACTER_ID } from './characters';
 import { resolveHits } from './combat';
 import { TICK_RATE } from './constants';
 import { createFighter, knockOut, respawn, stepFighter, type Fighter } from './fighter';
@@ -46,14 +47,19 @@ export function getStage(id: string): Stage {
   return stage;
 }
 
-export function createGame(
-  playerCount = 2,
-  stage: Stage = TEST_STAGE,
-  rules: MatchRules = DEFAULT_RULES,
-): GameState {
+export interface GameSetup {
+  /** Id da ficha de cada jogador, na ordem. Sem isso: 2 bonecos de teste. */
+  characters?: readonly string[];
+  stage?: Stage;
+  rules?: MatchRules;
+}
+
+export function createGame(setup: GameSetup = {}): GameState {
+  const { stage = TEST_STAGE, rules = DEFAULT_RULES } = setup;
+  const characters = setup.characters ?? [BASE_CHARACTER_ID, BASE_CHARACTER_ID];
   const fighters: Fighter[] = [];
-  for (let i = 0; i < playerCount; i++) {
-    const f = createFighter(i, spawnPoint(stage, i));
+  for (const [i, character] of characters.entries()) {
+    const f = createFighter(i, spawnPoint(stage, i), character);
     f.stocks = rules.stocks;
     fighters.push(f);
   }
