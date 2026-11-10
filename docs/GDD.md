@@ -72,7 +72,7 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames).
 
 - **Frames:** cada golpe é definido em ticks: **startup** (preparação) → **active** (hitbox ligada) → **recovery** (vulnerável). As hitboxes podem mudar de frame a frame (ex.: o arco do aéreo lado começa em cima e desce para a frente).
 - **Escolha do golpe:** ↓ > ↑ > ←/→ > parado. No ar, ↑ + Ataque com a recuperação já usada vira aéreo neutro. A recuperação volta ao tocar o chão, agarrar a borda ou levar golpe.
-- **Durante o golpe:** no chão não anda nem vira; no ar dá para mirar com ←/→, mas não vira. Os golpes de lado viram para o lado apertado ao começar. Leve lado dá um avanço; recuperação dá um impulso para cima.
+- **Durante o golpe:** dá para andar (no chão) e mirar (no ar) com ←/→, mas não virar; o golpe não para o lutador. Os golpes de lado viram para o lado apertado ao começar. Leve lado dá um avanço; recuperação dá um impulso para cima.
 - **Landing lag:** pousar no meio de um aéreo corta o golpe e deixa o lutador parado alguns ticks (4 a 8). O ground pound, ao pousar, vira a onda.
 - **Buffer:** Ataque e Especial apertados ficam guardados 6 ticks. Pulo + Ataque juntos no chão: pula e solta o aéreo no tick seguinte. O dash pode sair em ataque.
 
