@@ -5,3 +5,4 @@ export * from './input';
 export { FixedStepLoop } from './loop';
 export * from './physics';
 export * from './stage';
+export * from './trig';
