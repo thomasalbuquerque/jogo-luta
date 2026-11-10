@@ -3,7 +3,15 @@ import { defineCharacter, type CharacterSheet } from './character';
 import { BASE_CHARACTER_ID, getCharacter, registerCharacter } from './characters';
 import { resolveHits, resolveProjectileHits } from './combat';
 import { px } from './constants';
-import { canUseSpecial, createFighter, moveFrame, stepFighter, type Fighter } from './fighter';
+import {
+  canUseSpecial,
+  createFighter,
+  DEFAULT_STATS,
+  effectiveWeight,
+  moveFrame,
+  stepFighter,
+  type Fighter,
+} from './fighter';
 import { createGame, stepGame } from './game';
 import { Button } from './input';
 import type { ProjectileDef } from './moves';
@@ -242,4 +250,83 @@ function shotDef(): ProjectileDef {
   const def = getCharacter(SHOOTER).special?.move.projectile;
   if (!def) throw new Error('sem projétil');
   return { ...def, lifetimeTicks: 100 };
+}
+
+const BUFFER = character('t-buff', {
+  name: 'Marra',
+  startup: 5,
+  active: 1,
+  recovery: 10,
+  blocks: [
+    { type: 'buff', durationTicks: 120, damagePercent: 150, speedPercent: 130, weightPercent: 150 },
+  ],
+});
+
+const TELEPORTER = character('t-tele', {
+  name: 'Sumiço',
+  startup: 6,
+  active: 4,
+  recovery: 12,
+  blocks: [{ type: 'teleport', distance: 200, invulnTicks: 10 }],
+});
+
+describe('bloco buff', () => {
+  it('mais dano, mais rápido e mais pesado por um tempo', () => {
+    const f = onGround(0, BUFFER);
+    run([f], [SPECIAL]);
+    run([f], [0], 5);
+    expect(f.buffTicks).toBe(120);
+    expect(effectiveWeight(f)).toBe(150);
+    run([f], [0], 12);
+    expect(f.state).toBe('idle');
+    run([f], [Button.RIGHT], 30);
+    expect(f.vx).toBe(Math.trunc((DEFAULT_STATS.walkSpeed * 130) / 100));
+
+    const target = onGround(1, BUFFER, toPxX(f) + 60);
+    f.facing = 1;
+    run([f, target], [Button.ATTACK, 0]);
+    run([f, target], [0, 0], 10);
+    expect(target.damage).toBe(7); // 5% × 150%
+
+    run([f, target], [0, 0], 120);
+    expect(f.buffTicks).toBe(0);
+    expect(f.buffDamage).toBe(100);
+    expect(effectiveWeight(f)).toBe(100);
+  });
+});
+
+describe('bloco teleporte', () => {
+  it('sem direção, vai para a frente e fica invencível um pouco', () => {
+    const f = onGround(0, TELEPORTER);
+    const x0 = f.x;
+    run([f], [SPECIAL]);
+    run([f], [0], 6);
+    expect(f.x - x0).toBe(px(200));
+    expect(f.invulnTicks).toBeGreaterThan(0);
+  });
+
+  it('vai na direção apertada (para cima sai do chão)', () => {
+    const f = onGround(0, TELEPORTER);
+    const y0 = f.y;
+    run([f], [SPECIAL]);
+    run([f], [Button.UP], 6);
+    expect(y0 - f.y).toBeGreaterThan(px(190));
+    expect(f.grounded).toBe(false);
+  });
+
+  it('não atravessa bloco sólido', () => {
+    const wall: Solid = { kind: 'solid', x: px(100), y: px(-400), w: px(50), h: px(400) };
+    const f = createFighter(0, { x: 0, y: 0 }, TELEPORTER);
+    f.facing = 1;
+    const world = [...solids, wall];
+    for (let i = 0; i < 2; i++) stepFighter(f, 0, world);
+    stepFighter(f, SPECIAL, world);
+    for (let i = 0; i < 6; i++) stepFighter(f, 0, world);
+    expect(f.x + f.w).toBe(wall.x);
+  });
+});
+
+/** Centro do lutador em px. */
+function toPxX(f: Fighter): number {
+  return (f.x + f.w / 2) / 100;
 }

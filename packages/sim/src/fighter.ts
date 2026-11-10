@@ -119,6 +119,11 @@ export interface Fighter extends Body {
   specialCooldown: number;
   /** Especial "1 vez por ar" já usado neste ar. */
   specialUsed: boolean;
+  /** Buff temporário (bloco `buff`): ticks restantes e percentuais (100 = normal). */
+  buffTicks: number;
+  buffDamage: number;
+  buffSpeed: number;
+  buffWeight: number;
   prevInput: InputMask;
 }
 
@@ -179,6 +184,10 @@ export function createFighter(
     hitstop: 0,
     specialCooldown: 0,
     specialUsed: false,
+    buffTicks: 0,
+    buffDamage: 100,
+    buffSpeed: 100,
+    buffWeight: 100,
     prevInput: 0,
   };
   placeAtSpawn(f, spawn);
@@ -210,6 +219,7 @@ export function placeAtSpawn(f: Fighter, spawn: Spawn): void {
   f.ledgeCooldown = 0;
   f.hitstop = 0;
   f.specialCooldown = 0;
+  clearBuff(f);
   setState(f, 'fall');
 }
 
@@ -372,17 +382,19 @@ function finishAction(f: Fighter, input: InputMask, prev: InputMask): void {
 /** Andar no chão / mirar no ar, sem ação. */
 function moveHorizontally(f: Fighter, dir: -1 | 0 | 1, turn: boolean): void {
   const s = f.stats;
+  const walkSpeed = idiv(s.walkSpeed * f.buffSpeed, 100);
+  const airSpeed = idiv(s.airSpeed * f.buffSpeed, 100);
   if (f.grounded) {
     if (dir !== 0) {
       if (turn) f.facing = dir;
-      f.vx = approach(f.vx, dir * s.walkSpeed, s.groundAccel);
+      f.vx = approach(f.vx, dir * walkSpeed, s.groundAccel);
     } else {
       f.vx = approach(f.vx, 0, s.groundFriction);
     }
   } else if (dir !== 0) {
     // No ar, não freia quem já está mais rápido que airSpeed (ex.: saiu de um dash).
-    const target = dir * s.airSpeed;
-    if (dir * f.vx < s.airSpeed) f.vx = approach(f.vx, target, s.airAccel);
+    const target = dir * airSpeed;
+    if (dir * f.vx < airSpeed) f.vx = approach(f.vx, target, s.airAccel);
     if (turn) f.facing = dir;
   } else {
     f.vx = approach(f.vx, 0, s.airFriction);
@@ -460,15 +472,68 @@ function stepAttack(f: Fighter, input: InputMask, prev: InputMask, world: World)
   moveHorizontally(f, f.grounded && !move.canWalk ? 0 : axisX(input), false);
   cutJump(f, input);
   moveFrameEffects(f);
-  if (moveFrame(f) === move.startup + 1) fireBlocks(f, move, world);
+  if (moveFrame(f) === move.startup + 1) fireBlocks(f, move, input, world);
 }
 
 /**
  * Blocos instantâneos do especial, no 1º frame ativo. Roda 1 vez por golpe: o
  * frame só avança fora do hitstop.
  */
-function fireBlocks(f: Fighter, move: MoveDef, world: World): void {
-  if (move.projectile) world.projectiles?.push(spawnProjectile(f, move.projectile));
+function fireBlocks(f: Fighter, move: MoveDef, input: InputMask, world: World): void {
+  if (move.teleport) teleport(f, move.teleport, input, world.solids);
+  if (move.buff) {
+    f.buffTicks = move.buff.durationTicks;
+    f.buffDamage = move.buff.damagePercent;
+    f.buffSpeed = move.buff.speedPercent;
+    f.buffWeight = move.buff.weightPercent;
+  }
+  if (move.projectile) {
+    const p = spawnProjectile(f, move.projectile);
+    p.hit.damage = dealtDamage(f, p.hit.damage);
+    world.projectiles?.push(p);
+  }
+}
+
+/**
+ * Teleporte: some e reaparece a `distance` na direção apertada (8 direções; sem
+ * direção, para a frente). Não atravessa blocos sólidos: para encostado neles.
+ */
+function teleport(
+  f: Fighter,
+  def: NonNullable<MoveDef['teleport']>,
+  input: InputMask,
+  solids: readonly Solid[],
+): void {
+  let dx: number = axisX(input);
+  const dy = axisY(input);
+  if (dx === 0 && dy === 0) dx = f.facing;
+  // Na diagonal, cada eixo anda distância × cos 45°.
+  const dist = dx !== 0 && dy !== 0 ? idiv(def.distance * 707, 1000) : def.distance;
+  f.vx = dx * dist;
+  f.vy = dy * dist;
+  moveAndCollide(f, solids, dy > 0);
+  f.vx = 0;
+  f.vy = 0;
+  f.fastFalling = false;
+  if (dx !== 0) f.facing = dx > 0 ? 1 : -1;
+  f.invulnTicks = Math.max(f.invulnTicks, def.invulnTicks);
+}
+
+function clearBuff(f: Fighter): void {
+  f.buffTicks = 0;
+  f.buffDamage = 100;
+  f.buffSpeed = 100;
+  f.buffWeight = 100;
+}
+
+/** Dano que o lutador causa, com o buff ativo. */
+export function dealtDamage(f: Fighter, damage: number): number {
+  return idiv(damage * f.buffDamage, 100);
+}
+
+/** Peso que vale no knockback, com o buff ativo. */
+export function effectiveWeight(f: Fighter): number {
+  return idiv(f.stats.weight * f.buffWeight, 100);
 }
 
 /** Efeitos de movimento do frame atual do golpe (impulso, ground pound, investida). */
@@ -705,6 +770,7 @@ export function stepFighter(
   if (f.attackBufferTicks > 0) f.attackBufferTicks--;
   if (f.specialBufferTicks > 0) f.specialBufferTicks--;
   if (f.specialCooldown > 0) f.specialCooldown--;
+  if (f.buffTicks > 0 && --f.buffTicks === 0) clearBuff(f);
   if (f.ledgeCooldown > 0) f.ledgeCooldown--;
   if (isPressed(input, prev, Button.JUMP)) f.jumpBufferTicks = JUMP_BUFFER_TICKS;
   if (isPressed(input, prev, Button.ATTACK)) f.attackBufferTicks = ACTION_BUFFER_TICKS;

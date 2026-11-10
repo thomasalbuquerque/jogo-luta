@@ -1,6 +1,8 @@
 import { SUBPX } from './constants';
 import {
   currentMove,
+  dealtDamage,
+  effectiveWeight,
   enterHitstun,
   KNOCKBACK_DECAY,
   moveDef,
@@ -109,7 +111,7 @@ function knockbackSide(attacker: Fighter, victim: Fighter, move: HitProps): -1 |
 export function launch(victim: Fighter, hit: HitProps, side: -1 | 1, damage: number): number {
   victim.damage = Math.min(victim.damage + damage, MAX_DAMAGE);
 
-  const kb = knockback(hit, victim.damage, victim.stats.weight);
+  const kb = knockback(hit, victim.damage, effectiveWeight(victim));
   const cos = cosDeg(hit.angle);
   const sin = sinDeg(hit.angle);
   victim.kbx = side * idiv(kb * cos, TRIG_ONE);
@@ -129,7 +131,8 @@ export function launch(victim: Fighter, hit: HitProps, side: -1 | 1, damage: num
 export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): void {
   const move = moveDef(attacker, moveId);
   attacker.moveHits |= 1 << victim.id;
-  const stop = launch(victim, move, knockbackSide(attacker, victim, move), move.damage);
+  const damage = dealtDamage(attacker, move.damage);
+  const stop = launch(victim, move, knockbackSide(attacker, victim, move), damage);
   attacker.hitstop = Math.max(attacker.hitstop, stop);
   victim.hitstop = Math.max(victim.hitstop, stop);
 }
