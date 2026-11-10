@@ -60,9 +60,9 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames).
 
 | Golpe              | Input              | Uso                                 | Frames (S/A/R)  | Dano | Ângulo    | KB base / escala |
 | ------------------ | ------------------ | ----------------------------------- | --------------- | ---- | --------- | ---------------- |
-| Leve neutro (chão) | Ataque parado      | Rápido, curto alcance               | 4 / 3 / 10      | 5%   | 30°       | 7 / 0,08         |
-| Leve lado (chão)   | Ataque + ←/→       | Avança, arremessa na horizontal     | 7 / 4 / 16      | 8%   | 25°       | 9 / 0,17         |
-| Leve baixo (chão)  | Ataque + ↓         | Rasteira, arremessa para cima       | 6 / 4 / 18      | 7%   | 80°       | 10 / 0,16        |
+| Leve neutro (chão) | Ataque parado      | Rápido, curto alcance               | 4 / 3 / 7       | 5%   | 30°       | 7 / 0,08         |
+| Leve lado (chão)   | Ataque + ←/→       | Avança, arremessa na horizontal     | 7 / 4 / 12      | 8%   | 25°       | 9 / 0,17         |
+| Leve baixo (chão)  | Ataque + ↓         | Rasteira, arremessa para cima       | 6 / 4 / 14      | 7%   | 80°       | 10 / 0,16        |
 | Aéreo neutro       | Ataque no ar       | Golpe em volta do corpo             | 5 / 6 / 12      | 7%   | 45° longe | 8 / 0,12         |
 | Aéreo lado         | Ataque + ←/→ no ar | Principal golpe de KO lateral       | 9 / 4 / 18      | 11%  | 35°       | 10 / 0,21        |
 | Aéreo baixo        | Ataque + ↓ no ar   | Golpe para baixo (spike fraco)      | 8 / 5 / 14      | 9%   | 285°      | 7 / 0,08         |
@@ -72,7 +72,7 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames).
 
 - **Frames:** cada golpe é definido em ticks: **startup** (preparação) → **active** (hitbox ligada) → **recovery** (vulnerável). As hitboxes podem mudar de frame a frame (ex.: o arco do aéreo lado começa em cima e desce para a frente).
 - **Escolha do golpe:** ↓ > ↑ > ←/→ > parado. No ar, ↑ + Ataque com a recuperação já usada vira aéreo neutro. A recuperação volta ao tocar o chão, agarrar a borda ou levar golpe.
-- **Durante o golpe:** dá para andar (no chão) e mirar (no ar) com ←/→, mas não virar; o golpe não para o lutador. Os golpes de lado viram para o lado apertado ao começar. Leve lado dá um avanço; recuperação dá um impulso para cima.
+- **Durante o golpe:** no chão o lutador para (cada golpe pode liberar andar com `canWalk`); no ar dá para mirar com ←/→. Nunca vira no meio do golpe. O recovery é a janela em que quem errou fica exposto. Os golpes de lado viram para o lado apertado ao começar. Leve lado dá um avanço; recuperação dá um impulso para cima.
 - **Landing lag:** pousar no meio de um aéreo corta o golpe e deixa o lutador parado alguns ticks (4 a 8). O ground pound, ao pousar, vira a onda.
 - **Buffer:** Ataque e Especial apertados ficam guardados 6 ticks. Pulo + Ataque juntos no chão: pula e solta o aéreo no tick seguinte. O dash pode sair em ataque.
 
