@@ -36,8 +36,8 @@ docs/
    - nada de `Date.now`/`performance.now` no `sim`;
    - evitar `Math.sin`/`cos`/`pow`/`sqrt` na lógica → tabelas ou inteiros (ponto fixo);
    - estado do jogo serializável e clonável (snapshot/restore).
-6. **Personagem é dado.** Cada personagem é uma ficha validada com zod (stats, ajustes no moveset base, especiais, provocação, ids de animação). Especiais são montados com blocos reutilizáveis do `sim` (projétil, investida, área, contra-ataque, buff, teleporte, agarrão). Só crie bloco novo quando nenhum existente servir.
-7. **Moveset base compartilhado.** Todos têm os mesmos golpes base; cada personagem só muda números, visual, 1–2 especiais e a provocação.
+6. **Personagem é dado.** Cada personagem é uma ficha validada com zod (stats, ajustes no moveset base, especial, provocação, ids de animação). O especial é montado com blocos reutilizáveis do `sim` (projétil, investida, área, contra-ataque, buff, teleporte, agarrão). Só crie bloco novo quando nenhum existente servir.
+7. **Moveset base compartilhado.** Todos têm os mesmos golpes base; cada personagem só muda números, visual, 1 especial e a provocação.
 
 ## Fluxo de trabalho
 

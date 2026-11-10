@@ -7,7 +7,7 @@ O jogo fica completo e divertido no modo local, com 2 personagens, antes de qual
 - **Stack:** Phaser + TypeScript + Vite no front. WebRTC (PeerJS) ou um servidor Node pequeno para o online. Deploy estático em Vercel ou Cloudflare Pages.
 - **Local antes de online:** se a luta não for divertida no mesmo teclado, rede não salva.
 - **Retângulos antes de arte:** física e combate são validados com formas coloridas. A arte entra só quando o jogo já é bom.
-- **Moveset base compartilhado:** todos usam os mesmos golpes leves e aéreos. Cada amigo ganha visual próprio, 1 ou 2 especiais e uma provocação.
+- **Moveset base compartilhado:** todos usam os mesmos golpes leves e aéreos. Cada amigo ganha visual próprio, 1 especial e uma provocação.
 - **Personagem é dado, não código:** cada personagem é uma ficha de configuração. Balancear é editar números.
 - **Lógica separada da renderização:** a simulação roda num pacote próprio (`sim`), em passo fixo de 60 ticks/s, sem física do Phaser. É isso que viabiliza o online com rollback depois.
 
@@ -39,8 +39,8 @@ Objetivo: projeto configurado, regras do jogo escritas e um link público funcio
 - [x] Monorepo com pnpm workspaces: `packages/sim` (lógica pura, sem Phaser), `packages/game` (Phaser, render, input, áudio) e, mais tarde, `packages/server`.
 - [x] Vite + TypeScript strict + ESLint/Prettier + Vitest.
 - [x] `docs/GDD.md` de 1 página: regras da partida (3 stocks, tempo limite), controles, lista do moveset base e formato da ficha de personagem.
-- [ ] Planilha dos 16 amigos: apelido, traço mais caricato, bordão, 2 ideias de especial, ideia de provocação, cores.
-- [ ] Escolher os 2 primeiros personagens: os dois mais caricatos e com especiais bem diferentes entre si.
+- [ ] Planilha dos 16 amigos: apelido, traço mais caricato, bordão, ideia de especial, ideia de provocação, cores.
+- [x] Escolher os 2 primeiros personagens: os dois mais caricatos e com especiais bem diferentes entre si.
 - [ ] Combinar com o grupo o uso da imagem de cada um no jogo.
 - [x] Deploy contínuo desde o dia 1, para mandar link a cada etapa.
 
@@ -70,7 +70,7 @@ Objetivo: uma luta 1x1 de retângulos com começo, meio e fim.
 - [ ] Dano em % e knockback que cresce com o %: força base + (dano acumulado × escala), dividido pelo peso.
 - [ ] Hitstun e hitstop (congelamento curto no impacto).
 - [ ] Blast zones: saiu da tela = KO. Stocks e respawn com invencibilidade.
-- [ ] Moveset base: 3 leves no chão (neutro, lado, baixo), 3 aéreos (neutro, lado, baixo), golpe de recuperação para cima e ground pound. Os botões de golpe pesado ficam reservados para os especiais.
+- [ ] Moveset base: 3 leves no chão (neutro, lado, baixo), 3 aéreos (neutro, lado, baixo), golpe de recuperação para cima e ground pound. O botão Especial fica reservado para o especial de cada personagem (e o ground pound).
 - [ ] Visualizador de hitbox e hurtbox no modo debug.
 - [ ] Testes unitários do `sim`: knockback, KO, troca de estados.
 
@@ -80,10 +80,10 @@ Objetivo: uma luta 1x1 de retângulos com começo, meio e fim.
 
 Objetivo: trocar ou criar um personagem é editar um arquivo, não escrever código.
 
-- [ ] Schema da ficha de personagem (tipo TS + validação com zod): peso, velocidade, altura do pulo, ajustes nos golpes base, especiais, provocação e ids de animação.
+- [ ] Schema da ficha de personagem (tipo TS + validação com zod): peso, velocidade, altura do pulo, ajustes nos golpes base, especial, provocação e ids de animação.
 - [ ] Biblioteca de blocos de especial reutilizáveis: projétil, investida, ataque em área, contra-ataque, buff temporário, teleporte, agarrão. Um especial = combinação de blocos + números.
 - [ ] Provocação: animação + áudio, sem efeito de jogo (ou um efeito cômico pequeno).
-- [ ] Personagem 1 e personagem 2 completos em retângulo: stats, especiais e provocação.
+- [ ] Schummaki e João Frango completos em retângulo: stats, especial e provocação.
 - [ ] Seletor mínimo com 2 opções no modo local.
 
 **Pronto quando:** os dois personagens parecem diferentes de jogar, mesmo ainda sendo retângulos.
@@ -97,7 +97,7 @@ Objetivo: os 2 primeiros personagens animados e reconhecíveis. Esta etapa defin
 - [ ] Gerar o personagem em partes separadas, em pose neutra e fundo transparente: cabeça, tronco, braços (2 partes), mãos, pernas (2 partes), pés.
 - [ ] Montar um esqueleto humanoide único no DragonBones (grátis) ou no Spine (pago). Todos os amigos usam o mesmo esqueleto e só trocam as peças (skins).
 - [ ] Animar o esqueleto base: idle, run, jump, fall, os 8 golpes base, hit, dodge, ledge e KO.
-- [ ] Animar os especiais e a provocação de cada um dos 2 personagens.
+- [ ] Animar o especial e a provocação de cada um dos 2 personagens.
 - [ ] Exportar para o Phaser. Caminho mais simples: exportar como spritesheet e usar a animação nativa do Phaser. Runtime de esqueleto só se o tamanho dos arquivos pesar.
 - [ ] Alinhar os frames ativos das hitboxes (Etapa 2) com os frames visuais de cada golpe.
 - [ ] Cenário do primeiro mapa: fundo em camadas com parallax.
@@ -181,10 +181,10 @@ Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da 
 
 Checklist de cada personagem:
 
-1. Ficha: stats, 1–2 especiais montados com blocos existentes, provocação.
+1. Ficha: stats, 1 especial montado com blocos existentes, provocação.
 2. Concept art aprovado pelo próprio amigo.
 3. Peças geradas e encaixadas como skin no esqueleto base.
-4. Animações dos especiais e da provocação.
+4. Animações do especial e da provocação.
 5. Áudio: bordão, provocação e KO.
 6. Retrato para a tela de seleção e para o HUD.
 7. Teste: 5 lutas contra personagens diferentes.
