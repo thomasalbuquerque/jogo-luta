@@ -187,6 +187,8 @@ const SpecialSchema = z
     cooldownTicks: int(0, 600).default(0),
     /** No ar, só 1 vez até tocar o chão, agarrar a borda ou levar golpe. */
     oncePerAir: z.boolean().default(false),
+    /** No ar, fica parado durante o startup (sem cair). */
+    hoverStartup: z.boolean().default(false),
     blocks: z.array(BlockSchema).min(1).max(4),
   })
   .superRefine((s, ctx) => {
@@ -409,6 +411,7 @@ function compileSpecial(s: ParsedSpecial): Special {
     turns: true,
     canWalk: false,
   };
+  if (s.hoverStartup) move.hoverStartup = true;
   const window = (box: z.output<typeof BoxSchema>): HitboxFrames[] => [
     { from: s.startup + 1, to: s.startup + s.active, boxes: [toBox(box)] },
   ];

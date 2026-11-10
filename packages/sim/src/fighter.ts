@@ -3,7 +3,14 @@ import { axisX, axisY, Button, isHeld, isPressed, type InputMask } from './input
 import { approach, idiv, isqrt } from './math';
 import { getCharacter, BASE_CHARACTER_ID } from './characters';
 import type { Character } from './character';
-import { selectAttack, selectSpecial, totalFrames, type MoveDef, type MoveId } from './moves';
+import {
+  isActiveFrame,
+  selectAttack,
+  selectSpecial,
+  totalFrames,
+  type MoveDef,
+  type MoveId,
+} from './moves';
 import { moveAndCollide, touchingWall, type Body, type Solid } from './physics';
 import type { Spawn } from './stage';
 import type { FighterStats } from './stats';
@@ -107,6 +114,10 @@ export interface Fighter extends Body {
   ledgeCooldown: number;
   /** Ticks congelado pelo impacto de um golpe (hitstop). */
   hitstop: number;
+  /** Ticks até poder usar o especial de novo. */
+  specialCooldown: number;
+  /** Especial "1 vez por ar" já usado neste ar. */
+  specialUsed: boolean;
   prevInput: InputMask;
 }
 
@@ -165,6 +176,8 @@ export function createFighter(
     ledgeY: 0,
     ledgeCooldown: 0,
     hitstop: 0,
+    specialCooldown: 0,
+    specialUsed: false,
     prevInput: 0,
   };
   placeAtSpawn(f, spawn);
@@ -195,6 +208,7 @@ export function placeAtSpawn(f: Fighter, spawn: Spawn): void {
   f.moveHits = 0;
   f.ledgeCooldown = 0;
   f.hitstop = 0;
+  f.specialCooldown = 0;
   setState(f, 'fall');
 }
 
@@ -204,6 +218,7 @@ function refreshAirOptions(f: Fighter): void {
   f.wallJumpsUsed = 0;
   f.airDodgeUsed = false;
   f.recoveryUsed = false;
+  f.specialUsed = false;
 }
 
 function setState(f: Fighter, state: FighterState): void {
@@ -311,8 +326,20 @@ export function startMove(f: Fighter, id: MoveId, input: InputMask): void {
     if (dir !== 0) f.facing = dir;
   }
   if (id === 'recovery') f.recoveryUsed = true;
+  if (id === 'special') {
+    const special = characterOf(f).special;
+    f.specialCooldown = special?.cooldownTicks ?? 0;
+    if (special?.oncePerAir && !f.grounded) f.specialUsed = true;
+  }
   enterState(f, 'attack');
   moveFrameEffects(f);
+}
+
+/** O especial do personagem pode sair agora (existe, recarregou e, no ar, não foi usado). */
+export function canUseSpecial(f: Fighter): boolean {
+  const special = characterOf(f).special;
+  if (!special || f.specialCooldown > 0) return false;
+  return !(special.oncePerAir && f.specialUsed && !f.grounded);
 }
 
 /** Tenta gastar o ataque ou especial guardado. */
@@ -322,7 +349,7 @@ function tryAttack(f: Fighter, input: InputMask): boolean {
     return true;
   }
   if (f.specialBufferTicks > 0) {
-    const special = selectSpecial(f.grounded, input, characterOf(f).special !== null);
+    const special = selectSpecial(f.grounded, input, canUseSpecial(f));
     if (special) {
       startMove(f, special, input);
       return true;
@@ -434,11 +461,19 @@ function stepAttack(f: Fighter, input: InputMask, prev: InputMask): void {
   moveFrameEffects(f);
 }
 
-/** Efeitos de movimento do frame atual do golpe (impulso, ground pound). */
+/** Efeitos de movimento do frame atual do golpe (impulso, ground pound, investida). */
 function moveFrameEffects(f: Fighter): void {
   if (!f.move) return;
   const move = moveDef(f, f.move);
   const frame = moveFrame(f);
+  if (move.dash && isActiveFrame(move, frame)) {
+    // Investida: reta, na velocidade da ficha; no ar não cai (e é mais curta).
+    f.vx = f.facing * (f.grounded ? move.dash.speed : move.dash.airSpeed);
+    if (!f.grounded) {
+      f.vy = 0;
+      f.fastFalling = false;
+    }
+  }
   if (move.impulse?.frame === frame) {
     if (move.impulse.x !== undefined) f.vx = f.facing * move.impulse.x;
     if (move.impulse.y !== undefined) {
@@ -447,7 +482,7 @@ function moveFrameEffects(f: Fighter): void {
       f.canCutJump = false;
     }
   }
-  if (move.hoverStartup && frame <= move.startup) {
+  if (move.hoverStartup && !f.grounded && frame <= move.startup) {
     f.vx = 0;
     f.vy = 0;
     f.fastFalling = false;
@@ -574,10 +609,10 @@ function moveOverridesGravity(f: Fighter): boolean {
   if (f.state !== 'attack' || !f.move) return false;
   const move = moveDef(f, f.move);
   const frame = moveFrame(f);
-  if (move.hoverStartup && frame <= move.startup) return true;
-  return (
-    move.fallSpeed !== undefined && frame > move.startup && frame <= move.startup + move.active
-  );
+  // Parado no ar no startup (só no ar: no chão, sem gravidade, ele "sairia" do chão).
+  if (move.hoverStartup && !f.grounded && frame <= move.startup) return true;
+  if (move.dash && !f.grounded && isActiveFrame(move, frame)) return true;
+  return move.fallSpeed !== undefined && isActiveFrame(move, frame);
 }
 
 function applyGravity(f: Fighter, input: InputMask): void {
@@ -643,6 +678,7 @@ export function stepFighter(f: Fighter, input: InputMask, solids: readonly Solid
   if (f.jumpBufferTicks > 0) f.jumpBufferTicks--;
   if (f.attackBufferTicks > 0) f.attackBufferTicks--;
   if (f.specialBufferTicks > 0) f.specialBufferTicks--;
+  if (f.specialCooldown > 0) f.specialCooldown--;
   if (f.ledgeCooldown > 0) f.ledgeCooldown--;
   if (isPressed(input, prev, Button.JUMP)) f.jumpBufferTicks = JUMP_BUFFER_TICKS;
   if (isPressed(input, prev, Button.ATTACK)) f.attackBufferTicks = ACTION_BUFFER_TICKS;
