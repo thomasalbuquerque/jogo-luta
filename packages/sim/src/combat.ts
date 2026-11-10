@@ -10,6 +10,7 @@ import {
 import { idiv } from './math';
 import { hitboxesAt, type HitProps, type MoveId } from './moves';
 import { overlaps, type Box } from './physics';
+import { projectileSide, type Projectile } from './projectile';
 import { cosDeg, sinDeg, TRIG_ONE } from './trig';
 
 /** Dano máximo mostrado/guardado, em %. */
@@ -101,16 +102,16 @@ function knockbackSide(attacker: Fighter, victim: Fighter, move: HitProps): -1 |
   return attacker.facing;
 }
 
-/** Aplica um acerto: soma o dano, arremessa o alvo e marca como já acertado por este golpe. */
-export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): void {
-  const move = moveDef(attacker, moveId);
-  attacker.moveHits |= 1 << victim.id;
-  victim.damage = Math.min(victim.damage + move.damage, MAX_DAMAGE);
+/**
+ * Soma `damage` ao alvo e arremessa para o lado `side` com o ângulo e a força do
+ * acerto. Devolve os ticks de hitstop do impacto.
+ */
+export function launch(victim: Fighter, hit: HitProps, side: -1 | 1, damage: number): number {
+  victim.damage = Math.min(victim.damage + damage, MAX_DAMAGE);
 
-  const kb = knockback(move, victim.damage, victim.stats.weight);
-  const side = knockbackSide(attacker, victim, move);
-  const cos = cosDeg(move.angle);
-  const sin = sinDeg(move.angle);
+  const kb = knockback(hit, victim.damage, victim.stats.weight);
+  const cos = cosDeg(hit.angle);
+  const sin = sinDeg(hit.angle);
   victim.kbx = side * idiv(kb * cos, TRIG_ONE);
   victim.kby = 0 - idiv(kb * sin, TRIG_ONE);
   // Spike em quem está no chão quica para cima, mais fraco.
@@ -121,8 +122,14 @@ export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): vo
   victim.vy = 0;
   victim.facing = side === 1 ? -1 : 1;
   enterHitstun(victim, hitstunTicks(kb));
+  return hitstopTicks(damage);
+}
 
-  const stop = hitstopTicks(move.damage);
+/** Aplica um acerto: soma o dano, arremessa o alvo e marca como já acertado por este golpe. */
+export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): void {
+  const move = moveDef(attacker, moveId);
+  attacker.moveHits |= 1 << victim.id;
+  const stop = launch(victim, move, knockbackSide(attacker, victim, move), move.damage);
   attacker.hitstop = Math.max(attacker.hitstop, stop);
   victim.hitstop = Math.max(victim.hitstop, stop);
 }
@@ -136,4 +143,25 @@ export function resolveHits(fighters: readonly Fighter[]): Hit[] {
     if (attacker && victim) applyHit(attacker, victim, h.move);
   }
   return hits;
+}
+
+/**
+ * Projéteis que encostam num lutador (que não seja o dono) acertam e somem.
+ * Só o alvo congela no impacto: quem soltou está longe.
+ */
+export function resolveProjectileHits(
+  fighters: readonly Fighter[],
+  projectiles: Projectile[],
+): void {
+  let alive = 0;
+  for (const p of projectiles) {
+    const victim = fighters.find((v) => v.id !== p.owner && canBeHit(v) && overlaps(p, hurtbox(v)));
+    if (!victim) {
+      projectiles[alive++] = p;
+      continue;
+    }
+    const stop = launch(victim, p.hit, projectileSide(p), p.hit.damage);
+    victim.hitstop = Math.max(victim.hitstop, stop);
+  }
+  projectiles.length = alive;
 }

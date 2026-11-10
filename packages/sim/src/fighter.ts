@@ -12,6 +12,7 @@ import {
   type MoveId,
 } from './moves';
 import { moveAndCollide, touchingWall, type Body, type Solid } from './physics';
+import { spawnProjectile, type Projectile } from './projectile';
 import type { Spawn } from './stage';
 import type { FighterStats } from './stats';
 
@@ -449,7 +450,7 @@ function stepAirDodge(f: Fighter): void {
 }
 
 /** Golpe: segue os frames do moveset; no ar dá para mirar, mas não virar. */
-function stepAttack(f: Fighter, input: InputMask, prev: InputMask): void {
+function stepAttack(f: Fighter, input: InputMask, prev: InputMask, world: World): void {
   const move = currentMove(f);
   if (!move || moveFrame(f) > totalFrames(move)) {
     finishAction(f, input, prev);
@@ -459,6 +460,15 @@ function stepAttack(f: Fighter, input: InputMask, prev: InputMask): void {
   moveHorizontally(f, f.grounded && !move.canWalk ? 0 : axisX(input), false);
   cutJump(f, input);
   moveFrameEffects(f);
+  if (moveFrame(f) === move.startup + 1) fireBlocks(f, move, world);
+}
+
+/**
+ * Blocos instantâneos do especial, no 1º frame ativo. Roda 1 vez por golpe: o
+ * frame só avança fora do hitstop.
+ */
+function fireBlocks(f: Fighter, move: MoveDef, world: World): void {
+  if (move.projectile) world.projectiles?.push(spawnProjectile(f, move.projectile));
 }
 
 /** Efeitos de movimento do frame atual do golpe (impulso, ground pound, investida). */
@@ -655,8 +665,24 @@ export function isFree(f: Fighter): boolean {
   return FREE_STATES.has(f.state);
 }
 
-/** Avança um lutador um tick. */
-export function stepFighter(f: Fighter, input: InputMask, solids: readonly Solid[]): void {
+/** O que o lutador enxerga do resto da luta num tick. */
+interface World {
+  solids: readonly Solid[];
+  /** Onde entram os projéteis soltos (sem isso, não solta). */
+  projectiles: Projectile[] | undefined;
+}
+
+/**
+ * Avança um lutador um tick. `projectiles` é a lista da luta, onde entram os
+ * projéteis que ele soltar.
+ */
+export function stepFighter(
+  f: Fighter,
+  input: InputMask,
+  solids: readonly Solid[],
+  projectiles?: Projectile[],
+): void {
+  const world: World = { solids, projectiles };
   // Hitstop: congelado no impacto. O input anterior não muda, então um botão
   // apertado durante o congelamento vale como aperto quando ele acaba.
   if (f.hitstop > 0) {
@@ -692,7 +718,7 @@ export function stepFighter(f: Fighter, input: InputMask, solids: readonly Solid
       stepAirDodge(f);
       break;
     case 'attack':
-      stepAttack(f, input, prev);
+      stepAttack(f, input, prev, world);
       break;
     case 'landing':
       stepLanding(f, input, prev);

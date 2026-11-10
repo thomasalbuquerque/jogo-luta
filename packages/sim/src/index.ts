@@ -8,5 +8,6 @@ export * from './input';
 export * from './moves';
 export { FixedStepLoop } from './loop';
 export * from './physics';
+export * from './projectile';
 export * from './stage';
 export * from './trig';

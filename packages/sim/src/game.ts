@@ -1,9 +1,10 @@
 import { BASE_CHARACTER_ID } from './characters';
-import { resolveHits } from './combat';
+import { resolveHits, resolveProjectileHits } from './combat';
 import { TICK_RATE } from './constants';
 import { createFighter, knockOut, respawn, stepFighter, type Fighter } from './fighter';
 import type { InputMask } from './input';
 import { overlaps } from './physics';
+import { stepProjectiles, type Projectile } from './projectile';
 import { TEST_STAGE, type Spawn, type Stage } from './stage';
 
 /** Ticks fora de cena depois de um KO, antes de reaparecer. */
@@ -37,6 +38,8 @@ export interface GameState {
   /** Id do vencedor quando a luta acaba; null = empate (ou luta em andamento). */
   winner: number | null;
   fighters: Fighter[];
+  /** Projéteis em voo (especiais). */
+  projectiles: Projectile[];
 }
 
 const STAGES: Record<string, Stage> = { [TEST_STAGE.id]: TEST_STAGE };
@@ -72,6 +75,7 @@ export function createGame(setup: GameSetup = {}): GameState {
     suddenDeath: false,
     winner: null,
     fighters,
+    projectiles: [],
   };
 }
 
@@ -106,9 +110,11 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
   const stage = getStage(state.stageId);
   for (const f of state.fighters) {
     if (f.state === 'ko') stepKnockedOut(f, stage);
-    stepFighter(f, inputs[f.id] ?? 0, stage.solids);
+    stepFighter(f, inputs[f.id] ?? 0, stage.solids, state.projectiles);
   }
+  stepProjectiles(state.projectiles, stage.solids, stage.blastZone);
   resolveHits(state.fighters);
+  resolveProjectileHits(state.fighters, state.projectiles);
   // Saiu inteiro da blast zone = KO.
   for (const f of state.fighters) {
     if (f.state !== 'ko' && !overlaps(f, stage.blastZone)) knockOut(f, RESPAWN_DELAY_TICKS);
