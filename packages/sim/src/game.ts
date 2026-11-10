@@ -1,5 +1,5 @@
 import { BASE_CHARACTER_ID } from './characters';
-import { resolveHits, resolveProjectileHits } from './combat';
+import { resolveHits, resolveProjectileHits, stepGrabs } from './combat';
 import { TICK_RATE } from './constants';
 import { createFighter, knockOut, respawn, stepFighter, type Fighter } from './fighter';
 import type { InputMask } from './input';
@@ -115,6 +115,7 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
   stepProjectiles(state.projectiles, stage.solids, stage.blastZone);
   resolveHits(state.fighters);
   resolveProjectileHits(state.fighters, state.projectiles);
+  stepGrabs(state.fighters, stage.solids);
   // Saiu inteiro da blast zone = KO.
   for (const f of state.fighters) {
     if (f.state !== 'ko' && !overlaps(f, stage.blastZone)) knockOut(f, RESPAWN_DELAY_TICKS);

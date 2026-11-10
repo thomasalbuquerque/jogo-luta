@@ -3,15 +3,18 @@ import {
   currentMove,
   dealtDamage,
   effectiveWeight,
+  enterGrabbed,
   enterHitstun,
   KNOCKBACK_DECAY,
   moveDef,
   moveFrame,
+  releaseGrabbed,
+  skipToRecovery,
   type Fighter,
 } from './fighter';
 import { idiv } from './math';
 import { hitboxesAt, isActiveFrame, type HitProps, type MoveId } from './moves';
-import { overlaps, type Box } from './physics';
+import { moveAndCollide, overlaps, type Box, type Solid } from './physics';
 import { projectileSide, type Projectile } from './projectile';
 import { cosDeg, sinDeg, TRIG_ONE } from './trig';
 
@@ -47,10 +50,11 @@ export interface Hit {
   victim: number;
   move: MoveId;
   /**
-   * `hit`: acerto normal. `counter`: o alvo estava no contra-ataque, então quem
-   * leva é quem bateu (`attacker` é quem contra-ataca).
+   * `hit`: acerto normal. `grab`: agarrão (segura e depois arremessa).
+   * `counter`: o alvo estava no contra-ataque, então quem leva é quem bateu
+   * (`attacker` é quem contra-ataca).
    */
-  kind: 'hit' | 'counter';
+  kind: 'hit' | 'grab' | 'counter';
 }
 
 /** Está na janela do contra-ataque (bloco `counter`, frames ativos do especial). */
@@ -69,11 +73,17 @@ export function findHits(fighters: readonly Fighter[]): Hit[] {
   for (const a of fighters) {
     const boxes = activeHitboxes(a);
     if (boxes.length === 0 || !a.move) continue;
+    const grab = currentMove(a)?.grab !== undefined;
     for (const v of fighters) {
       if (v === a || !canBeHit(v) || (a.moveHits & (1 << v.id)) !== 0) continue;
       const hurt = hurtbox(v);
       if (!boxes.some((b) => overlaps(b, hurt))) continue;
-      if (isCountering(v)) {
+      // Agarrão ganha do contra-ataque (não é golpe).
+      if (grab) {
+        if (v.state !== 'grabbed') {
+          hits.push({ attacker: a.id, victim: v.id, move: a.move, kind: 'grab' });
+        }
+      } else if (isCountering(v)) {
         hits.push({ attacker: v.id, victim: a.id, move: 'special', kind: 'counter' });
       } else {
         hits.push({ attacker: a.id, victim: v.id, move: a.move, kind: 'hit' });
@@ -164,13 +174,7 @@ export function applyCounter(counterer: Fighter, striker: Fighter): void {
   const stop = launch(striker, counter, knockbackSide(counterer, striker, counter), damage);
   counterer.hitstop = Math.max(counterer.hitstop, stop);
   striker.hitstop = Math.max(striker.hitstop, stop);
-  endCounterWindow(counterer);
-}
-
-/** Fecha a janela do contra-ataque: o próximo frame já é o recovery. */
-function endCounterWindow(f: Fighter): void {
-  const move = f.state === 'attack' ? currentMove(f) : null;
-  if (move?.counter) f.stateTicks = Math.max(f.stateTicks, move.startup + move.active - 1);
+  skipToRecovery(counterer);
 }
 
 /** Procura e aplica os acertos do tick. */
@@ -181,6 +185,7 @@ export function resolveHits(fighters: readonly Fighter[]): Hit[] {
     const victim = fighters.find((f) => f.id === h.victim);
     if (!attacker || !victim) continue;
     if (h.kind === 'counter') applyCounter(attacker, victim);
+    else if (h.kind === 'grab') startGrab(attacker, victim, h.move);
     else applyHit(attacker, victim, h.move);
   }
   return hits;
@@ -206,7 +211,7 @@ export function resolveProjectileHits(
       p.owner = victim.id;
       p.vx = 0 - p.vx;
       p.facing = p.facing === 1 ? -1 : 1;
-      endCounterWindow(victim);
+      skipToRecovery(victim);
       projectiles[alive++] = p;
       continue;
     }
@@ -214,4 +219,57 @@ export function resolveProjectileHits(
     victim.hitstop = Math.max(victim.hitstop, stop);
   }
   projectiles.length = alive;
+}
+
+/** Agarrão pegou: `victim` fica preso na frente de `holder` até o arremesso. */
+export function startGrab(holder: Fighter, victim: Fighter, moveId: MoveId): void {
+  // Quem agarra levou golpe neste mesmo tick (troca): não agarra.
+  if (holder.state !== 'attack' || holder.move !== moveId || holder.grabTicks > 0) return;
+  const grab = moveDef(holder, moveId).grab;
+  if (!grab) return;
+  holder.moveHits |= 1 << victim.id;
+  holder.grabTicks = grab.holdTicks;
+  enterGrabbed(victim, holder.id);
+}
+
+/**
+ * Agarrões em andamento: prende o agarrado na frente de quem segura e, no fim do
+ * tempo, arremessa com o acerto do golpe. Se quem segura levar golpe ou sair de
+ * cena, o agarrado fica livre.
+ */
+export function stepGrabs(fighters: readonly Fighter[], solids: readonly Solid[]): void {
+  for (const h of fighters) {
+    if (h.grabTicks <= 0) continue;
+    const v = fighters.find((f) => f.grabbedBy === h.id && f.state === 'grabbed');
+    if (!v || h.state !== 'attack' || !h.move) {
+      h.grabTicks = 0;
+      skipToRecovery(h);
+      continue;
+    }
+    pinGrabbed(v, h, solids);
+    if (h.hitstop > 0) continue;
+    h.grabTicks--;
+    if (h.grabTicks === 0) {
+      v.grabbedBy = -1;
+      applyHit(h, v, h.move);
+      skipToRecovery(h);
+    }
+  }
+  for (const v of fighters) {
+    if (v.state !== 'grabbed') continue;
+    const h = fighters.find((f) => f.id === v.grabbedBy);
+    if (!h || h.grabTicks <= 0) releaseGrabbed(v);
+  }
+}
+
+/** Põe o agarrado colado na frente de quem segura, sem entrar em parede. */
+function pinGrabbed(v: Fighter, h: Fighter, solids: readonly Solid[]): void {
+  v.x = h.x + idiv(h.w, 2) - idiv(v.w, 2);
+  v.y = h.y + h.h - v.h;
+  v.vx = h.facing * (idiv(h.w, 2) + idiv(v.w, 2));
+  v.vy = 0;
+  moveAndCollide(v, solids, false);
+  v.vx = 0;
+  v.vy = 0;
+  v.facing = h.facing === 1 ? -1 : 1;
 }

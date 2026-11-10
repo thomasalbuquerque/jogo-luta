@@ -12,7 +12,7 @@ import {
   stepFighter,
   type Fighter,
 } from './fighter';
-import { createGame, stepGame } from './game';
+import { createGame, stepGame, type GameState } from './game';
 import { Button } from './input';
 import type { ProjectileDef } from './moves';
 import type { Solid } from './physics';
@@ -355,7 +355,7 @@ describe('bloco contra-ataque', () => {
     expect(b.state).toBe('hitstun');
     expect(b.kbx).toBeGreaterThan(0); // para longe de quem contra-atacou
     // a janela fecha depois de contra-atacar
-    expect(moveFrame(a)).toBeGreaterThanOrEqual(3 + 20);
+    expect(moveFrame(a)).toBeGreaterThan(3 + 20);
   });
 
   it('errar deixa exposto no recovery', () => {
@@ -384,5 +384,100 @@ describe('bloco contra-ataque', () => {
     expect(shots).toHaveLength(1);
     expect(shot.owner).toBe(0);
     expect(shot.vx).toBe(px(10));
+  });
+});
+
+const GRABBER = character('t-grab', {
+  name: 'Abraço',
+  startup: 4,
+  active: 6,
+  recovery: 18,
+  blocks: [
+    {
+      type: 'grab',
+      box: { x: 40, y: 0, w: 50, h: 80 },
+      holdTicks: 20,
+      hit: { damage: 9, angle: 40, baseKnockback: 10, knockbackScale: 0.18 },
+    },
+  ],
+});
+
+/** Luta com os lutadores lado a lado no chão do mapa de teste, `gap` px entre os centros. */
+function closeGame(characters: string[], gap = 60): GameState {
+  const g = createGame({ characters, rules: { stocks: 3, timeLimitTicks: 0 } });
+  for (const [i, f] of g.fighters.entries()) {
+    f.x = px(-100 + i * gap) - f.w / 2;
+    f.facing = i === 0 ? 1 : -1;
+  }
+  stepGame(g, []);
+  stepGame(g, []);
+  return g;
+}
+
+function steps(g: GameState, inputs: number[], ticks = 1): void {
+  for (let i = 0; i < ticks; i++) stepGame(g, inputs);
+}
+
+describe('bloco agarrão', () => {
+  it('agarra quem está na frente, segura e arremessa', () => {
+    const g = closeGame([GRABBER, BASE_CHARACTER_ID]);
+    const [a, b] = g.fighters as [Fighter, Fighter];
+    steps(g, [SPECIAL, 0]);
+    steps(g, [0, 0], 4);
+    expect(b.state).toBe('grabbed');
+    expect(b.grabbedBy).toBe(0);
+    expect(a.grabTicks).toBeGreaterThan(0);
+    // preso colado na frente
+    expect(b.x).toBe(a.x + a.w);
+    steps(g, [0, Button.ATTACK | Button.JUMP], 10);
+    expect(b.state).toBe('grabbed');
+    expect(b.damage).toBe(0);
+    steps(g, [0, 0], 12);
+    expect(b.state).toBe('hitstun');
+    expect(b.grabbedBy).toBe(-1);
+    expect(b.damage).toBe(9);
+    expect(b.kbx).toBeGreaterThan(0);
+    expect(a.grabTicks).toBe(0);
+    expect(moveFrame(a)).toBeGreaterThan(4 + 6);
+  });
+
+  it('segurando, ←/→ escolhe para onde arremessar', () => {
+    const g = closeGame([GRABBER, BASE_CHARACTER_ID]);
+    const [a, b] = g.fighters as [Fighter, Fighter];
+    steps(g, [SPECIAL, 0]);
+    steps(g, [0, 0], 4);
+    steps(g, [LEFT, 0], 3);
+    expect(a.facing).toBe(-1);
+    expect(b.x + b.w).toBe(a.x);
+    steps(g, [0, 0], 30);
+    expect(b.damage).toBe(9);
+    expect(b.kbx).toBeLessThan(0);
+  });
+
+  it('quem segura leva golpe: o agarrado fica livre', () => {
+    const g = closeGame([GRABBER, BASE_CHARACTER_ID, BASE_CHARACTER_ID], 60);
+    const [a, b, c] = g.fighters as [Fighter, Fighter, Fighter];
+    // c fica atrás de a, virado para ele
+    c.x = a.x - px(60);
+    c.facing = 1;
+    steps(g, [SPECIAL, 0, 0]);
+    steps(g, [0, 0, 0], 4);
+    expect(b.state).toBe('grabbed');
+    steps(g, [0, 0, Button.ATTACK]);
+    steps(g, [0, 0, 0], 6);
+    expect(a.state).toBe('hitstun');
+    expect(b.state).not.toBe('grabbed');
+    expect(b.grabbedBy).toBe(-1);
+    expect(b.damage).toBe(0);
+  });
+
+  it('ganha do contra-ataque', () => {
+    const g = closeGame([GRABBER, COUNTER]);
+    const [a, b] = g.fighters as [Fighter, Fighter];
+    steps(g, [0, SPECIAL]);
+    steps(g, [SPECIAL, 0]);
+    steps(g, [0, 0], 4);
+    expect(b.state).toBe('grabbed');
+    expect(a.damage).toBe(0);
   });
 });

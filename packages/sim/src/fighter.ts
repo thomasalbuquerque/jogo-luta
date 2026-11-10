@@ -58,6 +58,7 @@ export type FighterState =
   | 'landing'
   | 'ledge'
   | 'hitstun'
+  | 'grabbed'
   | 'ko';
 
 export interface Fighter extends Body {
@@ -124,6 +125,10 @@ export interface Fighter extends Body {
   buffDamage: number;
   buffSpeed: number;
   buffWeight: number;
+  /** Agarrado: id de quem segura (-1 = ninguém). */
+  grabbedBy: number;
+  /** Segurando alguém (bloco `grab`): ticks até arremessar. */
+  grabTicks: number;
   prevInput: InputMask;
 }
 
@@ -188,6 +193,8 @@ export function createFighter(
     buffDamage: 100,
     buffSpeed: 100,
     buffWeight: 100,
+    grabbedBy: -1,
+    grabTicks: 0,
     prevInput: 0,
   };
   placeAtSpawn(f, spawn);
@@ -220,6 +227,8 @@ export function placeAtSpawn(f: Fighter, spawn: Spawn): void {
   f.hitstop = 0;
   f.specialCooldown = 0;
   clearBuff(f);
+  f.grabbedBy = -1;
+  f.grabTicks = 0;
   setState(f, 'fall');
 }
 
@@ -464,6 +473,15 @@ function stepAirDodge(f: Fighter): void {
 /** Golpe: segue os frames do moveset; no ar dá para mirar, mas não virar. */
 function stepAttack(f: Fighter, input: InputMask, prev: InputMask, world: World): void {
   const move = currentMove(f);
+  if (f.grabTicks > 0) {
+    // Segurando: o golpe fica parado neste frame; ←/→ escolhe para onde arremessar.
+    f.stateTicks--;
+    f.vx = 0;
+    f.vy = 0;
+    const dir = axisX(input);
+    if (dir !== 0) f.facing = dir;
+    return;
+  }
   if (!move || moveFrame(f) > totalFrames(move)) {
     finishAction(f, input, prev);
     return;
@@ -578,6 +596,8 @@ export function knockOut(f: Fighter, respawnDelay: number): void {
   f.hitstop = 0;
   f.move = null;
   f.respawnTicks = respawnDelay;
+  f.grabbedBy = -1;
+  f.grabTicks = 0;
   enterState(f, 'ko');
 }
 
@@ -598,7 +618,35 @@ export function enterHitstun(f: Fighter, ticks: number): void {
   f.fastFalling = false;
   f.canCutJump = false;
   refreshAirOptions(f);
+  f.grabbedBy = -1;
+  f.grabTicks = 0;
   enterState(f, 'hitstun', ticks);
+}
+
+/** Foi agarrado por `holder`: perde o golpe em andamento e para onde está. */
+export function enterGrabbed(f: Fighter, holder: number): void {
+  f.move = null;
+  f.vx = 0;
+  f.vy = 0;
+  f.kbx = 0;
+  f.kby = 0;
+  f.fastFalling = false;
+  f.canCutJump = false;
+  f.grabTicks = 0;
+  f.grabbedBy = holder;
+  enterState(f, 'grabbed');
+}
+
+/** Quem segurava largou (levou golpe, saiu de cena): volta a cair, livre. */
+export function releaseGrabbed(f: Fighter): void {
+  f.grabbedBy = -1;
+  enterState(f, 'fall');
+}
+
+/** Encerra a janela ativa já (agarrão, contra-ataque): o frame atual vira o 1º do recovery. */
+export function skipToRecovery(f: Fighter): void {
+  const move = f.state === 'attack' ? currentMove(f) : null;
+  if (move) f.stateTicks = Math.max(f.stateTicks, move.startup + move.active);
 }
 
 /** Hitstun: sem controle; o corpo só freia e cai até o tempo acabar. */
@@ -682,6 +730,7 @@ function grabLedge(f: Fighter, cornerX: number, cornerY: number, facing: -1 | 1)
 /** Golpe que controla a própria velocidade vertical neste frame (sem gravidade). */
 function moveOverridesGravity(f: Fighter): boolean {
   if (f.state !== 'attack' || !f.move) return false;
+  if (f.grabTicks > 0) return true;
   const move = moveDef(f, f.move);
   const frame = moveFrame(f);
   // Parado no ar no startup (só no ar: no chão, sem gravidade, ele "sairia" do chão).
@@ -792,6 +841,9 @@ export function stepFighter(
     case 'ledge':
       stepLedge(f, input);
       break;
+    case 'grabbed':
+      // Preso: quem segura (combat.stepGrabs) decide onde fica e quando solta.
+      break;
     case 'hitstun':
       stepHitstun(f, input, prev);
       break;
@@ -799,8 +851,8 @@ export function stepFighter(
       controlFree(f, input, prev);
   }
 
-  // Pendurado não tem física: fica preso na quina.
-  if (f.state !== 'ledge') {
+  // Pendurado ou agarrado não tem física: fica preso na quina ou em quem segura.
+  if (f.state !== 'ledge' && f.state !== 'grabbed') {
     integrate(f, input, solids);
     tryGrabLedge(f, input, solids);
     updateState(f, input);
