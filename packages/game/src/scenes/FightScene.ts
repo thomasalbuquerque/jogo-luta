@@ -90,6 +90,9 @@ export class FightScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ENTER', () => {
       if (this.canRematch()) this.newMatch();
     });
+    this.input.keyboard?.on('keydown-ESC', () => {
+      if (this.canRematch()) this.backToSelect();
+    });
 
     this.drawStage();
     this.fightersGfx = this.add.graphics();
@@ -138,6 +141,13 @@ export class FightScene extends Phaser.Scene {
     return this.state.phase === 'over' && this.overTicks >= REMATCH_DELAY_TICKS;
   }
 
+  /** Volta para a seleção de personagem. */
+  backToSelect(): void {
+    this.scene.stop('hud');
+    this.scene.stop('debug');
+    this.scene.start('select', { characters: this.characters });
+  }
+
   private tick(): void {
     for (const [i, f] of this.state.fighters.entries()) this.prev[i] = { x: f.x, y: f.y };
     const prevInputs = this.lastInputs;
@@ -147,6 +157,10 @@ export class FightScene extends Phaser.Scene {
       this.overTicks++;
       const pressed = (button: number) =>
         this.lastInputs.some((m, i) => isPressed(m, prevInputs[i] ?? 0, button));
+      if (this.canRematch() && pressed(Button.SPECIAL)) {
+        this.backToSelect();
+        return;
+      }
       if (this.canRematch() && pressed(Button.ATTACK | Button.JUMP)) {
         this.newMatch();
         return;

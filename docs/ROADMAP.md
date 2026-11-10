@@ -82,9 +82,9 @@ Objetivo: trocar ou criar um personagem é editar um arquivo, não escrever cód
 
 - [x] Schema da ficha de personagem (tipo TS + validação com zod): peso, velocidade, altura do pulo, ajustes nos golpes base, especial, provocação e ids de animação.
 - [x] Biblioteca de blocos de especial reutilizáveis: projétil, investida, ataque em área, contra-ataque, buff temporário, teleporte, agarrão. Um especial = combinação de blocos + números.
-- [ ] Provocação: animação + áudio, sem efeito de jogo (ou um efeito cômico pequeno).
-- [ ] Schummaki e João Frango completos em retângulo: stats, especial e provocação.
-- [ ] Seletor mínimo com 2 opções no modo local.
+- [x] Provocação: animação + áudio, sem efeito de jogo (ou um efeito cômico pequeno).
+- [x] Schummaki e João Frango completos em retângulo: stats, especial e provocação.
+- [x] Seletor mínimo com 2 opções no modo local.
 
 **Pronto quando:** os dois personagens parecem diferentes de jogar, mesmo ainda sendo retângulos.
 

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { getCharacter } from '@jogo-luta/sim';
 import { formatClock, resultText, stocksLabel } from '../render/hud';
 import { PLAYER_COLORS, type FightScene } from './FightScene';
 
@@ -24,11 +25,19 @@ export class HudScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.scale;
+    const fighters = (this.scene.get('fight') as FightScene).state.fighters;
     this.panels = [0, 1].map((i) => {
       const x = i === 0 ? width * 0.3 : width * 0.7;
       const color = cssColor(PLAYER_COLORS[i] ?? 0xffffff);
+      const fighter = fighters[i];
+      const name = fighter ? getCharacter(fighter.character).name.toUpperCase() : '';
       this.add
-        .text(x, height - 104, `P${String(i + 1)}`, { fontFamily: FONT, fontSize: '20px', color })
+        .text(x, height - 104, `P${String(i + 1)}  ${name}`, {
+          fontFamily: FONT,
+          fontSize: '20px',
+          fontStyle: 'bold',
+          color,
+        })
         .setOrigin(0.5);
       const damage = this.add
         .text(x, height - 66, '0%', {
@@ -65,13 +74,18 @@ export class HudScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
     this.hint = this.add
-      .text(width / 2, height / 2 + 30, 'Ataque, Pulo ou Enter: revanche', {
-        fontFamily: FONT,
-        fontSize: '24px',
-        color: '#e9ecef',
-        stroke: '#000000',
-        strokeThickness: 5,
-      })
+      .text(
+        width / 2,
+        height / 2 + 30,
+        'Ataque, Pulo ou Enter: revanche · Especial ou Esc: trocar lutador',
+        {
+          fontFamily: FONT,
+          fontSize: '24px',
+          color: '#e9ecef',
+          stroke: '#000000',
+          strokeThickness: 5,
+        },
+      )
       .setOrigin(0.5);
   }
 
