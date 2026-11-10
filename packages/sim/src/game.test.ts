@@ -1,6 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { cloneState, createGame, stepGame } from './game';
+import { canBeHit } from './combat';
+import { px } from './constants';
+import type { Fighter } from './fighter';
+import {
+  cloneState,
+  createGame,
+  DEFAULT_RULES,
+  RESPAWN_DELAY_TICKS,
+  RESPAWN_INVULN_TICKS,
+  SUDDEN_DEATH_DAMAGE,
+  stepGame,
+  type GameState,
+} from './game';
 import { Button } from './input';
+import { TEST_STAGE } from './stage';
+
+function fighter(g: GameState, id: number): Fighter {
+  const f = g.fighters[id];
+  if (!f) throw new Error(`sem lutador ${String(id)}`);
+  return f;
+}
 
 describe('game', () => {
   it('cria 2 lutadores no chão do mapa de teste, virados um para o outro', () => {
@@ -23,13 +42,82 @@ describe('game', () => {
     expect(f?.onPlatform).toBe(true);
   });
 
-  it('quem cai do mapa volta ao spawn', () => {
+  it('começa com 3 stocks e 0% para cada um', () => {
     const g = createGame();
-    for (let i = 0; i < 600; i++) stepGame(g, [Button.LEFT, 0]);
-    const f = g.fighters[0];
-    expect(f).toBeDefined();
-    // andou para fora, caiu, voltou e andou de novo: sempre dentro da blast zone
-    expect(Math.abs(f?.x ?? 0)).toBeLessThan(130_000);
+    for (const f of g.fighters) {
+      expect(f.stocks).toBe(DEFAULT_RULES.stocks);
+      expect(f.damage).toBe(0);
+    }
+  });
+
+  it('sair da blast zone é KO: perde 1 stock e sai de cena', () => {
+    const g = createGame();
+    const f = fighter(g, 0);
+    f.damage = 87;
+    f.x = px(-1500);
+    stepGame(g, [0, 0]);
+    expect(f.state).toBe('ko');
+    expect(f.stocks).toBe(DEFAULT_RULES.stocks - 1);
+    expect(f.damage).toBe(0);
+  });
+
+  it('reaparece no alto depois do atraso, com 0% e invencível', () => {
+    const g = createGame();
+    const f = fighter(g, 0);
+    f.y = px(1200);
+    stepGame(g, [0, 0]);
+    for (let i = 0; i < RESPAWN_DELAY_TICKS - 1; i++) stepGame(g, [0, 0]);
+    expect(f.state).toBe('ko');
+    stepGame(g, [0, 0]);
+    expect(f.state).not.toBe('ko');
+    const point = TEST_STAGE.respawns[0];
+    expect(f.x + f.w / 2).toBe(point?.x);
+    expect(f.y + f.h).toBeLessThan(px(-300));
+    expect(f.invulnTicks).toBeGreaterThan(RESPAWN_INVULN_TICKS - 5);
+  });
+
+  it('em KO não leva golpe; sem stock, não volta mais', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    const f = fighter(g, 0);
+    f.x = px(2000);
+    stepGame(g, [0, 0]);
+    expect(f.stocks).toBe(0);
+    for (let i = 0; i < 300; i++) stepGame(g, [0, 0]);
+    expect(f.state).toBe('ko');
+    expect(canBeHit(f)).toBe(false);
+  });
+
+  it('andar para fora do mapa e cair é KO (sem recuperar)', () => {
+    const g = createGame();
+    let kos = 0;
+    for (let i = 0; i < 400 && kos === 0; i++) {
+      stepGame(g, [Button.LEFT | Button.DOWN, 0]);
+      if (fighter(g, 0).state === 'ko') kos++;
+    }
+    expect(kos).toBe(1);
+  });
+
+  it('aéreo lado em quem está com muito % na borda manda para fora', () => {
+    const g = createGame();
+    const [a, b] = [fighter(g, 0), fighter(g, 1)];
+    for (let i = 0; i < 3; i++) stepGame(g, [0, 0]);
+    // P1 no ar perto da borda direita, P2 colado na frente dele
+    a.x = px(330);
+    a.y = px(-150);
+    a.grounded = false;
+    a.facing = 1;
+    b.x = a.x + px(60);
+    b.y = a.y;
+    b.damage = 120;
+    stepGame(g, [Button.RIGHT | Button.ATTACK, 0]);
+    expect(a.move).toBe('sideAir');
+    let ko = false;
+    for (let i = 0; i < 240 && !ko; i++) {
+      stepGame(g, [0, 0]);
+      ko = b.state === 'ko';
+    }
+    expect(ko).toBe(true);
+    expect(b.stocks).toBe(DEFAULT_RULES.stocks - 1);
   });
 
   it('é determinístico: mesmos inputs, mesmo estado', () => {
@@ -46,7 +134,9 @@ describe('game', () => {
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
     // tudo inteiro: nada de fração no estado
     for (const f of a.fighters) {
-      for (const v of [f.x, f.y, f.vx, f.vy]) expect(Number.isInteger(v)).toBe(true);
+      for (const v of [f.x, f.y, f.vx, f.vy, f.kbx, f.kby, f.damage]) {
+        expect(Number.isInteger(v)).toBe(true);
+      }
     }
   });
 
@@ -56,5 +146,80 @@ describe('game', () => {
     stepGame(g, [Button.RIGHT, 0]);
     expect(snap.tick).toBe(0);
     expect(snap.fighters[0]?.x).not.toBe(g.fighters[0]?.x);
+  });
+});
+
+/** Tira o lutador da blast zone (KO no próximo tick). */
+function throwOut(f: Fighter): void {
+  f.x = px(5000);
+}
+
+describe('fim da partida', () => {
+  it('perder o último stock acaba a luta; o outro vence', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    throwOut(fighter(g, 0));
+    stepGame(g, [0, 0]);
+    expect(g.phase).toBe('over');
+    expect(g.winner).toBe(1);
+  });
+
+  it('com a luta acabada, nada mais se mexe', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    throwOut(fighter(g, 1));
+    stepGame(g, [0, 0]);
+    const snap = JSON.stringify(g.fighters);
+    for (let i = 0; i < 30; i++) stepGame(g, [Button.RIGHT | Button.JUMP, Button.ATTACK]);
+    expect(JSON.stringify(g.fighters)).toBe(snap);
+    expect(g.tick).toBe(31);
+  });
+
+  it('os dois perdem o último stock no mesmo tick: empate', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    throwOut(fighter(g, 0));
+    throwOut(fighter(g, 1));
+    stepGame(g, [0, 0]);
+    expect(g.phase).toBe('over');
+    expect(g.winner).toBeNull();
+  });
+
+  it('o relógio desconta 1 por tick', () => {
+    const g = createGame();
+    expect(g.timeLeft).toBe(DEFAULT_RULES.timeLimitTicks);
+    for (let i = 0; i < 10; i++) stepGame(g, [0, 0]);
+    expect(g.timeLeft).toBe(DEFAULT_RULES.timeLimitTicks - 10);
+  });
+
+  it('fim do tempo: vence quem tem mais stocks', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 3, timeLimitTicks: 5 });
+    fighter(g, 0).stocks = 2;
+    fighter(g, 1).damage = 150;
+    for (let i = 0; i < 5; i++) stepGame(g, [0, 0]);
+    expect(g.phase).toBe('over');
+    expect(g.winner).toBe(1);
+  });
+
+  it('fim do tempo com stocks iguais: vence quem tem menos %', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 3, timeLimitTicks: 5 });
+    fighter(g, 0).damage = 40;
+    fighter(g, 1).damage = 41;
+    for (let i = 0; i < 5; i++) stepGame(g, [0, 0]);
+    expect(g.winner).toBe(0);
+  });
+
+  it('empate total: morte súbita com 1 stock e 300%, e o próximo KO decide', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 3, timeLimitTicks: 5 });
+    for (let i = 0; i < 5; i++) stepGame(g, [0, 0]);
+    expect(g.phase).toBe('fight');
+    expect(g.suddenDeath).toBe(true);
+    for (const f of g.fighters) {
+      expect(f.stocks).toBe(1);
+      expect(f.damage).toBe(SUDDEN_DEATH_DAMAGE);
+    }
+    for (let i = 0; i < 100; i++) stepGame(g, [0, 0]);
+    expect(g.phase).toBe('fight'); // sem limite de tempo na morte súbita
+    throwOut(fighter(g, 1));
+    stepGame(g, [0, 0]);
+    expect(g.phase).toBe('over');
+    expect(g.winner).toBe(0);
   });
 });

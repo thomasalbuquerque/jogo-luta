@@ -9,11 +9,13 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 - **Stocks:** 3 vidas por jogador.
 - **Tempo limite:** 4 minutos. No fim do tempo vence quem tiver mais stocks; empate em stocks → menor % de dano; empate total → morte súbita (1 stock, 300%).
 - **Dano:** cada golpe soma % ao alvo (começa em 0%, sem teto). Quanto maior o %, mais longe o golpe arremessa.
-- **Knockback:** `(força base + dano acumulado × escala do golpe) ÷ peso`. Direção definida pelo golpe.
+- **Knockback:** `(força base + dano acumulado × escala do golpe) × 100 ÷ peso` (peso 100 = médio), com o dano do alvo já somado o do golpe. Ver [Combate](#combate).
 - **Hitstun:** proporcional ao knockback; durante o hitstun o lutador não age.
 - **Hitstop:** os dois lutadores congelam alguns ticks no impacto (mais em golpes fortes).
-- **Blast zones:** retângulo além das bordas da tela; sair dele = KO.
-- **Respawn:** reaparece no alto do mapa com 0% e ~2 s de invencibilidade.
+- **Blast zones:** retângulo além das bordas da tela; sair dele inteiro = KO (inclusive cair do mapa).
+- **Respawn:** 1 s fora de cena, depois reaparece no alto do mapa com 0% e 2 s de invencibilidade. Sem stock, está fora; quando sobra 1 lutador, ele vence (se os últimos stocks caírem no mesmo tick, empate).
+- **Morte súbita:** só os empatados voltam, nos pontos de início, com 1 stock, 300% e 1 s de invencibilidade, sem limite de tempo.
+- **Revanche:** no fim da luta, Ataque, Pulo ou Enter (depois de 1 s) começa outra.
 - **Simulação:** 60 ticks/s, passo fixo. Todos os tempos de golpe são contados em ticks.
 
 ## Movimento
@@ -26,7 +28,7 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 - **Esquiva:** no chão é um dash curto (9 ticks, recarga de 18; pulo cancela o dash). No ar é um dodge em qualquer das 8 direções (ou parado), sem gravidade, com 12 ticks de invencibilidade, 1 por vez no ar.
 - **Tolerâncias:** pulo até 5 ticks depois de sair da borda (coyote time) e pulo apertado até 6 ticks antes de poder pular fica guardado (buffer).
 - **Unidades no `sim`:** inteiros em subpixel (1 px = 100 subpx), para o resultado ser igual em todo navegador.
-- **Borda (ledge):** encostar na quina da plataforma principal agarra; dali sobe, pula ou solta.
+- **Borda (ledge):** caindo ao lado da quina de cima de um bloco sólido, com as mãos na altura dela, o lutador agarra (segurar ↓ não agarra). Agarrar devolve pulo aéreo, dodge e recuperação. Depois de 6 ticks pendurado: ↑ ou na direção do palco sobe; pulo pula; ↓ ou para fora solta (30 ticks sem poder agarrar de novo). Pendurado não é invencível.
 
 ## Controles
 
@@ -53,20 +55,37 @@ Rascunho; o remapeamento entra na Etapa 6. Gamepad (Gamepad API) é o recomendad
 
 ## Moveset base (igual para todos)
 
-Cada personagem só muda números destes golpes (dano, força, alcance, frames).
+Cada personagem só muda números destes golpes (dano, força, alcance, frames). Valores atuais em
+`packages/sim/src/moves.ts`.
 
-| Golpe              | Input              | Uso                                 |
-| ------------------ | ------------------ | ----------------------------------- |
-| Leve neutro (chão) | Ataque parado      | Rápido, curto alcance               |
-| Leve lado (chão)   | Ataque + ←/→       | Avança, arremessa na horizontal     |
-| Leve baixo (chão)  | Ataque + ↓         | Rasteira, arremessa para cima       |
-| Aéreo neutro       | Ataque no ar       | Golpe em volta do corpo             |
-| Aéreo lado         | Ataque + ←/→ no ar | Principal golpe de KO lateral       |
-| Aéreo baixo        | Ataque + ↓ no ar   | Golpe para baixo (spike fraco)      |
-| Recuperação        | Ataque + ↑         | Sobe e acerta; 1 vez por ar         |
-| Ground pound       | Especial + ↓ no ar | Cai rápido e acerta ao tocar o chão |
+| Golpe              | Input              | Uso                                 | Frames (S/A/R)  | Dano | Ângulo    | KB base / escala |
+| ------------------ | ------------------ | ----------------------------------- | --------------- | ---- | --------- | ---------------- |
+| Leve neutro (chão) | Ataque parado      | Rápido, curto alcance               | 4 / 3 / 10      | 5%   | 30°       | 7 / 0,08         |
+| Leve lado (chão)   | Ataque + ←/→       | Avança, arremessa na horizontal     | 7 / 4 / 16      | 8%   | 25°       | 9 / 0,17         |
+| Leve baixo (chão)  | Ataque + ↓         | Rasteira, arremessa para cima       | 6 / 4 / 18      | 7%   | 80°       | 10 / 0,16        |
+| Aéreo neutro       | Ataque no ar       | Golpe em volta do corpo             | 5 / 6 / 12      | 7%   | 45° longe | 8 / 0,12         |
+| Aéreo lado         | Ataque + ←/→ no ar | Principal golpe de KO lateral       | 9 / 4 / 18      | 11%  | 35°       | 10 / 0,21        |
+| Aéreo baixo        | Ataque + ↓ no ar   | Golpe para baixo (spike fraco)      | 8 / 5 / 14      | 9%   | 285°      | 7 / 0,08         |
+| Recuperação        | Ataque + ↑         | Sobe e acerta; 1 vez por ar         | 3 / 12 / 12     | 8%   | 80°       | 9 / 0,17         |
+| Ground pound       | Especial + ↓ no ar | Cai rápido e acerta ao tocar o chão | 8 / até 40 / 10 | 6%   | 285°      | 6 / 0,06         |
+| ↳ onda ao pousar   | —                  | Acerta dos dois lados               | 0 / 4 / 16      | 10%  | 50° longe | 11 / 0,16        |
 
-Cada golpe é definido em ticks: **startup** (preparação) → **active** (hitbox ligada) → **recovery** (vulnerável).
+- **Frames:** cada golpe é definido em ticks: **startup** (preparação) → **active** (hitbox ligada) → **recovery** (vulnerável). As hitboxes podem mudar de frame a frame (ex.: o arco do aéreo lado começa em cima e desce para a frente).
+- **Escolha do golpe:** ↓ > ↑ > ←/→ > parado. No ar, ↑ + Ataque com a recuperação já usada vira aéreo neutro. A recuperação volta ao tocar o chão, agarrar a borda ou levar golpe.
+- **Durante o golpe:** no chão não anda nem vira; no ar dá para mirar com ←/→, mas não vira. Os golpes de lado viram para o lado apertado ao começar. Leve lado dá um avanço; recuperação dá um impulso para cima.
+- **Landing lag:** pousar no meio de um aéreo corta o golpe e deixa o lutador parado alguns ticks (4 a 8). O ground pound, ao pousar, vira a onda.
+- **Buffer:** Ataque e Especial apertados ficam guardados 6 ticks. Pulo + Ataque juntos no chão: pula e solta o aéreo no tick seguinte. O dash pode sair em ataque.
+
+## Combate
+
+- **Hitbox × hurtbox:** a hurtbox é o corpo do lutador. Cada golpe acerta cada alvo 1 vez. Se dois golpes se acertam no mesmo tick, os dois levam (troca). Invencível (dodge aéreo, respawn) não leva golpe.
+- **Knockback** em px/tick, na direção do ângulo do golpe (0° = para a frente de quem bate, 90° = para cima, 270° = para baixo). Golpes em volta do corpo ("longe") arremessam para longe do centro de quem bate.
+- O arremesso é uma velocidade à parte que freia 0,38 px/tick a cada tick ao longo da direção (no chão, pelo menos 1,5 na horizontal). Pular ou dar dodge depois do hitstun não cancela o arremesso.
+- Spike em quem está no chão quica para cima, com metade da força.
+- **Hitstun:** `6 + 1,2 × knockback` ticks (knockback em px/tick). Levar golpe cancela o golpe em andamento e devolve pulo aéreo, dodge e recuperação.
+- **Hitstop:** `3 + dano ÷ 3` ticks (máx. 12), para os dois.
+- **Referência de KO** (sem o alvo reagir): aéreo lado ~100% perto da borda e ~130% no meio; leve lado ~125% / ~155%; golpes para cima ~175%.
+- **Determinismo:** seno e cosseno vêm de uma tabela de inteiros; todo o estado do combate é inteiro.
 
 ## Especiais e provocação
 
