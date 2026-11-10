@@ -76,12 +76,32 @@ export const ACTION_BUFFER_TICKS = 6;
 /** Ticks ignorando plataformas depois de ↓ em cima de uma. */
 export const DROP_THROUGH_TICKS = 10;
 
+/** Borda: distância horizontal da quina em que o lutador agarra. */
+export const LEDGE_GRAB_X = px(20);
+/** Borda: tolerância vertical em volta da posição pendurada. */
+export const LEDGE_GRAB_Y = px(28);
+/** Pendurado, o topo do corpo fica esta altura acima da quina (as mãos em cima). */
+export const LEDGE_HANG_Y = px(14);
+/** Ticks pendurado antes de aceitar subir, pular ou soltar (evita sair sem querer). */
+export const LEDGE_MIN_TICKS = 6;
+/** Ticks sem poder agarrar de novo depois de soltar ou pular da borda. */
+export const LEDGE_REGRAB_TICKS = 30;
+
 /**
  * Estados do lutador. Os "livres" (idle, run, jump, fall, wallslide) saem da
  * física; os outros têm regras próprias e duração.
  */
 export type FighterState =
-  'idle' | 'run' | 'jump' | 'fall' | 'wallslide' | 'dash' | 'dodge' | 'attack' | 'landing';
+  | 'idle'
+  | 'run'
+  | 'jump'
+  | 'fall'
+  | 'wallslide'
+  | 'dash'
+  | 'dodge'
+  | 'attack'
+  | 'landing'
+  | 'ledge';
 
 export interface Fighter extends Body {
   id: number;
@@ -118,6 +138,10 @@ export interface Fighter extends Body {
   move: MoveId | null;
   /** Bitmask dos ids já acertados pelo golpe atual: cada golpe acerta cada alvo 1 vez. */
   moveHits: number;
+  /** Quina agarrada (estado `ledge`), em subpx. */
+  ledgeX: number;
+  ledgeY: number;
+  ledgeCooldown: number;
   prevInput: InputMask;
 }
 
@@ -163,6 +187,9 @@ export function createFighter(
     dodgeDirY: 0,
     move: null,
     moveHits: 0,
+    ledgeX: 0,
+    ledgeY: 0,
+    ledgeCooldown: 0,
     prevInput: 0,
   };
   placeAtSpawn(f, spawn);
@@ -189,6 +216,7 @@ export function placeAtSpawn(f: Fighter, spawn: Spawn): void {
   f.specialBufferTicks = 0;
   f.move = null;
   f.moveHits = 0;
+  f.ledgeCooldown = 0;
   setState(f, 'fall');
 }
 
@@ -441,6 +469,66 @@ function stepLanding(f: Fighter, input: InputMask, prev: InputMask): void {
   moveHorizontally(f, 0, false);
 }
 
+/** Pendurado na borda: ↑ ou na direção do palco sobe, pulo pula, ↓ ou para fora solta. */
+function stepLedge(f: Fighter, input: InputMask): void {
+  f.vx = 0;
+  f.vy = 0;
+  if (f.stateTicks < LEDGE_MIN_TICKS) return;
+  const dirX = axisX(input);
+  const dirY = axisY(input);
+  if (f.jumpBufferTicks > 0) {
+    f.vy = -jumpVelocity(f.stats.gravity, f.stats.jumpHeight);
+    f.canCutJump = true;
+    f.jumpBufferTicks = 0;
+    f.ledgeCooldown = LEDGE_REGRAB_TICKS;
+    enterState(f, 'jump');
+  } else if (dirY < 0 || dirX === f.facing) {
+    f.x = f.facing === 1 ? f.ledgeX : f.ledgeX - f.w;
+    f.y = f.ledgeY - f.h;
+    f.grounded = true;
+    enterState(f, 'idle');
+  } else if (dirY > 0 || dirX === -f.facing) {
+    f.ledgeCooldown = LEDGE_REGRAB_TICKS;
+    enterState(f, 'fall');
+  }
+}
+
+/**
+ * Agarra a quina de cima de um bloco sólido quando cai do lado dela, com as mãos
+ * na altura certa. Segurar ↓ não agarra.
+ */
+function tryGrabLedge(f: Fighter, input: InputMask, solids: readonly Solid[]): void {
+  if (!isFree(f) || f.grounded || f.ledgeCooldown > 0 || f.vy < 0) return;
+  if (isHeld(input, Button.DOWN)) return;
+  for (const s of solids) {
+    if (s.kind !== 'solid') continue;
+    if (Math.abs(f.y - (s.y - LEDGE_HANG_Y)) > LEDGE_GRAB_Y) continue;
+    const right = f.x + f.w;
+    if (right <= s.x && right >= s.x - LEDGE_GRAB_X) {
+      grabLedge(f, s.x, s.y, 1);
+      return;
+    }
+    if (f.x >= s.x + s.w && f.x <= s.x + s.w + LEDGE_GRAB_X) {
+      grabLedge(f, s.x + s.w, s.y, -1);
+      return;
+    }
+  }
+}
+
+function grabLedge(f: Fighter, cornerX: number, cornerY: number, facing: -1 | 1): void {
+  f.x = facing === 1 ? cornerX - f.w : cornerX;
+  f.y = cornerY - LEDGE_HANG_Y;
+  f.vx = 0;
+  f.vy = 0;
+  f.facing = facing;
+  f.ledgeX = cornerX;
+  f.ledgeY = cornerY;
+  f.fastFalling = false;
+  f.canCutJump = false;
+  refreshAirOptions(f);
+  enterState(f, 'ledge');
+}
+
 /** Golpe que controla a própria velocidade vertical neste frame (sem gravidade). */
 function moveOverridesGravity(f: Fighter): boolean {
   if (f.state !== 'attack' || !f.move) return false;
@@ -504,6 +592,7 @@ export function stepFighter(f: Fighter, input: InputMask, solids: readonly Solid
   if (f.jumpBufferTicks > 0) f.jumpBufferTicks--;
   if (f.attackBufferTicks > 0) f.attackBufferTicks--;
   if (f.specialBufferTicks > 0) f.specialBufferTicks--;
+  if (f.ledgeCooldown > 0) f.ledgeCooldown--;
   if (isPressed(input, prev, Button.JUMP)) f.jumpBufferTicks = JUMP_BUFFER_TICKS;
   if (isPressed(input, prev, Button.ATTACK)) f.attackBufferTicks = ACTION_BUFFER_TICKS;
   if (isPressed(input, prev, Button.SPECIAL)) f.specialBufferTicks = ACTION_BUFFER_TICKS;
@@ -521,12 +610,19 @@ export function stepFighter(f: Fighter, input: InputMask, solids: readonly Solid
     case 'landing':
       stepLanding(f, input, prev);
       break;
+    case 'ledge':
+      stepLedge(f, input);
+      break;
     default:
       controlFree(f, input, prev);
   }
 
-  integrate(f, input, solids);
-  updateState(f, input);
+  // Pendurado não tem física: fica preso na quina.
+  if (f.state !== 'ledge') {
+    integrate(f, input, solids);
+    tryGrabLedge(f, input, solids);
+    updateState(f, input);
+  }
   f.prevInput = input;
 }
 
