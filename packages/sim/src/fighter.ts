@@ -463,8 +463,8 @@ function stepAttack(f: Fighter, input: InputMask, prev: InputMask): void {
     finishAction(f, input, prev);
     return;
   }
-  // Dá para andar (no chão) e mirar (no ar) atacando, mas não virar.
-  moveHorizontally(f, axisX(input), false);
+  // No ar dá para mirar; no chão só anda se o golpe permitir (`canWalk`). Nunca vira.
+  moveHorizontally(f, f.grounded && !move.canWalk ? 0 : axisX(input), false);
   cutJump(f, input);
   moveFrameEffects(f);
 }
