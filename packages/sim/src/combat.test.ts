@@ -246,3 +246,13 @@ describe('hitstun e hitstop', () => {
     expect(b.damage).toBe(MOVES.neutralLight.damage);
   });
 });
+
+describe('recuperação (↑ + Ataque)', () => {
+  it('acerta quem está do lado no chão, não só quem está em cima', () => {
+    const [a, b] = duel(50);
+    step([a, b], [Button.UP | ATTACK, 0]);
+    step([a, b], [Button.UP, 0], 20);
+    expect(b.damage).toBe(MOVES.recovery.damage);
+    expect(b.kby).toBeLessThanOrEqual(0); // lançado para cima
+  });
+});

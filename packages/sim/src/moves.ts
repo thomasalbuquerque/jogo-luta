@@ -172,8 +172,9 @@ export const MOVES: Readonly<Record<MoveId, MoveDef>> = {
     recovery: 12,
     impulse: { frame: 3, y: px(-15) },
     hitboxes: [
-      { from: 4, to: 9, boxes: [box(10, -46, 60, 50)] },
-      { from: 10, to: 15, boxes: [box(0, -40, 72, 64)] },
+      // Começo: cobre o corpo e a frente (pega quem está do lado); depois só em cima.
+      { from: 4, to: 8, boxes: [box(14, -16, 72, 112)] },
+      { from: 9, to: 15, boxes: [box(0, -40, 72, 64)] },
     ],
     damage: 8,
     angle: 80,
