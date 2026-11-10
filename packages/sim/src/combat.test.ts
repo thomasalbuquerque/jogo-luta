@@ -1,12 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { activeHitboxes, applyHit, findHits, hurtbox, knockback, resolveHits } from './combat';
+import {
+  activeHitboxes,
+  applyHit,
+  findHits,
+  HITSTOP_MAX_TICKS,
+  hitstopTicks,
+  HITSTUN_BASE_TICKS,
+  hitstunTicks,
+  hurtbox,
+  knockback,
+  resolveHits,
+} from './combat';
 import { px } from './constants';
 import { createFighter, stepFighter, type Fighter } from './fighter';
 import { Button } from './input';
 import { MOVES } from './moves';
 import { overlaps, type Solid } from './physics';
 
-const { ATTACK } = Button;
+const { ATTACK, JUMP, RIGHT } = Button;
 
 const solids: Solid[] = [{ kind: 'solid', x: px(-1000), y: 0, w: px(2000), h: px(500) }];
 
@@ -166,5 +177,72 @@ describe('dano e knockback', () => {
     for (let t = 0; t < 200; t++) stepFighter(b, 0, []);
     expect(b.kbx).toBe(0);
     expect(b.kby).toBe(0);
+  });
+});
+
+describe('hitstun e hitstop', () => {
+  it('hitstun cresce com o knockback; hitstop cresce com o dano', () => {
+    expect(hitstunTicks(px(30))).toBeGreaterThan(hitstunTicks(px(8)));
+    expect(hitstunTicks(0)).toBe(HITSTUN_BASE_TICKS);
+    expect(hitstopTicks(12)).toBeGreaterThan(hitstopTicks(3));
+    expect(hitstopTicks(999)).toBe(HITSTOP_MAX_TICKS);
+  });
+
+  it('quem leva fica em hitstun, sem agir, pelo tempo calculado', () => {
+    const a = floating(0);
+    const b = floating(1, 40);
+    applyHit(a, b, 'sideLight');
+    const stun = b.stateDuration;
+    expect(b.state).toBe('hitstun');
+    expect(stun).toBe(hitstunTicks(knockback(MOVES.sideLight, b.damage, 100)));
+    const ticks = b.hitstop + stun - 1;
+    // segurar direção e pulo não faz nada durante o hitstun
+    for (let t = 0; t < ticks; t++) stepFighter(b, RIGHT | JUMP, []);
+    expect(b.state).toBe('hitstun');
+    expect(b.facing).toBe(-1);
+    expect(b.airJumpsLeft).toBe(1);
+    stepFighter(b, RIGHT | JUMP | ATTACK, []);
+    expect(b.state).toBe('attack'); // sai do hitstun já agindo
+  });
+
+  it('hitstop congela os dois no impacto', () => {
+    const a = floating(0);
+    const b = floating(1, 40);
+    applyHit(a, b, 'sideAir');
+    const stop = hitstopTicks(MOVES.sideAir.damage);
+    expect(a.hitstop).toBe(stop);
+    expect(b.hitstop).toBe(stop);
+    const pa = { x: a.x, y: a.y };
+    const pb = { x: b.x, y: b.y };
+    for (let t = 0; t < stop; t++) {
+      stepFighter(a, 0, []);
+      stepFighter(b, 0, []);
+    }
+    expect({ x: a.x, y: a.y }).toEqual(pa);
+    expect({ x: b.x, y: b.y }).toEqual(pb);
+    stepFighter(b, 0, []);
+    expect(b.x).toBeGreaterThan(pb.x);
+  });
+
+  it('levar golpe cancela o golpe em andamento e devolve pulo e recuperação', () => {
+    const a = floating(0);
+    const b = floating(1, 40);
+    stepFighter(b, Button.UP | ATTACK, []);
+    expect(b.move).toBe('recovery');
+    b.airJumpsLeft = 0;
+    applyHit(a, b, 'neutralLight');
+    expect(b.move).toBeNull();
+    expect(b.recoveryUsed).toBe(false);
+    expect(b.airJumpsLeft).toBe(1);
+  });
+
+  it('numa luta, o leve neutro acerta 1 vez e congela os dois', () => {
+    const [a, b] = duel(60);
+    step([a, b], [ATTACK, 0]);
+    step([a, b], [0, 0], MOVES.neutralLight.startup);
+    expect(b.state).toBe('hitstun');
+    expect(a.hitstop).toBeGreaterThan(0);
+    step([a, b], [0, 0], 40);
+    expect(b.damage).toBe(MOVES.neutralLight.damage);
   });
 });

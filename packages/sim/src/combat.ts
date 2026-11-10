@@ -1,4 +1,5 @@
-import { KNOCKBACK_DECAY, moveFrame, type Fighter } from './fighter';
+import { SUBPX } from './constants';
+import { enterHitstun, KNOCKBACK_DECAY, moveFrame, type Fighter } from './fighter';
 import { idiv } from './math';
 import { hitboxesAt, MOVES, type MoveDef, type MoveId } from './moves';
 import { overlaps, type Box } from './physics';
@@ -65,6 +66,24 @@ export function knockback(move: MoveDef, damage: number, weight: number): number
   return idiv((move.baseKnockback + damage * move.knockbackScale) * 100, weight);
 }
 
+/** Hitstun mínimo, em ticks. */
+export const HITSTUN_BASE_TICKS = 6;
+/** Hitstun extra por px/tick de knockback, em décimos de tick. */
+export const HITSTUN_TENTHS_PER_KB = 12;
+/** Hitstop: base em ticks, mais 1 a cada 3% do golpe, até o máximo. */
+export const HITSTOP_BASE_TICKS = 3;
+export const HITSTOP_MAX_TICKS = 12;
+
+/** Ticks sem agir depois de um arremesso: proporcional ao knockback. */
+export function hitstunTicks(kb: number): number {
+  return HITSTUN_BASE_TICKS + idiv(kb * HITSTUN_TENTHS_PER_KB, SUBPX * 10);
+}
+
+/** Ticks em que os dois lutadores congelam no impacto: golpe forte congela mais. */
+export function hitstopTicks(damage: number): number {
+  return Math.min(HITSTOP_BASE_TICKS + idiv(damage, 3), HITSTOP_MAX_TICKS);
+}
+
 /** Lado do arremesso: -1 ou 1. */
 function knockbackSide(attacker: Fighter, victim: Fighter, move: MoveDef): -1 | 1 {
   if (move.knockbackDir === 'away') {
@@ -92,8 +111,12 @@ export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): vo
   victim.kbDecayY = Math.max(1, idiv(KNOCKBACK_DECAY * Math.abs(sin), TRIG_ONE));
   victim.vx = 0;
   victim.vy = 0;
-  victim.fastFalling = false;
   victim.facing = side === 1 ? -1 : 1;
+  enterHitstun(victim, hitstunTicks(kb));
+
+  const stop = hitstopTicks(move.damage);
+  attacker.hitstop = Math.max(attacker.hitstop, stop);
+  victim.hitstop = Math.max(victim.hitstop, stop);
 }
 
 /** Procura e aplica os acertos do tick. */

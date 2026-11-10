@@ -106,7 +106,8 @@ export type FighterState =
   | 'dodge'
   | 'attack'
   | 'landing'
-  | 'ledge';
+  | 'ledge'
+  | 'hitstun';
 
 export interface Fighter extends Body {
   id: number;
@@ -154,6 +155,8 @@ export interface Fighter extends Body {
   ledgeX: number;
   ledgeY: number;
   ledgeCooldown: number;
+  /** Ticks congelado pelo impacto de um golpe (hitstop). */
+  hitstop: number;
   prevInput: InputMask;
 }
 
@@ -207,6 +210,7 @@ export function createFighter(
     ledgeX: 0,
     ledgeY: 0,
     ledgeCooldown: 0,
+    hitstop: 0,
     prevInput: 0,
   };
   placeAtSpawn(f, spawn);
@@ -236,6 +240,7 @@ export function placeAtSpawn(f: Fighter, spawn: Spawn): void {
   f.move = null;
   f.moveHits = 0;
   f.ledgeCooldown = 0;
+  f.hitstop = 0;
   setState(f, 'fall');
 }
 
@@ -480,6 +485,27 @@ function moveFrameEffects(f: Fighter): void {
 }
 
 /** Pouso no meio de um aéreo: parado alguns ticks. */
+/**
+ * Levou um golpe: perde o golpe em andamento e fica sem agir por `ticks`.
+ * Ser acertado devolve pulo aéreo, dodge e recuperação, para dar chance de voltar.
+ */
+export function enterHitstun(f: Fighter, ticks: number): void {
+  f.move = null;
+  f.fastFalling = false;
+  f.canCutJump = false;
+  refreshAirOptions(f);
+  enterState(f, 'hitstun', ticks);
+}
+
+/** Hitstun: sem controle; o corpo só freia e cai até o tempo acabar. */
+function stepHitstun(f: Fighter, input: InputMask, prev: InputMask): void {
+  if (f.stateTicks >= f.stateDuration) {
+    finishAction(f, input, prev);
+    return;
+  }
+  moveHorizontally(f, 0, false);
+}
+
 function stepLanding(f: Fighter, input: InputMask, prev: InputMask): void {
   if (f.stateTicks >= f.stateDuration) {
     finishAction(f, input, prev);
@@ -601,6 +627,12 @@ export function isFree(f: Fighter): boolean {
 
 /** Avança um lutador um tick. */
 export function stepFighter(f: Fighter, input: InputMask, solids: readonly Solid[]): void {
+  // Hitstop: congelado no impacto. O input anterior não muda, então um botão
+  // apertado durante o congelamento vale como aperto quando ele acaba.
+  if (f.hitstop > 0) {
+    f.hitstop--;
+    return;
+  }
   const prev = f.prevInput;
 
   f.stateTicks++;
@@ -631,6 +663,9 @@ export function stepFighter(f: Fighter, input: InputMask, solids: readonly Solid
       break;
     case 'ledge':
       stepLedge(f, input);
+      break;
+    case 'hitstun':
+      stepHitstun(f, input, prev);
       break;
     default:
       controlFree(f, input, prev);
