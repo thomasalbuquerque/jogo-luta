@@ -15,12 +15,12 @@ O jogo fica completo e divertido no modo local, com 2 personagens, antes de qual
 
 Cada fase só começa quando o marco da anterior foi atingido.
 
-| Fase | Etapas | Marco para passar |
-| --- | --- | --- |
-| 1. Núcleo local | 0 Fundação · 1 Movimento · 2 Combate base · 3 Personagens (2) | A luta de retângulos já é divertida |
-| 2. Arte e polimento | 4 Arte com IA · 5 Game feel e áudio · 6 Menus e HUD | **Jogo local completo, link enviado ao grupo** |
-| 3. Online | 7 Determinismo · 8 Online 1x1 · 9 Online 2x2 | 10 partidas online sem dessincronizar |
-| 4. Conteúdo | 10 Elenco completo · 11 Balanceamento e deploy | 16 jogáveis e o grupo joga sem explicação |
+| Fase                | Etapas                                                        | Marco para passar                              |
+| ------------------- | ------------------------------------------------------------- | ---------------------------------------------- |
+| 1. Núcleo local     | 0 Fundação · 1 Movimento · 2 Combate base · 3 Personagens (2) | A luta de retângulos já é divertida            |
+| 2. Arte e polimento | 4 Arte com IA · 5 Game feel e áudio · 6 Menus e HUD           | **Jogo local completo, link enviado ao grupo** |
+| 3. Online           | 7 Determinismo · 8 Online 1x1 · 9 Online 2x2                  | 10 partidas online sem dessincronizar          |
+| 4. Conteúdo         | 10 Elenco completo · 11 Balanceamento e deploy                | 16 jogáveis e o grupo joga sem explicação      |
 
 ## Regra de commits (vale para todas as etapas)
 
