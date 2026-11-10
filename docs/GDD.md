@@ -35,7 +35,7 @@ Rascunho; o remapeamento entra na Etapa 6. Gamepad (Gamepad API) é o recomendad
 | Ação       | Jogador 1 | Jogador 2 | Gamepad (padrão)       |
 | ---------- | --------- | --------- | ---------------------- |
 | Direções   | W A S D   | Setas     | Analógico esq. / D-pad |
-| Pular      | C         | J         | A                      |
+| Pular      | Espaço    | J         | A                      |
 | Ataque     | V         | K         | X                      |
 | Especial   | B         | L         | B                      |
 | Esquiva    | F         | I         | RB / RT                |

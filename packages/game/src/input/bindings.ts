@@ -8,7 +8,7 @@ export const P1_KEYS: KeyBindings = {
   RIGHT: ['KeyD'],
   UP: ['KeyW'],
   DOWN: ['KeyS'],
-  JUMP: ['KeyC'],
+  JUMP: ['Space'],
   ATTACK: ['KeyV'],
   SPECIAL: ['KeyB'],
   DODGE: ['KeyF'],

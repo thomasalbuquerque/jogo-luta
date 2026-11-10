@@ -4,7 +4,7 @@ import { allCodes, maskFromKeys, maskFromPad, P1_KEYS, P2_KEYS } from './binding
 
 describe('bindings', () => {
   it('teclado: cada jogador só enxerga as próprias teclas', () => {
-    const down = new Set(['KeyA', 'KeyC', 'ArrowRight']);
+    const down = new Set(['KeyA', 'Space', 'ArrowRight']);
     expect(maskFromKeys(down, P1_KEYS)).toBe(Button.LEFT | Button.JUMP);
     expect(maskFromKeys(down, P2_KEYS)).toBe(Button.RIGHT);
   });
