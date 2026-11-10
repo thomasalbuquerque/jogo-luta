@@ -2,22 +2,43 @@ import { px } from './constants';
 import { axisX, axisY, type InputMask } from './input';
 
 /**
- * Moveset base, igual para todos (GDD). Na Etapa 3 cada ficha de personagem
- * só ajusta estes números.
+ * Moveset base, igual para todos (GDD). Cada ficha de personagem só ajusta estes
+ * números (`character.ts`) e acrescenta 1 especial, montado com blocos.
  *
  * Frames contam a partir de 1 (o tick em que o golpe começa):
  * 1..startup → startup+1..startup+active (hitbox ligada) → recovery.
  */
-export type MoveId =
-  | 'neutralLight'
-  | 'sideLight'
-  | 'downLight'
-  | 'neutralAir'
-  | 'sideAir'
-  | 'downAir'
-  | 'recovery'
-  | 'groundPound'
-  | 'groundPoundLand';
+export const BASE_MOVE_IDS = [
+  'neutralLight',
+  'sideLight',
+  'downLight',
+  'neutralAir',
+  'sideAir',
+  'downAir',
+  'recovery',
+  'groundPound',
+  'groundPoundLand',
+] as const;
+
+/** Golpes do moveset base (iguais para todos). */
+export type BaseMoveId = (typeof BASE_MOVE_IDS)[number];
+
+/** Qualquer golpe: os do moveset base ou o especial do personagem. */
+export type MoveId = BaseMoveId | 'special';
+
+/** O que um acerto faz no alvo. */
+export interface HitProps {
+  /** Dano somado ao alvo, em %. */
+  damage: number;
+  /** Direção do knockback em graus: 0 = para a frente, 90 = para cima, 270 = para baixo. */
+  angle: number;
+  /** Knockback base, em subpx/tick. */
+  baseKnockback: number;
+  /** Quanto o knockback cresce por % de dano do alvo, em subpx/tick. */
+  knockbackScale: number;
+  /** `facing`: lado em que o atacante olha. `away`: para longe do centro do atacante. */
+  knockbackDir: 'facing' | 'away';
+}
 
 /** Caixa de ataque relativa ao centro do corpo: x positivo = para a frente, y positivo = para baixo. */
 export interface HitboxDef {
@@ -34,21 +55,39 @@ export interface HitboxFrames {
   boxes: readonly HitboxDef[];
 }
 
-export interface MoveDef {
+/** Projétil solto no 1º frame ativo (bloco `projectile`). Medidas em subpx. */
+export interface ProjectileDef {
+  /** Velocidade de saída (subpx/tick). */
+  speed: number;
+  /** Ângulo de saída em graus: 0 = reto para a frente, 90 = para cima. */
+  launchAngle: number;
+  /** Gravidade por tick (0 = linha reta). */
+  gravity: number;
+  lifetimeTicks: number;
+  w: number;
+  h: number;
+  /** Onde nasce, em relação ao centro do corpo (x para a frente). */
+  offsetX: number;
+  offsetY: number;
+  hit: HitProps;
+}
+
+/** Buff temporário aplicado no 1º frame ativo (bloco `buff`). Percentuais: 100 = normal. */
+export interface BuffDef {
+  durationTicks: number;
+  /** Dano causado. */
+  damagePercent: number;
+  /** Velocidade andando e no ar. */
+  speedPercent: number;
+  /** Peso (maior = voa menos). */
+  weightPercent: number;
+}
+
+export interface MoveDef extends HitProps {
   startup: number;
   active: number;
   recovery: number;
   hitboxes: readonly HitboxFrames[];
-  /** Dano somado ao alvo, em %. */
-  damage: number;
-  /** Direção do knockback em graus: 0 = para a frente, 90 = para cima, 270 = para baixo. */
-  angle: number;
-  /** Knockback base, em subpx/tick. */
-  baseKnockback: number;
-  /** Quanto o knockback cresce por % de dano do alvo, em subpx/tick. */
-  knockbackScale: number;
-  /** `facing`: lado em que o atacante olha. `away`: para longe do centro do atacante. */
-  knockbackDir: 'facing' | 'away';
   /** Golpe aéreo: pousar no meio dele corta o golpe (vira landing lag ou `landMove`). */
   aerial: boolean;
   /** Ticks parado ao pousar no meio do golpe aéreo. */
@@ -64,7 +103,21 @@ export interface MoveDef {
   /** Durante o active, cai reto a esta velocidade (subpx/tick). */
   fallSpeed?: number;
   /** Golpe que começa ao pousar no meio deste. */
-  landMove?: MoveId;
+  landMove?: BaseMoveId;
+
+  // Blocos de especial (`character.ts` monta o especial com eles).
+  /** Investida: durante o active, avança reto nesta velocidade (no ar, sem cair). */
+  dash?: { speed: number; airSpeed: number };
+  /** Solta um projétil no 1º frame ativo. */
+  projectile?: ProjectileDef;
+  /** Buff temporário no 1º frame ativo. */
+  buff?: BuffDef;
+  /** Teleporte no 1º frame ativo, na direção apertada (ou para a frente). */
+  teleport?: { distance: number; invulnTicks: number };
+  /** Contra-ataque: levar golpe durante o active devolve este acerto em quem bateu. */
+  counter?: HitProps;
+  /** Agarrão: a hitbox segura o alvo por `holdTicks` e depois arremessa com o HitProps do golpe. */
+  grab?: { holdTicks: number };
 }
 
 function box(x: number, y: number, w: number, h: number): HitboxDef {
@@ -80,7 +133,7 @@ const GROUND = {
 } as const;
 const AIR = { aerial: true, turns: false, canWalk: false, knockbackDir: 'facing' } as const;
 
-export const MOVES: Readonly<Record<MoveId, MoveDef>> = {
+export const MOVES: Readonly<Record<BaseMoveId, MoveDef>> = {
   // Rápido, curto alcance: abre combo.
   neutralLight: {
     ...GROUND,
@@ -236,7 +289,7 @@ export function selectAttack(
   grounded: boolean,
   input: InputMask,
   recoveryAvailable: boolean,
-): MoveId {
+): BaseMoveId {
   const x = axisX(input);
   const y = axisY(input);
   if (grounded) {
@@ -250,10 +303,14 @@ export function selectAttack(
 }
 
 /**
- * Golpe do botão Especial. Por enquanto só o ground pound (Especial + ↓ no ar);
- * o especial de cada personagem entra na Etapa 3.
+ * Golpe do botão Especial: Especial + ↓ no ar é o ground pound (moveset base);
+ * o resto é o especial do personagem, se ele puder usar agora.
  */
-export function selectSpecial(grounded: boolean, input: InputMask): MoveId | null {
+export function selectSpecial(
+  grounded: boolean,
+  input: InputMask,
+  specialAvailable: boolean,
+): MoveId | null {
   if (!grounded && axisY(input) > 0) return 'groundPound';
-  return null;
+  return specialAvailable ? 'special' : null;
 }

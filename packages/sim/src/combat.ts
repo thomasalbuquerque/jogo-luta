@@ -1,14 +1,27 @@
 import { SUBPX } from './constants';
-import { enterHitstun, KNOCKBACK_DECAY, moveFrame, type Fighter } from './fighter';
+import {
+  currentMove,
+  dealtDamage,
+  effectiveWeight,
+  enterGrabbed,
+  enterHitstun,
+  KNOCKBACK_DECAY,
+  moveDef,
+  moveFrame,
+  releaseGrabbed,
+  skipToRecovery,
+  type Fighter,
+} from './fighter';
 import { idiv } from './math';
-import { hitboxesAt, MOVES, type MoveDef, type MoveId } from './moves';
-import { overlaps, type Box } from './physics';
+import { hitboxesAt, isActiveFrame, type HitProps, type MoveId } from './moves';
+import { moveAndCollide, overlaps, type Box, type Solid } from './physics';
+import { projectileSide, type Projectile } from './projectile';
 import { cosDeg, sinDeg, TRIG_ONE } from './trig';
 
 /** Dano máximo mostrado/guardado, em %. */
 export const MAX_DAMAGE = 999;
 
-/** Caixa que recebe golpes. Por enquanto é o próprio corpo; na Etapa 3 vem da ficha. */
+/** Caixa que recebe golpes: o corpo, com o tamanho da ficha (`stats.hurtbox`). */
 export function hurtbox(f: Fighter): Box {
   return { x: f.x, y: f.y, w: f.w, h: f.h };
 }
@@ -20,10 +33,11 @@ export function canBeHit(f: Fighter): boolean {
 
 /** Hitboxes ligadas neste tick, em coordenadas do mundo (subpx). */
 export function activeHitboxes(f: Fighter): Box[] {
-  if (f.state !== 'attack' || !f.move) return [];
+  const move = f.state === 'attack' ? currentMove(f) : null;
+  if (!move) return [];
   const cx = f.x + idiv(f.w, 2);
   const cy = f.y + idiv(f.h, 2);
-  return hitboxesAt(MOVES[f.move], moveFrame(f)).map((b) => ({
+  return hitboxesAt(move, moveFrame(f)).map((b) => ({
     x: cx + f.facing * b.x - idiv(b.w, 2),
     y: cy + b.y - idiv(b.h, 2),
     w: b.w,
@@ -35,6 +49,19 @@ export interface Hit {
   attacker: number;
   victim: number;
   move: MoveId;
+  /**
+   * `hit`: acerto normal. `grab`: agarrão (segura e depois arremessa).
+   * `counter`: o alvo estava no contra-ataque, então quem leva é quem bateu
+   * (`attacker` é quem contra-ataca).
+   */
+  kind: 'hit' | 'grab' | 'counter';
+}
+
+/** Está na janela do contra-ataque (bloco `counter`, frames ativos do especial). */
+export function isCountering(f: Fighter): boolean {
+  if (f.state !== 'attack') return false;
+  const move = currentMove(f);
+  return move?.counter !== undefined && isActiveFrame(move, moveFrame(f));
 }
 
 /**
@@ -46,11 +73,20 @@ export function findHits(fighters: readonly Fighter[]): Hit[] {
   for (const a of fighters) {
     const boxes = activeHitboxes(a);
     if (boxes.length === 0 || !a.move) continue;
+    const grab = currentMove(a)?.grab !== undefined;
     for (const v of fighters) {
       if (v === a || !canBeHit(v) || (a.moveHits & (1 << v.id)) !== 0) continue;
       const hurt = hurtbox(v);
-      if (boxes.some((b) => overlaps(b, hurt))) {
-        hits.push({ attacker: a.id, victim: v.id, move: a.move });
+      if (!boxes.some((b) => overlaps(b, hurt))) continue;
+      // Agarrão ganha do contra-ataque (não é golpe).
+      if (grab) {
+        if (v.state !== 'grabbed') {
+          hits.push({ attacker: a.id, victim: v.id, move: a.move, kind: 'grab' });
+        }
+      } else if (isCountering(v)) {
+        hits.push({ attacker: v.id, victim: a.id, move: 'special', kind: 'counter' });
+      } else {
+        hits.push({ attacker: a.id, victim: v.id, move: a.move, kind: 'hit' });
       }
     }
   }
@@ -62,7 +98,7 @@ export function findHits(fighters: readonly Fighter[]): Hit[] {
  * `(força base + dano acumulado × escala) ÷ peso`, com peso 100 = médio.
  * `damage` é o dano do alvo já somado o deste golpe.
  */
-export function knockback(move: MoveDef, damage: number, weight: number): number {
+export function knockback(move: HitProps, damage: number, weight: number): number {
   return idiv((move.baseKnockback + damage * move.knockbackScale) * 100, weight);
 }
 
@@ -85,7 +121,7 @@ export function hitstopTicks(damage: number): number {
 }
 
 /** Lado do arremesso: -1 ou 1. */
-function knockbackSide(attacker: Fighter, victim: Fighter, move: MoveDef): -1 | 1 {
+function knockbackSide(attacker: Fighter, victim: Fighter, move: HitProps): -1 | 1 {
   if (move.knockbackDir === 'away') {
     const diff = victim.x + idiv(victim.w, 2) - (attacker.x + idiv(attacker.w, 2));
     if (diff !== 0) return diff > 0 ? 1 : -1;
@@ -93,16 +129,16 @@ function knockbackSide(attacker: Fighter, victim: Fighter, move: MoveDef): -1 | 
   return attacker.facing;
 }
 
-/** Aplica um acerto: soma o dano, arremessa o alvo e marca como já acertado por este golpe. */
-export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): void {
-  const move = MOVES[moveId];
-  attacker.moveHits |= 1 << victim.id;
-  victim.damage = Math.min(victim.damage + move.damage, MAX_DAMAGE);
+/**
+ * Soma `damage` ao alvo e arremessa para o lado `side` com o ângulo e a força do
+ * acerto. Devolve os ticks de hitstop do impacto.
+ */
+export function launch(victim: Fighter, hit: HitProps, side: -1 | 1, damage: number): number {
+  victim.damage = Math.min(victim.damage + damage, MAX_DAMAGE);
 
-  const kb = knockback(move, victim.damage, victim.stats.weight);
-  const side = knockbackSide(attacker, victim, move);
-  const cos = cosDeg(move.angle);
-  const sin = sinDeg(move.angle);
+  const kb = knockback(hit, victim.damage, effectiveWeight(victim));
+  const cos = cosDeg(hit.angle);
+  const sin = sinDeg(hit.angle);
   victim.kbx = side * idiv(kb * cos, TRIG_ONE);
   victim.kby = 0 - idiv(kb * sin, TRIG_ONE);
   // Spike em quem está no chão quica para cima, mais fraco.
@@ -113,10 +149,32 @@ export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): vo
   victim.vy = 0;
   victim.facing = side === 1 ? -1 : 1;
   enterHitstun(victim, hitstunTicks(kb));
+  return hitstopTicks(damage);
+}
 
-  const stop = hitstopTicks(move.damage);
+/** Aplica um acerto: soma o dano, arremessa o alvo e marca como já acertado por este golpe. */
+export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): void {
+  const move = moveDef(attacker, moveId);
+  attacker.moveHits |= 1 << victim.id;
+  const damage = dealtDamage(attacker, move.damage);
+  const stop = launch(victim, move, knockbackSide(attacker, victim, move), damage);
   attacker.hitstop = Math.max(attacker.hitstop, stop);
   victim.hitstop = Math.max(victim.hitstop, stop);
+}
+
+/**
+ * Contra-ataque: quem bateu (`striker`) leva o acerto do bloco `counter`, e quem
+ * contra-atacou pula para o recovery do especial.
+ */
+export function applyCounter(counterer: Fighter, striker: Fighter): void {
+  const counter = moveDef(counterer, 'special').counter;
+  if (!counter) return;
+  striker.moveHits |= 1 << counterer.id;
+  const damage = dealtDamage(counterer, counter.damage);
+  const stop = launch(striker, counter, knockbackSide(counterer, striker, counter), damage);
+  counterer.hitstop = Math.max(counterer.hitstop, stop);
+  striker.hitstop = Math.max(striker.hitstop, stop);
+  skipToRecovery(counterer);
 }
 
 /** Procura e aplica os acertos do tick. */
@@ -125,7 +183,93 @@ export function resolveHits(fighters: readonly Fighter[]): Hit[] {
   for (const h of hits) {
     const attacker = fighters.find((f) => f.id === h.attacker);
     const victim = fighters.find((f) => f.id === h.victim);
-    if (attacker && victim) applyHit(attacker, victim, h.move);
+    if (!attacker || !victim) continue;
+    if (h.kind === 'counter') applyCounter(attacker, victim);
+    else if (h.kind === 'grab') startGrab(attacker, victim, h.move);
+    else applyHit(attacker, victim, h.move);
   }
   return hits;
+}
+
+/**
+ * Projéteis que encostam num lutador (que não seja o dono) acertam e somem.
+ * Só o alvo congela no impacto: quem soltou está longe. Quem está no
+ * contra-ataque devolve o projétil (vira o dono dele).
+ */
+export function resolveProjectileHits(
+  fighters: readonly Fighter[],
+  projectiles: Projectile[],
+): void {
+  let alive = 0;
+  for (const p of projectiles) {
+    const victim = fighters.find((v) => v.id !== p.owner && canBeHit(v) && overlaps(p, hurtbox(v)));
+    if (!victim) {
+      projectiles[alive++] = p;
+      continue;
+    }
+    if (isCountering(victim)) {
+      p.owner = victim.id;
+      p.vx = 0 - p.vx;
+      p.facing = p.facing === 1 ? -1 : 1;
+      skipToRecovery(victim);
+      projectiles[alive++] = p;
+      continue;
+    }
+    const stop = launch(victim, p.hit, projectileSide(p), p.hit.damage);
+    victim.hitstop = Math.max(victim.hitstop, stop);
+  }
+  projectiles.length = alive;
+}
+
+/** Agarrão pegou: `victim` fica preso na frente de `holder` até o arremesso. */
+export function startGrab(holder: Fighter, victim: Fighter, moveId: MoveId): void {
+  // Quem agarra levou golpe neste mesmo tick (troca): não agarra.
+  if (holder.state !== 'attack' || holder.move !== moveId || holder.grabTicks > 0) return;
+  const grab = moveDef(holder, moveId).grab;
+  if (!grab) return;
+  holder.moveHits |= 1 << victim.id;
+  holder.grabTicks = grab.holdTicks;
+  enterGrabbed(victim, holder.id);
+}
+
+/**
+ * Agarrões em andamento: prende o agarrado na frente de quem segura e, no fim do
+ * tempo, arremessa com o acerto do golpe. Se quem segura levar golpe ou sair de
+ * cena, o agarrado fica livre.
+ */
+export function stepGrabs(fighters: readonly Fighter[], solids: readonly Solid[]): void {
+  for (const h of fighters) {
+    if (h.grabTicks <= 0) continue;
+    const v = fighters.find((f) => f.grabbedBy === h.id && f.state === 'grabbed');
+    if (!v || h.state !== 'attack' || !h.move) {
+      h.grabTicks = 0;
+      skipToRecovery(h);
+      continue;
+    }
+    pinGrabbed(v, h, solids);
+    if (h.hitstop > 0) continue;
+    h.grabTicks--;
+    if (h.grabTicks === 0) {
+      v.grabbedBy = -1;
+      applyHit(h, v, h.move);
+      skipToRecovery(h);
+    }
+  }
+  for (const v of fighters) {
+    if (v.state !== 'grabbed') continue;
+    const h = fighters.find((f) => f.id === v.grabbedBy);
+    if (!h || h.grabTicks <= 0) releaseGrabbed(v);
+  }
+}
+
+/** Põe o agarrado colado na frente de quem segura, sem entrar em parede. */
+function pinGrabbed(v: Fighter, h: Fighter, solids: readonly Solid[]): void {
+  v.x = h.x + idiv(h.w, 2) - idiv(v.w, 2);
+  v.y = h.y + h.h - v.h;
+  v.vx = h.facing * (idiv(h.w, 2) + idiv(v.w, 2));
+  v.vy = 0;
+  moveAndCollide(v, solids, false);
+  v.vx = 0;
+  v.vy = 0;
+  v.facing = h.facing === 1 ? -1 : 1;
 }

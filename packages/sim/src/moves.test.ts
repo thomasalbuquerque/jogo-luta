@@ -7,11 +7,11 @@ import {
   selectAttack,
   selectSpecial,
   totalFrames,
-  type MoveId,
+  BASE_MOVE_IDS,
 } from './moves';
 
 const { LEFT, RIGHT, UP, DOWN } = Button;
-const ids = Object.keys(MOVES) as MoveId[];
+const ids = BASE_MOVE_IDS;
 
 describe('moves', () => {
   it.each(ids)('%s: frames e hitboxes coerentes', (id) => {
@@ -68,9 +68,12 @@ describe('moves', () => {
     expect(selectAttack(false, UP, false)).toBe('neutralAir');
   });
 
-  it('Especial + ↓ no ar é o ground pound; o resto fica para a Etapa 3', () => {
-    expect(selectSpecial(false, DOWN)).toBe('groundPound');
-    expect(selectSpecial(true, DOWN)).toBeNull();
-    expect(selectSpecial(false, 0)).toBeNull();
+  it('Especial + ↓ no ar é o ground pound; o resto é o especial, se disponível', () => {
+    expect(selectSpecial(false, DOWN, true)).toBe('groundPound');
+    expect(selectSpecial(false, DOWN, false)).toBe('groundPound');
+    expect(selectSpecial(true, DOWN, true)).toBe('special');
+    expect(selectSpecial(false, RIGHT, true)).toBe('special');
+    expect(selectSpecial(true, 0, false)).toBeNull();
+    expect(selectSpecial(false, 0, false)).toBeNull();
   });
 });

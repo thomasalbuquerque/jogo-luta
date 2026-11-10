@@ -1,8 +1,10 @@
-import { resolveHits } from './combat';
+import { BASE_CHARACTER_ID } from './characters';
+import { resolveHits, resolveProjectileHits, stepGrabs } from './combat';
 import { TICK_RATE } from './constants';
 import { createFighter, knockOut, respawn, stepFighter, type Fighter } from './fighter';
 import type { InputMask } from './input';
 import { overlaps } from './physics';
+import { stepProjectiles, type Projectile } from './projectile';
 import { TEST_STAGE, type Spawn, type Stage } from './stage';
 
 /** Ticks fora de cena depois de um KO, antes de reaparecer. */
@@ -36,6 +38,8 @@ export interface GameState {
   /** Id do vencedor quando a luta acaba; null = empate (ou luta em andamento). */
   winner: number | null;
   fighters: Fighter[];
+  /** Projéteis em voo (especiais). */
+  projectiles: Projectile[];
 }
 
 const STAGES: Record<string, Stage> = { [TEST_STAGE.id]: TEST_STAGE };
@@ -46,14 +50,19 @@ export function getStage(id: string): Stage {
   return stage;
 }
 
-export function createGame(
-  playerCount = 2,
-  stage: Stage = TEST_STAGE,
-  rules: MatchRules = DEFAULT_RULES,
-): GameState {
+export interface GameSetup {
+  /** Id da ficha de cada jogador, na ordem. Sem isso: 2 bonecos de teste. */
+  characters?: readonly string[];
+  stage?: Stage;
+  rules?: MatchRules;
+}
+
+export function createGame(setup: GameSetup = {}): GameState {
+  const { stage = TEST_STAGE, rules = DEFAULT_RULES } = setup;
+  const characters = setup.characters ?? [BASE_CHARACTER_ID, BASE_CHARACTER_ID];
   const fighters: Fighter[] = [];
-  for (let i = 0; i < playerCount; i++) {
-    const f = createFighter(i, spawnPoint(stage, i));
+  for (const [i, character] of characters.entries()) {
+    const f = createFighter(i, spawnPoint(stage, i), character);
     f.stocks = rules.stocks;
     fighters.push(f);
   }
@@ -66,6 +75,7 @@ export function createGame(
     suddenDeath: false,
     winner: null,
     fighters,
+    projectiles: [],
   };
 }
 
@@ -100,9 +110,12 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
   const stage = getStage(state.stageId);
   for (const f of state.fighters) {
     if (f.state === 'ko') stepKnockedOut(f, stage);
-    stepFighter(f, inputs[f.id] ?? 0, stage.solids);
+    stepFighter(f, inputs[f.id] ?? 0, stage.solids, state.projectiles);
   }
+  stepProjectiles(state.projectiles, stage.solids, stage.blastZone);
   resolveHits(state.fighters);
+  resolveProjectileHits(state.fighters, state.projectiles);
+  stepGrabs(state.fighters, stage.solids);
   // Saiu inteiro da blast zone = KO.
   for (const f of state.fighters) {
     if (f.state !== 'ko' && !overlaps(f, stage.blastZone)) knockOut(f, RESPAWN_DELAY_TICKS);

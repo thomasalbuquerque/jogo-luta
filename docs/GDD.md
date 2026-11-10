@@ -15,7 +15,7 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 - **Blast zones:** retângulo além das bordas da tela; sair dele inteiro = KO (inclusive cair do mapa).
 - **Respawn:** 1 s fora de cena, depois reaparece no alto do mapa com 0% e 2 s de invencibilidade. Sem stock, está fora; quando sobra 1 lutador, ele vence (se os últimos stocks caírem no mesmo tick, empate).
 - **Morte súbita:** só os empatados voltam, nos pontos de início, com 1 stock, 300% e 1 s de invencibilidade, sem limite de tempo.
-- **Revanche:** no fim da luta, Ataque, Pulo ou Enter (depois de 1 s) começa outra.
+- **Revanche:** no fim da luta, Ataque, Pulo ou Enter (depois de 1 s) começa outra com os mesmos personagens; Especial ou Esc volta para a seleção.
 - **Simulação:** 60 ticks/s, passo fixo. Todos os tempos de golpe são contados em ticks.
 
 ## Movimento
@@ -55,7 +55,7 @@ Rascunho; o remapeamento entra na Etapa 6. Gamepad (Gamepad API) é o recomendad
 
 ## Moveset base (igual para todos)
 
-Cada personagem só muda números destes golpes (dano, força, alcance, frames). Valores atuais em
+Cada personagem só muda números destes golpes (dano, força, alcance, frames) na ficha. Valores base em
 `packages/sim/src/moves.ts`.
 
 | Golpe              | Input              | Uso                                 | Frames (S/A/R)  | Dano | Ângulo    | KB base / escala |
@@ -89,38 +89,79 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames).
 
 ## Especiais e provocação
 
-- Botão **Especial**: cada personagem tem **1 especial**, que sai com Especial parado ou com qualquer direção (exceto Especial + ↓ no ar, que é o ground pound do moveset base). A direção ←/→ só vira o lutador para aquele lado.
-- O especial é montado com blocos do `sim`: projétil, investida, área, contra-ataque, buff, teleporte, agarrão.
-- **Provocação:** animação + áudio do amigo. Sem efeito de jogo (no máximo um efeito cômico pequeno).
+- Botão **Especial**: cada personagem tem **1 especial**, que sai com Especial parado ou com qualquer direção (exceto Especial + ↓ no ar, que é o ground pound do moveset base). ←/→ ao começar vira o lutador para aquele lado.
+- O especial é um golpe como os outros (startup / active / recovery), montado com **blocos** do `sim` (`packages/sim/src/character.ts`). Os instantâneos disparam no 1º frame ativo; os contínuos duram o active. Cada bloco aparece no máximo 1 vez, e só 1 bloco liga hitbox (investida, área ou agarrão).
+
+| Bloco         | Quando         | O que faz                                                                                                                                              |
+| ------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Projétil      | 1º frame ativo | Solta um projétil na frente (ângulo, velocidade, gravidade, duração). Some ao acertar, ao bater em bloco sólido ou no fim do tempo. Só o alvo congela. |
+| Investida     | active         | Avança reto com a hitbox; no ar não cai e é mais curta (`airSpeed`). No fim freia para a velocidade normal.                                            |
+| Área          | active         | Hitbox em volta do corpo; arremessa para longe do centro.                                                                                              |
+| Contra-ataque | active         | Quem acerta o lutador na janela leva o golpe do bloco; projétil volta para quem soltou. Errar deixa exposto no recovery.                               |
+| Buff          | 1º frame ativo | Por um tempo: % de dano causado, % de velocidade (chão e ar), % de peso.                                                                               |
+| Teleporte     | 1º frame ativo | Reaparece a uma distância na direção apertada (8 direções; sem direção, para a frente). Para em bloco sólido. Pode dar invencibilidade curta.          |
+| Agarrão       | active         | A hitbox segura o alvo na frente por um tempo; ←/→ escolhe o lado; depois arremessa. Ganha do contra-ataque. Quem segura levando golpe solta.          |
+
+- **Opções do especial:** recarga (`cooldownTicks`, contada do começo), 1 vez por ar (`oncePerAir`, volta como a recuperação) e ficar parado no ar no startup (`hoverStartup`).
+- **Provocação** (R / U / Y): só no chão, parado pela duração da ficha; levar golpe desfaz. Sem efeito de jogo. Mostra o bordão num balão e toca o áudio do amigo; enquanto não há áudio gravado (Etapa 5), toca uma voz provisória sintetizada a partir do bordão.
+
+## Seleção
+
+- Seletor mínimo do modo local: cada jogador escolhe com ←/→, confirma com Ataque ou Pulo e desfaz com Especial. Com os 2 prontos, a luta começa. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
+- No fim da luta: Ataque, Pulo ou Enter = revanche com os mesmos; Especial ou Esc = volta para a seleção.
 
 ## Ficha de personagem
 
-Cada personagem é um arquivo de dados validado com zod (Etapa 3). Formato previsto:
+Cada personagem é um arquivo em `packages/sim/src/characters/` (registrado em `index.ts`), validado com zod ao carregar: campo desconhecido, número fora da faixa ou cor inválida param o jogo com uma mensagem dizendo o quê. Unidades da ficha: px, px/tick, ticks e %; o que a ficha não muda vem do padrão.
 
 ```ts
-{
+export const FULANO = defineCharacter({
   id: 'fulano',
   name: 'Fulano',
+  blurb: 'Estilo de luta em 1 linha (tela de seleção).',
   colors: { primary: '#e63946', secondary: '#f1faee' },
   stats: {
-    weight: 100,          // 100 = médio; maior = voa menos
-    walkSpeed: 6,         // px/tick
-    airSpeed: 5,
-    jumpHeight: 140,      // px
+    weight: 100, // 100 = médio; maior = voa menos
+    walkSpeed: 6.5, // px/tick
+    airSpeed: 5.5,
+    jumpHeight: 175, // px (airJumpHeight: sem valor = 80% disso)
     airJumps: 1,
-    hurtbox: { w: 48, h: 96 },
+    hurtbox: { w: 48, h: 96 }, // corpo (colisão e hurtbox), px
+    // opcionais: airJumpHeight, gravity, maxFallSpeed, fastFallSpeed, dashSpeed
   },
-  moves: {                // só os ajustes; o resto vem do moveset base
-    sideLight: { damage: 9, baseKnockback: 30 },
-    sideAir: { activeTicks: 4 },
+  moves: {
+    // só os ajustes; o resto vem do moveset base
+    sideLight: { damage: 9, baseKnockback: 9.5 },
+    sideAir: { startup: 8, reach: 110 }, // startup desloca as hitboxes; reach = % do alcance
   },
   special: {
     name: 'Nome do especial',
-    blocks: [{ type: 'projectile', speed: 10, damage: 6, lifetimeTicks: 60 }],
+    startup: 10,
+    active: 1,
+    recovery: 16,
+    cooldownTicks: 40, // opcional; também oncePerAir e hoverStartup
+    blocks: [
+      {
+        type: 'projectile',
+        speed: 9.5,
+        lifetimeTicks: 60,
+        size: { w: 34, h: 22 },
+        hit: { damage: 5, angle: 25, baseKnockback: 6, knockbackScale: 0.05 },
+      },
+    ],
   },
-  taunt: { animation: 'fulano_taunt', sound: 'fulano_bordao' },
-  animations: { idle: 'fulano_idle', run: 'fulano_run' /* ... */ },
-}
+  taunt: { text: 'Bordão!', sound: 'fulano_bordao', animation: 'fulano_taunt', durationTicks: 60 },
+  animations: { idle: 'fulano_parado' }, // opcional; sem valor = '<id>_<chave>'
+});
 ```
+
+Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `baseKnockback`, `knockbackScale`, `landingLag`, `canWalk`, `reach`.
+
+### Os 2 primeiros
+
+| Personagem  | Estilo | Peso | Chão (px/tick) | Ar (px/tick) | Pulo | Pulos aéreos | Especial                                                                            |
+| ----------- | ------ | ---- | -------------- | ------------ | ---- | ------------ | ----------------------------------------------------------------------------------- |
+| Schummaki   | Rusher | 112  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 13%, 1 vez por ar, parado no ar no startup |
+| João Frango | Zoner  | 86   | 5,6            | 6,2          | 180  | 2            | **Frango assado voador** (projétil): 10 / 1 / 16, 5%, reto, ~570 px, recarga de 42  |
 
 O elenco (apelidos, traços, especial e provocação de cada um) fica em [`docs/ELENCO.md`](ELENCO.md).
