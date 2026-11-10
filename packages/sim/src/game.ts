@@ -1,3 +1,4 @@
+import { resolveHits } from './combat';
 import { createFighter, placeAtSpawn, stepFighter, type Fighter } from './fighter';
 import type { InputMask } from './input';
 import { overlaps } from './physics';
@@ -39,6 +40,7 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
       if (spawn) placeAtSpawn(f, spawn);
     }
   }
+  resolveHits(state.fighters);
   state.tick++;
 }
 

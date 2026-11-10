@@ -106,6 +106,8 @@ export type FighterState =
 export interface Fighter extends Body {
   id: number;
   stats: FighterStats;
+  /** Dano acumulado, em %. Quanto maior, mais longe voa. */
+  damage: number;
   state: FighterState;
   /** Ticks no estado atual (0 no tick em que entrou). */
   stateTicks: number;
@@ -157,6 +159,7 @@ export function createFighter(
   const f: Fighter = {
     id,
     stats,
+    damage: 0,
     x: 0,
     y: 0,
     w: stats.width,
