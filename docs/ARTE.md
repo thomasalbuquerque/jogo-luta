@@ -89,7 +89,7 @@ no esqueleto.
 
 ---
 
-## Bloco de estilo (cole no começo de toda conversa)
+## Bloco de estilo (já incluído na Mensagem 1 de cada conversa)
 
 ```text
 ART STYLE "CALÇADÃO" — locked rules for every image in this conversation:
@@ -112,8 +112,20 @@ ART STYLE "CALÇADÃO" — locked rules for every image in this conversation:
 ### Mensagem 1 (sem imagem)
 
 ```text
-[COLE AQUI O BLOCO DE ESTILO]
+[BLOCO DE ESTILO]
+ART STYLE "CALÇADÃO" — locked rules for every image in this conversation:
+- 2D cartoon art for a platform fighting game, hand-inked caricature look, as if a Brazilian beach-boardwalk caricature artist drew characters for a modern fighting game.
+- Proportions: big-head caricature, exactly 3 heads tall (head = 1/3 of total height). Compact torso, short sturdy legs, oversized hands and shoes. The whole body fits a box 1 wide by 2 tall.
+- Likeness first: keep the real person's face shape, hairline, nose, eyebrows, facial hair and eye shape from the photos, and exaggerate their 1-2 most distinctive features by about 30%. Eyes stay human-shaped, not anime.
+- Line: bold clean ink outline in dark plum-brown (#2B1A22), never pure black. Thicker on the outer silhouette, thinner on inner details, slightly tapered ends.
+- Shading: flat cel shading only: one base color + one hard-edged shadow tone tinted cool violet + one small hard highlight. No gradients, no airbrush, no texture, no noise.
+- Light: from straight above and slightly in front, so the art can be mirrored horizontally. Shadows under the chin, under the arms and on the lower part of shapes. No side lighting, no rim light.
+- Colors: saturated and warm, few colors per character (3 main colors + skin + outline). Use off-white (#F6F0E4) instead of pure white.
+- Clothing: everyday Brazilian clothes (t-shirts, zip jackets, caps, shorts, aprons, flip-flops, sneakers). No armor, no fantasy gear.
+- Readability: a strong silhouette that still reads at 100 pixels tall. No thin straps, tiny patterns or small details.
+- Never draw: text, letters, numbers, logos, brand names, watermarks, signatures, real sports team liveries.
 
+[INSTRUÇÕES]
 I'm making a 2D platform fighting game where my 16 friends are the characters. In this conversation we will create 2 reference images that will define the style for all of them. Do not generate any image yet. Reply only "OK" and summarize the style rules in 3 short lines.
 ```
 
@@ -151,13 +163,76 @@ Transparent background. No text, no numbers, no labels.
 
 ### Mensagem 1 (sem imagem)
 
-Anexe: **A1, A2 e as 2–3 fotos do amigo.** Cole o bloco de estilo e a ficha do personagem (abaixo).
+Anexe: **A1, A2 e as 2–3 fotos do amigo.** Copie a mensagem inteira do personagem. Para os próximos 14, copie uma delas e troque só o trecho entre `[FICHA DO PERSONAGEM]` e `[INSTRUÇÕES]` pela ficha do novo personagem (modelo em [Fichas dos personagens](#fichas-dos-personagens)).
+
+#### Schummaki
 
 ```text
-[COLE AQUI O BLOCO DE ESTILO]
+[BLOCO DE ESTILO]
+ART STYLE "CALÇADÃO" — locked rules for every image in this conversation:
+- 2D cartoon art for a platform fighting game, hand-inked caricature look, as if a Brazilian beach-boardwalk caricature artist drew characters for a modern fighting game.
+- Proportions: big-head caricature, exactly 3 heads tall (head = 1/3 of total height). Compact torso, short sturdy legs, oversized hands and shoes. The whole body fits a box 1 wide by 2 tall.
+- Likeness first: keep the real person's face shape, hairline, nose, eyebrows, facial hair and eye shape from the photos, and exaggerate their 1-2 most distinctive features by about 30%. Eyes stay human-shaped, not anime.
+- Line: bold clean ink outline in dark plum-brown (#2B1A22), never pure black. Thicker on the outer silhouette, thinner on inner details, slightly tapered ends.
+- Shading: flat cel shading only: one base color + one hard-edged shadow tone tinted cool violet + one small hard highlight. No gradients, no airbrush, no texture, no noise.
+- Light: from straight above and slightly in front, so the art can be mirrored horizontally. Shadows under the chin, under the arms and on the lower part of shapes. No side lighting, no rim light.
+- Colors: saturated and warm, few colors per character (3 main colors + skin + outline). Use off-white (#F6F0E4) instead of pure white.
+- Clothing: everyday Brazilian clothes (t-shirts, zip jackets, caps, shorts, aprons, flip-flops, sneakers). No armor, no fantasy gear.
+- Readability: a strong silhouette that still reads at 100 pixels tall. No thin straps, tiny patterns or small details.
+- Never draw: text, letters, numbers, logos, brand names, watermarks, signatures, real sports team liveries.
 
-[COLE AQUI A FICHA DO PERSONAGEM]
+[FICHA DO PERSONAGEM]
+CHARACTER SHEET
+Name: Schummaki — 30-year-old guy from the coast of São Paulo state (a "caiçara"), crazy about cars.
+Fighting style: rusher — fast on the ground, heavy, always charging forward. Grounded, leaning-forward posture.
+Body: based on the photos; solid, medium-heavy build.
+Outfit: generic racing-team style zip jacket in petrol blue (#1F6F78) with graphite (#3A3F47) side panels and two silver (#C9D1D9) stripes, no logos and no patches; graphite baseball cap; fingerless driving gloves in silver-gray; graphite board shorts (beach touch); chunky petrol-blue sneakers with silver soles.
+Signature details: cap, racing-style jacket, driving gloves.
+Colors: primary #1F6F78, secondary #3A3F47, accent #C9D1D9.
+Face/personality: competitive, determined grin.
+Special move: "Arrancada" — he burns rubber in place (thick tire smoke at his feet), then shoots forward like a car.
+Taunt: turns an imaginary steering wheel with both hands, making "vroom vroom", then shouts his catchphrase.
+Extra parts for C3: two hands gripping an invisible steering wheel (left and right).
+Props and effects for C4: 4 tire-smoke puffs in different sizes (light gray, inked); 2 horizontal speed-streak shapes; 1 burnt-rubber skid mark seen from the side.
+Avoid: red racing suit or red as a main color, helmets, racing numbers, names, sponsor logos, and any resemblance to a famous racing driver beyond what is in the photos.
 
+[INSTRUÇÕES]
+Attached: (1) the style anchor, for style only — do not copy its face; (2) the body template, for proportions and part layout; (3) photos of my friend, for likeness.
+Do not generate any image yet. Reply only "OK" and list the 3 most distinctive facial features you see in the photos, which you will exaggerate.
+```
+
+#### João Frango
+
+```text
+[BLOCO DE ESTILO]
+ART STYLE "CALÇADÃO" — locked rules for every image in this conversation:
+- 2D cartoon art for a platform fighting game, hand-inked caricature look, as if a Brazilian beach-boardwalk caricature artist drew characters for a modern fighting game.
+- Proportions: big-head caricature, exactly 3 heads tall (head = 1/3 of total height). Compact torso, short sturdy legs, oversized hands and shoes. The whole body fits a box 1 wide by 2 tall.
+- Likeness first: keep the real person's face shape, hairline, nose, eyebrows, facial hair and eye shape from the photos, and exaggerate their 1-2 most distinctive features by about 30%. Eyes stay human-shaped, not anime.
+- Line: bold clean ink outline in dark plum-brown (#2B1A22), never pure black. Thicker on the outer silhouette, thinner on inner details, slightly tapered ends.
+- Shading: flat cel shading only: one base color + one hard-edged shadow tone tinted cool violet + one small hard highlight. No gradients, no airbrush, no texture, no noise.
+- Light: from straight above and slightly in front, so the art can be mirrored horizontally. Shadows under the chin, under the arms and on the lower part of shapes. No side lighting, no rim light.
+- Colors: saturated and warm, few colors per character (3 main colors + skin + outline). Use off-white (#F6F0E4) instead of pure white.
+- Clothing: everyday Brazilian clothes (t-shirts, zip jackets, caps, shorts, aprons, flip-flops, sneakers). No armor, no fantasy gear.
+- Readability: a strong silhouette that still reads at 100 pixels tall. No thin straps, tiny patterns or small details.
+- Never draw: text, letters, numbers, logos, brand names, watermarks, signatures, real sports team liveries.
+
+[FICHA DO PERSONAGEM]
+CHARACTER SHEET
+Name: João Frango — 24-year-old guy from Rio de Janeiro, owns a restaurant, always sleepy because he wakes up late, always taking photos of food.
+Fighting style: zoner — light and floaty, attacks from a distance. Relaxed, loose posture.
+Body: based on the photos; light, slim build.
+Outfit: off-white chef apron (#F2EAD8) over an orange t-shirt (#F28C28); corn-yellow (#F6C945) baseball cap with a red-orange chicken comb sticking out on top; casual shorts; flip-flops.
+Signature details: the chicken comb on the cap, the apron, the sleepy eyes.
+Colors: primary #F2EAD8, secondary #F28C28, accent #F6C945.
+Face/personality: sleepy half-closed eyes, easygoing smile.
+Special move: "Frango assado voador" — he throws a whole golden roast chicken that flies straight forward.
+Taunt: cups both hands around his mouth and shouts "Ô Mariiiliaaa!".
+Extra parts for C3: two hands cupped around the mouth, as when shouting (left and right).
+Props and effects for C4: the roast chicken projectile, side view flying right, in 3 slightly different rotation frames; 3 small steam puffs; 1 short motion-trail shape behind the chicken.
+Avoid: restaurant names, text or logos on the apron or cap.
+
+[INSTRUÇÕES]
 Attached: (1) the style anchor, for style only — do not copy its face; (2) the body template, for proportions and part layout; (3) photos of my friend, for likeness.
 Do not generate any image yet. Reply only "OK" and list the 3 most distinctive facial features you see in the photos, which you will exaggerate.
 ```
@@ -222,7 +297,7 @@ Square image, transparent background outside the sticker. No text.
 
 ## Fichas dos personagens
 
-Cole a ficha inteira na Mensagem 1. Para os próximos 14, copie o modelo e preencha a partir do
+As fichas abaixo já estão coladas na Mensagem 1 de cada personagem. Para os próximos 14, copie o modelo e preencha a partir do
 `ELENCO.md` e das fotos.
 
 ### Modelo
@@ -293,8 +368,20 @@ atravessáveis flutuam acima dela. Se preferir outro tema, troque só a descriç
 Anexe: **A1.**
 
 ```text
-[COLE AQUI O BLOCO DE ESTILO]
+[BLOCO DE ESTILO]
+ART STYLE "CALÇADÃO" — locked rules for every image in this conversation:
+- 2D cartoon art for a platform fighting game, hand-inked caricature look, as if a Brazilian beach-boardwalk caricature artist drew characters for a modern fighting game.
+- Proportions: big-head caricature, exactly 3 heads tall (head = 1/3 of total height). Compact torso, short sturdy legs, oversized hands and shoes. The whole body fits a box 1 wide by 2 tall.
+- Likeness first: keep the real person's face shape, hairline, nose, eyebrows, facial hair and eye shape from the photos, and exaggerate their 1-2 most distinctive features by about 30%. Eyes stay human-shaped, not anime.
+- Line: bold clean ink outline in dark plum-brown (#2B1A22), never pure black. Thicker on the outer silhouette, thinner on inner details, slightly tapered ends.
+- Shading: flat cel shading only: one base color + one hard-edged shadow tone tinted cool violet + one small hard highlight. No gradients, no airbrush, no texture, no noise.
+- Light: from straight above and slightly in front, so the art can be mirrored horizontally. Shadows under the chin, under the arms and on the lower part of shapes. No side lighting, no rim light.
+- Colors: saturated and warm, few colors per character (3 main colors + skin + outline). Use off-white (#F6F0E4) instead of pure white.
+- Clothing: everyday Brazilian clothes (t-shirts, zip jackets, caps, shorts, aprons, flip-flops, sneakers). No armor, no fantasy gear.
+- Readability: a strong silhouette that still reads at 100 pixels tall. No thin straps, tiny patterns or small details.
+- Never draw: text, letters, numbers, logos, brand names, watermarks, signatures, real sports team liveries.
 
+[INSTRUÇÕES]
 Background rules for this conversation: backgrounds are less saturated and lighter than the characters, with thin outlines or none, flat shapes, gradients only in the sky. The fighters must always stand out against the background.
 Attached: the style anchor, for line and color reference.
 We will create the first stage of the game. Do not generate any image yet. Reply only "OK".
