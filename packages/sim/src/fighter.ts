@@ -1,10 +1,12 @@
 import { px } from './constants';
 import { axisX, axisY, Button, isHeld, isPressed, type InputMask } from './input';
 import { approach, idiv, isqrt } from './math';
-import { MOVES, selectAttack, selectSpecial, totalFrames, type MoveId } from './moves';
+import { getCharacter, BASE_CHARACTER_ID } from './characters';
+import type { Character } from './character';
+import { selectAttack, selectSpecial, totalFrames, type MoveDef, type MoveId } from './moves';
 import { moveAndCollide, touchingWall, type Body, type Solid } from './physics';
 import type { Spawn } from './stage';
-import { DEFAULT_STATS, type FighterStats } from './stats';
+import type { FighterStats } from './stats';
 
 export { DEFAULT_STATS, type FighterStats } from './stats';
 
@@ -52,6 +54,9 @@ export type FighterState =
 
 export interface Fighter extends Body {
   id: number;
+  /** Id da ficha do personagem: golpes e especial vêm dela (`getCharacter`). */
+  character: string;
+  /** Copiados da ficha ao criar o lutador. */
   stats: FighterStats;
   /** Dano acumulado, em %. Quanto maior, mais longe voa. */
   damage: number;
@@ -112,10 +117,12 @@ export function jumpVelocity(gravity: number, height: number): number {
 export function createFighter(
   id: number,
   spawn: Spawn,
-  stats: FighterStats = DEFAULT_STATS,
+  character: string = BASE_CHARACTER_ID,
 ): Fighter {
+  const stats = getCharacter(character).stats;
   const f: Fighter = {
     id,
+    character,
     stats,
     damage: 0,
     stocks: 1,
@@ -218,6 +225,24 @@ export function moveFrame(f: Fighter): number {
   return f.stateTicks + 1;
 }
 
+/** Ficha do personagem do lutador. */
+export function characterOf(f: Pick<Fighter, 'character'>): Character {
+  return getCharacter(f.character);
+}
+
+/** Um golpe do lutador: o do moveset base ajustado pela ficha, ou o especial. */
+export function moveDef(f: Pick<Fighter, 'character'>, id: MoveId): MoveDef {
+  const c = characterOf(f);
+  if (id !== 'special') return c.moves[id];
+  if (!c.special) throw new Error(`${c.id} não tem especial`);
+  return c.special.move;
+}
+
+/** Golpe em andamento, se houver. */
+export function currentMove(f: Fighter): MoveDef | null {
+  return f.move ? moveDef(f, f.move) : null;
+}
+
 // ---------------------------------------------------------------------------
 // Ações
 
@@ -276,7 +301,7 @@ function tryJump(f: Fighter, input: InputMask): boolean {
 
 /** Começa um golpe do moveset e já aplica o frame 1. */
 export function startMove(f: Fighter, id: MoveId, input: InputMask): void {
-  const move = MOVES[id];
+  const move = moveDef(f, id);
   f.move = id;
   f.moveHits = 0;
   f.attackBufferTicks = 0;
@@ -297,7 +322,7 @@ function tryAttack(f: Fighter, input: InputMask): boolean {
     return true;
   }
   if (f.specialBufferTicks > 0) {
-    const special = selectSpecial(f.grounded, input);
+    const special = selectSpecial(f.grounded, input, characterOf(f).special !== null);
     if (special) {
       startMove(f, special, input);
       return true;
@@ -398,7 +423,7 @@ function stepAirDodge(f: Fighter): void {
 
 /** Golpe: segue os frames do moveset; no ar dá para mirar, mas não virar. */
 function stepAttack(f: Fighter, input: InputMask, prev: InputMask): void {
-  const move = f.move ? MOVES[f.move] : null;
+  const move = currentMove(f);
   if (!move || moveFrame(f) > totalFrames(move)) {
     finishAction(f, input, prev);
     return;
@@ -412,7 +437,7 @@ function stepAttack(f: Fighter, input: InputMask, prev: InputMask): void {
 /** Efeitos de movimento do frame atual do golpe (impulso, ground pound). */
 function moveFrameEffects(f: Fighter): void {
   if (!f.move) return;
-  const move = MOVES[f.move];
+  const move = moveDef(f, f.move);
   const frame = moveFrame(f);
   if (move.impulse?.frame === frame) {
     if (move.impulse.x !== undefined) f.vx = f.facing * move.impulse.x;
@@ -547,7 +572,7 @@ function grabLedge(f: Fighter, cornerX: number, cornerY: number, facing: -1 | 1)
 /** Golpe que controla a própria velocidade vertical neste frame (sem gravidade). */
 function moveOverridesGravity(f: Fighter): boolean {
   if (f.state !== 'attack' || !f.move) return false;
-  const move = MOVES[f.move];
+  const move = moveDef(f, f.move);
   const frame = moveFrame(f);
   if (move.hoverStartup && frame <= move.startup) return true;
   return (
@@ -572,7 +597,7 @@ function applyGravity(f: Fighter, input: InputMask): void {
 /** Pousou neste tick: aéreo vira landing lag (ou o golpe de pouso, no ground pound). */
 function onLand(f: Fighter, input: InputMask): void {
   if (f.state !== 'attack' || !f.move) return;
-  const move = MOVES[f.move];
+  const move = moveDef(f, f.move);
   if (!move.aerial) return;
   if (move.landMove) {
     startMove(f, move.landMove, input);

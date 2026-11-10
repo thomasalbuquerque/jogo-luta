@@ -1,14 +1,21 @@
 import { SUBPX } from './constants';
-import { enterHitstun, KNOCKBACK_DECAY, moveFrame, type Fighter } from './fighter';
+import {
+  currentMove,
+  enterHitstun,
+  KNOCKBACK_DECAY,
+  moveDef,
+  moveFrame,
+  type Fighter,
+} from './fighter';
 import { idiv } from './math';
-import { hitboxesAt, MOVES, type MoveDef, type MoveId } from './moves';
+import { hitboxesAt, type HitProps, type MoveId } from './moves';
 import { overlaps, type Box } from './physics';
 import { cosDeg, sinDeg, TRIG_ONE } from './trig';
 
 /** Dano máximo mostrado/guardado, em %. */
 export const MAX_DAMAGE = 999;
 
-/** Caixa que recebe golpes. Por enquanto é o próprio corpo; na Etapa 3 vem da ficha. */
+/** Caixa que recebe golpes: o corpo, com o tamanho da ficha (`stats.hurtbox`). */
 export function hurtbox(f: Fighter): Box {
   return { x: f.x, y: f.y, w: f.w, h: f.h };
 }
@@ -20,10 +27,11 @@ export function canBeHit(f: Fighter): boolean {
 
 /** Hitboxes ligadas neste tick, em coordenadas do mundo (subpx). */
 export function activeHitboxes(f: Fighter): Box[] {
-  if (f.state !== 'attack' || !f.move) return [];
+  const move = f.state === 'attack' ? currentMove(f) : null;
+  if (!move) return [];
   const cx = f.x + idiv(f.w, 2);
   const cy = f.y + idiv(f.h, 2);
-  return hitboxesAt(MOVES[f.move], moveFrame(f)).map((b) => ({
+  return hitboxesAt(move, moveFrame(f)).map((b) => ({
     x: cx + f.facing * b.x - idiv(b.w, 2),
     y: cy + b.y - idiv(b.h, 2),
     w: b.w,
@@ -62,7 +70,7 @@ export function findHits(fighters: readonly Fighter[]): Hit[] {
  * `(força base + dano acumulado × escala) ÷ peso`, com peso 100 = médio.
  * `damage` é o dano do alvo já somado o deste golpe.
  */
-export function knockback(move: MoveDef, damage: number, weight: number): number {
+export function knockback(move: HitProps, damage: number, weight: number): number {
   return idiv((move.baseKnockback + damage * move.knockbackScale) * 100, weight);
 }
 
@@ -85,7 +93,7 @@ export function hitstopTicks(damage: number): number {
 }
 
 /** Lado do arremesso: -1 ou 1. */
-function knockbackSide(attacker: Fighter, victim: Fighter, move: MoveDef): -1 | 1 {
+function knockbackSide(attacker: Fighter, victim: Fighter, move: HitProps): -1 | 1 {
   if (move.knockbackDir === 'away') {
     const diff = victim.x + idiv(victim.w, 2) - (attacker.x + idiv(attacker.w, 2));
     if (diff !== 0) return diff > 0 ? 1 : -1;
@@ -95,7 +103,7 @@ function knockbackSide(attacker: Fighter, victim: Fighter, move: MoveDef): -1 | 
 
 /** Aplica um acerto: soma o dano, arremessa o alvo e marca como já acertado por este golpe. */
 export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): void {
-  const move = MOVES[moveId];
+  const move = moveDef(attacker, moveId);
   attacker.moveHits |= 1 << victim.id;
   victim.damage = Math.min(victim.damage + move.damage, MAX_DAMAGE);
 
