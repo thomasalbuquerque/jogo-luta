@@ -11,7 +11,7 @@ export const P1_KEYS: KeyBindings = {
   JUMP: ['Space'],
   ATTACK: ['KeyV'],
   SPECIAL: ['KeyB'],
-  DODGE: ['KeyF'],
+  DODGE: ['ShiftLeft'],
   TAUNT: ['KeyR'],
 };
 
