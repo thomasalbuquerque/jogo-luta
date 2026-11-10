@@ -50,13 +50,13 @@ Objetivo: projeto configurado, regras do jogo escritas e um link público funcio
 
 Objetivo: dois retângulos se movendo pelo mapa com sensação boa de controle.
 
-- [ ] Loop de simulação em passo fixo (60 ticks/s) com acumulador, separado do loop de renderização do Phaser.
-- [ ] Camada de input: teclado e gamepad (Gamepad API) viram uma bitmask de botões por tick. Dois jogadores no mesmo teclado.
-- [ ] Física própria com caixas (AABB): gravidade, velocidade, colisão com chão e paredes.
-- [ ] Mapa de teste: plataforma principal + 2 plataformas atravessáveis (descer com ↓).
-- [ ] Movimentos: andar, pulo, pulo duplo, wall jump, dodge/dash, fast fall.
-- [ ] Câmera que enquadra os dois jogadores com zoom dinâmico.
-- [ ] Overlay de debug: FPS, tick atual, estado e velocidade de cada jogador.
+- [x] Loop de simulação em passo fixo (60 ticks/s) com acumulador, separado do loop de renderização do Phaser.
+- [x] Camada de input: teclado e gamepad (Gamepad API) viram uma bitmask de botões por tick. Dois jogadores no mesmo teclado.
+- [x] Física própria com caixas (AABB): gravidade, velocidade, colisão com chão e paredes.
+- [x] Mapa de teste: plataforma principal + 2 plataformas atravessáveis (descer com ↓).
+- [x] Movimentos: andar, pulo, pulo duplo, wall jump, dodge/dash, fast fall.
+- [x] Câmera que enquadra os dois jogadores com zoom dinâmico.
+- [x] Overlay de debug: FPS, tick atual, estado e velocidade de cada jogador.
 
 **Pronto quando:** só ficar pulando pelo mapa já é gostoso.
 
