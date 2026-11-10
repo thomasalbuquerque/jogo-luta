@@ -1,5 +1,7 @@
 import type { Character } from '../character';
 import { BASE } from './base';
+import { JOAO_FRANGO } from './joao-frango';
+import { SCHUMMAKI } from './schummaki';
 
 const REGISTRY = new Map<string, Character>();
 
@@ -8,13 +10,13 @@ export function registerCharacter(c: Character): void {
   REGISTRY.set(c.id, c);
 }
 
-for (const c of [BASE]) registerCharacter(c);
+for (const c of [BASE, SCHUMMAKI, JOAO_FRANGO]) registerCharacter(c);
 
 /** Personagem usado quando nenhum é escolhido (e nos testes). */
 export const BASE_CHARACTER_ID = BASE.id;
 
 /** Personagens da tela de seleção, na ordem. */
-export const PLAYABLE_CHARACTERS: readonly string[] = [];
+export const PLAYABLE_CHARACTERS: readonly string[] = [SCHUMMAKI.id, JOAO_FRANGO.id];
 
 export function hasCharacter(id: string): boolean {
   return REGISTRY.has(id);
