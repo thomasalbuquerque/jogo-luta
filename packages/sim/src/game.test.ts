@@ -8,6 +8,7 @@ import {
   DEFAULT_RULES,
   RESPAWN_DELAY_TICKS,
   RESPAWN_INVULN_TICKS,
+  SUDDEN_DEATH_DAMAGE,
   stepGame,
   type GameState,
 } from './game';
@@ -76,7 +77,7 @@ describe('game', () => {
   });
 
   it('em KO não leva golpe; sem stock, não volta mais', () => {
-    const g = createGame(2, TEST_STAGE, { stocks: 1 });
+    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
     const f = fighter(g, 0);
     f.x = px(2000);
     stepGame(g, [0, 0]);
@@ -133,7 +134,9 @@ describe('game', () => {
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
     // tudo inteiro: nada de fração no estado
     for (const f of a.fighters) {
-      for (const v of [f.x, f.y, f.vx, f.vy]) expect(Number.isInteger(v)).toBe(true);
+      for (const v of [f.x, f.y, f.vx, f.vy, f.kbx, f.kby, f.damage]) {
+        expect(Number.isInteger(v)).toBe(true);
+      }
     }
   });
 
@@ -143,5 +146,80 @@ describe('game', () => {
     stepGame(g, [Button.RIGHT, 0]);
     expect(snap.tick).toBe(0);
     expect(snap.fighters[0]?.x).not.toBe(g.fighters[0]?.x);
+  });
+});
+
+/** Tira o lutador da blast zone (KO no próximo tick). */
+function throwOut(f: Fighter): void {
+  f.x = px(5000);
+}
+
+describe('fim da partida', () => {
+  it('perder o último stock acaba a luta; o outro vence', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    throwOut(fighter(g, 0));
+    stepGame(g, [0, 0]);
+    expect(g.phase).toBe('over');
+    expect(g.winner).toBe(1);
+  });
+
+  it('com a luta acabada, nada mais se mexe', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    throwOut(fighter(g, 1));
+    stepGame(g, [0, 0]);
+    const snap = JSON.stringify(g.fighters);
+    for (let i = 0; i < 30; i++) stepGame(g, [Button.RIGHT | Button.JUMP, Button.ATTACK]);
+    expect(JSON.stringify(g.fighters)).toBe(snap);
+    expect(g.tick).toBe(31);
+  });
+
+  it('os dois perdem o último stock no mesmo tick: empate', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 1, timeLimitTicks: 0 });
+    throwOut(fighter(g, 0));
+    throwOut(fighter(g, 1));
+    stepGame(g, [0, 0]);
+    expect(g.phase).toBe('over');
+    expect(g.winner).toBeNull();
+  });
+
+  it('o relógio desconta 1 por tick', () => {
+    const g = createGame();
+    expect(g.timeLeft).toBe(DEFAULT_RULES.timeLimitTicks);
+    for (let i = 0; i < 10; i++) stepGame(g, [0, 0]);
+    expect(g.timeLeft).toBe(DEFAULT_RULES.timeLimitTicks - 10);
+  });
+
+  it('fim do tempo: vence quem tem mais stocks', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 3, timeLimitTicks: 5 });
+    fighter(g, 0).stocks = 2;
+    fighter(g, 1).damage = 150;
+    for (let i = 0; i < 5; i++) stepGame(g, [0, 0]);
+    expect(g.phase).toBe('over');
+    expect(g.winner).toBe(1);
+  });
+
+  it('fim do tempo com stocks iguais: vence quem tem menos %', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 3, timeLimitTicks: 5 });
+    fighter(g, 0).damage = 40;
+    fighter(g, 1).damage = 41;
+    for (let i = 0; i < 5; i++) stepGame(g, [0, 0]);
+    expect(g.winner).toBe(0);
+  });
+
+  it('empate total: morte súbita com 1 stock e 300%, e o próximo KO decide', () => {
+    const g = createGame(2, TEST_STAGE, { stocks: 3, timeLimitTicks: 5 });
+    for (let i = 0; i < 5; i++) stepGame(g, [0, 0]);
+    expect(g.phase).toBe('fight');
+    expect(g.suddenDeath).toBe(true);
+    for (const f of g.fighters) {
+      expect(f.stocks).toBe(1);
+      expect(f.damage).toBe(SUDDEN_DEATH_DAMAGE);
+    }
+    for (let i = 0; i < 100; i++) stepGame(g, [0, 0]);
+    expect(g.phase).toBe('fight'); // sem limite de tempo na morte súbita
+    throwOut(fighter(g, 1));
+    stepGame(g, [0, 0]);
+    expect(g.phase).toBe('over');
+    expect(g.winner).toBe(0);
   });
 });
