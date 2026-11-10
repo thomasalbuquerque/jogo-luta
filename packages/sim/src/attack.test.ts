@@ -40,12 +40,13 @@ describe('ataques', () => {
     expect(f.move).toBeNull();
   });
 
-  it('não anda nem vira durante golpe no chão', () => {
+  it('anda durante golpe no chão, mas não vira', () => {
     const f = onGround();
     run(f, ATTACK);
     run(f, LEFT, 5);
     expect(f.facing).toBe(1);
-    expect(f.vx).toBe(0);
+    expect(f.vx).toBeLessThan(0);
+    expect(f.state).toBe('attack');
   });
 
   it('leve lado vira para o lado apertado e avança', () => {
