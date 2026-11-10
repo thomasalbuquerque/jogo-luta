@@ -66,8 +66,8 @@ Cada golpe é definido em ticks: **startup** (preparação) → **active** (hitb
 
 ## Especiais e provocação
 
-- Botão **Especial**: cada personagem tem 1–2 especiais — **neutro** (obrigatório, Especial parado ou + ↑) e **lado** (opcional, Especial + ←/→; se não houver, vira o neutro).
-- Especiais são montados com blocos do `sim`: projétil, investida, área, contra-ataque, buff, teleporte, agarrão.
+- Botão **Especial**: cada personagem tem **1 especial**, que sai com Especial parado ou com qualquer direção (exceto Especial + ↓ no ar, que é o ground pound do moveset base). A direção ←/→ só vira o lutador para aquele lado.
+- O especial é montado com blocos do `sim`: projétil, investida, área, contra-ataque, buff, teleporte, agarrão.
 - **Provocação:** animação + áudio do amigo. Sem efeito de jogo (no máximo um efeito cômico pequeno).
 
 ## Ficha de personagem
@@ -91,13 +91,13 @@ Cada personagem é um arquivo de dados validado com zod (Etapa 3). Formato previ
     sideLight: { damage: 9, baseKnockback: 30 },
     sideAir: { activeTicks: 4 },
   },
-  specials: {
-    neutral: { blocks: [{ type: 'projectile', speed: 10, damage: 6, lifetimeTicks: 60 }] },
-    side: { blocks: [{ type: 'dash', distance: 220, damage: 10 }] },
+  special: {
+    name: 'Nome do especial',
+    blocks: [{ type: 'projectile', speed: 10, damage: 6, lifetimeTicks: 60 }],
   },
   taunt: { animation: 'fulano_taunt', sound: 'fulano_bordao' },
   animations: { idle: 'fulano_idle', run: 'fulano_run' /* ... */ },
 }
 ```
 
-O elenco (apelidos, traços, ideias de especial) fica em [`docs/ELENCO.md`](ELENCO.md).
+O elenco (apelidos, traços, especial e provocação de cada um) fica em [`docs/ELENCO.md`](ELENCO.md).
