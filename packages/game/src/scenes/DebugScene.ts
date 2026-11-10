@@ -1,5 +1,14 @@
 import Phaser from 'phaser';
-import { Button, moveFrame, toPx, type ButtonName, type Fighter } from '@jogo-luta/sim';
+import {
+  animationId,
+  Button,
+  getCharacter,
+  moveFrame,
+  toPx,
+  type ButtonName,
+  type Fighter,
+} from '@jogo-luta/sim';
+import { animationKey } from '../render/fighterLook';
 import { DEBUG_KEY, type FightScene } from './FightScene';
 
 const BUTTON_LABELS: Record<ButtonName, string> = {
@@ -72,13 +81,18 @@ export class DebugScene extends Phaser.Scene {
           f.recoveryUsed ? 'sem recup.' : '',
           f.airDodgeUsed ? 'sem dodge' : '',
           f.hitstop > 0 ? `hitstop ${String(f.hitstop)}` : '',
+          f.specialCooldown > 0 ? `recarga ${String(f.specialCooldown)}` : '',
+          f.buffTicks > 0 ? `buff ${String(f.buffTicks)}` : '',
+          f.grabTicks > 0 ? `segurando ${String(f.grabTicks)}` : '',
         ]
           .filter(Boolean)
           .join(' ');
-        return `P${String(f.id + 1)} ${stateLabel(f).padEnd(18)} vx ${vx} vy ${vy}  ${flags}  [${inputLabel(fight.lastInputs[f.id] ?? 0)}]`;
+        const c = getCharacter(f.character);
+        const anim = animationId(c, animationKey(f));
+        return `P${String(f.id + 1)} ${c.name.padEnd(12)} ${stateLabel(f).padEnd(18)} ${anim.padEnd(26)} vx ${vx} vy ${vy}  ${flags}  [${inputLabel(fight.lastInputs[f.id] ?? 0)}]`;
       }),
-      'P1: WASD, Espaço pula, V ataque, B especial, Shift esq. esquiva',
-      'P2: setas, J pula, K ataque, L especial, I esquiva     ` debug',
+      'P1: WASD, Espaço pula, V ataque, B especial, Shift esq. esquiva, R provoca',
+      'P2: setas, J pula, K ataque, L especial, I esquiva, U provoca     ` debug',
     ];
     this.text.setText(lines);
   }
