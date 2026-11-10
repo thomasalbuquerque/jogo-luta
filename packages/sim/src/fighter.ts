@@ -87,6 +87,11 @@ export const LEDGE_MIN_TICKS = 6;
 /** Ticks sem poder agarrar de novo depois de soltar ou pular da borda. */
 export const LEDGE_REGRAB_TICKS = 30;
 
+/** Quanto o knockback perde por tick, ao longo da direção do arremesso (subpx/tick). */
+export const KNOCKBACK_DECAY = px(0.5);
+/** Freio horizontal mínimo do knockback deslizando no chão. */
+export const KNOCKBACK_GROUND_DECAY = px(1.5);
+
 /**
  * Estados do lutador. Os "livres" (idle, run, jump, fall, wallslide) saem da
  * física; os outros têm regras próprias e duração.
@@ -140,6 +145,11 @@ export interface Fighter extends Body {
   move: MoveId | null;
   /** Bitmask dos ids já acertados pelo golpe atual: cada golpe acerta cada alvo 1 vez. */
   moveHits: number;
+  /** Velocidade do arremesso (knockback), somada à do lutador; freia `kbDecay` por tick. */
+  kbx: number;
+  kby: number;
+  kbDecayX: number;
+  kbDecayY: number;
   /** Quina agarrada (estado `ledge`), em subpx. */
   ledgeX: number;
   ledgeY: number;
@@ -190,6 +200,10 @@ export function createFighter(
     dodgeDirY: 0,
     move: null,
     moveHits: 0,
+    kbx: 0,
+    kby: 0,
+    kbDecayX: 0,
+    kbDecayY: 0,
     ledgeX: 0,
     ledgeY: 0,
     ledgeCooldown: 0,
@@ -205,6 +219,8 @@ export function placeAtSpawn(f: Fighter, spawn: Spawn): void {
   f.y = spawn.y - f.h;
   f.vx = 0;
   f.vy = 0;
+  f.kbx = 0;
+  f.kby = 0;
   f.facing = spawn.x > 0 ? -1 : 1;
   f.grounded = false;
   f.onPlatform = false;
@@ -501,7 +517,7 @@ function stepLedge(f: Fighter, input: InputMask): void {
  * na altura certa. Segurar ↓ não agarra.
  */
 function tryGrabLedge(f: Fighter, input: InputMask, solids: readonly Solid[]): void {
-  if (!isFree(f) || f.grounded || f.ledgeCooldown > 0 || f.vy < 0) return;
+  if (!isFree(f) || f.grounded || f.ledgeCooldown > 0 || f.vy + f.kby < 0) return;
   if (isHeld(input, Button.DOWN)) return;
   for (const s of solids) {
     if (s.kind !== 'solid') continue;
@@ -633,8 +649,25 @@ export function stepFighter(f: Fighter, input: InputMask, solids: readonly Solid
 function integrate(f: Fighter, input: InputMask, solids: readonly Solid[]): void {
   const wasGrounded = f.grounded;
   if (f.state !== 'dodge' && !moveOverridesGravity(f)) applyGravity(f, input);
+  decayKnockback(f, wasGrounded);
 
+  // O knockback soma com a velocidade do próprio lutador, mas é freado à parte:
+  // pular ou dar dodge depois do hitstun não cancela o arremesso.
+  const ownVx = f.vx;
+  const ownVy = f.vy;
+  f.vx += f.kbx;
+  f.vy += f.kby;
   const result = moveAndCollide(f, solids, f.dropTicks > 0);
+  f.vx = ownVx;
+  f.vy = ownVy;
+  if (result.hitWall !== 0) {
+    f.vx = 0;
+    f.kbx = 0;
+  }
+  if (result.landed || result.hitCeiling) {
+    f.vy = 0;
+    f.kby = 0;
+  }
   if (result.hitCeiling) f.canCutJump = false;
 
   f.grounded = result.landed;
@@ -661,6 +694,15 @@ function updateState(f: Fighter, input: InputMask): void {
   } else if (f.wallDir !== 0 && axisX(input) === f.wallDir && f.vy > 0) {
     setState(f, 'wallslide');
   } else {
-    setState(f, f.vy < 0 ? 'jump' : 'fall');
+    setState(f, f.vy + f.kby < 0 ? 'jump' : 'fall');
   }
+}
+
+/** Freia o knockback; no chão ele morre mais rápido (atrito). */
+function decayKnockback(f: Fighter, grounded: boolean): void {
+  if (f.kbx !== 0) {
+    const decay = grounded ? Math.max(f.kbDecayX, KNOCKBACK_GROUND_DECAY) : f.kbDecayX;
+    f.kbx = approach(f.kbx, 0, decay);
+  }
+  if (f.kby !== 0) f.kby = approach(f.kby, 0, f.kbDecayY);
 }

@@ -1,7 +1,8 @@
-import { moveFrame, type Fighter } from './fighter';
+import { KNOCKBACK_DECAY, moveFrame, type Fighter } from './fighter';
 import { idiv } from './math';
-import { hitboxesAt, MOVES, type MoveId } from './moves';
+import { hitboxesAt, MOVES, type MoveDef, type MoveId } from './moves';
 import { overlaps, type Box } from './physics';
+import { cosDeg, sinDeg, TRIG_ONE } from './trig';
 
 /** Dano máximo mostrado/guardado, em %. */
 export const MAX_DAMAGE = 999;
@@ -55,11 +56,44 @@ export function findHits(fighters: readonly Fighter[]): Hit[] {
   return hits;
 }
 
-/** Aplica um acerto: soma o dano e marca o alvo como já acertado por este golpe. */
+/**
+ * Força do arremesso, em subpx/tick (GDD):
+ * `(força base + dano acumulado × escala) ÷ peso`, com peso 100 = médio.
+ * `damage` é o dano do alvo já somado o deste golpe.
+ */
+export function knockback(move: MoveDef, damage: number, weight: number): number {
+  return idiv((move.baseKnockback + damage * move.knockbackScale) * 100, weight);
+}
+
+/** Lado do arremesso: -1 ou 1. */
+function knockbackSide(attacker: Fighter, victim: Fighter, move: MoveDef): -1 | 1 {
+  if (move.knockbackDir === 'away') {
+    const diff = victim.x + idiv(victim.w, 2) - (attacker.x + idiv(attacker.w, 2));
+    if (diff !== 0) return diff > 0 ? 1 : -1;
+  }
+  return attacker.facing;
+}
+
+/** Aplica um acerto: soma o dano, arremessa o alvo e marca como já acertado por este golpe. */
 export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): void {
   const move = MOVES[moveId];
   attacker.moveHits |= 1 << victim.id;
   victim.damage = Math.min(victim.damage + move.damage, MAX_DAMAGE);
+
+  const kb = knockback(move, victim.damage, victim.stats.weight);
+  const side = knockbackSide(attacker, victim, move);
+  const cos = cosDeg(move.angle);
+  const sin = sinDeg(move.angle);
+  victim.kbx = side * idiv(kb * cos, TRIG_ONE);
+  victim.kby = 0 - idiv(kb * sin, TRIG_ONE);
+  // Spike em quem está no chão quica para cima, mais fraco.
+  if (victim.grounded && victim.kby > 0) victim.kby = 0 - idiv(victim.kby, 2);
+  victim.kbDecayX = Math.max(1, idiv(KNOCKBACK_DECAY * Math.abs(cos), TRIG_ONE));
+  victim.kbDecayY = Math.max(1, idiv(KNOCKBACK_DECAY * Math.abs(sin), TRIG_ONE));
+  victim.vx = 0;
+  victim.vy = 0;
+  victim.fastFalling = false;
+  victim.facing = side === 1 ? -1 : 1;
 }
 
 /** Procura e aplica os acertos do tick. */

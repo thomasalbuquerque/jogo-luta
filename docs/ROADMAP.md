@@ -67,7 +67,7 @@ Objetivo: uma luta 1x1 de retângulos com começo, meio e fim.
 - [ ] Máquina de estados do lutador: idle, run, jump, fall, attack, hitstun, dodge, ledge, KO.
 - [x] Ataques definidos por frames: startup, active e recovery, com hitboxes por frame.
 - [x] Hurtbox por lutador e detecção hitbox × hurtbox.
-- [ ] Dano em % e knockback que cresce com o %: força base + (dano acumulado × escala), dividido pelo peso.
+- [x] Dano em % e knockback que cresce com o %: força base + (dano acumulado × escala), dividido pelo peso.
 - [ ] Hitstun e hitstop (congelamento curto no impacto).
 - [ ] Blast zones: saiu da tela = KO. Stocks e respawn com invencibilidade.
 - [ ] Moveset base: 3 leves no chão (neutro, lado, baixo), 3 aéreos (neutro, lado, baixo), golpe de recuperação para cima e ground pound. O botão Especial fica reservado para o especial de cada personagem (e o ground pound).
