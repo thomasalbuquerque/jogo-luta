@@ -34,6 +34,8 @@ export class HudScene extends Phaser.Scene {
   private panels: Panel[] = [];
   private clock!: Phaser.GameObjects.Text;
   private countdown!: Phaser.GameObjects.Text;
+  private replayTag!: Phaser.GameObjects.Text;
+  private replayMs = 0;
   private koBursts!: KoBurstLayer;
   /** Último % mostrado e tamanho atual do texto, por jogador. */
   private shownDamage: number[] = [];
@@ -75,6 +77,17 @@ export class HudScene extends Phaser.Scene {
     })
       .setOrigin(1, 0)
       .setAlpha(0.75);
+    // assistindo a um replay: etiqueta piscando embaixo do relógio
+    this.replayTag = uiText(this, width / 2, 56, '● REPLAY', {
+      fontFamily: UI.titleFont,
+      fontSize: '22px',
+      color: '#ff5a3c',
+      stroke: '#0b0e16',
+      strokeThickness: 6,
+    })
+      .setOrigin(0.5, 0)
+      .setVisible(false);
+    this.replayMs = 0;
     this.countdown = uiText(this, width / 2, height / 2 - 40, '', {
       fontFamily: UI.titleFont,
       fontSize: '150px',
@@ -173,6 +186,10 @@ export class HudScene extends Phaser.Scene {
       this.clock.setText(state.rules.timeLimitTicks > 0 ? formatClock(state.timeLeft) : '');
     }
     this.updateCountdown(delta);
+    this.replayMs += delta;
+    this.replayTag
+      .setVisible(this.fight.playback !== null)
+      .setAlpha(this.replayMs % 1200 < 800 ? 1 : 0.35);
   }
 
   /** "3, 2, 1" enquanto o sim conta, e "LUTA!" quando a luta começa. */
