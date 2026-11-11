@@ -753,10 +753,24 @@ Nomes das peças: `torso`, `hips`, `upperArm`, `forearm`, `thigh`, `shin`, `foot
 `portrait` e os efeitos `fx_*`. Uma peça com `2` no fim (`thigh2`, `hand_taunt2`) é a versão do
 lado de trás; sem ela, os dois lados usam a mesma.
 
-**Regra das juntas.** Em cada junta, uma peça fica na frente e a outra atrás (a manga na frente do
-antebraço, o short na frente da coxa, o tênis na frente da canela). O toco da peça da frente é
-apagado; o da peça de trás fica, escondido, e só aparece para tapar a fresta quando o membro dobra.
-Os pontos vão na linha onde o toco encontra a peça, não no meio do toco.
+**Todas as peças viradas para a direita.** O gerador costuma desenhar os pares espelhados (uma
+coxa e uma canela de cada lado, como vistas de frente). Use só a peça com o joelho na frente (à
+direita) e a panturrilha atrás, para as duas pernas; a outra fica fora do manifesto. O jogo
+escurece sozinho o braço e a perna de trás, e espelha tudo quando o personagem vira.
+
+**Regra das juntas.** Em cada junta, uma peça fica na frente e a outra atrás: a manga na frente
+do antebraço, o short na frente da coxa, a coxa na frente da canela, o pé na frente da canela, a
+mão na frente do antebraço.
+
+- **Peça da frente:** o toco é apagado junto com a linha do anel. Ela termina num corte limpo, sem
+  contorno, e a junta (`tip` dela, `pivot` do filho) fica uns 12 px da folha acima do corte. Assim
+  ela cobre o começo da peça de trás. Manga e barra do short são exceção: o contorno faz parte da
+  roupa.
+- **Peça de trás:** o `pivot` fica uns 12 px abaixo do anel, para o anel ficar escondido. O toco
+  continua lá, pintado da cor da pele com `paint`, e tapa a fresta quando o membro dobra, sem
+  aparecer vermelho.
+- Na ponta que entra em outra peça (canela dentro do tênis), o toco de baixo é apagado e a canela
+  passa uns pixels para dentro.
 
 ### 2. Esqueleto e animação: `packages/game/src/rig`
 
