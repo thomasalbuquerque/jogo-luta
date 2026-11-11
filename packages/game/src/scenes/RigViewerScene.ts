@@ -45,7 +45,9 @@ export class RigViewerScene extends Phaser.Scene {
   private label!: Phaser.GameObjects.Text;
   private stripLabels: Phaser.GameObjects.Text[] = [];
   private showBoxes = true;
-  private zoom = LIVE_ZOOM;
+  zoom = LIVE_ZOOM;
+  /** Centro da câmera no modo ao vivo (para olhar um detalhe de perto, pelo console). */
+  focus = { x: 0, y: -60 };
 
   constructor() {
     super('rig-viewer');
@@ -124,7 +126,7 @@ export class RigViewerScene extends Phaser.Scene {
       cam.centerOn(0, -55);
     } else {
       cam.setZoom(this.zoom);
-      cam.centerOn(0, -60);
+      cam.centerOn(this.focus.x, this.focus.y);
     }
     g.lineStyle(1, 0xffffff, 0.4);
     g.lineBetween(-STRIP * STRIP_GAP, 0, STRIP * STRIP_GAP, 0);
