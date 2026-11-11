@@ -6,12 +6,14 @@ import {
   finishReplay,
   FixedStepLoop,
   getStage,
+  hashState,
   hurtbox,
   InputDelay,
   isActiveFrame,
   isCountering,
   MATCH_RULES,
   moveFrame,
+  NO_INPUT,
   PLAYABLE_CHARACTERS,
   recordInputs,
   replayGame,
@@ -40,6 +42,9 @@ import { InputManager } from '../input/InputManager';
 import { Menu, type MenuMask } from '../input/menu';
 import { newSeed } from '../match/replayFile';
 import { createStats, recordEvents, type MatchStats } from '../match/stats';
+import { closeOnline, getOnline } from '../net/online';
+import { onlineRoute } from '../net/route';
+import type { OnlineMatch, OnlineSession } from '../net/session';
 import {
   DEFAULT_CAMERA,
   frameTargets,
@@ -99,6 +104,8 @@ const RESULT_DELAY_TICKS = 60;
 const PAUSE_COOLDOWN_MS = 250;
 /** Teclas que pausam: Enter, Esc, Start e Select do controle. */
 const PAUSE_KEYS = Menu.CONFIRM | Menu.BACK | Menu.START;
+/** Online: os dois lados trocam o hash do estado a cada tantos ticks (0,5 s). */
+const HASH_EVERY_TICKS = 30;
 /** Enquadramento da câmera quando ninguém está em cena. */
 const STAGE_VIEW: Rect = { x: -450, y: -200, w: 900, h: 200 };
 
@@ -132,14 +139,19 @@ export interface FightData extends Partial<MatchSetup> {
 }
 
 /** Telas para onde dá para sair da luta (pausa e resultado). */
-export type LeaveTarget = 'select' | 'stage' | 'title';
+export type LeaveTarget = 'select' | 'stage' | 'title' | 'online';
 
 interface PrevPos {
   x: number;
   y: number;
 }
 
-/** Luta: roda o sim em passo fixo e desenha o estado interpolado. */
+/**
+ * Luta: roda o sim em passo fixo e desenha o estado interpolado.
+ *
+ * Online (sala aberta), os inputs passam pelo lockstep da sala: o tick só roda
+ * quando o input dos dois chegou, e os dois lados veem a mesma luta.
+ */
 export class FightScene extends Phaser.Scene {
   state!: GameState;
   /** Último input enviado ao sim, por jogador (para o overlay de debug). */
@@ -158,12 +170,24 @@ export class FightScene extends Phaser.Scene {
   playback: Replay | null = null;
   /** No fim de um replay: reproduziu a luta gravada? (null = ainda rodando, ou luta de verdade) */
   replayOk: boolean | null = null;
+  /** Sala online (null = jogo local). */
+  net: OnlineSession | null = null;
+  /** Online: o último tick não rodou porque faltava o input do outro jogador. */
+  stalled = false;
+  /** Online: há quanto tempo está parado esperando o input do outro (ms). */
+  stalledMs = 0;
 
   /** Gravação da luta em andamento (seed + inputs de cada tick). */
   private recording: Replay | null = null;
   /** A gravação fechou: a luta acabou e o replay está completo. */
   private recorded = false;
 
+  /** Online: id da partida que está rodando (muda na revanche). */
+  private matchId = -1;
+  /** Online: o menu de pausa estava aberto no tick anterior. */
+  private menuWasOpen = false;
+  /** Já pediu para sair da luta: não faz mais nada até a cena fechar. */
+  private leaving = false;
   private readonly loop = new FixedStepLoop();
   private controls!: InputManager;
   private pauseRequested = false;
@@ -198,6 +222,8 @@ export class FightScene extends Phaser.Scene {
 
   init(data: FightData): void {
     this.playback = data.replay ?? null;
+    this.net = getOnline();
+    this.leaving = false;
     this.setup = {
       characters: data.replay?.characters ?? data.characters ?? PLAYABLE_CHARACTERS,
       stageId: data.replay?.stageId ?? data.stageId ?? STAGES[0]?.id ?? '',
@@ -219,7 +245,8 @@ export class FightScene extends Phaser.Scene {
     this.pauseRequested = false;
     this.prevSystem = PAUSE_KEYS; // segurado desde o menu não pausa
     const requestPause = () => {
-      this.pauseRequested = true;
+      // online a luta não para: perder o foco não abre o menu
+      if (!this.net) this.pauseRequested = true;
     };
     // trocar de janela ou de aba no meio da luta pausa
     this.game.events.on(Phaser.Core.Events.BLUR, requestPause);
@@ -265,19 +292,56 @@ export class FightScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number): void {
+    // a pausa e o resultado rodam antes desta cena no quadro: podem já ter pedido a saída
+    if (this.leaving || this.followRoom()) return;
     if (this.wantsPause()) {
       this.openPause();
-      return;
+      // online o menu abre por cima e a luta continua
+      if (!this.net) return;
     }
     const timeScale = this.slowMo.update(delta);
     if (!this.slowMo.active) this.focus = null;
-    const alpha = this.loop.advance(delta * timeScale, () => {
+    let alpha = this.loop.advance(delta * timeScale, () => {
       this.tick();
     });
+    // parado esperando o outro jogador: desenha o último tick, sem interpolar
+    if (this.stalled) {
+      alpha = 1;
+      this.stalledMs += delta;
+    } else {
+      this.stalledMs = 0;
+    }
     this.drawFighters(alpha);
     this.drawProjectiles(alpha);
     this.updateTaunts(alpha);
     this.updateCamera(alpha, delta);
+  }
+
+  /** Partida online em andamento (null = jogo local, ou assistindo a um replay). */
+  get onlineMatch(): OnlineMatch | null {
+    return this.playback ? null : (this.net?.match ?? null);
+  }
+
+  /**
+   * Online: segue a tela da sala. Sala acabou ou mudou de tela: sai da luta
+   * (devolve true). Partida nova (revanche): começa de novo aqui mesmo.
+   */
+  private followRoom(): boolean {
+    const net = this.net;
+    if (!net) return false;
+    // com a luta já no resultado, a sala que acabou só é avisada lá (dá para salvar o replay)
+    if (net.ended && (this.ended || this.playback)) return false;
+    const route = onlineRoute(net, 'fight');
+    if (route) {
+      this.exit(route.scene, route.data);
+      return true;
+    }
+    const match = net.match;
+    if (match && match.seq !== this.matchId) {
+      this.playback = null;
+      this.rematch();
+    }
+    return false;
   }
 
   /** Replay da luta que acabou (ou o que está sendo assistido), para ver de novo ou salvar. */
@@ -305,13 +369,23 @@ export class FightScene extends Phaser.Scene {
       this.recording = null;
       this.state = replayGame(this.playback);
     } else {
+      // online: personagens, mapa e seed são os da partida da sala (iguais nos dois lados)
+      const match = this.net?.match;
+      if (match) {
+        this.matchId = match.seq;
+        this.setup = { characters: match.characters, stageId: match.stageId };
+      }
       // a seed é sorteada fora do sim; dentro dele, tudo sai dela
-      this.recording = createReplay({ ...this.setup, rules: MATCH_RULES, seed: newSeed() });
+      const seed = match?.seed ?? newSeed();
+      this.recording = createReplay({ ...this.setup, rules: MATCH_RULES, seed });
       this.state = replayGame(this.recording);
     }
     this.recorded = false;
     this.replayOk = null;
     this.inputDelay.reset();
+    this.stalled = false;
+    this.stalledMs = 0;
+    this.menuWasOpen = false;
     this.stats = createStats(this.state.fighters.length);
     this.prev = this.state.fighters.map((f) => ({ x: f.x, y: f.y }));
     this.lastStates = this.state.fighters.map((f) => f.state);
@@ -343,6 +417,7 @@ export class FightScene extends Phaser.Scene {
   /** Revanche (resultado) ou recomeçar (pausa): mesma luta do zero, com a contagem. */
   rematch(): void {
     this.scene.stop('result');
+    if (this.net) this.scene.stop('pause');
     this.newMatch();
     this.controls.suppressHeld();
     this.pauseRequested = false;
@@ -352,23 +427,39 @@ export class FightScene extends Phaser.Scene {
 
   /** Sai da luta para outra tela, levando o que foi escolhido. */
   leave(target: LeaveTarget): void {
+    const net = this.net;
+    if (net?.ended && target !== 'title') target = 'online';
+    if (net && !net.ended && (target === 'select' || target === 'stage')) {
+      // online: a sala inteira troca de tela (quem entrou pede ao host) e a luta segue a sala
+      net.openSelect();
+      return;
+    }
+    if (target === 'title') this.exit('title', { menu: true });
+    else if (target === 'online') this.exit('online', { ended: net?.ended ?? 'quit' });
+    else this.exit(target, this.setup);
+  }
+
+  /** Fecha a luta e o que está por cima dela, e abre outra tela. */
+  private exit(scene: string, data: object): void {
+    if (this.leaving) return;
+    this.leaving = true;
+    if (scene === 'title' || scene === 'online') closeOnline();
     for (const key of ['hud', 'debug', 'pause', 'result']) this.scene.stop(key);
-    if (target === 'title') this.scene.start('title', { menu: true });
-    else this.scene.start(target, this.setup);
+    this.scene.start(scene, data);
   }
 
   /** Esc, Enter ou Start do controle (ou perder o foco), com a luta ainda rolando. */
   private wantsPause(): boolean {
     const requested = this.pauseRequested;
     this.pauseRequested = false;
-    if (!requested || this.ended) return false;
+    if (!requested || this.ended || this.scene.isActive('pause')) return false;
     return this.game.loop.time - this.resumedAt >= PAUSE_COOLDOWN_MS;
   }
 
   private openPause(): void {
     playSfx(this, 'ui_confirm');
     this.scene.launch('pause');
-    this.scene.pause();
+    if (!this.net) this.scene.pause();
   }
 
   /** Voltando da pausa: o que estiver apertado só conta depois de soltar. */
@@ -381,27 +472,63 @@ export class FightScene extends Phaser.Scene {
   };
 
   private tick(): void {
-    for (const [i, f] of this.state.fighters.entries()) this.prev[i] = { x: f.x, y: f.y };
     // lê os controles mesmo num replay: as teclas de pausa vêm daqui
     const sampled = this.controls.sample(this.state.fighters.length);
     const system = this.controls.system & PAUSE_KEYS;
     if (system & ~this.prevSystem) this.pauseRequested = true;
     this.prevSystem = system;
 
+    const inputs = this.nextInputs(sampled);
+    this.stalled = inputs === null;
+    if (!inputs) return;
+    for (const [i, f] of this.state.fighters.entries()) this.prev[i] = { x: f.x, y: f.y };
     if (this.ended) {
       this.overTicks++;
       if (this.overTicks === RESULT_DELAY_TICKS) this.scene.launch('result');
     }
-    this.lastInputs = this.playback
-      ? replayInputs(this.playback, this.state.tick)
-      : this.inputDelay.push(sampled);
-    this.stepRecorded(this.lastInputs);
+    this.lastInputs = inputs;
+    this.stepRecorded(inputs);
+    this.checkHash();
     recordEvents(this.stats, this.state.events);
     this.handleEvents();
     this.spawnTrails();
     this.spawnFx();
     this.fx.step();
     this.backFx.step();
+  }
+
+  /**
+   * Inputs do tick: do replay, dos controles (jogo local) ou do lockstep da sala
+   * (online). Online, null = ainda falta o input do outro jogador: o tick não roda.
+   */
+  private nextInputs(sampled: readonly InputMask[]): InputMask[] | null {
+    if (this.playback) return replayInputs(this.playback, this.state.tick);
+    const net = this.net;
+    const match = net?.match;
+    if (!net || !match) return this.inputDelay.push(sampled);
+    // os inputs que faltam para o outro lado continuam indo, mesmo depois do fim
+    if (this.state.phase === 'over') {
+      net.sendInputs();
+      return this.state.fighters.map(() => NO_INPUT);
+    }
+    // este PC é um jogador só: vale qualquer um dos controles. Com o menu aberto, nada
+    const menuOpen = this.scene.isActive('pause');
+    if (this.menuWasOpen && !menuOpen) this.controls.suppressHeld();
+    this.menuWasOpen = menuOpen;
+    const mine = menuOpen ? NO_INPUT : sampled.reduce((a, b) => a | b, NO_INPUT);
+    match.lockstep.addLocal(mine);
+    net.sendInputs();
+    return match.lockstep.ready() ? match.lockstep.step() : null;
+  }
+
+  /** Online: de tempos em tempos (e no fim da luta), manda o hash do estado para comparar. */
+  private checkHash(): void {
+    const net = this.net;
+    if (!net || !this.onlineMatch || this.overTicks > 0) return;
+    const over = this.state.phase === 'over';
+    if (over || this.state.tick % HASH_EVERY_TICKS === 0) {
+      net.reportHash(this.state.tick, hashState(this.state));
+    }
   }
 
   /**
