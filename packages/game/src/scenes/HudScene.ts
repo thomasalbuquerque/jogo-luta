@@ -1,9 +1,14 @@
 import Phaser from 'phaser';
 import { getCharacter } from '@jogo-luta/sim';
 import { formatClock, resultText, stocksLabel } from '../render/hud';
+import { KoBurstLayer } from '../render/koBurst';
+import type { EdgePoint } from '../render/koEdge';
 import { PLAYER_COLORS, type FightScene } from './FightScene';
 
 const FONT = 'monospace';
+/** O % cresce ao levar golpe e volta sozinho (até este tamanho). */
+const DAMAGE_POP_MAX = 1.6;
+const DAMAGE_POP_RATE = 9;
 
 function cssColor(color: number): string {
   return `#${color.toString(16).padStart(6, '0')}`;
@@ -18,6 +23,10 @@ export class HudScene extends Phaser.Scene {
   private clock!: Phaser.GameObjects.Text;
   private result!: Phaser.GameObjects.Text;
   private hint!: Phaser.GameObjects.Text;
+  private koBursts!: KoBurstLayer;
+  /** Último % mostrado e tamanho atual do texto, por jogador. */
+  private shownDamage: number[] = [];
+  private pop: number[] = [];
 
   constructor() {
     super('hud');
@@ -26,6 +35,10 @@ export class HudScene extends Phaser.Scene {
   create(): void {
     const { width, height } = this.scale;
     const fighters = (this.scene.get('fight') as FightScene).state.fighters;
+    // por baixo do resto do HUD
+    this.koBursts = new KoBurstLayer(this);
+    this.shownDamage = fighters.map((f) => f.damage);
+    this.pop = fighters.map(() => 1);
     this.panels = [0, 1].map((i) => {
       const x = i === 0 ? width * 0.3 : width * 0.7;
       const color = cssColor(PLAYER_COLORS[i] ?? 0xffffff);
@@ -89,12 +102,26 @@ export class HudScene extends Phaser.Scene {
       .setOrigin(0.5);
   }
 
-  override update(): void {
+  /** Explosão do KO na borda da tela (px de tela), na cor do jogador. */
+  koBurst(at: EdgePoint, color: number): void {
+    this.koBursts.spawn(at, color);
+  }
+
+  override update(_time: number, delta: number): void {
     const fight = this.scene.get('fight') as FightScene;
     const state = fight.state;
+    this.koBursts.update(delta);
     for (const [i, panel] of this.panels.entries()) {
       const f = state.fighters[i];
       if (!f) continue;
+      // levou dano: o % pula de tamanho, proporcional ao golpe
+      const shown = this.shownDamage[i] ?? 0;
+      let pop = this.pop[i] ?? 1;
+      if (f.damage > shown) pop = Math.min(pop + 0.15 + (f.damage - shown) * 0.03, DAMAGE_POP_MAX);
+      pop = 1 + (pop - 1) * Math.exp(-DAMAGE_POP_RATE * (delta / 1000));
+      this.shownDamage[i] = f.damage;
+      this.pop[i] = pop;
+      panel.damage.setScale(pop);
       panel.damage.setText(`${String(f.damage)}%`);
       panel.stocks.setText(stocksLabel(f.stocks, state.rules.stocks));
       panel.damage.setAlpha(f.state === 'ko' ? 0.4 : 1);
