@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import { BASE_CHARACTER_ID } from './characters';
 import { canBeHit } from './combat';
 import { px } from './constants';
 import type { Fighter } from './fighter';
 import {
   cloneState,
+  COUNTDOWN_TICKS,
   createGame,
   DEFAULT_RULES,
+  getStage,
+  MATCH_RULES,
   RESPAWN_DELAY_TICKS,
   RESPAWN_INVULN_TICKS,
   SUDDEN_DEATH_DAMAGE,
@@ -13,7 +17,7 @@ import {
   type GameState,
 } from './game';
 import { Button } from './input';
-import { TEST_STAGE } from './stage';
+import { FLAT_STAGE, STAGES, TEST_STAGE } from './stage';
 
 function fighter(g: GameState, id: number): Fighter {
   const f = g.fighters[id];
@@ -221,5 +225,44 @@ describe('fim da partida', () => {
     stepGame(g, [0, 0]);
     expect(g.phase).toBe('over');
     expect(g.winner).toBe(0);
+  });
+
+  it('contagem: ninguém age e o relógio para até a luta começar', () => {
+    const g = createGame({ rules: MATCH_RULES });
+    expect(g.phase).toBe('countdown');
+    expect(g.countdown).toBe(COUNTDOWN_TICKS);
+    const start = fighter(g, 0).x;
+    for (let i = 0; i < COUNTDOWN_TICKS - 1; i++) stepGame(g, [Button.RIGHT | Button.ATTACK, 0]);
+    expect(g.phase).toBe('countdown');
+    expect(fighter(g, 0).x).toBe(start);
+    expect(fighter(g, 0).state).toBe('idle');
+    expect(g.timeLeft).toBe(MATCH_RULES.timeLimitTicks);
+    stepGame(g, [Button.RIGHT, 0]);
+    expect(g.phase).toBe('fight');
+    expect(g.countdown).toBe(0);
+    stepGame(g, [Button.RIGHT, 0]);
+    expect(fighter(g, 0).x).toBeGreaterThan(start);
+    expect(g.timeLeft).toBe(MATCH_RULES.timeLimitTicks - 1);
+  });
+
+  it('sem contagem nas regras, a luta começa direto', () => {
+    expect(createGame().phase).toBe('fight');
+  });
+
+  it('laje lisa: só o prédio, sem plataformas, e todos começam no chão', () => {
+    expect(getStage('flat')).toBe(FLAT_STAGE);
+    expect(FLAT_STAGE.solids.every((s) => s.kind === 'solid')).toBe(true);
+    const g = createGame({ stage: FLAT_STAGE, characters: [BASE_CHARACTER_ID, BASE_CHARACTER_ID] });
+    for (let i = 0; i < 3; i++) stepGame(g, [0, 0]);
+    expect(g.stageId).toBe('flat');
+    expect(g.fighters.every((f) => f.grounded && !f.onPlatform)).toBe(true);
+  });
+
+  it('todo mapa tem spawn e respawn para 4 jogadores', () => {
+    for (const stage of STAGES) {
+      expect(stage.spawns.length).toBeGreaterThanOrEqual(4);
+      expect(stage.respawns.length).toBeGreaterThanOrEqual(4);
+      expect(getStage(stage.id)).toBe(stage);
+    }
   });
 });

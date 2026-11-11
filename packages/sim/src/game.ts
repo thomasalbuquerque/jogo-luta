@@ -3,11 +3,11 @@ import { resolveHits, resolveProjectileHits, stepGrabs } from './combat';
 import { TICK_RATE } from './constants';
 import { cueNames, type GameEvent } from './events';
 import { createFighter, knockOut, respawn, stepFighter, type Fighter } from './fighter';
-import type { InputMask } from './input';
+import { NO_INPUT, type InputMask } from './input';
 import { idiv } from './math';
 import { overlaps } from './physics';
 import { stepProjectiles, type Projectile } from './projectile';
-import { TEST_STAGE, type Spawn, type Stage } from './stage';
+import { STAGES, TEST_STAGE, type Spawn, type Stage } from './stage';
 
 /** Ticks fora de cena depois de um KO, antes de reaparecer. */
 export const RESPAWN_DELAY_TICKS = 60;
@@ -17,16 +17,26 @@ export const RESPAWN_INVULN_TICKS = 120;
 export const SUDDEN_DEATH_DAMAGE = 300;
 /** Invencibilidade no começo da morte súbita, para dar tempo de entender. */
 export const SUDDEN_DEATH_INVULN_TICKS = 60;
+/** Contagem "3, 2, 1" antes da luta (um número a cada terço). */
+export const COUNTDOWN_TICKS = 150;
 
 export interface MatchRules {
   stocks: number;
   /** Duração da luta em ticks; 0 = sem limite. */
   timeLimitTicks: number;
+  /**
+   * Contagem antes da luta, em ticks (sem valor: começa direto). Durante a
+   * contagem o input é ignorado e o relógio não anda.
+   */
+  countdownTicks?: number;
 }
 
 export const DEFAULT_RULES: MatchRules = { stocks: 3, timeLimitTicks: 4 * 60 * TICK_RATE };
 
-export type MatchPhase = 'fight' | 'over';
+/** Regras da luta de verdade: as padrão, com a contagem antes. */
+export const MATCH_RULES: MatchRules = { ...DEFAULT_RULES, countdownTicks: COUNTDOWN_TICKS };
+
+export type MatchPhase = 'countdown' | 'fight' | 'over';
 
 /** Estado completo da luta: só dados simples, serializável. */
 export interface GameState {
@@ -34,6 +44,8 @@ export interface GameState {
   stageId: string;
   rules: MatchRules;
   phase: MatchPhase;
+  /** Ticks até a contagem acabar e a luta começar (0 depois disso). */
+  countdown: number;
   /** Ticks até o fim do tempo (fica em 0 na morte súbita ou sem limite). */
   timeLeft: number;
   suddenDeath: boolean;
@@ -46,10 +58,8 @@ export interface GameState {
   events: GameEvent[];
 }
 
-const STAGES: Record<string, Stage> = { [TEST_STAGE.id]: TEST_STAGE };
-
 export function getStage(id: string): Stage {
-  const stage = STAGES[id];
+  const stage = STAGES.find((s) => s.id === id);
   if (!stage) throw new Error(`Mapa desconhecido: ${id}`);
   return stage;
 }
@@ -70,11 +80,13 @@ export function createGame(setup: GameSetup = {}): GameState {
     f.stocks = rules.stocks;
     fighters.push(f);
   }
+  const countdown = Math.max(0, rules.countdownTicks ?? 0);
   return {
     tick: 0,
     stageId: stage.id,
     rules: { ...rules },
-    phase: 'fight',
+    phase: countdown > 0 ? 'countdown' : 'fight',
+    countdown,
     timeLeft: rules.timeLimitTicks,
     suddenDeath: false,
     winner: null,
@@ -108,7 +120,8 @@ function stepKnockedOut(f: Fighter, stage: Stage, events: GameEvent[]): void {
 
 /**
  * Avança a luta um tick. `inputs[i]` é a bitmask do jogador i neste tick.
- * Depois do fim da luta, só o contador de ticks anda.
+ * Na contagem o input é ignorado (os lutadores ficam parados no spawn); depois
+ * do fim da luta, só o contador de ticks anda.
  */
 export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
   const events: GameEvent[] = [];
@@ -118,9 +131,11 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
     return;
   }
   const stage = getStage(state.stageId);
+  const counting = state.phase === 'countdown';
   for (const f of state.fighters) {
     if (f.state === 'ko') stepKnockedOut(f, stage, events);
-    stepFighter(f, inputs[f.id] ?? 0, stage.solids, state.projectiles);
+    const input = counting ? NO_INPUT : (inputs[f.id] ?? NO_INPUT);
+    stepFighter(f, input, stage.solids, state.projectiles);
     for (const action of cueNames(f.cues)) events.push({ type: 'action', fighter: f.id, action });
   }
   stepProjectiles(state.projectiles, stage.solids, stage.blastZone);
@@ -136,8 +151,16 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
     events.push({ type: 'ko', fighter: f.id, x, y, stocksLeft: f.stocks });
   }
   checkLastStanding(state);
-  stepClock(state, stage);
+  if (counting) stepCountdown(state);
+  else stepClock(state, stage);
   state.tick++;
+}
+
+/** Conta a contagem antes da luta; no fim dela, a luta começa (o relógio só anda depois). */
+function stepCountdown(state: GameState): void {
+  if (state.phase !== 'countdown') return;
+  if (state.countdown > 0) state.countdown--;
+  if (state.countdown === 0) state.phase = 'fight';
 }
 
 /** Lutadores ainda na luta (com stock, mesmo esperando respawn). */

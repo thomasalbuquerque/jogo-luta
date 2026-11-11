@@ -48,3 +48,22 @@ export const TEST_STAGE: Stage = {
   ],
   blastZone: { x: px(-1300), y: px(-1000), w: px(2600), h: px(1800) },
 };
+
+/**
+ * Laje lisa: o mesmo prédio do mapa de teste, sem as plataformas atravessáveis.
+ * Luta no chão, sem onde se esconder.
+ */
+export const FLAT_STAGE: Stage = {
+  ...TEST_STAGE,
+  id: 'flat',
+  solids: [solid('solid', -450, 0, 900, 420)],
+  spawns: [
+    { x: px(-200), y: 0 },
+    { x: px(200), y: 0 },
+    { x: px(-340), y: 0 },
+    { x: px(340), y: 0 },
+  ],
+};
+
+/** Mapas do jogo, na ordem da tela de seleção. */
+export const STAGES: readonly Stage[] = [TEST_STAGE, FLAT_STAGE];
