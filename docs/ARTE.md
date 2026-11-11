@@ -774,7 +774,8 @@ original da arte, iguais aos da frente: o jogo não escurece o lado de trás.
 
 **Regra das juntas.** Em cada junta, uma peça fica na frente e a outra atrás: a manga na frente
 do antebraço, o short na frente da coxa, a coxa na frente da canela, o pé na frente da canela, a
-mão na frente do antebraço.
+mão na frente do antebraço. A exceção é o cotovelo dobrado para a frente (mais de 85°, como na
+guarda): aí o jogo desenha o antebraço na frente da manga, senão a barra da manga cobre o antebraço.
 
 - **Peça da frente:** o toco é apagado junto com a linha do anel. Ela termina num corte limpo, sem
   contorno, e a junta (`tip` dela, `pivot` do filho) fica uns 12 px da folha acima do corte. Assim
