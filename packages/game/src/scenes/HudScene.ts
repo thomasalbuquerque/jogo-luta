@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getCharacter } from '@jogo-luta/sim';
+import { addAudioHint } from '../audio/unlock';
 import { formatClock, resultText, stocksLabel } from '../render/hud';
 import { KoBurstLayer } from '../render/koBurst';
 import type { EdgePoint } from '../render/koEdge';
@@ -37,6 +38,7 @@ export class HudScene extends Phaser.Scene {
     const fighters = (this.scene.get('fight') as FightScene).state.fighters;
     // por baixo do resto do HUD
     this.koBursts = new KoBurstLayer(this);
+    addAudioHint(this);
     this.shownDamage = fighters.map((f) => f.damage);
     this.pop = fighters.map(() => 1);
     this.panels = [0, 1].map((i) => {

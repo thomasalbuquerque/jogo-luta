@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { setupAudio } from './audio/unlock';
 import { BootScene } from './scenes/BootScene';
 import { DebugScene } from './scenes/DebugScene';
 import { FightScene } from './scenes/FightScene';
@@ -19,6 +20,8 @@ const game = new Phaser.Game({
   // A primeira da lista começa sozinha: carrega a arte e abre a seleção.
   scene: [BootScene, SelectScene, FightScene, HudScene, DebugScene, RigViewerScene],
 });
+
+setupAudio(game);
 
 // Só em dev: permite inspecionar o jogo pelo console (window.__game).
 if (import.meta.env.DEV) {

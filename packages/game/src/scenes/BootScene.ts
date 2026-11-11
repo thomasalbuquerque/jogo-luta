@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { PLAYABLE_CHARACTERS } from '@jogo-luta/sim';
+import { AUDIO_FILES } from '../audio/files';
+import { prepareSfx } from '../audio/sfx';
 import { characterAtlasPath, characterTextureKey } from '../render/FighterView';
 import { createFxTextures } from '../render/fxTextures';
 import { loadStages } from '../render/stageView';
@@ -27,10 +29,14 @@ export class BootScene extends Phaser.Scene {
       this.load.atlas(characterTextureKey(id), `${path}.png`, `${path}.json`);
     }
     loadStages(this.load);
+    // Áudios gravados (audio/ na raiz): já vêm com a URL final do build.
+    this.load.setPath('');
+    for (const [key, urls] of AUDIO_FILES) this.load.audio(key, [...urls]);
   }
 
   create(): void {
     createFxTextures(this);
+    prepareSfx(this);
     // Só em dev: ?rig abre o visualizador de animações.
     const viewer = import.meta.env.DEV && new URLSearchParams(location.search).has('rig');
     this.scene.start(viewer ? 'rig-viewer' : 'select');

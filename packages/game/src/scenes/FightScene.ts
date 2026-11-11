@@ -24,7 +24,9 @@ import {
   type InputMask,
   type KoEvent,
 } from '@jogo-luta/sim';
-import { playVoice } from '../audio/voice';
+import { music } from '../audio/music';
+import { playSfx } from '../audio/sfx';
+import { playKoVoice, playVoice } from '../audio/voice';
 import { InputManager } from '../input/InputManager';
 import {
   DEFAULT_CAMERA,
@@ -205,6 +207,7 @@ export class FightScene extends Phaser.Scene {
 
     this.scene.launch('hud');
     this.scene.launch('debug');
+    music.play(this, 'luta');
   }
 
   override update(_time: number, delta: number): void {
@@ -289,6 +292,7 @@ export class FightScene extends Phaser.Scene {
           this.onAction(e.fighter, e.action);
           break;
         case 'grab':
+          playSfx(this, 'grab');
           break;
       }
     }
@@ -308,6 +312,9 @@ export class FightScene extends Phaser.Scene {
       color: playerColor(e.attacker),
     });
     this.shake.add(hitTrauma(kb));
+    const sound = strength > 0.6 ? 'hit_heavy' : strength > 0.25 ? 'hit_medium' : 'hit_light';
+    playSfx(this, sound, { volume: 0.85 + 0.25 * strength });
+    if (e.kind === 'counter') playSfx(this, 'counter');
     this.flashUntil[e.victim] = this.state.tick + FLASH_TICKS + Math.round(3 * strength);
     if (!this.decisiveShown && isDecisiveHit(this.state, e.victim)) {
       this.decisiveShown = true;
@@ -335,6 +342,9 @@ export class FightScene extends Phaser.Scene {
       (this.scene.get('hud') as HudScene).koBurst(at, playerColor(e.fighter));
     }
     this.shake.add(KO_TRAUMA);
+    playSfx(this, 'ko');
+    const f = this.state.fighters[e.fighter];
+    if (f) playKoVoice(this, characterOfFighter(f));
     if (this.focus === e.fighter) this.focus = null;
     if (this.state.phase === 'over' && !this.decisiveShown) {
       this.decisiveShown = true;
@@ -346,9 +356,10 @@ export class FightScene extends Phaser.Scene {
     const f = this.state.fighters[id];
     if (!f) return;
     spawnRespawnGlow(this.fx, toPx(f.x + f.w / 2), toPx(f.y + f.h / 2), playerColor(id));
+    playSfx(this, 'respawn');
   }
 
-  /** Poeira e lufadas das ações de movimento. */
+  /** Som, poeira e lufadas das ações do lutador. */
   private onAction(id: number, action: CueName): void {
     const f = this.state.fighters[id];
     if (!f) return;
@@ -356,15 +367,27 @@ export class FightScene extends Phaser.Scene {
     const feetY = toPx(f.y + f.h);
     switch (action) {
       case 'JUMP':
+        playSfx(this, 'jump');
         spawnDust(this.backFx, feetX, feetY, 4);
         break;
       case 'LAND':
+        playSfx(this, 'land');
         spawnDust(this.backFx, feetX, feetY, 6);
         break;
       case 'DASH':
+        playSfx(this, 'dash');
         spawnDust(this.backFx, feetX, feetY, 3, f.facing === 1 ? -1 : 1);
         break;
+      case 'SWING':
+        playSfx(this, 'swing', { detune: f.move === 'special' ? -300 : 0 });
+        break;
+      case 'TAUNT': {
+        const taunt = characterOfFighter(f).taunt;
+        playVoice(this, taunt.sound, taunt.text);
+        break;
+      }
       case 'WALL_JUMP':
+        playSfx(this, 'jump');
         spawnDust(
           this.backFx,
           feetX - f.facing * toPx(f.w / 2),
@@ -374,6 +397,7 @@ export class FightScene extends Phaser.Scene {
         );
         break;
       case 'AIR_JUMP':
+        playSfx(this, 'air_jump');
         this.fx.spawn({
           texture: FX_TEXTURE.ring,
           x: feetX,
@@ -386,6 +410,7 @@ export class FightScene extends Phaser.Scene {
         });
         break;
       case 'AIR_DODGE':
+        playSfx(this, 'dodge');
         this.fx.spawn({
           texture: FX_TEXTURE.glow,
           x: feetX,
@@ -650,7 +675,7 @@ export class FightScene extends Phaser.Scene {
     }
   }
 
-  /** Provocação: balão com o bordão e a voz ao começar. */
+  /** Provocação: balão com o bordão (a voz sai do evento TAUNT). */
   private updateTaunts(alpha: number): void {
     for (const f of this.state.fighters) {
       const bubble = this.bubbles[f.id];
@@ -659,7 +684,6 @@ export class FightScene extends Phaser.Scene {
       const c = characterOfFighter(f);
       if (taunting && this.lastStates[f.id] !== 'taunt') {
         bubble.setText(c.taunt.text);
-        playVoice(this, c.taunt.sound, c.taunt.text);
       }
       this.lastStates[f.id] = f.state;
       bubble.setVisible(taunting);
