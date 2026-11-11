@@ -79,4 +79,6 @@ pnpm art [pasta]      recorta a arte de art/ e gera os atlas (--debug <pasta> mo
 
 Visualizador de animações (só em dev): `http://localhost:5173/?rig`.
 
+Atraso de input para testar o netcode sem rede: `http://localhost:5173/?atraso=3` (ou 1/2 e 3/4 com o debug ligado). Replays, snapshot e hash do estado: ver "Determinismo e replays" no `docs/GDD.md`.
+
 Deploy: todo push na `main` roda `.github/workflows/deploy.yml` (lint, testes, build) e publica no GitHub Pages: https://thomasalbuquerque.github.io/jogo-luta/
