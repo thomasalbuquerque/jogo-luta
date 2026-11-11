@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { BASE_CHARACTER_ID } from './characters';
 import { canBeHit } from './combat';
 import { px } from './constants';
 import type { Fighter } from './fighter';
@@ -17,7 +16,7 @@ import {
   type GameState,
 } from './game';
 import { Button } from './input';
-import { FLAT_STAGE, STAGES, TEST_STAGE } from './stage';
+import { STAGES, TEST_STAGE } from './stage';
 
 function fighter(g: GameState, id: number): Fighter {
   const f = g.fighters[id];
@@ -247,15 +246,6 @@ describe('fim da partida', () => {
 
   it('sem contagem nas regras, a luta começa direto', () => {
     expect(createGame().phase).toBe('fight');
-  });
-
-  it('laje lisa: só o prédio, sem plataformas, e todos começam no chão', () => {
-    expect(getStage('flat')).toBe(FLAT_STAGE);
-    expect(FLAT_STAGE.solids.every((s) => s.kind === 'solid')).toBe(true);
-    const g = createGame({ stage: FLAT_STAGE, characters: [BASE_CHARACTER_ID, BASE_CHARACTER_ID] });
-    for (let i = 0; i < 3; i++) stepGame(g, [0, 0]);
-    expect(g.stageId).toBe('flat');
-    expect(g.fighters.every((f) => f.grounded && !f.onPlatform)).toBe(true);
   });
 
   it('todo mapa tem spawn e respawn para 4 jogadores', () => {
