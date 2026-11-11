@@ -726,6 +726,7 @@ No fim, a pasta `art/` fica assim (só as versões aprovadas):
 art/
   style/           style.png, shape.png
   schummaki/       1-conceito.png, 2-cabecas.png, 3-pecas.png, 4-efeitos.png, 5-figurinha.png
+                   + 3-pecas-bracos.png (tronco, braços e mãos refeitos sem os pinos das juntas)
   joao-frango/     (mesmos nomes) + 3-pecas-tronco.png (tronco e short, que vieram grudados)
                    + 3-pecas-maos.png (mãos vistas pela palma, para o braço de trás)
   cenario-laje/    1-mapa.png, 2-ceu.png, 3-longe.png, 4-meio.png, 5-pecas.png
