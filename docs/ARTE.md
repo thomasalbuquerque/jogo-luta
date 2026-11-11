@@ -13,6 +13,9 @@ regra) e o modelo de ficha para os próximos personagens.
 | 3     | João Frango      | Igual à parte 2                                                       | 5       | ✅ feita |
 | 4     | Cenário (a laje) | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feita |
 
+Depois das imagens, o Claude recorta, monta e anima tudo no jogo: ver
+[Do PNG ao jogo](#do-png-ao-jogo-o-que-o-claude-faz). Isso já foi feito para os 2 personagens e a laje.
+
 As partes 2 a 4 podem ser feitas por dois caminhos. Os dois usam as mesmas imagens de referência e
 salvam com os mesmos nomes:
 
@@ -312,7 +315,10 @@ Copie os textos da parte 3 (João Frango, feito do zero) e troque só o que é d
   que evitar). A ficha da [Referência](#ficha-para-um-personagem-novo) ajuda a pensar no que
   escrever.
 - **Peças (3.3):** troque o que vem depois de `Extra:` pelas mãos especiais dele (ou apague o
-  `Extra:`), e `foot with flip-flop` pelo calçado dele.
+  `Extra:`), e `foot with flip-flop` pelo calçado dele. Troque também `head and torso and hips` por
+  `head and torso without sleeves (arm holes only) and hips` e acrescente `No text on the clothes.`
+  no fim: manga colada no tronco e texto na roupa dão trabalho no recorte (ver
+  [Do PNG ao jogo](#do-png-ao-jogo-o-que-o-claude-faz)).
 - **Efeitos (3.4):** troque a lista de itens pelos efeitos do especial dele.
 - **Cabeças (3.2) e figurinha (3.5):** iguais para todos, não mude nada.
 
@@ -716,9 +722,79 @@ art/
 ```
 
 Não precisa esperar terminar tudo. Assim que tiver um personagem, diga aqui no Claude, por exemplo:
-_"as imagens do Schummaki estão em `art/schummaki/`, segue a Etapa 4"_. O Claude tira o fundo,
-recorta e nomeia as peças, acerta a escala pelo tamanho do personagem no jogo e prepara a montagem no
-esqueleto de animação.
+_"as imagens do Fulano estão em `art/fulano/`, segue a Etapa 10"_. O Claude faz o resto (abaixo).
+
+## Do PNG ao jogo (o que o Claude faz)
+
+### 1. Recorte: `art/<pasta>/recortes.json` e `pnpm art`
+
+Cada pasta de `art/` tem um `recortes.json` que diz onde está cada peça na folha e onde ficam as
+juntas. O comando `pnpm art` (ou `pnpm art fulano`, só uma pasta) lê os PNGs, tira o fundo magenta
+(a borda vira transparência, sem franja rosa), recorta, apaga sujeira solta, reduz para o tamanho
+do jogo e grava um atlas em `packages/game/public/assets/`. As imagens de `art/` nunca entram no
+jogo direto. `pnpm art fulano --debug <pasta>` grava também o atlas com as juntas marcadas.
+
+Campos de cada peça:
+
+| Campo     | O que é                                                                                         |
+| --------- | ----------------------------------------------------------------------------------------------- |
+| `rect`    | Retângulo da peça na folha (x, y, largura, altura), em px da imagem original.                   |
+| `pivot`   | Junta com o pai: onde a peça gira (ombro no braço, joelho na canela).                           |
+| `tip`     | Junta com o filho (cotovelo no braço). Define o comprimento e a direção do osso.                |
+| `sockets` | Outros encaixes: `neck`, `shoulderNear`, `shoulderFar` no tronco; `legNear`, `legFar` no short. |
+| `erase`   | Polígonos apagados: manga que veio grudada no tronco, toco de junta que ficaria aparecendo.     |
+| `keep`    | Só o que está dentro fica: separa peças grudadas (mão do antebraço, as duas mãos em concha).    |
+| `outline` | Linha de contorno desenhada num corte, para a peça não ficar "aberta".                          |
+| `paint`   | Pinta um polígono de uma cor (`auto` = a cor em volta). Serviu para tirar o texto do avental.   |
+| `stretch` | Estica ou encolhe a peça (`[largura, altura]`), para acertar a proporção com o conceito.        |
+
+Nomes das peças: `torso`, `hips`, `upperArm`, `forearm`, `thigh`, `shin`, `foot`,
+`hand_fist`, `hand_open`, `hand_taunt`, `head_normal`, `head_hurt`, `head_taunt`, `head_ko`,
+`portrait` e os efeitos `fx_*`. Uma peça com `2` no fim (`thigh2`, `hand_taunt2`) é a versão do
+lado de trás; sem ela, os dois lados usam a mesma.
+
+**Regra das juntas.** Em cada junta, uma peça fica na frente e a outra atrás (a manga na frente do
+antebraço, o short na frente da coxa, o tênis na frente da canela). O toco da peça da frente é
+apagado; o da peça de trás fica, escondido, e só aparece para tapar a fresta quando o membro dobra.
+Os pontos vão na linha onde o toco encontra a peça, não no meio do toco.
+
+### 2. Esqueleto e animação: `packages/game/src/rig`
+
+- `skeleton.ts`: os 15 ossos (quadril, tronco, cabeça, braços e pernas da frente e de trás), a
+  ordem de desenho e a conta que posiciona cada peça. Todos os personagens usam o mesmo esqueleto;
+  o tamanho de cada osso vem das juntas das peças dele.
+- `clips.ts`: as animações do esqueleto base (guarda, correr, pular, cair, parede, dash, esquiva,
+  borda, levar golpe, arremessado, agarrado e os golpes). São poses-chave com o ângulo de cada osso.
+- `characterClips.ts`: especial e provocação de cada personagem, pelo id da ficha.
+- Golpes são animados nas fases do sim (startup, active, recovery). A pose do impacto aparece no 1º
+  frame ativo, quando a hitbox liga, mesmo se a ficha mudar os frames.
+- A cabeça troca inteira conforme o estado: normal, golpe levado (`hurt`), provocação e KO.
+- `render/fx.ts`: quais peças `fx_*` cada especial usa (fumaça, linhas de velocidade, projétil).
+
+Para ver as animações, abra o jogo com `?rig` no fim do endereço (só no `pnpm dev`):
+`http://localhost:5173/?rig`. ←/→ troca o clipe, F mostra 4 quadros lado a lado com a hitbox
+de cada um, C troca o personagem, Espaço pausa.
+
+### 3. Personagem novo (checklist do Claude)
+
+1. Rodar `pnpm art` com um `recortes.json` mínimo (só os `rect`) e olhar o atlas com `--debug`.
+2. Marcar `pivot`, `tip` e `sockets` em cada peça, nas linhas das juntas.
+3. Apagar a manga colada no tronco (com `outline` no corte) e os tocos das peças da frente.
+4. Conferir no `?rig` em repouso e na guarda; acertar a proporção com `stretch` comparando com o
+   `1-conceito.png` (cabeça grande, pernas curtas).
+5. Escrever o especial e a provocação em `characterClips.ts` e os efeitos em `render/fx.ts`.
+6. Conferir na luta: golpes, especial, provocação, arremessado, borda.
+
+O que facilita o recorte nas próximas folhas de peças: tronco **sem** as mangas (só os buracos dos
+braços), antebraço separado da mão e nenhum texto na roupa (o jogo espelha o personagem e o texto
+sairia ao contrário).
+
+### 4. Cenário
+
+O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` e `wallRight`,
+`plank` com `right`, para o jogo encaixar a arte nas caixas de colisão) e as camadas do fundo
+(`layers`: céu, longe, meio). A posição e a velocidade de cada camada ficam em
+`packages/game/src/render/stageView.ts`.
 
 ---
 
