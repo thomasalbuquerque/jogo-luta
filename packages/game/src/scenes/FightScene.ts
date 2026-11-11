@@ -338,6 +338,11 @@ export class FightScene extends Phaser.Scene {
     }
     const match = net.match;
     if (match && match.seq !== this.matchId) {
+      // revanche com menos gente (alguém saiu da sala): monta a luta de novo, com HUD e lutadores certos
+      if (match.characters.length !== this.state.fighters.length) {
+        this.exit('fight', { characters: match.characters, stageId: match.stageId });
+        return true;
+      }
       this.playback = null;
       this.rematch();
     }
