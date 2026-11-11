@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { cloneState, createGame, stepGame } from '../game';
+import { createGame, stepGame } from '../game';
+import { cloneState } from '../snapshot';
 import { Button } from '../input';
 import { getCharacter, PLAYABLE_CHARACTERS } from './index';
 
