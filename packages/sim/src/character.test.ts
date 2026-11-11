@@ -118,6 +118,11 @@ describe('ficha de personagem', () => {
     expect(animationId(c, 'special')).toBe('joao_teste_special');
   });
 
+  it('voz de KO: a da ficha ou <id>_ko', () => {
+    expect(defineCharacter(sheet({ id: 'joao-teste' })).koSound).toBe('joao_teste_ko');
+    expect(defineCharacter(sheet({ koSound: 'grito' })).koSound).toBe('grito');
+  });
+
   it('o lutador usa o tamanho e os números da ficha', () => {
     registerCharacter(
       defineCharacter(

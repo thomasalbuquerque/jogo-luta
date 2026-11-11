@@ -55,4 +55,5 @@ export const SCHUMMAKI = defineCharacter({
     animation: 'schummaki_taunt',
     durationTicks: 80,
   },
+  koSound: 'schummaki_ko',
 });

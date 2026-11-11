@@ -52,4 +52,5 @@ export const JOAO_FRANGO = defineCharacter({
     animation: 'joao_frango_taunt',
     durationTicks: 90,
   },
+  koSound: 'joao_frango_ko',
 });
