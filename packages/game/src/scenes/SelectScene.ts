@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getCharacter, PLAYABLE_CHARACTERS, type Character } from '@jogo-luta/sim';
+import { getCharacter, PLAYABLE_CHARACTERS, STAGES, type Character } from '@jogo-luta/sim';
 import { music } from '../audio/music';
 import { playSfx } from '../audio/sfx';
 import { addAudioHint } from '../audio/unlock';
@@ -7,6 +7,9 @@ import { playVoice } from '../audio/voice';
 import { getControls, keyLabel } from '../input/controls';
 import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
+import { getOnline } from '../net/online';
+import { netLabel, onlineRoute } from '../net/route';
+import type { OnlineSession } from '../net/session';
 import { colorValue, statBars } from '../render/fighterLook';
 import { FighterView } from '../render/FighterView';
 import { clipFor } from '../rig/library';
@@ -41,6 +44,9 @@ interface PlayerPanel {
  * Seleção de personagem: grade com 7 casas (os que existem e silhuetas "em
  * breve"). Cada jogador anda com as próprias direções, confirma com Ataque ou
  * Pulo e desfaz com Especial. Com os 2 prontos, vai para a seleção de mapa.
+ *
+ * Online, cada PC só mexe no próprio cursor (com qualquer um dos controles) e
+ * vê o do outro jogador pela rede.
  */
 export class SelectScene extends Phaser.Scene {
   private controls!: MenuInput;
@@ -52,6 +58,11 @@ export class SelectScene extends Phaser.Scene {
   private tags: Phaser.GameObjects.Text[] = [];
   private tiles: Phaser.GameObjects.Container[] = [];
   private panels: PlayerPanel[] = [];
+  /** Sala online (null = jogo local, os 2 no mesmo PC). */
+  private net: OnlineSession | null = null;
+  private netText: Phaser.GameObjects.Text | null = null;
+  /** Online: o host já pediu a tela de mapa. */
+  private stageOpened = false;
 
   constructor() {
     super('select');
@@ -66,6 +77,9 @@ export class SelectScene extends Phaser.Scene {
     });
     this.ready = this.cursors.map(() => false);
     this.readyMs = 0;
+    this.net = getOnline();
+    this.netText = null;
+    this.stageOpened = false;
   }
 
   create(): void {
@@ -104,7 +118,14 @@ export class SelectScene extends Phaser.Scene {
       this.rebuildPanel(p);
     });
 
-    uiText(this, width / 2, height - 22, this.hintText(), {
+    if (this.net) {
+      this.netText = uiText(this, width - 16, 14, netLabel(this.net), {
+        fontSize: '16px',
+        fontStyle: 'bold',
+        color: '#ced4da',
+      }).setOrigin(1, 0);
+    }
+    uiText(this, width / 2, height - 22, this.net ? this.onlineHint(this.net) : this.hintText(), {
       fontSize: '15px',
       color: UI.muted,
     }).setOrigin(0.5);
@@ -112,6 +133,15 @@ export class SelectScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number): void {
+    const net = this.net;
+    if (net) {
+      const route = onlineRoute(net, 'select');
+      if (route) {
+        this.scene.start(route.scene, route.data);
+        return;
+      }
+      this.netText?.setText(netLabel(net));
+    }
     const frame = this.controls.poll(PLAYERS, delta);
     if (frame.system & Menu.BACK) {
       this.backToTitle();
@@ -119,12 +149,20 @@ export class SelectScene extends Phaser.Scene {
     }
     const count = this.slots.length;
     const cols = gridColumns(count);
-    for (const [p, actions] of frame.players.entries()) {
+    // online: este PC só mexe no próprio cursor, com qualquer um dos controles
+    const mine = frame.players.reduce((a, b) => a | b, 0);
+    for (let p = 0; p < PLAYERS; p++) {
+      if (net && p !== net.local) {
+        this.followRemote(p, net);
+        continue;
+      }
+      const actions = net ? mine : (frame.players[p] ?? 0);
       if (this.ready[p]) {
         if (actions & Menu.BACK) this.setReady(p, false);
         continue;
       }
-      if (actions & Menu.BACK && !this.ready.some(Boolean)) {
+      // online, Especial não sai da sala sem querer: só o Esc
+      if (actions & Menu.BACK && !net && !this.ready.some(Boolean)) {
         this.backToTitle();
         return;
       }
@@ -137,19 +175,46 @@ export class SelectScene extends Phaser.Scene {
       }
       if (actions & Menu.CONFIRM) this.confirm(p);
     }
+    net?.setSel(this.cursors[net.local] ?? 0, this.ready[net.local] === true);
 
     if (this.ready.every(Boolean)) {
       this.readyMs += delta;
       if (this.readyMs >= START_DELAY_MS) {
         const characters = this.cursors.map((i) => this.slots[i] ?? '');
-        this.scene.start('stage', { characters } satisfies Partial<MatchSetup>);
-        return;
+        if (!net) {
+          this.scene.start('stage', { characters } satisfies Partial<MatchSetup>);
+          return;
+        }
+        // online: o host abre o mapa para os dois (quem entrou segue a tela da sala)
+        if (net.role === 'host' && !this.stageOpened) {
+          this.stageOpened = true;
+          net.openStage(characters, STAGES[0]?.id ?? '');
+        }
       }
     } else {
       this.readyMs = 0;
     }
     this.animatePanels(delta);
     this.refresh();
+  }
+
+  /** Online: o cursor e a confirmação do outro jogador, como chegaram pela rede. */
+  private followRemote(p: number, net: OnlineSession): void {
+    const sel = net.remoteSel;
+    if (!sel) return;
+    const cursor = Math.min(sel.cursor, this.slots.length - 1);
+    if (cursor !== this.cursors[p]) {
+      this.cursors[p] = cursor;
+      this.rebuildPanel(p);
+    }
+    const id = this.slots[cursor];
+    const ready = sel.ready && Boolean(id);
+    if (ready === (this.ready[p] === true)) return;
+    this.setReady(p, ready);
+    if (ready && id) {
+      const c = getCharacter(id);
+      playVoice(this, c.taunt.sound, c.taunt.text);
+    }
   }
 
   private backToTitle(): void {
@@ -258,7 +323,7 @@ export class SelectScene extends Phaser.Scene {
       return t;
     };
     box.add(
-      uiText(this, 16, 14, `P${String(p + 1)}`, {
+      uiText(this, 16, 14, `P${String(p + 1)}${this.net?.local === p ? ' · VOCÊ' : ''}`, {
         fontFamily: UI.titleFont,
         fontSize: '26px',
         color: cssColor(color),
@@ -365,6 +430,11 @@ export class SelectScene extends Phaser.Scene {
       );
       this.tags[p]?.setPosition(x + (p === 0 ? 22 : TILE_W - 22), y - 6);
     }
+  }
+
+  /** Rodapé do online: quem é este PC e como sair da sala. */
+  private onlineHint(net: OnlineSession): string {
+    return `Você é o P${String(net.local + 1)}      Direções escolhem · Ataque ou Pulo confirma · Especial desfaz      Esc sai da sala`;
   }
 
   /** Rodapé com as teclas atuais de cada jogador. */
