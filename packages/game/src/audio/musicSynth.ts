@@ -69,7 +69,7 @@ export function songSeconds(song: Song): number {
 type Voice = (t: number) => number;
 
 /** Gera o loop: o fim de cada nota que passa do final volta para o começo (emenda sem corte). */
-export function renderSong(song: Song, sampleRate = MUSIC_SAMPLE_RATE): Float32Array {
+export function renderSong(song: Song, sampleRate = MUSIC_SAMPLE_RATE): Float32Array<ArrayBuffer> {
   const total = Math.round(songSeconds(song) * sampleRate);
   const buf = new Float32Array(total);
   const step = 60 / song.bpm / 4;

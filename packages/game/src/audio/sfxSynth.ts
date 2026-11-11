@@ -37,7 +37,12 @@ export type SfxName = (typeof SFX_NAMES)[number];
 type Voice = (t: number) => number;
 
 /** Roda `voice` por `seconds` e normaliza. */
-function render(sampleRate: number, seconds: number, voice: Voice, peak = 0.9): Float32Array {
+function render(
+  sampleRate: number,
+  seconds: number,
+  voice: Voice,
+  peak = 0.9,
+): Float32Array<ArrayBuffer> {
   const buf = new Float32Array(Math.ceil(seconds * sampleRate));
   for (let i = 0; i < buf.length; i++) buf[i] = voice(i / sampleRate);
   // rampa curta no fim para não estalar
@@ -50,7 +55,7 @@ function render(sampleRate: number, seconds: number, voice: Voice, peak = 0.9): 
 }
 
 /** Soco: estalo, corpo de ruído e um baque grave que cai de tom. `s` 0..1 = força. */
-function hit(sr: number, s: number): Float32Array {
+function hit(sr: number, s: number): Float32Array<ArrayBuffer> {
   const r = rng(11 + Math.round(s * 10));
   const crack = new OnePole(sr);
   const body = new OnePole(sr);
@@ -66,7 +71,13 @@ function hit(sr: number, s: number): Float32Array {
 }
 
 /** Lufada: ruído passa-faixa varrendo, com volume em sino. */
-function whoosh(sr: number, seconds: number, from: number, to: number, seed: number): Float32Array {
+function whoosh(
+  sr: number,
+  seconds: number,
+  from: number,
+  to: number,
+  seed: number,
+): Float32Array<ArrayBuffer> {
   const r = rng(seed);
   const bp = new BandPass(sr);
   return render(sr, seconds, (t) => {
@@ -76,7 +87,7 @@ function whoosh(sr: number, seconds: number, from: number, to: number, seed: num
   });
 }
 
-function jump(sr: number, from: number, to: number): Float32Array {
+function jump(sr: number, from: number, to: number): Float32Array<ArrayBuffer> {
   const r = rng(5);
   const osc = new Osc(sr);
   const puff = new OnePole(sr);
@@ -94,7 +105,7 @@ function jump(sr: number, from: number, to: number): Float32Array {
   );
 }
 
-function land(sr: number): Float32Array {
+function land(sr: number): Float32Array<ArrayBuffer> {
   const r = rng(7);
   const lp = new OnePole(sr);
   const osc = new Osc(sr);
@@ -104,7 +115,7 @@ function land(sr: number): Float32Array {
   });
 }
 
-function grab(sr: number): Float32Array {
+function grab(sr: number): Float32Array<ArrayBuffer> {
   const r = rng(9);
   const lp = new OnePole(sr);
   const osc = new Osc(sr);
@@ -115,7 +126,7 @@ function grab(sr: number): Float32Array {
 }
 
 /** Contra-ataque: "tim" metálico (parciais que não são harmônicas). */
-function counter(sr: number): Float32Array {
+function counter(sr: number): Float32Array<ArrayBuffer> {
   const r = rng(13);
   const oscs = [1250, 1830, 2710, 3390].map(() => new Osc(sr));
   const parts = [1250, 1830, 2710, 3390];
@@ -130,7 +141,7 @@ function counter(sr: number): Float32Array {
 }
 
 /** KO: explosão grave, ruído que escurece e estalos espalhados. */
-function ko(sr: number): Float32Array {
+function ko(sr: number): Float32Array<ArrayBuffer> {
   const r = rng(17);
   const lp = new OnePole(sr);
   const crackle = new OnePole(sr);
@@ -145,7 +156,7 @@ function ko(sr: number): Float32Array {
 }
 
 /** Respawn: arpejo subindo, com brilho. */
-function respawn(sr: number): Float32Array {
+function respawn(sr: number): Float32Array<ArrayBuffer> {
   const notes = [72, 76, 79, 84];
   const oscs = notes.map(() => new Osc(sr));
   const shimmer = new Osc(sr);
@@ -166,7 +177,7 @@ function respawn(sr: number): Float32Array {
 }
 
 /** Amostras do efeito `name`, na taxa `sampleRate`. Sempre iguais para o mesmo nome. */
-export function renderSfx(name: SfxName, sampleRate: number): Float32Array {
+export function renderSfx(name: SfxName, sampleRate: number): Float32Array<ArrayBuffer> {
   switch (name) {
     case 'hit_light':
       return hit(sampleRate, 0);
@@ -202,7 +213,7 @@ export function renderSfx(name: SfxName, sampleRate: number): Float32Array {
  * caindo de tom, com formantes de vogal A. O tom muda com `seed` (o id do
  * personagem), para cada um ter uma voz.
  */
-export function renderKoYell(seed: string, sampleRate: number): Float32Array {
+export function renderKoYell(seed: string, sampleRate: number): Float32Array<ArrayBuffer> {
   const h = hashText(seed);
   const base = 260 + (h % 140);
   const seconds = 0.75;

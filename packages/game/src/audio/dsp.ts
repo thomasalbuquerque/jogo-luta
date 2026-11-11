@@ -110,7 +110,7 @@ export function drive(x: number, amount: number): number {
 }
 
 /** Escala para o pico ficar em `peak` (silêncio fica como está). */
-export function normalize(buf: Float32Array, peak = 0.9): Float32Array {
+export function normalize<T extends Float32Array>(buf: T, peak = 0.9): T {
   let max = 0;
   for (const v of buf) max = Math.max(max, Math.abs(v));
   if (max > 0) for (let i = 0; i < buf.length; i++) buf[i] = ((buf[i] ?? 0) / max) * peak;
