@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { PLAYABLE_CHARACTERS } from '@jogo-luta/sim';
 import { characterAtlasPath, characterTextureKey } from '../render/FighterView';
+import { loadStages } from '../render/stageView';
 
 /** Carrega a arte (atlas dos personagens e o cenário) e abre a primeira tela. */
 export class BootScene extends Phaser.Scene {
@@ -24,6 +25,7 @@ export class BootScene extends Phaser.Scene {
       const path = characterAtlasPath(id);
       this.load.atlas(characterTextureKey(id), `${path}.png`, `${path}.json`);
     }
+    loadStages(this.load);
   }
 
   create(): void {

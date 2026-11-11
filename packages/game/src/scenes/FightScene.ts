@@ -27,12 +27,12 @@ import { frameTargets, smooth, type Rect } from '../render/camera';
 import { characterOfFighter, colorValue } from '../render/fighterLook';
 import { FighterView, characterTextureKey } from '../render/FighterView';
 import { CHARACTER_FX, FxLayer } from '../render/fx';
+import { StageView } from '../render/stageView';
 import { fighterPose } from '../rig/fighterPose';
 
 /** Cor de cada jogador (marcador e HUD); a cor do corpo vem da arte. */
 export const PLAYER_COLORS = [0xe63946, 0x4cc9f0, 0x80ed99, 0xffd166];
-const SOLID_COLOR = 0x5c677d;
-const PLATFORM_COLOR = 0x8d99ae;
+const STAGE_DEBUG_COLOR = 0x80ed99;
 const HITBOX_COLOR = 0xff3b30;
 const HURTBOX_COLOR = 0xffd166;
 const HURTBOX_INVULN_COLOR = 0x9aa0a6;
@@ -45,7 +45,16 @@ const REMATCH_DELAY_TICKS = 60;
 const STAGE_VIEW: Rect = { x: -450, y: -200, w: 900, h: 200 };
 
 /** Camadas de desenho (depth do Phaser). */
-const DEPTH = { stage: 0, back: 5, fighters: 10, fx: 20, projectiles: 25, ui: 30, debug: 40 };
+const DEPTH = {
+  background: -10,
+  stage: 0,
+  decoration: 2,
+  fighters: 10,
+  fx: 20,
+  projectiles: 25,
+  ui: 30,
+  debug: 40,
+};
 
 /** Registro do Phaser: modo debug ligado (overlay de texto + caixas). */
 export const DEBUG_KEY = 'debug';
@@ -80,6 +89,7 @@ export class FightScene extends Phaser.Scene {
   private overlayGfx!: Phaser.GameObjects.Graphics;
   private debugGfx!: Phaser.GameObjects.Graphics;
   private bubbles: Phaser.GameObjects.Text[] = [];
+  private stageView!: StageView;
 
   constructor() {
     super('fight');
@@ -107,7 +117,7 @@ export class FightScene extends Phaser.Scene {
       if (this.canRematch()) this.backToSelect();
     });
 
-    this.drawStage();
+    this.stageView = new StageView(this, getStage(this.state.stageId), DEPTH);
     this.views = this.state.fighters.map((f) =>
       new FighterView(this, f.character, toPx(f.stats.height)).setDepth(DEPTH.fighters + f.id),
     );
@@ -203,25 +213,19 @@ export class FightScene extends Phaser.Scene {
     return { x: toPx(x), y: toPx(y), w: toPx(f.w), h: toPx(f.h) };
   }
 
-  private drawStage(): void {
-    const g = this.add.graphics().setDepth(DEPTH.stage);
-    for (const s of getStage(this.state.stageId).solids) {
-      const color = s.kind === 'solid' ? SOLID_COLOR : PLATFORM_COLOR;
-      g.fillStyle(color, 1);
-      g.fillRect(toPx(s.x), toPx(s.y), toPx(s.w), toPx(s.h));
-      if (s.kind === 'solid') {
-        g.fillStyle(0xadb5bd, 1);
-        g.fillRect(toPx(s.x), toPx(s.y), toPx(s.w), 6);
-      }
-    }
-  }
-
   private drawFighters(alpha: number): void {
     const g = this.overlayGfx;
     const d = this.debugGfx;
     const debug = this.registry.get(DEBUG_KEY) === true;
     g.clear();
     d.clear();
+    if (debug) {
+      // caixas de colisão do mapa
+      d.lineStyle(2, STAGE_DEBUG_COLOR, 0.8);
+      for (const s of getStage(this.state.stageId).solids) {
+        d.strokeRect(toPx(s.x), toPx(s.y), toPx(s.w), toPx(s.h));
+      }
+    }
     for (const f of this.state.fighters) {
       const view = this.views[f.id];
       if (!view) continue;
@@ -460,6 +464,7 @@ export class FightScene extends Phaser.Scene {
     const y = smooth(cam.midPoint.y, target.y, CAMERA_RATE, delta);
     cam.setZoom(zoom);
     cam.centerOn(x, y);
+    this.stageView.update({ x, y, zoom, width: this.scale.width, height: this.scale.height });
   }
 }
 
