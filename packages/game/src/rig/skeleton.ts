@@ -64,7 +64,8 @@ export const BONES: Readonly<Record<BoneId, BoneDef>> = {
 /**
  * Ordem de desenho, de trás para a frente. Em cada membro o pedaço de cima fica na
  * frente do de baixo (a manga cobre o toco do antebraço, o short cobre a coxa) e a
- * mão e o pé ficam na frente de tudo do membro.
+ * mão e o pé ficam na frente de tudo do membro. Com o cotovelo dobrado, o antebraço
+ * vai para a frente do braço: ver `drawOrder`.
  */
 export const DRAW_ORDER: readonly BoneId[] = [
   'forearmFar',
@@ -83,6 +84,29 @@ export const DRAW_ORDER: readonly BoneId[] = [
   'upperArmNear',
   'handNear',
 ];
+
+/**
+ * A partir de quanto o antebraço dobrado para a frente (graus, em relação ao braço)
+ * passa a ser desenhado na frente do braço. Esticado, a manga cobre o começo do
+ * antebraço; dobrado (guarda, volante, corrida), o antebraço cruza na frente da
+ * manga, senão a barra da manga fica por cima dele.
+ */
+export const FOREARM_FOLD = 85;
+
+/**
+ * Ordem de desenho da pose: a `DRAW_ORDER`, mas com o antebraço logo depois do
+ * braço (na frente dele, atrás da mão) quando o cotovelo está dobrado para a frente.
+ */
+export function drawOrder(pose: Pose): BoneId[] {
+  const order = [...DRAW_ORDER];
+  for (const side of ['Near', 'Far'] as const) {
+    if ((pose.rot[`forearm${side}`] ?? 0) > -FOREARM_FOLD) continue;
+    const forearm: BoneId = `forearm${side}`;
+    order.splice(order.indexOf(forearm), 1);
+    order.splice(order.indexOf(`upperArm${side}`) + 1, 0, forearm);
+  }
+  return order;
+}
 
 export type Expression = 'normal' | 'hurt' | 'taunt' | 'ko';
 export type HandPose = 'fist' | 'open' | 'taunt';

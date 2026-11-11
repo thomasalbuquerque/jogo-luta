@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BONE_IDS,
   DRAW_ORDER,
+  drawOrder,
   fitRig,
   frameFor,
   REST_POSE,
@@ -47,6 +48,17 @@ describe('esqueleto', () => {
     expect([...DRAW_ORDER].sort()).toEqual([...BONE_IDS].sort());
     const placed = solvePose(testSkin(), REST_POSE);
     expect(placed.map((p) => p.bone)).toEqual([...BONE_IDS]);
+  });
+
+  it('com o cotovelo dobrado o antebraço vai para a frente do braço, atrás da mão', () => {
+    expect(drawOrder(REST_POSE)).toEqual([...DRAW_ORDER]);
+    const bent = drawOrder({ ...REST_POSE, rot: { forearmNear: -120, forearmFar: -40 } });
+    const at = (bone: (typeof BONE_IDS)[number]) => bent.indexOf(bone);
+    expect(at('forearmNear')).toBeGreaterThan(at('upperArmNear'));
+    expect(at('forearmNear')).toBeLessThan(at('handNear'));
+    // o braço de trás, pouco dobrado, continua com a manga na frente
+    expect(at('forearmFar')).toBeLessThan(at('upperArmFar'));
+    expect([...bent].sort()).toEqual([...BONE_IDS].sort());
   });
 
   it('em repouso as pernas descem retas a partir do quadril', () => {
