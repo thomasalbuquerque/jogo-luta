@@ -8,7 +8,7 @@ export const SCHUMMAKI = defineCharacter({
   id: 'schummaki',
   name: 'Schummaki',
   blurb: 'Rusher: rápido no chão, pesado, pulo baixo. Vai pra cima.',
-  colors: { primary: '#1f6f78', secondary: '#c9d1d9' },
+  colors: { primary: '#d62839', secondary: '#f6f0e4' },
   stats: {
     weight: 112,
     walkSpeed: 7.4,
