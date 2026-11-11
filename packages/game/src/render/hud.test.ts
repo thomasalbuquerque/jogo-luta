@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { formatClock, resultText, stocksLabel } from './hud';
+import { countdownNumber, damageColor, formatClock, resultText } from './hud';
+
+function channels(color: number): [number, number, number] {
+  return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
+}
 
 describe('hud', () => {
   it('formata o tempo em m:ss', () => {
@@ -9,15 +13,32 @@ describe('hud', () => {
     expect(formatClock(0)).toBe('0:00');
   });
 
-  it('mostra stocks restantes e perdidos', () => {
-    expect(stocksLabel(3, 3)).toBe('●●●');
-    expect(stocksLabel(1, 3)).toBe('●○○');
-    expect(stocksLabel(0, 3)).toBe('○○○');
-  });
-
   it('anuncia o vencedor ou o empate', () => {
     expect(resultText({ winner: 0 })).toBe('P1 VENCEU!');
     expect(resultText({ winner: 1 })).toBe('P2 VENCEU!');
     expect(resultText({ winner: null })).toBe('EMPATE!');
+  });
+
+  it('o % esquenta: branco no 0, vermelho perto de 140, vinho depois', () => {
+    expect(damageColor(0)).toBe(0xffffff);
+    expect(damageColor(140)).toBe(0xf03a26);
+    expect(damageColor(999)).toBe(0x7a0a1f);
+    // cada vez menos verde e azul conforme sobe
+    let last = channels(damageColor(0));
+    for (let d = 10; d <= 300; d += 10) {
+      const c = channels(damageColor(d));
+      expect(c[1]).toBeLessThanOrEqual(last[1]);
+      expect(c[2]).toBeLessThanOrEqual(last[2]);
+      last = c;
+    }
+  });
+
+  it('contagem: 3, 2, 1 e depois nada', () => {
+    expect(countdownNumber(150, 150)).toBe(3);
+    expect(countdownNumber(101, 150)).toBe(3);
+    expect(countdownNumber(100, 150)).toBe(2);
+    expect(countdownNumber(50, 150)).toBe(1);
+    expect(countdownNumber(1, 150)).toBe(1);
+    expect(countdownNumber(0, 150)).toBe(0);
   });
 });
