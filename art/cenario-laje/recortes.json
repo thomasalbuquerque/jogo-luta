@@ -1,0 +1,32 @@
+{
+  "out": "stages/laje",
+  "scale": 1,
+  "atlasWidth": 2048,
+  "imageFormat": "webp",
+  "sheets": {
+    "pecas": { "file": "5-pecas.png" }
+  },
+  "parts": {
+    "building": {
+      "sheet": "pecas",
+      "rect": [78, 82, 1385, 343],
+      "pivot": [768, 135],
+      "sockets": { "wallLeft": [103, 300], "wallRight": [1432, 300] }
+    },
+    "plank": {
+      "sheet": "pecas",
+      "rect": [68, 618, 540, 104],
+      "pivot": [78, 636],
+      "sockets": { "right": [598, 636] }
+    },
+    "grill": { "sheet": "pecas", "rect": [654, 587, 215, 186], "pivot": [761, 766] },
+    "tank": { "sheet": "pecas", "rect": [915, 581, 217, 188], "pivot": [1023, 760] },
+    "chair": { "sheet": "pecas", "rect": [1147, 588, 147, 185], "pivot": [1220, 766] },
+    "cooler": { "sheet": "pecas", "rect": [1323, 648, 145, 121], "pivot": [1395, 763] }
+  },
+  "layers": {
+    "sky": { "file": "2-ceu.png", "key": false, "width": 1536 },
+    "far": { "file": "3-longe.png", "width": 1536 },
+    "mid": { "file": "4-meio.png", "width": 1536 }
+  }
+}
