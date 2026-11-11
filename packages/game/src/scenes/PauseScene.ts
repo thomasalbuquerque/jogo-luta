@@ -25,6 +25,8 @@ export class PauseScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.scale;
+    // por cima do HUD e do debug
+    this.scene.bringToTop();
     this.controls = new MenuInput();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.controls.destroy();

@@ -31,6 +31,8 @@ export class ResultScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const fight = this.fight;
     const state = fight.state;
+    // por cima do HUD e do debug
+    this.scene.bringToTop();
     this.controls = new MenuInput();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.controls.destroy();
