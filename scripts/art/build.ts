@@ -31,6 +31,7 @@ import {
 const ROOT = resolve(import.meta.dirname, '../..');
 const ART = join(ROOT, 'art');
 const OUT = join(ROOT, 'packages/game/public/assets');
+/** Largura máxima do atlas (o manifesto pode pedir outra com `atlasWidth`). */
 const ATLAS_MAX_WIDTH = 1024;
 /** Borda transparente em volta de cada peça antes de reduzir (o filtro não corta a borda). */
 const PAD = 3;
@@ -82,6 +83,10 @@ interface Manifest {
   out: string;
   /** px da folha → px da textura. */
   scale: number;
+  /** Largura máxima do atlas, para peças grandes (cenário). */
+  atlasWidth?: number;
+  /** Formato da imagem do atlas: png (padrão, traço nítido) ou webp (arte grande e suave). */
+  imageFormat?: 'png' | 'webp';
   /** Cor e largura (em px da folha) do traço dos cortes. */
   outline?: { color: string; width: number };
   sheets: Record<string, SheetDef>;
@@ -222,7 +227,7 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
 
   const pack = packShelves(
     parts.map((p) => p.img),
-    ATLAS_MAX_WIDTH,
+    manifest.atlasWidth ?? ATLAS_MAX_WIDTH,
   );
   const atlas = createImage(pack.w, pack.h);
   const frames: Record<string, unknown> = {};
@@ -245,13 +250,15 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
   });
 
   mkdirSync(dirname(outBase), { recursive: true });
-  const png = `${outBase}.png`;
-  await toSharp(atlas).png({ compressionLevel: 9, palette: false }).toFile(png);
+  const format = manifest.imageFormat ?? 'png';
+  const image = `${outBase}.${format}`;
+  if (format === 'webp') await writeWebp(atlas, image);
+  else await toSharp(atlas).png({ compressionLevel: 9, palette: false }).toFile(image);
   const json = {
     frames,
     meta: {
       app: 'scripts/art/build.ts',
-      image: `${manifest.out.split('/').at(-1) ?? ''}.png`,
+      image: `${manifest.out.split('/').at(-1) ?? ''}.${format}`,
       format: 'RGBA8888',
       size: { w: pack.w, h: pack.h },
       scale: '1',
@@ -259,7 +266,7 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
   };
   writeFileSync(`${outBase}.json`, `${JSON.stringify(json, null, 1)}\n`);
   console.log(
-    `  atlas: ${String(names.length)} peças, ${String(pack.w)}x${String(pack.h)} → ${png}`,
+    `  atlas: ${String(names.length)} peças, ${String(pack.w)}x${String(pack.h)} → ${image}`,
   );
 
   for (const [name, def] of Object.entries(manifest.layers ?? {})) {
