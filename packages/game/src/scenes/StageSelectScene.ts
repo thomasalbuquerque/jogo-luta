@@ -4,6 +4,9 @@ import { playSfx } from '../audio/sfx';
 import { addAudioHint } from '../audio/unlock';
 import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
+import { getOnline } from '../net/online';
+import { netLabel, onlineRoute } from '../net/route';
+import type { OnlineSession } from '../net/session';
 import { fadeIn, panel, titleText, UI, uiText } from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
 import type { MatchSetup } from './FightScene';
@@ -29,6 +32,7 @@ export function stageName(id: string): string {
 /**
  * Seleção de mapa: um cursor só, qualquer jogador mexe. ←/→ troca (quando houver
  * mais de um), Ataque/Pulo/Enter luta, Especial/Esc volta para os personagens.
+ * Online, quem escolhe é o host (P1); o outro jogador vê a escolha.
  */
 export class StageSelectScene extends Phaser.Scene {
   private controls!: MenuInput;
@@ -37,6 +41,9 @@ export class StageSelectScene extends Phaser.Scene {
   private name!: Phaser.GameObjects.Text;
   private blurb!: Phaser.GameObjects.Text;
   private arrows: Phaser.GameObjects.Text[] = [];
+  /** Sala online (null = jogo local). */
+  private net: OnlineSession | null = null;
+  private netText: Phaser.GameObjects.Text | null = null;
 
   constructor() {
     super('stage');
@@ -48,6 +55,8 @@ export class StageSelectScene extends Phaser.Scene {
       STAGES.findIndex((s) => s.id === data.stageId),
     );
     this.setup = { characters: data.characters ?? [], stageId: STAGES[this.index]?.id ?? '' };
+    this.net = getOnline();
+    this.netText = null;
   }
 
   create(): void {
@@ -93,32 +102,62 @@ export class StageSelectScene extends Phaser.Scene {
         ).setOrigin(0.5),
       );
     }
-    uiText(
-      this,
-      width / 2,
-      height - 22,
-      'Ataque, Pulo ou Enter: lutar      Especial ou Esc: trocar lutador',
-      { fontSize: '15px', color: UI.muted },
-    ).setOrigin(0.5);
+    if (this.net) {
+      this.netText = uiText(this, width - 16, 14, netLabel(this.net), {
+        fontSize: '16px',
+        fontStyle: 'bold',
+        color: '#ced4da',
+      }).setOrigin(1, 0);
+    }
+    const hint =
+      this.net?.role === 'guest'
+        ? 'O P1 escolhe o mapa e começa a luta      Especial ou Esc: trocar lutador'
+        : 'Ataque, Pulo ou Enter: lutar      Especial ou Esc: trocar lutador';
+    uiText(this, width / 2, height - 22, hint, { fontSize: '15px', color: UI.muted }).setOrigin(
+      0.5,
+    );
     this.show();
   }
 
   override update(_time: number, delta: number): void {
+    const net = this.net;
+    if (net) {
+      const route = onlineRoute(net, 'stage');
+      if (route) {
+        this.scene.start(route.scene, route.data);
+        return;
+      }
+      this.netText?.setText(netLabel(net));
+      // o host trocou o mapa: mostra o mesmo aqui
+      const screen = net.screen;
+      if (screen?.name === 'stage' && screen.stageId !== this.setup.stageId) {
+        this.index = Math.max(
+          0,
+          STAGES.findIndex((s) => s.id === screen.stageId),
+        );
+        this.show();
+      }
+    }
     const actions = this.controls.poll(PLAYERS, delta).any;
     const n = STAGES.length;
-    if (n > 1 && actions & (Menu.LEFT | Menu.RIGHT)) {
+    const picks = !net || net.role === 'host';
+    if (picks && n > 1 && actions & (Menu.LEFT | Menu.RIGHT)) {
       this.index = (this.index + (actions & Menu.LEFT ? n - 1 : 1)) % n;
       playSfx(this, 'ui_move');
       this.show();
+      net?.openStage(this.setup.characters, this.setup.stageId);
     }
     if (actions & Menu.BACK) {
       playSfx(this, 'ui_back');
-      this.scene.start('select', this.setup);
+      // online: a sala inteira volta para a seleção (quem entrou pede ao host)
+      if (net) net.openSelect();
+      else this.scene.start('select', this.setup);
       return;
     }
-    if (actions & (Menu.CONFIRM | Menu.START)) {
+    if (picks && actions & (Menu.CONFIRM | Menu.START)) {
       playSfx(this, 'ui_confirm');
-      this.scene.start('fight', this.setup);
+      if (net) net.startMatch(this.setup.characters, this.setup.stageId);
+      else this.scene.start('fight', this.setup);
     }
   }
 
