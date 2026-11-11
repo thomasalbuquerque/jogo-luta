@@ -1,6 +1,6 @@
 import { Button } from '@jogo-luta/sim';
 import { describe, expect, it } from 'vitest';
-import { allCodes, maskFromKeys, maskFromPad, P1_KEYS, P2_KEYS } from './bindings';
+import { allCodes, DEFAULT_PAD, maskFromKeys, maskFromPad, P1_KEYS, P2_KEYS } from './bindings';
 
 describe('bindings', () => {
   it('teclado: cada jogador só enxerga as próprias teclas', () => {
@@ -22,5 +22,13 @@ describe('bindings', () => {
       Button.JUMP | Button.DODGE | Button.DOWN,
     );
     expect(maskFromPad({ buttons: [], axes: [-0.8, -0.6] })).toBe(Button.LEFT | Button.UP);
+  });
+
+  it('gamepad remapeado: segue o mapa novo; o D-pad continua igual', () => {
+    const buttons = Array.from({ length: 17 }, () => false);
+    buttons[2] = true; // X
+    buttons[14] = true; // D-pad esquerda
+    const pad = { ...DEFAULT_PAD, JUMP: [2], ATTACK: [0] };
+    expect(maskFromPad({ buttons, axes: [] }, pad)).toBe(Button.JUMP | Button.LEFT);
   });
 });
