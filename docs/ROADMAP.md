@@ -137,7 +137,7 @@ Objetivo: a mesma sequência de inputs sempre produz exatamente a mesma luta. Se
 
 - [x] Determinismo do `sim`: nada de `Math.random` (usar RNG com seed), nada de tempo real, nada de `Math.sin`/`cos`/`pow` na lógica, porque podem variar entre navegadores. Usar tabela de valores ou inteiros (ponto fixo).
 - [x] Estado do jogo serializável e barato de clonar (snapshot e restore). Base dos replays, da checagem de dessincronização e do rollback, se ele vier (Etapa 12).
-- [ ] Teste automatizado: rodar 10 mil ticks com inputs aleatórios (mesma seed) duas vezes e comparar o hash do estado.
+- [x] Teste automatizado: rodar 10 mil ticks com inputs aleatórios (mesma seed) duas vezes e comparar o hash do estado.
 - [ ] Replays: gravar seed + lista de inputs e reproduzir. De brinde, dá para compartilhar lances no grupo.
 - [ ] Simular latência localmente, atrasando os inputs de um jogador em N frames, para sentir o netcode antes de ter rede.
 
