@@ -16,10 +16,25 @@ const VOLUME: Readonly<Record<SfxName, number>> = {
   counter: 0.6,
   ko: 1,
   respawn: 0.45,
+  count: 0.45,
+  go: 0.6,
+  ui_move: 0.18,
+  ui_confirm: 0.3,
+  ui_back: 0.25,
+  ui_error: 0.3,
 };
 
 /** Variação aleatória de tom em cada toque (cents), para não soar repetido. */
 const DETUNE_SPREAD = 160;
+/** Sons que tocam sempre no mesmo tom (contagem e menus). */
+const STEADY: ReadonlySet<SfxName> = new Set([
+  'count',
+  'go',
+  'ui_move',
+  'ui_confirm',
+  'ui_back',
+  'ui_error',
+]);
 
 export function sfxKey(name: SfxName): string {
   return `sfx/${name}`;
@@ -69,6 +84,6 @@ export function playSfx(scene: Phaser.Scene, name: SfxName, opts: SfxOptions = {
   if (scene.sound.locked || !scene.cache.audio.exists(key)) return;
   scene.sound.play(key, {
     volume: VOLUME[name] * (opts.volume ?? 1),
-    detune: (opts.detune ?? 0) + (Math.random() - 0.5) * DETUNE_SPREAD,
+    detune: (opts.detune ?? 0) + (STEADY.has(name) ? 0 : (Math.random() - 0.5) * DETUNE_SPREAD),
   });
 }
