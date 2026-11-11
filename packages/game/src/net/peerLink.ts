@@ -1,6 +1,6 @@
 import { Peer, type DataConnection, type PeerOptions } from 'peerjs';
 import type { NetConfig } from './config';
-import type { ControlMessage } from './protocol';
+import { MAX_INPUT_PACKET_BYTES, type ControlMessage } from './protocol';
 import { roomPeerId } from './roomCode';
 import type { EndReason, Link, Route, Transport } from './transport';
 
@@ -15,7 +15,7 @@ const DIAL_TIMEOUT_MS = 12000;
 /** Espera entre tentativas (reconexão com a sala ou com o servidor de sinalização). */
 const RETRY_MS = 2000;
 /** Maior pacote aceito pelo caminho de reserva (canal confiável). */
-const MAX_FALLBACK_BYTES = 256;
+const MAX_FALLBACK_BYTES = MAX_INPUT_PACKET_BYTES;
 
 interface FallbackPacket {
   t: 'raw';
@@ -174,8 +174,10 @@ class PeerTransport implements Transport {
 
 /**
  * Sala no PeerJS: o host se registra no servidor de sinalização com o código da
- * sala; quem entra disca para esse id. A partir daí o tráfego é direto (P2P).
- * Quando a conexão cai, quem entrou disca de novo; o host fica esperando.
+ * sala; quem entra disca para esse id. A partir daí o tráfego é direto (P2P). A
+ * sala é uma estrela: o host aceita uma conexão de cada um que entra (quem passa
+ * do limite a sessão recusa), e quem entra só se conecta ao host. Quando a
+ * conexão cai, quem entrou disca de novo; o host fica esperando.
  */
 export class PeerLink implements Link {
   onReady: (() => void) | null = null;
@@ -186,7 +188,8 @@ export class PeerLink implements Link {
   /** O servidor de sinalização já respondeu alguma vez. */
   private registered = false;
   private everConnected = false;
-  private live: PeerTransport | null = null;
+  /** Conexões abertas (quem entra tem no máximo uma: a do host). */
+  private readonly live = new Set<PeerTransport>();
   private dialing: DataConnection | null = null;
   private readonly timers = new Set<number>();
 
@@ -207,6 +210,11 @@ export class PeerLink implements Link {
       if (this.role === 'guest') this.dial();
     });
     this.peer.on('connection', (conn) => {
+      // só o host recebe conexões: quem entra não fala com os outros que entraram
+      if (this.role !== 'host') {
+        conn.close();
+        return;
+      }
       conn.on('open', () => {
         this.adopt(conn);
       });
@@ -220,9 +228,10 @@ export class PeerLink implements Link {
     });
   }
 
-  /** Conexão P2P em uso: direta/relay e se o canal de inputs sem retransmissão abriu. */
+  /** As conexões abertas já usam o canal de inputs sem retransmissão (e não o de reserva). */
   get unreliable(): boolean {
-    return this.live?.unreliable ?? false;
+    const live = [...this.live];
+    return live.length > 0 && live.every((t) => t.unreliable);
   }
 
   close(): void {
@@ -287,7 +296,7 @@ export class PeerLink implements Link {
 
   /** Quem entra: disca para a sala (a 1ª vez e a cada queda). */
   private readonly dial = (): void => {
-    if (this.closed || this.role !== 'guest' || this.live || this.dialing) return;
+    if (this.closed || this.role !== 'guest' || this.live.size > 0 || this.dialing) return;
     if (this.peer.disconnected) {
       // sem servidor de sinalização não dá para discar: o 'open' dele disca de novo
       this.reconnectSignaling();
@@ -328,10 +337,10 @@ export class PeerLink implements Link {
     }
     this.everConnected = true;
     const transport = new PeerTransport(conn, () => {
-      if (this.live === transport) this.live = null;
+      this.live.delete(transport);
       this.later(this.dial, RETRY_MS / 2);
     });
-    this.live = transport;
+    this.live.add(transport);
     this.onTransport?.(transport);
   }
 }

@@ -29,7 +29,7 @@ const MAX_ROOM_TRIES = 5;
 
 /**
  * Jogar online: criar uma sala (aparece um código de 4 letras para mandar no
- * grupo) ou entrar na sala de um amigo com o código. Com os dois na sala, vai
+ * grupo) ou entrar na sala de um amigo com o código. Com alguém na sala, vai
  * para a seleção de personagem.
  */
 export class OnlineScene extends Phaser.Scene {
@@ -135,7 +135,7 @@ export class OnlineScene extends Phaser.Scene {
       this,
       width / 2,
       height - 24,
-      'Um cria a sala e manda o código; o outro entra com ele. Cada um joga no seu PC.',
+      'Um cria a sala e manda o código; até 3 amigos entram com ele. Cada um joga no seu PC.',
       { fontSize: '15px', color: UI.muted },
     ).setOrigin(0.5);
 
@@ -206,7 +206,7 @@ export class OnlineScene extends Phaser.Scene {
         const ready = code !== null;
         this.label.setText('CÓDIGO DA SALA');
         this.codeText.setText(code ?? '····');
-        this.status.setText(ready ? 'Esperando o amigo entrar…' : 'Criando a sala…');
+        this.status.setText(ready ? 'Esperando os amigos entrarem…' : 'Criando a sala…');
         this.hint.setText(
           ready
             ? `Mande o código no grupo.\n${this.copied ? 'Link da sala copiado!' : 'C (ou clique) copia o link que já entra na sala.'}\nEsc: cancelar`

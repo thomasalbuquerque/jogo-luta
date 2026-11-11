@@ -103,7 +103,7 @@ export class DebugScene extends Phaser.Scene {
     if (!net) return [];
     const match = this.fight.onlineMatch;
     const parts = [
-      `online ${net.role} sala ${net.code}`,
+      `online ${net.role} sala ${net.code} P${String(net.local + 1)} de ${String(net.players)}`,
       net.status,
       `${pingLabel(net.ping.rtt)} ±${net.ping.jitter.toFixed(0)}`,
       net.route ?? 'rota ?',
@@ -115,7 +115,7 @@ export class DebugScene extends Phaser.Scene {
         `folga ${String(match.lockstep.remoteLead)}`,
         `sem confirmar ${String(match.lockstep.unacked)}`,
         desync
-          ? `DESSINCRONIZOU no tick ${String(desync.tick)}`
+          ? `DESSINCRONIZOU no tick ${String(desync.tick)} (P${String(desync.player + 1)})`
           : `hashes ok ${String(match.desync.checked)}`,
       );
     }

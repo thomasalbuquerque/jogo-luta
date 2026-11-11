@@ -7,6 +7,7 @@ import {
   pingLabel,
   PingMeter,
   pingQuality,
+  starPing,
 } from './ping';
 
 describe('PingMeter', () => {
@@ -57,6 +58,32 @@ describe('delayForPing', () => {
 
   it('sem medida, usa o padrão', () => {
     expect(delayForPing(null)).toBe(DEFAULT_NET_DELAY);
+  });
+});
+
+describe('starPing', () => {
+  it('com um só que entrou, é o ping dele', () => {
+    expect(starPing([{ rtt: 30, jitter: 4 }])).toEqual({ rtt: 30, jitter: 4 });
+  });
+
+  it('entre dois que entraram, o input passa pelo host: soma os dois maiores', () => {
+    const pings = [
+      { rtt: 20, jitter: 1 },
+      { rtt: 50, jitter: 2 },
+      { rtt: 30, jitter: 9 },
+    ];
+    expect(starPing(pings)).toEqual({ rtt: 80, jitter: 11 });
+    expect(delayForPing(80, 11)).toBeGreaterThan(delayForPing(50, 2));
+  });
+
+  it('sem medida de alguém (ou de ninguém), fica sem medida', () => {
+    expect(starPing([]).rtt).toBeNull();
+    expect(
+      starPing([
+        { rtt: 20, jitter: 0 },
+        { rtt: null, jitter: 0 },
+      ]).rtt,
+    ).toBeNull();
   });
 });
 
