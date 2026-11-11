@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import {
   DRAW_ORDER,
+  drawOrder,
   fitRig,
   poseBounds,
   skinFromAtlas,
@@ -63,6 +64,8 @@ export class FighterView {
   private readonly skin: Skin;
   private readonly fit: RigFit;
   private readonly textureKey: string;
+  /** Ordem de desenho atual (muda quando o cotovelo dobra). */
+  private order = DRAW_ORDER.join();
 
   constructor(scene: Phaser.Scene, characterId: string, hurtboxHeight: number) {
     const { skin, fit } = skinOf(scene, characterId);
@@ -95,6 +98,15 @@ export class FighterView {
       img.setOrigin(p.originX, p.originY);
       img.setPosition(p.x, p.y - this.fit.groundY + lift);
       img.setRotation(p.rotation);
+    }
+    const order = drawOrder(pose);
+    const key = order.join();
+    if (key !== this.order) {
+      this.order = key;
+      for (const bone of order) {
+        const img = this.images.get(bone);
+        if (img) this.container.bringToTop(img);
+      }
     }
     const unit = this.height / 100;
     this.container.setPosition(x + pose.x * unit * facing, y + pose.y * unit);
