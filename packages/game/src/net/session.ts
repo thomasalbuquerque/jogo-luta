@@ -281,7 +281,9 @@ export class OnlineSession {
         break;
       case 'input':
         // pacote atrasado de outra partida não entra nesta
-        if (this.match && packet.seq === this.match.seq) this.match.lockstep.receive(packet);
+        if (this.match && packet.seq === this.match.seq) {
+          this.match.lockstep.receive(this.remote, packet, [this.remote]);
+        }
         break;
     }
   }
@@ -319,7 +321,7 @@ export class OnlineSession {
       screen.name === 'fight'
         ? {
             ...screen,
-            lockstep: new Lockstep(this.local, screen.delay),
+            lockstep: new Lockstep(screen.characters.length, this.local, screen.delay),
             desync: new DesyncDetector(),
           }
         : null;
@@ -387,7 +389,8 @@ export class OnlineSession {
   sendInputs(): void {
     const match = this.match;
     if (!match || this.status !== 'connected') return;
-    this.transport?.sendPacket(encodeInputPacket(match.seq, match.lockstep.outgoing()));
+    const batch = match.lockstep.outgoing(this.remote, [this.local]);
+    this.transport?.sendPacket(encodeInputPacket(match.seq, batch));
   }
 
   /** Hash do estado deste lado depois do tick `tick`: guarda, manda e compara. */

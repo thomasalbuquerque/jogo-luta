@@ -1,17 +1,21 @@
 import { z } from 'zod';
 import { hasCharacter, INPUT_BITS, MAX_INPUT_DELAY, STAGES } from '@jogo-luta/sim';
-import { MAX_PACKET_INPUTS, type InputBatch } from './lockstep';
+import { MAX_PACKET_INPUTS, type InputBatch, type InputRun } from './lockstep';
 
 /**
  * Versão do protocolo do online. Muda quando uma mensagem muda de formato: os
- * dois lados precisam da mesma (e do mesmo build do jogo, para a luta ser igual).
+ * lados precisam da mesma (e do mesmo build do jogo, para a luta ser igual).
  */
-export const NET_VERSION = 1;
+export const NET_VERSION = 2;
+
+/** Jogadores numa sala online, no máximo (o host e mais 3). */
+export const MAX_ROOM_PLAYERS = 4;
 
 const uint32 = z.number().int().min(0).max(0xffffffff);
 const characters = z
   .array(z.string().refine(hasCharacter, { error: 'personagem desconhecido' }))
-  .length(2);
+  .min(2)
+  .max(MAX_ROOM_PLAYERS);
 const stageId = z.string().refine((id) => STAGES.some((s) => s.id === id), {
   error: 'mapa desconhecido',
 });
@@ -83,20 +87,48 @@ export type Packet =
 const TYPE_INPUT = 1;
 const TYPE_PING = 2;
 const TYPE_PONG = 3;
-/** tipo (1) + seq, ack e start (4 cada) + quantidade (1) */
-const INPUT_HEADER = 14;
+/** tipo (1) + seq (4) + jogadores (1) */
+const INPUT_HEADER = 6;
+/** jogador (1) + start (4) + quantidade (1) */
+const RUN_HEADER = 6;
 
-/** [tipo][seq u32][ack u32][start u32][n u8][n × u16], little-endian. */
+/** Maior pacote de inputs possível, em bytes. */
+export const MAX_INPUT_PACKET_BYTES =
+  INPUT_HEADER + MAX_ROOM_PLAYERS * 4 + 1 + MAX_ROOM_PLAYERS * (RUN_HEADER + MAX_PACKET_INPUTS * 2);
+
+/**
+ * [tipo][seq u32][n u8][n × have u32][pedaços u8], e cada pedaço
+ * [jogador u8][start u32][k u8][k × u16], tudo little-endian.
+ */
 export function encodeInputPacket(seq: number, batch: InputBatch): Uint8Array<ArrayBuffer> {
-  const count = Math.min(batch.masks.length, MAX_PACKET_INPUTS);
-  const bytes = new Uint8Array(new ArrayBuffer(INPUT_HEADER + count * 2));
+  const players = Math.min(batch.have.length, MAX_ROOM_PLAYERS);
+  const runs = batch.runs
+    .filter((run) => run.player < players)
+    .slice(0, players)
+    .map((run) => ({ ...run, masks: run.masks.slice(0, MAX_PACKET_INPUTS) }));
+  const size =
+    INPUT_HEADER +
+    players * 4 +
+    1 +
+    runs.reduce((total, run) => total + RUN_HEADER + run.masks.length * 2, 0);
+  const bytes = new Uint8Array(new ArrayBuffer(size));
   const view = new DataView(bytes.buffer);
   view.setUint8(0, TYPE_INPUT);
   view.setUint32(1, seq, true);
-  view.setUint32(5, batch.ack, true);
-  view.setUint32(9, batch.start, true);
-  view.setUint8(13, count);
-  for (let i = 0; i < count; i++) view.setUint16(INPUT_HEADER + i * 2, batch.masks[i] ?? 0, true);
+  view.setUint8(5, players);
+  let at = INPUT_HEADER;
+  for (let p = 0; p < players; p++, at += 4) view.setUint32(at, batch.have[p] ?? 0, true);
+  view.setUint8(at++, runs.length);
+  for (const run of runs) {
+    view.setUint8(at, run.player);
+    view.setUint32(at + 1, run.start, true);
+    view.setUint8(at + 5, run.masks.length);
+    at += RUN_HEADER;
+    for (const mask of run.masks) {
+      view.setUint16(at, mask, true);
+      at += 2;
+    }
+  }
   return bytes;
 }
 
@@ -121,17 +153,27 @@ export function decodePacket(bytes: Uint8Array): Packet | null {
     return { type: type === TYPE_PING ? 'ping' : 'pong', time };
   }
   if (type !== TYPE_INPUT || bytes.length < INPUT_HEADER) return null;
-  const count = view.getUint8(13);
-  if (count > MAX_PACKET_INPUTS || bytes.length !== INPUT_HEADER + count * 2) return null;
-  const masks: number[] = [];
-  for (let i = 0; i < count; i++) {
-    masks.push(view.getUint16(INPUT_HEADER + i * 2, true) & INPUT_BITS);
+  const players = view.getUint8(5);
+  if (players < 1 || players > MAX_ROOM_PLAYERS) return null;
+  let at = INPUT_HEADER;
+  if (bytes.length < at + players * 4 + 1) return null;
+  const have: number[] = [];
+  for (let p = 0; p < players; p++, at += 4) have.push(view.getUint32(at, true));
+  const count = view.getUint8(at++);
+  if (count > players) return null;
+  const runs: InputRun[] = [];
+  for (let r = 0; r < count; r++) {
+    if (bytes.length < at + RUN_HEADER) return null;
+    const player = view.getUint8(at);
+    const start = view.getUint32(at + 1, true);
+    const k = view.getUint8(at + 5);
+    at += RUN_HEADER;
+    if (player >= players || k > MAX_PACKET_INPUTS || bytes.length < at + k * 2) return null;
+    if (runs.some((run) => run.player === player)) return null;
+    const masks: number[] = [];
+    for (let i = 0; i < k; i++, at += 2) masks.push(view.getUint16(at, true) & INPUT_BITS);
+    runs.push({ player, start, masks });
   }
-  return {
-    type: 'input',
-    seq: view.getUint32(1, true),
-    ack: view.getUint32(5, true),
-    start: view.getUint32(9, true),
-    masks,
-  };
+  if (at !== bytes.length) return null;
+  return { type: 'input', seq: view.getUint32(1, true), have, runs };
 }

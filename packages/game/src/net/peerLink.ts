@@ -1,6 +1,6 @@
 import { Peer, type DataConnection, type PeerOptions } from 'peerjs';
 import type { NetConfig } from './config';
-import type { ControlMessage } from './protocol';
+import { MAX_INPUT_PACKET_BYTES, type ControlMessage } from './protocol';
 import { roomPeerId } from './roomCode';
 import type { EndReason, Link, Route, Transport } from './transport';
 
@@ -15,7 +15,7 @@ const DIAL_TIMEOUT_MS = 12000;
 /** Espera entre tentativas (reconexão com a sala ou com o servidor de sinalização). */
 const RETRY_MS = 2000;
 /** Maior pacote aceito pelo caminho de reserva (canal confiável). */
-const MAX_FALLBACK_BYTES = 256;
+const MAX_FALLBACK_BYTES = MAX_INPUT_PACKET_BYTES;
 
 interface FallbackPacket {
   t: 'raw';
