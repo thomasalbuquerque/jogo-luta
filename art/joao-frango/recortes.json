@@ -177,7 +177,7 @@
           [120, 700]
         ]
       ],
-      "stretch": [0.97, 0.97]
+      "stretch": [0.78, 0.78]
     },
     "hand_open": {
       "sheet": "pecas",
@@ -207,7 +207,7 @@
           [870, 720]
         ]
       ],
-      "stretch": [0.95, 0.95]
+      "stretch": [0.76, 0.76]
     },
     "hand_taunt": {
       "sheet": "pecas",
