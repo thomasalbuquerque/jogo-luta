@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { PLAYABLE_CHARACTERS } from '@jogo-luta/sim';
 import { characterAtlasPath, characterTextureKey } from '../render/FighterView';
+import { createFxTextures } from '../render/fxTextures';
 import { loadStages } from '../render/stageView';
 
 /** Carrega a arte (atlas dos personagens e o cenário) e abre a primeira tela. */
@@ -29,6 +30,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
+    createFxTextures(this);
     // Só em dev: ?rig abre o visualizador de animações.
     const viewer = import.meta.env.DEV && new URLSearchParams(location.search).has('rig');
     this.scene.start(viewer ? 'rig-viewer' : 'select');

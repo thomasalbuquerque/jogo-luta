@@ -135,6 +135,12 @@ export class FighterView {
     return this;
   }
 
+  /** Clarão do impacto: pinta as peças inteiras de `color` (desfaz com `setTint`). */
+  setFlash(color = 0xffffff): this {
+    for (const img of this.images.values()) img.setTintFill(color);
+    return this;
+  }
+
   setDepth(depth: number): this {
     this.container.setDepth(depth);
     return this;
