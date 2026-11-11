@@ -5,6 +5,7 @@ import { addAudioHint } from '../audio/unlock';
 import { countdownNumber, damageColor, formatClock } from '../render/hud';
 import { KoBurstLayer } from '../render/koBurst';
 import { pingLabel, pingQuality } from '../net/ping';
+import { waitingLabel } from '../net/route';
 import { UNSTABLE_MS } from '../net/session';
 import type { EdgePoint } from '../render/koEdge';
 import { addPortrait } from '../ui/portrait';
@@ -16,9 +17,11 @@ const DAMAGE_POP_MAX = 1.6;
 const DAMAGE_POP_RATE = 9;
 const PANEL_W = 300;
 const PANEL_H = 92;
+/** Espaço entre os painéis, com 3 ou 4 lutadores. */
+const PANEL_GAP = 12;
 const PORTRAIT = 84;
 const STOCK_ICON = 26;
-/** Online: parado esperando o input do outro por mais que isto, avisa na tela (ms). */
+/** Online: parado esperando o input de alguém por mais que isto, avisa na tela (ms). */
 const WAITING_NOTICE_MS = 400;
 /** Cor do ping: bom, médio, ruim. */
 const PING_COLORS = { good: '#80ed99', ok: '#ffd166', bad: '#ff5a3c' } as const;
@@ -70,10 +73,15 @@ export class HudScene extends Phaser.Scene {
     this.pop = fighters.map(() => 1);
     this.shownCount = 0;
     this.goMs = 0;
+    const n = fighters.length;
+    // com 2, um de cada lado; com mais, lado a lado e centralizados (4 cabem na largura)
+    const row = n * PANEL_W + (n - 1) * PANEL_GAP;
     this.panels = fighters.map((f, i) => {
-      const n = fighters.length;
-      const cx = (width * (i + 1)) / (n + 1) + (n === 2 ? (i === 0 ? -70 : 70) : 0);
-      return this.drawPanel(f, cx - PANEL_W / 2, height - PANEL_H - 14);
+      const x =
+        n === 2
+          ? (width * (i + 1)) / 3 + (i === 0 ? -70 : 70) - PANEL_W / 2
+          : (width - row) / 2 + i * (PANEL_W + PANEL_GAP);
+      return this.drawPanel(f, x, height - PANEL_H - 14);
     });
     this.clock = uiText(this, width / 2, 14, '', {
       fontFamily: UI.titleFont,
@@ -155,7 +163,7 @@ export class HudScene extends Phaser.Scene {
     g.fillStyle(0x0b0e16, 0.35);
     g.fillCircle(px, py, PORTRAIT / 2 - 4);
     const portrait = addPortrait(this, f.character, px, py - 4, PORTRAIT + 8);
-    const you = this.fight.net?.local === f.id ? ' VOCÊ' : '';
+    const you = this.fight.net?.match?.local === f.id ? ' VOCÊ' : '';
     uiText(this, px, y + PANEL_H - 6, `P${String(f.id + 1)}${you}`, {
       fontFamily: UI.titleFont,
       fontSize: '18px',
@@ -252,8 +260,12 @@ export class HudScene extends Phaser.Scene {
       banner = `Reconectando… ${String(Math.ceil(net.reconnectLeftMs / 1000))} s`;
     } else if (!net.ended && match && !fight.ended) {
       if (net.silentMs > UNSTABLE_MS) banner = 'Conexão instável…';
-      else if (fight.stalledMs > WAITING_NOTICE_MS) banner = 'Esperando o outro jogador…';
+      else if (fight.stalledMs > WAITING_NOTICE_MS) {
+        banner = waitingLabel(match.characters.length, match.lockstep.waiting());
+      }
     }
+    // quem entrou ou saiu da sala, quando não há aviso de conexão
+    if (!banner) banner = net.notice;
     this.netBanner.setVisible(banner !== '').setText(banner);
   }
 
