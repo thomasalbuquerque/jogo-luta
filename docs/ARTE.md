@@ -6,12 +6,12 @@ regra) e o modelo de ficha para os próximos personagens.
 
 ## Visão geral
 
-| Parte | O quê            | O que sai                                                             | Imagens | Situação |
-| ----- | ---------------- | --------------------------------------------------------------------- | ------- | -------- |
-| 1     | Estilo do jogo   | `style.png` (boneco no estilo do jogo) e `shape.png` (molde do corpo) | 2       | ✅ feita |
-| 2     | Schummaki        | Conceito, cabeças com expressões, peças do corpo, efeitos, figurinha  | 5       |          |
-| 3     | João Frango      | Igual à parte 2                                                       | 5       |          |
-| 4     | Cenário (a laje) | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       |          |
+| Parte | O quê            | O que sai                                                             | Imagens | Situação    |
+| ----- | ---------------- | --------------------------------------------------------------------- | ------- | ----------- |
+| 1     | Estilo do jogo   | `style.png` (boneco no estilo do jogo) e `shape.png` (molde do corpo) | 2       | ✅ feita    |
+| 2     | Schummaki        | Conceito, cabeças com expressões, peças do corpo, efeitos, figurinha  | 5       | conceito ✅ |
+| 3     | João Frango      | Igual à parte 2                                                       | 5       |             |
+| 4     | Cenário (a laje) | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       |             |
 
 As partes 2 a 4 podem ser feitas por dois caminhos. Os dois usam as mesmas imagens de referência e
 salvam com os mesmos nomes:
@@ -83,31 +83,27 @@ O que muda em relação ao ChatGPT:
 
 ### Parte 2 — Schummaki (Firefly)
 
-#### 2.1 Conceito → `1-conceito.png`
+#### 2.1 Conceito → `1-conceito.png` ✅
 
-O rosto do Schummaki já está pronto na imagem base `art/schummaki/0-base.webp`: corpo de frente,
-pose de luta em 3/4 e 3 cabeças. Este passo **não gera do zero**: ele só troca a roupa da base pelo
-visual do jogo (jaqueta vermelha, tênis branco com vermelho). Rosto, cabelo, poses e expressões
-ficam iguais.
+**Feito:** `art/schummaki/1-conceito.png`. Corpo de frente, pose de luta em 3/4 virada para a
+direita e 3 cabeças (sorrindo, piscando, sério). Ele define o personagem: as próximas imagens copiam
+dele. Também serve de modelo de layout e traço para o conceito dos outros amigos (veja o 3.1). Se
+ainda não mandou para o Schummaki aprovar, mande antes de seguir.
 
-**Formato:** Wide (4:3). **Referências:** `0-base.webp` (só ela).
+Como ele saiu, para repetir quando precisar (o truque **"rosto de uma, roupa de outra"**):
+
+1. Uma geração acertou o rosto; outra acertou a roupa, mas na cor errada (azul-petróleo).
+2. No Paint, recortei a roupa da segunda imagem.
+3. Mandei as duas em _Reference images_, a folha com o rosto certo e o recorte da roupa, com este
+   texto:
 
 ```text
-Edit the attached character sheet. Keep exactly the same: face, hair, beard, expressions, poses, proportions, layout and drawing style. Change only the outfit:
-- open red (#D62839) zip jacket in a casual sporty cut, with two off-white stripes down each sleeve, no logos, no patches;
-- graphite (#2E3138) t-shirt under the jacket;
-- graphite board shorts instead of the khaki shorts;
-- graphite fingerless driving gloves;
-- chunky white sneakers with red details: a red side stripe and a red heel, white soles, no logos.
-No cap, no helmet, no racing suit, no numbers, no text. Plain light-gray background.
+Edit the attached character sheet. Keep exactly the same: face, hair, beard, expressions, poses, proportions, layout and drawing style.
+Change only the outfit: the outfit should be exactly like the attached petrol-blue outfit, you should only change the colors:
+jacket: open red (#D62839) with white and graphite (#2E3138)
+shorts: graphite (#2E3138)
+sneakers: white with red (#D62839) details
 ```
-
-**Confira:** o rosto continua igual ao da base? Se o Firefly mexeu no rosto, gere de novo. Se só um
-detalhe da roupa saiu errado, corrija com a tabela [Se der errado no Firefly](#se-der-errado-no-firefly).
-A base não tem a vista de perfil; tudo bem, o jogo usa a vista 3/4. Este é o desenho que define o
-personagem; as próximas imagens copiam dele.
-
-**Salve como:** `art/schummaki/1-conceito.png`. **Mande para o amigo aprovar antes de seguir.**
 
 #### 2.2 Cabeças com expressões → `2-cabecas.png`
 
@@ -175,14 +171,20 @@ Os mesmos 5 passos da parte 2, com os textos do João. Salve em `art/joao-frango
 
 #### 3.1 Conceito → `1-conceito.png`
 
-**Formato:** Wide (4:3). **Referências:** `style.png` + 2 ou 3 fotos do João.
+O conceito do Schummaki entra como referência para o João sair com o mesmo layout e o mesmo traço. O
+texto manda copiar só o estilo e a disposição, não o rosto nem a roupa.
+
+**Formato:** Wide (4:3). **Referências:** `art/schummaki/1-conceito.png` + 2 ou 3 fotos do João.
 
 ```text
-Character concept sheet of my friend from the attached photos, drawn in the exact style of the attached cartoon reference (do not copy that character's face). Keep his real face shape, hair, nose, eyebrows and facial hair; exaggerate his most distinctive features by about 30%.
+Character concept sheet of my friend from the attached photos. Copy only the drawing style and the exact layout of the attached cartoon sheet, not its face, hair or outfit: front view standing, 3/4 view in a fighting stance facing right, and 3 heads on the right (smiling, winking, sleepy yawn). Keep his real face shape, hair, nose, eyebrows and facial hair; exaggerate his most distinctive features by about 30%.
 Character: João Frango, sleepy restaurant owner from Rio, slim build, half-closed sleepy eyes, easygoing smile. Off-white chef apron over an orange (#F28C28) t-shirt; corn-yellow (#F6C945) cap with a red-orange chicken comb sticking out on top; casual shorts; flip-flops. No text on the apron.
-The same character 3 times side by side, same scale, feet aligned: front view, 3/4 view facing right, side profile facing right. Neutral standing pose.
-Big head (3 heads tall), bold dark plum-brown outline, flat 2-tone cel shading, light from above. Plain light-gray background. No text, logos or numbers.
+Big head, bold dark outline, flat 2-tone cel shading, light from above. Plain light-gray background. No text, logos or numbers.
 ```
+
+**Confira:** dá para reconhecer o João? Não veio nada do Schummaki (rosto, topete, jaqueta
+vermelha)? Se uma geração acertar o rosto e outra a roupa, junte as duas com o truque "rosto de uma,
+roupa de outra" do 2.1.
 
 **Salve como:** `art/joao-frango/1-conceito.png`. **Mande para o amigo aprovar antes de seguir.**
 
@@ -314,8 +316,8 @@ Copie os textos da parte 3 (João Frango, feito do zero) e troque só o que é d
 - **Efeitos (3.4):** troque a lista de itens pelos efeitos do especial dele.
 - **Cabeças (3.2) e figurinha (3.5):** iguais para todos, não mude nada.
 
-Se você já tiver uma imagem do amigo de que gostou, faça como no Schummaki: use o texto do 2.1,
-anexe só essa imagem e troque a lista de roupas.
+Se uma geração acertar o rosto e outra a roupa, junte as duas com o truque "rosto de uma, roupa de
+outra" do 2.1.
 
 Antes de gerar, confira se o texto passou de 1.000 caracteres (o Firefly corta o excesso).
 
@@ -325,15 +327,16 @@ Primeiro, tente gerar de novo com o mesmo texto: cada geração sai um pouco dif
 saiu quase certa, corrija só o defeito: anexe **a imagem com defeito** em _Reference images_ (mais
 as fotos, quando o problema é o rosto) e mande só a frase da tabela.
 
-| Problema                             | Anexe                       | Mande                                                                                                                                                                   |
-| ------------------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Não parece o amigo                   | A imagem + 2 fotos do rosto | `Edit the attached cartoon: redo only the face so it clearly looks like the man in the attached photos (nose, eyebrows, jaw, hairline). Keep everything else the same.` |
-| Ficou genérico, parecendo outro jogo | A imagem                    | `Edit the attached cartoon: bigger head (1/3 of the height), stronger caricature of his most distinctive features, flat 2-tone shading. Keep everything else the same.` |
-| Fundo xadrez, sujo ou com sombra     | A imagem                    | `Edit the attached image: replace the whole background with solid flat magenta (#FF00FF). Keep everything else the same.`                                               |
-| Peças encostando ou cortadas         | A imagem                    | `Redo the attached parts sheet with more empty space between all parts, every part complete, with rounded joint ends. Same character, same style.`                      |
-| Apareceu texto ou logo               | A imagem                    | `Edit the attached image: remove all text, letters, numbers and logos. Keep everything else the same.`                                                                  |
-| Virado para o lado errado            | A imagem                    | `Edit the attached image: turn it to a 3/4 view facing right. Keep everything else the same.`                                                                           |
-| Luz vindo de um lado                 | A imagem                    | `Edit the attached image: light from straight above, shadows only under the chin, arms and lower parts. Keep everything else the same.`                                 |
+| Problema                                | Anexe                                               | Mande                                                                                                                                                                                                     |
+| --------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Não parece o amigo                      | A imagem + 2 fotos do rosto                         | `Edit the attached cartoon: redo only the face so it clearly looks like the man in the attached photos (nose, eyebrows, jaw, hairline). Keep everything else the same.`                                   |
+| Ficou genérico, parecendo outro jogo    | A imagem                                            | `Edit the attached cartoon: bigger head (1/3 of the height), stronger caricature of his most distinctive features, flat 2-tone shading. Keep everything else the same.`                                   |
+| Fundo xadrez, sujo ou com sombra        | A imagem                                            | `Edit the attached image: replace the whole background with solid flat magenta (#FF00FF). Keep everything else the same.`                                                                                 |
+| Peças encostando ou cortadas            | A imagem                                            | `Redo the attached parts sheet with more empty space between all parts, every part complete, with rounded joint ends. Same character, same style.`                                                        |
+| Apareceu texto ou logo                  | A imagem                                            | `Edit the attached image: remove all text, letters, numbers and logos. Keep everything else the same.`                                                                                                    |
+| Virado para o lado errado               | A imagem                                            | `Edit the attached image: turn it to a 3/4 view facing right. Keep everything else the same.`                                                                                                             |
+| Luz vindo de um lado                    | A imagem                                            | `Edit the attached image: light from straight above, shadows only under the chin, arms and lower parts. Keep everything else the same.`                                                                   |
+| Rosto bom numa imagem, roupa boa noutra | A imagem com o rosto certo + recorte da roupa certa | `Edit the attached character sheet. Keep exactly the same: face, hair, expressions, poses, proportions, layout and drawing style. Change only the outfit: it should be exactly like the attached outfit.` |
 
 Para defeitos pequenos (um logo, um dedo a mais, uma peça cortada), o **Photoshop** costuma ser mais
 barato: selecione a área com o laço, use o _Preenchimento generativo_ e descreva o que deve ficar
@@ -442,7 +445,7 @@ CHARACTER SHEET
 Name: Schummaki — 30-year-old guy from the coast of São Paulo state (a "caiçara"), crazy about cars.
 Fighting style: rusher — fast on the ground, heavy, always charging forward. Grounded, leaning-forward posture.
 Body: based on the photos; solid, medium-heavy build.
-Outfit: open red (#D62839) zip jacket in a casual sporty cut, with two off-white (#F6F0E4) stripes down each sleeve, no logos and no patches; graphite (#2E3138) t-shirt underneath; graphite fingerless driving gloves; graphite board shorts (beach touch); chunky white sneakers with red details (red side stripe and red heel), white soles. No cap: his hair must show.
+Outfit: open red (#D62839) racing-style track jacket with white stripes down the sleeves and graphite (#2E3138) side panels, no logos; graphite t-shirt underneath; gray fingerless driving gloves; graphite cargo shorts; chunky red-and-white sneakers. No cap: his hair must show.
 Signature details: red jacket, driving gloves, his hair.
 Colors: primary #D62839, secondary #F6F0E4, accent #2E3138.
 Face/personality: competitive, determined grin.
@@ -450,7 +453,7 @@ Special move: "Arrancada" — he burns rubber in place (thick tire smoke at his 
 Taunt: turns an imaginary steering wheel with both hands, making "vroom vroom", then shouts his catchphrase.
 Extra parts for the parts sheet: two hands gripping an invisible steering wheel (left and right).
 Props and effects for the effects sheet: 4 tire-smoke puffs in different sizes (light gray, inked); 2 horizontal speed-streak shapes; 1 burnt-rubber skid mark seen from the side.
-Avoid: one-piece racing suits, helmets, racing numbers, names, team or sponsor logos, and any resemblance to a famous racing driver beyond what is in the photos.
+Avoid: any reference to a real racing driver: no racing suits, helmets, racing numbers, names, team or sponsor logos.
 
 [INSTRUÇÕES]
 Attached: (1) the style anchor, for style only — do not copy its face; (2) the body template, only as the list of animation parts; (3) photos of my friend, for likeness.
@@ -707,7 +710,7 @@ No fim, a pasta `art/` fica assim (só as versões aprovadas):
 ```text
 art/
   style/           style.png, shape.png
-  schummaki/       0-base.webp, 1-conceito.png, 2-cabecas.png, 3-pecas.png, 4-efeitos.png, 5-figurinha.png
+  schummaki/       1-conceito.png, 2-cabecas.png, 3-pecas.png, 4-efeitos.png, 5-figurinha.png
   joao-frango/     (mesmos nomes)
   cenario-laje/    1-mapa.png, 2-ceu.png, 3-longe.png, 4-meio.png, 5-pecas.png
 ```

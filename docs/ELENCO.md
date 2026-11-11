@@ -39,14 +39,13 @@ controla de longe (projétil).
   na horizontal, acertando quem estiver no caminho. Startup mais longo, alcance e knockback altos;
   no ar a distância é menor (não vira recuperação infinita).
 - **Provocação:** gira um volante imaginário, faz "vrum vrum" e solta "Vem com o Schummy, mermão!".
-- **Visual:** roupa casual de quem curte carro. Jaqueta vermelha aberta, de corte esportivo, com 2
-  listras off-white nas mangas e sem logos; camiseta e bermuda de praia grafite; luvas de piloto sem
-  dedos, grafite; tênis branco com detalhes vermelhos (listra lateral e calcanhar). Sem boné, para o
-  cabelo aparecer. Cores: vermelho, branco e grafite.
-- **Cuidado com a referência ao piloto:** a semelhança aparece só em detalhes pontuais (traços do
-  rosto, um ou outro elemento de corrida). A jaqueta vermelha é peça casual, não uniforme de equipe.
-  **Não usar** macacão de piloto, capacete, nome, número, logos de equipe ou patrocinador, nem nada
-  que lembre o acidente dele.
+- **Visual:** roupa de quem curte carro. Jaqueta de corrida vermelha (`#D62839`), aberta, com
+  listras brancas nas mangas e laterais grafite (`#2E3138`), sem logos; camiseta grafite; bermuda
+  cargo grafite; luvas de piloto sem dedos, cinza; tênis vermelho e branco. Sem boné, para o topete
+  aparecer. Cores: vermelho, branco e grafite. Concept art: `art/schummaki/1-conceito.png`.
+- **Sem referências ao piloto:** o apelido vem da semelhança, mas o personagem não faz referência a
+  ele: nada de nome, número, capacete, macacão ou logos de equipe, nem nada que lembre o acidente
+  dele. Usar vermelho tudo bem.
 
 ### 2. João Frango
 
