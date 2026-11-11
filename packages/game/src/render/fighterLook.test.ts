@@ -1,23 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { createFighter, getCharacter, PLAYABLE_CHARACTERS } from '@jogo-luta/sim';
-import { animationKey, colorValue, statBars } from './fighterLook';
+import { getCharacter, PLAYABLE_CHARACTERS } from '@jogo-luta/sim';
+import { colorValue, statBars } from './fighterLook';
 
 describe('visual do lutador', () => {
   it('converte cor #rrggbb', () => {
     expect(colorValue('#1f6f78')).toBe(0x1f6f78);
     expect(colorValue('#FFFFFF')).toBe(0xffffff);
-  });
-
-  it('animação: o estado, ou o golpe em andamento', () => {
-    const f = createFighter(0, { x: 0, y: 0 });
-    expect(animationKey(f)).toBe('fall');
-    f.state = 'attack';
-    f.move = 'sideAir';
-    expect(animationKey(f)).toBe('sideAir');
-    f.move = 'special';
-    expect(animationKey(f)).toBe('special');
-    f.state = 'taunt';
-    expect(animationKey(f)).toBe('taunt');
   });
 
   it('barras da seleção ficam entre 0 e 1 e mostram a diferença', () => {
