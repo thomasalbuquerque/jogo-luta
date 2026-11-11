@@ -38,17 +38,20 @@ function burnout(phase: 0 | 1): Rot {
     : { thighNear: -20, shinNear: 60, footNear: -40, thighFar: -10, shinFar: 70, footFar: -20 };
 }
 
-/** João com as mãos em concha na boca. */
+/**
+ * João com as mãos em concha na boca: braço para a frente e para cima, cotovelo
+ * dobrado e a mão deitada ao lado da boca, dedos para a frente (megafone).
+ */
 const CUPPED: Rot = {
   ...STANCE,
-  torso: -6,
-  head: -12,
-  upperArmNear: -80,
-  forearmNear: -105,
-  handNear: -15,
-  upperArmFar: -95,
-  forearmFar: -90,
-  handFar: -15,
+  torso: -8,
+  head: -20,
+  upperArmNear: -62,
+  forearmNear: -100,
+  handNear: 62,
+  upperArmFar: -80,
+  forearmFar: -88,
+  handFar: 55,
 };
 
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
@@ -201,10 +204,10 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 10, rot: CUPPED, handNear: 'taunt', handFar: 'taunt', ease: 'out' },
       {
         t: 14,
-        rot: { ...CUPPED, torso: -12, head: -18 },
+        rot: { ...CUPPED, torso: -12, head: -24 },
         expression: 'taunt',
       },
-      { t: 70, rot: { ...CUPPED, torso: -16, head: -22 }, y: -1 },
+      { t: 70, rot: { ...CUPPED, torso: -16, head: -28 }, y: -1 },
       { t: 80, rot: CUPPED, expression: 'normal' },
       { t: 90, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
     ],
