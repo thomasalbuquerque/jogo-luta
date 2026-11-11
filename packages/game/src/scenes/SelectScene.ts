@@ -4,11 +4,11 @@ import {
   getCharacter,
   isPressed,
   PLAYABLE_CHARACTERS,
-  toPx,
   type Character,
   type InputMask,
 } from '@jogo-luta/sim';
 import { InputManager } from '../input/InputManager';
+import { characterTextureKey } from '../render/FighterView';
 import { colorValue, statBars } from '../render/fighterLook';
 import { PLAYER_COLORS, type FightData } from './FightScene';
 
@@ -17,6 +17,8 @@ const CARD_W = 380;
 const CARD_H = 470;
 const CARD_GAP = 60;
 const CARD_Y = 120;
+/** Lado da figurinha no cartão. */
+const PORTRAIT_SIZE = 170;
 const PLAYERS = 2;
 /** Frames com os 2 prontos antes de começar (dá tempo de ver a escolha). */
 const START_DELAY_FRAMES = 30;
@@ -139,23 +141,15 @@ export class SelectScene extends Phaser.Scene {
     return (this.scale.width - total) / 2 + index * (CARD_W + CARD_GAP);
   }
 
-  /** Cartão de um personagem: retângulo de prévia, nome, estilo, especial e barras. */
+  /** Cartão de um personagem: figurinha, nome, estilo, especial e barras. */
   private drawCard(c: Character, x: number, y: number): void {
     const g = this.add.graphics();
     g.fillStyle(0x2b3245, 1);
     g.fillRoundedRect(x, y, CARD_W, CARD_H, 14);
 
-    // prévia em retângulo, no tamanho relativo da ficha
-    const w = toPx(c.stats.width) * 1.3;
-    const h = toPx(c.stats.height) * 1.3;
-    const px = x + CARD_W / 2 - w / 2;
-    const py = y + 30 + (140 - h) + 10;
-    g.fillStyle(colorValue(c.colors.primary), 1);
-    g.fillRect(px, py, w, h);
-    g.fillStyle(colorValue(c.colors.secondary), 1);
-    g.fillRect(px, py + h * 0.52, w, h * 0.16);
-    g.fillStyle(0x111111, 1);
-    g.fillRect(px + w - 20, py + 20, 12, 12);
+    // figurinha (retrato), gerada pelo pnpm art junto com as peças
+    const portrait = this.add.image(x + CARD_W / 2, y + 98, characterTextureKey(c.id), 'portrait');
+    portrait.setScale(PORTRAIT_SIZE / Math.max(portrait.width, portrait.height));
 
     const text = (dy: number, value: string, style: Phaser.Types.GameObjects.Text.TextStyle) =>
       this.add
