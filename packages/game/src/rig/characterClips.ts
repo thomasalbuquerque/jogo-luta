@@ -7,24 +7,28 @@ import { STANCE } from './clips';
  * Convenção de ângulos e de tempo: ver `clips.ts`.
  */
 
-/** Schummaki ao volante: mãos no volante imaginário na frente do peito. */
+/**
+ * Schummaki ao volante: as duas mãos lado a lado no volante imaginário, na frente
+ * do peito, cotovelos para baixo. A mão de trás fica um pouco mais à frente e mais
+ * alta, para as duas aparecerem.
+ */
 const WHEEL: Rot = {
   ...STANCE,
   torso: 10,
-  upperArmNear: -62,
-  forearmNear: -62,
-  handNear: -70,
-  upperArmFar: -72,
-  forearmFar: -48,
-  handFar: -70,
+  upperArmNear: 4,
+  forearmNear: -120,
+  handNear: -74,
+  upperArmFar: -6,
+  forearmFar: -124,
+  handFar: -60,
 };
 
 /** Volante girado: `turn` > 0 vira para um lado, < 0 para o outro. */
 function wheel(turn: number, extra: Rot = {}): Rot {
   return {
     ...WHEEL,
-    upperArmNear: -62 - turn,
-    upperArmFar: -72 + turn,
+    upperArmNear: 4 - turn,
+    upperArmFar: -6 + turn,
     torso: 10 + turn * 0.15,
     head: -4 - turn * 0.2,
     ...extra,
