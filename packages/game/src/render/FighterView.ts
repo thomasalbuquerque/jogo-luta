@@ -2,9 +2,11 @@ import Phaser from 'phaser';
 import {
   DRAW_ORDER,
   fitRig,
+  poseBounds,
   skinFromAtlas,
   solvePose,
   type BoneId,
+  type PlacedBone,
   type Pose,
   type RigFit,
   type Skin,
@@ -18,6 +20,12 @@ export function characterTextureKey(id: string): string {
 /** Atlas de cada personagem, gerados pelo `pnpm art` (ver `docs/ARTE.md`). */
 export function characterAtlasPath(id: string): string {
   return `characters/${id}`;
+}
+
+/** Y mais baixo dos pés na pose (px da textura, quadril em 0). */
+function lowestFoot(skin: Skin, placed: readonly PlacedBone[]): number {
+  const feet = placed.filter((p) => p.bone === 'footNear' || p.bone === 'footFar');
+  return poseBounds(skin, feet).maxY;
 }
 
 /** Arte um pouco mais alta que a hurtbox: o cabelo e o boné passam do topo. */
@@ -73,15 +81,18 @@ export class FighterView {
 
   /**
    * Desenha a pose com os pés em (x, y) (px de mundo), virado para `facing`.
+   * `plant`: no chão, desce ou sobe o corpo até o pé mais baixo encostar no chão
+   * (as animações não precisam acertar a altura das pernas dobradas).
    */
-  setPose(pose: Pose, x: number, y: number, facing: -1 | 1): void {
+  setPose(pose: Pose, x: number, y: number, facing: -1 | 1, plant = false): void {
     const placed = solvePose(this.skin, pose);
+    const lift = plant ? this.fit.groundY - lowestFoot(this.skin, placed) : 0;
     for (const p of placed) {
       const img = this.images.get(p.bone);
       if (!img) continue;
       if (img.frame.name !== p.frame) img.setFrame(p.frame);
       img.setOrigin(p.originX, p.originY);
-      img.setPosition(p.x, p.y - this.fit.groundY);
+      img.setPosition(p.x, p.y - this.fit.groundY + lift);
       img.setRotation(p.rotation);
     }
     const unit = this.height / 100;

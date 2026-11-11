@@ -32,6 +32,8 @@ export interface Clip {
   timing: 'loop' | 'once' | 'move';
   /** Duração em ticks (loop e once). */
   length?: number;
+  /** Animação feita para o chão (o visualizador encosta os pés no chão). */
+  ground?: boolean;
   keys: readonly Key[];
 }
 
