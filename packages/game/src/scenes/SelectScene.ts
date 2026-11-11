@@ -200,7 +200,7 @@ export class SelectScene extends Phaser.Scene {
 
   /** Online: o cursor e a confirmação do outro jogador, como chegaram pela rede. */
   private followRemote(p: number, net: OnlineSession): void {
-    const sel = net.remoteSel;
+    const sel = net.selection(p);
     if (!sel) return;
     const cursor = Math.min(sel.cursor, this.slots.length - 1);
     if (cursor !== this.cursors[p]) {

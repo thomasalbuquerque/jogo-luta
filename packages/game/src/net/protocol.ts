@@ -20,22 +20,35 @@ const stageId = z.string().refine((id) => STAGES.some((s) => s.id === id), {
   error: 'mapa desconhecido',
 });
 
+/** Id de cada um na sala (sorteado ao abrir; serve para reconhecer a reconexão). */
+const clientId = z.string().min(1).max(40);
+const SelectionSchema = z.object({ cursor: z.number().int().min(0).max(63), ready: z.boolean() });
+
 /**
- * Em que tela a sala está. Quem manda é o host; o outro lado segue. `seq` cresce
+ * Em que tela a sala está. Quem manda é o host; os outros seguem. `seq` cresce
  * a cada mudança (na luta, é o id da partida).
  */
 const ScreenSchema = z.discriminatedUnion('name', [
   z.object({ name: z.literal('select'), seq: uint32 }),
+  /** `characters`: o de cada lugar da sala, na ordem. */
   z.object({ name: z.literal('stage'), seq: uint32, characters, stageId }),
-  z.object({
-    name: z.literal('fight'),
-    seq: uint32,
-    characters,
-    stageId,
-    seed: uint32,
-    /** Atraso de input da partida, em ticks. */
-    delay: z.number().int().min(1).max(MAX_INPUT_DELAY),
-  }),
+  z
+    .object({
+      name: z.literal('fight'),
+      seq: uint32,
+      characters,
+      stageId,
+      seed: uint32,
+      /** Atraso de input da partida, em ticks. */
+      delay: z.number().int().min(1).max(MAX_INPUT_DELAY),
+      /** Quem joga com cada lutador (o id de cada um, na ordem de `characters`). */
+      clients: z.array(clientId).min(2).max(MAX_ROOM_PLAYERS),
+    })
+    .refine(
+      (s) =>
+        s.clients.length === s.characters.length && new Set(s.clients).size === s.clients.length,
+      { error: 'jogadores da partida não batem com os personagens' },
+    ),
 ]);
 
 export type Screen = z.infer<typeof ScreenSchema>;
@@ -48,22 +61,31 @@ const ControlSchema = z.discriminatedUnion('t', [
     t: z.literal('hello'),
     v: z.number().int(),
     build: z.string().max(80),
-    client: z.string().min(1).max(40),
+    client: clientId,
   }),
   z.object({ t: z.literal('welcome') }),
-  z.object({ t: z.literal('refuse'), reason: z.enum(['full', 'version']) }),
+  z.object({ t: z.literal('refuse'), reason: z.enum(['full', 'version', 'busy']) }),
+  /** Host: quem está na sala, na ordem dos lugares (o 1º é o host). */
+  z.object({ t: z.literal('roster'), clients: z.array(clientId).min(1).max(MAX_ROOM_PLAYERS) }),
   z.object({ t: z.literal('screen'), screen: ScreenSchema }),
-  /** Seleção de personagem: onde está o cursor de quem mandou e se já confirmou. */
+  /** Seleção de personagem de quem mandou (para o host): onde está o cursor e se confirmou. */
+  z.object({ t: z.literal('sel'), seq: uint32, ...SelectionSchema.shape }),
+  /** Host: a seleção de cada lugar da sala (null = ainda não mandou). */
   z.object({
-    t: z.literal('sel'),
+    t: z.literal('sels'),
     seq: uint32,
-    cursor: z.number().int().min(0).max(63),
-    ready: z.boolean(),
+    sels: z.array(SelectionSchema.nullable()).max(MAX_ROOM_PLAYERS),
   }),
   /** Pedido para voltar à seleção de personagem. */
   z.object({ t: z.literal('goto'), screen: z.literal('select') }),
-  /** Voto de revanche na partida `seq`. */
+  /** Voto de revanche na partida `seq` (para o host). */
   z.object({ t: z.literal('rematch'), seq: uint32 }),
+  /** Host: quantos já votaram na revanche da partida `seq`. */
+  z.object({
+    t: z.literal('votes'),
+    seq: uint32,
+    count: z.number().int().min(0).max(MAX_ROOM_PLAYERS),
+  }),
   /** Hash do estado depois do tick `tick` da partida `seq` (checagem de dessincronização). */
   z.object({ t: z.literal('hash'), seq: uint32, tick: uint32, hash: uint32 }),
   /** Saiu da sala de propósito. */

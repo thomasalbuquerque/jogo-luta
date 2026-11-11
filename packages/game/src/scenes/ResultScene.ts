@@ -207,7 +207,7 @@ export class ResultScene extends Phaser.Scene {
     else if (desync) {
       text = `A luta dessincronizou no tick ${String(desync.tick)}: cada um viu uma luta diferente. Salvem o replay dos dois lados.`;
     } else if (net.rematch.local) text = 'Esperando o outro jogador aceitar a revanche…';
-    else if (net.rematch.remote) text = 'O outro jogador quer revanche!';
+    else if (net.rematch.votes > 0) text = 'O outro jogador quer revanche!';
     if (text === this.netNote) return;
     this.netNote = text;
     this.note.setText(text);

@@ -12,19 +12,34 @@ import {
 
 const characters = [PLAYABLE_CHARACTERS[0] ?? '', PLAYABLE_CHARACTERS[1] ?? ''];
 const stageId = STAGES[0]?.id ?? '';
+const four = [...characters, ...characters];
 
 describe('mensagens de controle', () => {
   it('aceita as mensagens do protocolo', () => {
+    const fight = {
+      name: 'fight',
+      seq: 3,
+      characters,
+      stageId,
+      seed: 7,
+      delay: 3,
+      clients: ['a', 'b'],
+    };
     const messages = [
       { t: 'hello', v: 1, build: 'dev', client: 'abc' },
       { t: 'welcome' },
       { t: 'refuse', reason: 'full' },
+      { t: 'refuse', reason: 'busy' },
+      { t: 'roster', clients: ['a', 'b', 'c', 'd'] },
       { t: 'screen', screen: { name: 'select', seq: 1 } },
       { t: 'screen', screen: { name: 'stage', seq: 2, characters, stageId } },
-      { t: 'screen', screen: { name: 'fight', seq: 3, characters, stageId, seed: 7, delay: 3 } },
+      { t: 'screen', screen: fight },
+      { t: 'screen', screen: { ...fight, characters: four, clients: ['a', 'b', 'c', 'd'] } },
       { t: 'sel', seq: 1, cursor: 2, ready: true },
+      { t: 'sels', seq: 1, sels: [{ cursor: 2, ready: true }, null, { cursor: 0, ready: false }] },
       { t: 'goto', screen: 'select' },
       { t: 'rematch', seq: 3 },
+      { t: 'votes', seq: 3, count: 2 },
       { t: 'hash', seq: 3, tick: 30, hash: 0xdeadbeef },
       { t: 'bye' },
     ];
@@ -32,7 +47,15 @@ describe('mensagens de controle', () => {
   });
 
   it('recusa o que não é do protocolo', () => {
-    const fight = { name: 'fight', seq: 3, characters, stageId, seed: 7, delay: 3 };
+    const fight = {
+      name: 'fight',
+      seq: 3,
+      characters,
+      stageId,
+      seed: 7,
+      delay: 3,
+      clients: ['a', 'b'],
+    };
     const bad: unknown[] = [
       null,
       'oi',
@@ -47,6 +70,14 @@ describe('mensagens de controle', () => {
       { t: 'screen', screen: { ...fight, delay: 0 } },
       { t: 'screen', screen: { ...fight, delay: 99 } },
       { t: 'screen', screen: { ...fight, seed: -1 } },
+      { t: 'screen', screen: { ...fight, clients: ['a'] } },
+      { t: 'screen', screen: { ...fight, clients: ['a', 'a'] } },
+      { t: 'screen', screen: { ...fight, characters: [...four, characters[0]] } },
+      { t: 'roster', clients: [] },
+      { t: 'roster', clients: ['a', 'b', 'c', 'd', 'e'] },
+      { t: 'sels', seq: 1, sels: [null, null, null, null, null] },
+      { t: 'votes', seq: 1, count: 5 },
+      { t: 'refuse', reason: 'cansei' },
     ];
     for (const m of bad) expect(parseControl(m)).toBeNull();
   });

@@ -4,7 +4,8 @@ import type { ControlMessage } from './protocol';
 export type Route = 'direct' | 'relay';
 
 /**
- * Uma conexão aberta com o outro jogador, com dois canais: o confiável (chega
+ * Uma conexão aberta com outro lado da sala (quem entra só se conecta ao host;
+ * o host tem uma conexão com cada um que entrou), com dois canais: o confiável (chega
  * tudo, em ordem: lobby e controle) e o sem garantia (pode perder e trocar a
  * ordem, como UDP: inputs e ping).
  */
@@ -26,14 +27,18 @@ export interface Transport {
 export type EndReason =
   /** Saí da sala. */
   | 'quit'
-  /** O outro jogador saiu. */
+  /** Host: todos os outros saíram. */
   | 'left'
+  /** Quem criou a sala saiu (sem o host, a sala acaba). */
+  | 'host-left'
   /** A conexão caiu e não voltou. */
   | 'lost'
   /** Não existe sala com esse código. */
   | 'not-found'
-  /** A sala já tem 2 jogadores. */
+  /** A sala já tem 4 jogadores. */
   | 'full'
+  /** A sala está no meio de uma luta (só dá para entrar na espera ou na seleção). */
+  | 'busy'
   /** Os dois lados estão com versões diferentes do jogo. */
   | 'version'
   /** O código sorteado já está em uso (o host sorteia outro). */
@@ -59,13 +64,17 @@ export interface Link {
 export function endMessage(reason: EndReason): string {
   switch (reason) {
     case 'left':
-      return 'O outro jogador saiu da sala.';
+      return 'Os outros jogadores saíram da sala.';
+    case 'host-left':
+      return 'Quem criou a sala saiu, e a sala acabou.';
     case 'lost':
       return 'A conexão caiu e não voltou.';
     case 'not-found':
       return 'Sala não encontrada. Confira o código com quem criou.';
     case 'full':
-      return 'Essa sala já está cheia.';
+      return 'Essa sala já está cheia (4 jogadores).';
+    case 'busy':
+      return 'A sala está no meio de uma luta. Tente de novo quando voltarem à seleção de lutador.';
     case 'version':
       return 'Versões diferentes do jogo: os dois precisam recarregar a página (Ctrl+F5).';
     case 'error':
