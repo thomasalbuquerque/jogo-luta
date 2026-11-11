@@ -1,6 +1,7 @@
 export * from './character';
 export * from './characters';
 export * from './combat';
+export * from './events';
 export { px, SUBPX, TICK_MS, TICK_RATE, toPx } from './constants';
 export * from './fighter';
 export * from './game';

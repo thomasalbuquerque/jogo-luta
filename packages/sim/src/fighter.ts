@@ -3,6 +3,7 @@ import { axisX, axisY, Button, isHeld, isPressed, type InputMask } from './input
 import { approach, idiv, isqrt } from './math';
 import { getCharacter, BASE_CHARACTER_ID } from './characters';
 import type { Character } from './character';
+import { Cue } from './events';
 import {
   isActiveFrame,
   selectAttack,
@@ -131,6 +132,8 @@ export interface Fighter extends Body {
   /** Segurando alguém (bloco `grab`): ticks até arremessar. */
   grabTicks: number;
   prevInput: InputMask;
+  /** Sinais deste tick para som e efeitos (bitmask de `Cue`); nenhuma regra lê. */
+  cues: number;
 }
 
 export function jumpVelocity(gravity: number, height: number): number {
@@ -197,6 +200,7 @@ export function createFighter(
     grabbedBy: -1,
     grabTicks: 0,
     prevInput: 0,
+    cues: 0,
   };
   placeAtSpawn(f, spawn);
   return f;
@@ -289,6 +293,7 @@ function startDodge(f: Fighter, input: InputMask): void {
     if (dir !== 0) f.facing = dir;
     f.vx = f.facing * s.dashSpeed;
     f.dashCooldown = s.dashCooldownTicks;
+    f.cues |= Cue.DASH;
     enterState(f, 'dash');
   } else {
     f.dodgeDirX = axisX(input);
@@ -297,6 +302,7 @@ function startDodge(f: Fighter, input: InputMask): void {
     f.fastFalling = false;
     f.canCutJump = false;
     f.invulnTicks = s.airDodgeInvulnTicks;
+    f.cues |= Cue.AIR_DODGE;
     enterState(f, 'dodge');
   }
 }
@@ -308,6 +314,7 @@ function tryJump(f: Fighter, input: InputMask): boolean {
   if (f.grounded || f.coyoteTicks > 0) {
     f.vy = -jumpVelocity(s.gravity, s.jumpHeight);
     f.canCutJump = true;
+    f.cues |= Cue.JUMP;
   } else if (f.wallDir !== 0 && f.wallJumpsUsed < s.maxWallJumps) {
     f.vx = -f.wallDir * s.wallJumpSpeedX;
     f.vy = -jumpVelocity(s.gravity, s.wallJumpHeight);
@@ -315,9 +322,11 @@ function tryJump(f: Fighter, input: InputMask): boolean {
     f.wallJumpsUsed++;
     f.airJumpsLeft = s.airJumps;
     f.canCutJump = false;
+    f.cues |= Cue.WALL_JUMP;
   } else if (f.airJumpsLeft > 0) {
     f.vy = -jumpVelocity(s.gravity, s.airJumpHeight);
     f.airJumpsLeft--;
+    f.cues |= Cue.AIR_JUMP;
     if (dir !== 0) {
       f.vx = dir * s.airSpeed;
       f.facing = dir;
@@ -352,6 +361,7 @@ export function startMove(f: Fighter, id: MoveId, input: InputMask): void {
     f.specialCooldown = special?.cooldownTicks ?? 0;
     if (special?.oncePerAir && !f.grounded) f.specialUsed = true;
   }
+  f.cues |= Cue.SWING;
   enterState(f, 'attack');
   moveFrameEffects(f);
 }
@@ -434,6 +444,7 @@ function controlFree(f: Fighter, input: InputMask, prev: InputMask): void {
   if (f.jumpBufferTicks > 0 && tryJump(f, input)) return;
   if (tryAttack(f, input)) return;
   if (f.grounded && isPressed(input, prev, Button.TAUNT)) {
+    f.cues |= Cue.TAUNT;
     enterState(f, 'taunt', characterOf(f).taunt.durationTicks);
     return;
   }
@@ -700,6 +711,7 @@ function stepLedge(f: Fighter, input: InputMask): void {
     f.canCutJump = true;
     f.jumpBufferTicks = 0;
     f.ledgeCooldown = LEDGE_REGRAB_TICKS;
+    f.cues |= Cue.JUMP;
     enterState(f, 'jump');
   } else if (dirY < 0 || dirX === f.facing) {
     f.x = f.facing === 1 ? f.ledgeX : f.ledgeX - f.w;
@@ -818,6 +830,7 @@ export function stepFighter(
   projectiles?: Projectile[],
 ): void {
   const world: World = { solids, projectiles };
+  f.cues = 0;
   // Hitstop: congelado no impacto. O input anterior não muda, então um botão
   // apertado durante o congelamento vale como aperto quando ele acaba.
   if (f.hitstop > 0) {
@@ -917,7 +930,10 @@ function integrate(f: Fighter, input: InputMask, solids: readonly Solid[]): void
     f.canCutJump = false;
     f.coyoteTicks = COYOTE_TICKS;
     if (f.state === 'dodge') setState(f, 'idle');
-    if (!wasGrounded) onLand(f, input);
+    if (!wasGrounded) {
+      f.cues |= Cue.LAND;
+      onLand(f, input);
+    }
   }
   // Ao sair da borda sem pular, coyoteTicks segue contando a partir do último tick no chão.
 

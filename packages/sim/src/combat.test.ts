@@ -100,7 +100,7 @@ describe('hitbox × hurtbox', () => {
       stepFighter(b, 0, solids);
     }
     expect(activeHitboxes(a).some((box) => overlaps(box, hurtbox(b)))).toBe(true);
-    expect(findHits([a, b])).toEqual([
+    expect(findHits([a, b])).toMatchObject([
       { attacker: 0, victim: 1, move: 'neutralLight', kind: 'hit' },
     ]);
     expect(b.damage).toBe(0);
