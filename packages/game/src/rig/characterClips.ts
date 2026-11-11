@@ -47,11 +47,11 @@ const CUPPED: Rot = {
   ...STANCE,
   torso: -4,
   head: -18,
-  upperArmNear: -48,
+  upperArmNear: -55,
   forearmNear: -146,
-  handNear: 48,
-  upperArmFar: -20,
-  forearmFar: -162,
+  handNear: 50,
+  upperArmFar: -27,
+  forearmFar: -160,
   handFar: 36,
 };
 
