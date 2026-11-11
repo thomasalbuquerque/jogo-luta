@@ -43,6 +43,8 @@ Rascunho; o remapeamento entra na Etapa 6. Gamepad (Gamepad API) é o recomendad
 | Esquiva    | Shift esq. | I         | RB / RT                |
 | Provocação | R          | U         | Y                      |
 
+**M** liga e desliga o som (vale para todos; o navegador lembra).
+
 **Input como dado:** a cada tick, cada jogador vira uma bitmask. O `sim` só enxerga isso.
 
 | Bit | Botão | Bit | Botão   |
@@ -103,7 +105,24 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames) 
 | Agarrão       | active         | A hitbox segura o alvo na frente por um tempo; ←/→ escolhe o lado; depois arremessa. Ganha do contra-ataque. Quem segura levando golpe solta.          |
 
 - **Opções do especial:** recarga (`cooldownTicks`, contada do começo), 1 vez por ar (`oncePerAir`, volta como a recuperação) e ficar parado no ar no startup (`hoverStartup`).
-- **Provocação** (R / U / Y): só no chão, parado pela duração da ficha; levar golpe desfaz. Sem efeito de jogo. Mostra o bordão num balão e toca o áudio do amigo; enquanto não há áudio gravado (Etapa 5), toca uma voz provisória sintetizada a partir do bordão.
+- **Provocação** (R / U / Y): só no chão, parado pela duração da ficha; levar golpe desfaz. Sem efeito de jogo. Mostra o bordão num balão e toca o áudio do amigo (`audio/vozes/<taunt.sound>`); enquanto não há áudio gravado, toca uma voz provisória sintetizada a partir do bordão.
+
+## Game feel e áudio
+
+Só apresentação: nada disto muda a luta. O `sim` avisa o que aconteceu em cada tick (`state.events`: golpe com força e ponto do impacto, agarrão, KO, respawn e ações como pulo, dash, dodge, pouso, começo de golpe e provocação), e o jogo desenha e toca em cima disso.
+
+- **Impacto:** estrela, clarão, anel na cor de quem bateu e faíscas na direção do arremesso, tudo maior quanto mais forte o golpe. Quem leva fica branco por alguns ticks e o % no HUD pula de tamanho.
+- **Tremor de tela:** proporcional ao knockback (golpe fraco quase não treme); o KO treme forte.
+- **Rastro:** quem voa a mais de 14 px/tick deixa fumaça, que vira fogo nos arremessos mais fortes.
+- **KO:** explosão na borda da tela por onde o lutador saiu, apontando para dentro, na cor do jogador.
+- **Golpe decisivo:** quando um golpe vai tirar o último stock e acabar a luta (o jogo simula à frente uma cópia do estado enquanto o alvo está sem controle), a câmera dá zoom em quem voa e o tempo fica a 20% por ~1,3 s. Se a luta acabar sem esse aviso (ex.: caiu sozinho), há uma câmera lenta mais curta no KO final.
+- **Poeira** no pulo do chão, no pouso, no dash e no wall jump; anel no pulo aéreo; brilho no respawn.
+- **Sons:** golpe fraco, médio e forte (pela força do arremesso), swing, pulo, pulo aéreo, dash, dodge, pouso, agarrão, contra-ataque, KO e respawn, com uma variação de tom a cada toque. São gerados em código; um arquivo em `audio/sfx/<nome>.*` substitui o gerado.
+- **Vozes:** provocação e KO de cada amigo, dos áudios em `audio/vozes/` (ids `taunt.sound` e `koSound` da ficha). Sem áudio, a provocação "canta" o bordão e o KO é um grito sintetizado com o tom do personagem.
+- **Música:** uma faixa no menu e outra na luta, em loop, trocando com fade. Provisórias, geradas em código; `audio/musica/menu.*` e `audio/musica/luta.*` substituem.
+- **Liberar o áudio:** os navegadores só tocam som depois de um clique ou tecla. Até lá, um aviso no alto da tela pede isso, e a música começa assim que liberar.
+
+Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 
 ## Seleção
 
@@ -151,6 +170,7 @@ export const FULANO = defineCharacter({
     ],
   },
   taunt: { text: 'Bordão!', sound: 'fulano_bordao', animation: 'fulano_taunt', durationTicks: 60 },
+  koSound: 'fulano_ko', // opcional; sem valor = '<id com _>_ko' (áudio em audio/vozes/)
   animations: { idle: 'fulano_parado' }, // opcional; sem valor = '<id>_<chave>'
 });
 ```
