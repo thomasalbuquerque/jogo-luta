@@ -27,8 +27,8 @@ import {
 import { music } from '../audio/music';
 import { playSfx } from '../audio/sfx';
 import { playKoVoice, playVoice } from '../audio/voice';
-import { PAD_START } from '../input/bindings';
-import { InputManager, readPads } from '../input/InputManager';
+import { InputManager } from '../input/InputManager';
+import { Menu, type MenuMask } from '../input/menu';
 import { createStats, recordEvents, type MatchStats } from '../match/stats';
 import {
   DEFAULT_CAMERA,
@@ -87,6 +87,8 @@ const FINAL_KO_SLOWMO_SCALE = 0.35;
 const RESULT_DELAY_TICKS = 60;
 /** Depois de voltar da pausa, ignora pedir pausa de novo por este tempo (a tecla que voltou). */
 const PAUSE_COOLDOWN_MS = 250;
+/** Teclas que pausam: Enter, Esc, Start e Select do controle. */
+const PAUSE_KEYS = Menu.CONFIRM | Menu.BACK | Menu.START;
 /** Enquadramento da câmera quando ninguém está em cena. */
 const STAGE_VIEW: Rect = { x: -450, y: -200, w: 900, h: 200 };
 
@@ -136,7 +138,8 @@ export class FightScene extends Phaser.Scene {
   private readonly loop = new FixedStepLoop();
   private controls!: InputManager;
   private pauseRequested = false;
-  private padStartHeld = false;
+  /** Teclas fixas (Enter, Esc, Start) no tick anterior: pausa só no aperto. */
+  private prevSystem: MenuMask = 0;
   private resumedAt = 0;
   private prev: PrevPos[] = [];
   private lastStates: FighterState[] = [];
@@ -184,12 +187,10 @@ export class FightScene extends Phaser.Scene {
     this.newMatch();
     this.controls = new InputManager();
     this.pauseRequested = false;
-    this.padStartHeld = true; // Start segurado desde o menu não pausa
+    this.prevSystem = PAUSE_KEYS; // segurado desde o menu não pausa
     const requestPause = () => {
       this.pauseRequested = true;
     };
-    this.input.keyboard?.on('keydown-ESC', requestPause);
-    this.input.keyboard?.on('keydown-ENTER', requestPause);
     // trocar de janela ou de aba no meio da luta pausa
     this.game.events.on(Phaser.Core.Events.BLUR, requestPause);
     this.game.events.on(Phaser.Core.Events.HIDDEN, requestPause);
@@ -287,10 +288,7 @@ export class FightScene extends Phaser.Scene {
 
   /** Esc, Enter ou Start do controle (ou perder o foco), com a luta ainda rolando. */
   private wantsPause(): boolean {
-    const start = readPads().some((p) => p.buttons[PAD_START] === true);
-    const startPressed = start && !this.padStartHeld;
-    this.padStartHeld = start;
-    const requested = this.pauseRequested || startPressed;
+    const requested = this.pauseRequested;
     this.pauseRequested = false;
     if (!requested || this.state.phase === 'over') return false;
     return this.game.loop.time - this.resumedAt >= PAUSE_COOLDOWN_MS;
@@ -306,13 +304,16 @@ export class FightScene extends Phaser.Scene {
   private readonly onResume = (): void => {
     this.controls.suppressHeld();
     this.pauseRequested = false;
-    this.padStartHeld = true;
+    this.prevSystem = PAUSE_KEYS;
     this.resumedAt = this.game.loop.time;
   };
 
   private tick(): void {
     for (const [i, f] of this.state.fighters.entries()) this.prev[i] = { x: f.x, y: f.y };
     this.lastInputs = this.controls.sample(this.state.fighters.length);
+    const system = this.controls.system & PAUSE_KEYS;
+    if (system & ~this.prevSystem) this.pauseRequested = true;
+    this.prevSystem = system;
 
     if (this.state.phase === 'over') {
       this.overTicks++;
