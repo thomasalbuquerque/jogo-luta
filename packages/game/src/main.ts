@@ -1,7 +1,9 @@
 import Phaser from 'phaser';
+import { BootScene } from './scenes/BootScene';
 import { DebugScene } from './scenes/DebugScene';
 import { FightScene } from './scenes/FightScene';
 import { HudScene } from './scenes/HudScene';
+import { RigViewerScene } from './scenes/RigViewerScene';
 import { SelectScene } from './scenes/SelectScene';
 
 const game = new Phaser.Game({
@@ -14,8 +16,8 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  // A primeira da lista começa sozinha: a seleção de personagem.
-  scene: [SelectScene, FightScene, HudScene, DebugScene],
+  // A primeira da lista começa sozinha: carrega a arte e abre a seleção.
+  scene: [BootScene, SelectScene, FightScene, HudScene, DebugScene, RigViewerScene],
 });
 
 // Só em dev: permite inspecionar o jogo pelo console (window.__game).

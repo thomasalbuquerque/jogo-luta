@@ -1,0 +1,186 @@
+{
+ "frames": {
+  "building": {
+   "frame": {
+    "x": 2,
+    "y": 2,
+    "w": 1374,
+    "h": 344
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1374,
+    "h": 344
+   },
+   "sourceSize": {
+    "w": 1374,
+    "h": 344
+   },
+   "anchors": {
+    "pivot": [
+     687,
+     51
+    ],
+    "sockets": {
+     "wallLeft": [
+      22,
+      216
+     ],
+     "wallRight": [
+      1351,
+      216
+     ]
+    }
+   }
+  },
+  "plank": {
+   "frame": {
+    "x": 145,
+    "y": 348,
+    "w": 526,
+    "h": 94
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 526,
+    "h": 94
+   },
+   "sourceSize": {
+    "w": 526,
+    "h": 94
+   },
+   "anchors": {
+    "pivot": [
+     7,
+     11
+    ],
+    "sockets": {
+     "right": [
+      527,
+      11
+     ]
+    }
+   }
+  },
+  "grill": {
+   "frame": {
+    "x": 1736,
+    "y": 2,
+    "w": 210,
+    "h": 182
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 210,
+    "h": 182
+   },
+   "sourceSize": {
+    "w": 210,
+    "h": 182
+   },
+   "anchors": {
+    "pivot": [
+     105,
+     176
+    ]
+   }
+  },
+  "tank": {
+   "frame": {
+    "x": 1378,
+    "y": 2,
+    "w": 212,
+    "h": 185
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 212,
+    "h": 185
+   },
+   "sourceSize": {
+    "w": 212,
+    "h": 185
+   },
+   "anchors": {
+    "pivot": [
+     105,
+     176
+    ]
+   }
+  },
+  "chair": {
+   "frame": {
+    "x": 1592,
+    "y": 2,
+    "w": 142,
+    "h": 183
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 142,
+    "h": 183
+   },
+   "sourceSize": {
+    "w": 142,
+    "h": 183
+   },
+   "anchors": {
+    "pivot": [
+     70,
+     176
+    ]
+   }
+  },
+  "cooler": {
+   "frame": {
+    "x": 2,
+    "y": 348,
+    "w": 141,
+    "h": 117
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 141,
+    "h": 117
+   },
+   "sourceSize": {
+    "w": 141,
+    "h": 117
+   },
+   "anchors": {
+    "pivot": [
+     70,
+     112
+    ]
+   }
+  }
+ },
+ "meta": {
+  "app": "scripts/art/build.ts",
+  "image": "laje.webp",
+  "format": "RGBA8888",
+  "size": {
+   "w": 1948,
+   "h": 467
+  },
+  "scale": "1"
+ }
+}

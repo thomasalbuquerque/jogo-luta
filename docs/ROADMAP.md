@@ -94,13 +94,13 @@ Objetivo: os 2 primeiros personagens animados e reconhecíveis. Esta etapa defin
 
 - [x] Guia de estilo único: proporção caricata (cabeça grande ajuda a reconhecer os amigos), tipo de contorno, paleta e iluminação. Um prompt base fixo para todos os personagens.
 - [x] Concept art de cada um: frente, perfil e 3 expressões, a partir da descrição e de fotos.
-- [ ] Gerar o personagem em partes separadas, em pose neutra e fundo transparente: cabeça, tronco, braços (2 partes), mãos, pernas (2 partes), pés.
-- [ ] Montar um esqueleto humanoide único no DragonBones (grátis) ou no Spine (pago). Todos os amigos usam o mesmo esqueleto e só trocam as peças (skins).
-- [ ] Animar o esqueleto base: idle, run, jump, fall, os 8 golpes base, hit, dodge, ledge e KO.
-- [ ] Animar o especial e a provocação de cada um dos 2 personagens.
-- [ ] Exportar para o Phaser. Caminho mais simples: exportar como spritesheet e usar a animação nativa do Phaser. Runtime de esqueleto só se o tamanho dos arquivos pesar.
-- [ ] Alinhar os frames ativos das hitboxes (Etapa 2) com os frames visuais de cada golpe.
-- [ ] Cenário do primeiro mapa: fundo em camadas com parallax.
+- [x] Gerar o personagem em partes separadas, em pose neutra e fundo transparente: cabeça, tronco, braços (2 partes), mãos, pernas (2 partes), pés. O `pnpm art` tira o fundo magenta, recorta as peças pelo `art/<pasta>/recortes.json` e gera um atlas por personagem.
+- [x] Montar um esqueleto humanoide único. Em vez do DragonBones/Spine, um esqueleto próprio em TypeScript (`packages/game/src/rig`): mesmos ossos para todos, cada amigo só troca as peças (skins).
+- [x] Animar o esqueleto base: idle, run, jump, fall, os 8 golpes base, hit, dodge, ledge e KO (arremessado girando, com a cabeça de KO).
+- [x] Animar o especial e a provocação de cada um dos 2 personagens.
+- [x] Exportar para o Phaser. O esqueleto roda direto no Phaser (atlas + imagens por osso), sem spritesheet.
+- [x] Alinhar os frames ativos das hitboxes (Etapa 2) com os frames visuais de cada golpe. Os golpes são animados nas fases do sim (startup, active, recovery): o quadro do impacto cai sempre no 1º frame ativo, com teste.
+- [x] Cenário do primeiro mapa: fundo em camadas com parallax.
 
 **Pronto quando:** alguém do grupo acerta quem é quem só de olhar.
 

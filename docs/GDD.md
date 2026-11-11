@@ -157,6 +157,8 @@ export const FULANO = defineCharacter({
 
 Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `baseKnockback`, `knockbackScale`, `landingLag`, `canWalk`, `reach`.
 
+`animations` e `taunt.animation` são nomes de clipes do esqueleto (`packages/game/src/rig/characterClips.ts`). Sem clipe com esse nome, o personagem usa o do esqueleto base (`rig/clips.ts`). Os golpes são animados nas fases da ficha, então mudar os frames de um golpe não desalinha a animação. A arte e o esqueleto estão em [`docs/ARTE.md`](ARTE.md).
+
 ### Os 2 primeiros
 
 | Personagem  | Estilo | Peso | Chão (px/tick) | Ar (px/tick) | Pulo | Pulos aéreos | Especial                                                                            |

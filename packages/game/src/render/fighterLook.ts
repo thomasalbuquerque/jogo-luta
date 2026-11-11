@@ -1,23 +1,8 @@
-import {
-  getCharacter,
-  toPx,
-  type AnimationKey,
-  type Character,
-  type Fighter,
-} from '@jogo-luta/sim';
+import { getCharacter, toPx, type Character, type Fighter } from '@jogo-luta/sim';
 
 /** '#rrggbb' → número que o Phaser usa (0xrrggbb). */
 export function colorValue(hex: string): number {
   return Number.parseInt(hex.slice(1), 16);
-}
-
-/**
- * Animação que o lutador deveria tocar agora (Etapa 4). Cada estado tem a sua;
- * no golpe, é o próprio golpe (ou `special`).
- */
-export function animationKey(f: Fighter): AnimationKey {
-  if (f.state === 'attack') return f.move ?? 'idle';
-  return f.state;
 }
 
 export interface StatBar {
