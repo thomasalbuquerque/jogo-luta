@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import {
   activeHitboxes,
-  Button,
   createGame,
   currentMove,
   FixedStepLoop,
@@ -9,9 +8,10 @@ import {
   hurtbox,
   isActiveFrame,
   isCountering,
-  isPressed,
+  MATCH_RULES,
   moveFrame,
   PLAYABLE_CHARACTERS,
+  STAGES,
   stepGame,
   SUBPX,
   toPx,
@@ -28,6 +28,8 @@ import { music } from '../audio/music';
 import { playSfx } from '../audio/sfx';
 import { playKoVoice, playVoice } from '../audio/voice';
 import { InputManager } from '../input/InputManager';
+import { Menu, type MenuMask } from '../input/menu';
+import { createStats, recordEvents, type MatchStats } from '../match/stats';
 import {
   DEFAULT_CAMERA,
   frameTargets,
@@ -53,10 +55,9 @@ import { hitTrauma, Shake } from '../render/shake';
 import { SlowMo } from '../render/slowmo';
 import { StageView } from '../render/stageView';
 import { fighterPose } from '../rig/fighterPose';
+import { playerColor } from '../ui/theme';
 import type { HudScene } from './HudScene';
 
-/** Cor de cada jogador (marcador e HUD); a cor do corpo vem da arte. */
-export const PLAYER_COLORS = [0xe63946, 0x4cc9f0, 0x80ed99, 0xffd166];
 const STAGE_DEBUG_COLOR = 0x80ed99;
 const HITBOX_COLOR = 0xff3b30;
 const HURTBOX_COLOR = 0xffd166;
@@ -82,8 +83,12 @@ const FOCUS_CAMERA: CameraOptions = {
 /** Luta que acabou sem o golpe decisivo aparecer (caiu sozinho): câmera lenta mais curta. */
 const FINAL_KO_SLOWMO_MS = 700;
 const FINAL_KO_SLOWMO_SCALE = 0.35;
-/** Ticks depois do fim da luta antes de aceitar revanche (evita apertar sem querer). */
-const REMATCH_DELAY_TICKS = 60;
+/** Ticks depois do fim da luta antes da tela de resultado (dá tempo de ver o último KO). */
+const RESULT_DELAY_TICKS = 60;
+/** Depois de voltar da pausa, ignora pedir pausa de novo por este tempo (a tecla que voltou). */
+const PAUSE_COOLDOWN_MS = 250;
+/** Teclas que pausam: Enter, Esc, Start e Select do controle. */
+const PAUSE_KEYS = Menu.CONFIRM | Menu.BACK | Menu.START;
 /** Enquadramento da câmera quando ninguém está em cena. */
 const STAGE_VIEW: Rect = { x: -450, y: -200, w: 900, h: 200 };
 
@@ -104,14 +109,15 @@ const DEPTH = {
 /** Registro do Phaser: modo debug ligado (overlay de texto + caixas). */
 export const DEBUG_KEY = 'debug';
 
-export interface FightData {
-  /** Id da ficha de cada jogador. Sem isso: os 2 primeiros do elenco. */
-  characters?: readonly string[];
+/** O que foi escolhido nos menus: personagem de cada jogador e mapa. */
+export interface MatchSetup {
+  /** Id da ficha de cada jogador, na ordem. */
+  characters: readonly string[];
+  stageId: string;
 }
 
-function playerColor(id: number): number {
-  return PLAYER_COLORS[id % PLAYER_COLORS.length] ?? 0xffffff;
-}
+/** Telas para onde dá para sair da luta (pausa e resultado). */
+export type LeaveTarget = 'select' | 'stage' | 'title';
 
 interface PrevPos {
   x: number;
@@ -125,10 +131,16 @@ export class FightScene extends Phaser.Scene {
   lastInputs: InputMask[] = [];
   /** Ticks desde que a luta acabou. */
   overTicks = 0;
+  /** KOs, quedas e dano de cada jogador nesta luta. */
+  stats: MatchStats = createStats(0);
+  setup: MatchSetup = { characters: PLAYABLE_CHARACTERS, stageId: STAGES[0]?.id ?? '' };
 
   private readonly loop = new FixedStepLoop();
-  private characters: readonly string[] = PLAYABLE_CHARACTERS;
   private controls!: InputManager;
+  private pauseRequested = false;
+  /** Teclas fixas (Enter, Esc, Start) no tick anterior: pausa só no aperto. */
+  private prevSystem: MenuMask = 0;
+  private resumedAt = 0;
   private prev: PrevPos[] = [];
   private lastStates: FighterState[] = [];
   private views: FighterView[] = [];
@@ -155,12 +167,18 @@ export class FightScene extends Phaser.Scene {
     super('fight');
   }
 
-  init(data: FightData): void {
-    this.characters = data.characters ?? PLAYABLE_CHARACTERS;
+  init(data: Partial<MatchSetup>): void {
+    this.setup = {
+      characters: data.characters ?? PLAYABLE_CHARACTERS,
+      stageId: data.stageId ?? STAGES[0]?.id ?? '',
+    };
   }
 
   create(): void {
-    if (this.registry.get(DEBUG_KEY) === undefined) this.registry.set(DEBUG_KEY, true);
+    // debug ligado por padrão só no `pnpm dev` (` liga e desliga)
+    if (this.registry.get(DEBUG_KEY) === undefined) {
+      this.registry.set(DEBUG_KEY, import.meta.env.DEV);
+    }
     this.views = [];
     this.projectileImages = [];
     this.projectileTrails = [];
@@ -168,14 +186,20 @@ export class FightScene extends Phaser.Scene {
     this.backFx = new FxLayer(this, DEPTH.backFx);
     this.newMatch();
     this.controls = new InputManager();
+    this.pauseRequested = false;
+    this.prevSystem = PAUSE_KEYS; // segurado desde o menu não pausa
+    const requestPause = () => {
+      this.pauseRequested = true;
+    };
+    // trocar de janela ou de aba no meio da luta pausa
+    this.game.events.on(Phaser.Core.Events.BLUR, requestPause);
+    this.game.events.on(Phaser.Core.Events.HIDDEN, requestPause);
+    this.events.on(Phaser.Scenes.Events.RESUME, this.onResume);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.controls.destroy();
-    });
-    this.input.keyboard?.on('keydown-ENTER', () => {
-      if (this.canRematch()) this.newMatch();
-    });
-    this.input.keyboard?.on('keydown-ESC', () => {
-      if (this.canRematch()) this.backToSelect();
+      this.game.events.off(Phaser.Core.Events.BLUR, requestPause);
+      this.game.events.off(Phaser.Core.Events.HIDDEN, requestPause);
+      this.events.off(Phaser.Scenes.Events.RESUME, this.onResume);
     });
 
     this.stageView = new StageView(this, getStage(this.state.stageId), DEPTH);
@@ -211,6 +235,10 @@ export class FightScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number): void {
+    if (this.wantsPause()) {
+      this.openPause();
+      return;
+    }
     const timeScale = this.slowMo.update(delta);
     if (!this.slowMo.active) this.focus = null;
     const alpha = this.loop.advance(delta * timeScale, () => {
@@ -222,9 +250,14 @@ export class FightScene extends Phaser.Scene {
     this.updateCamera(alpha, delta);
   }
 
-  /** Começa uma luta nova (início e revanche), com os mesmos personagens. */
+  /** Começa uma luta nova (início e revanche), com os mesmos personagens e mapa. */
   newMatch(): void {
-    this.state = createGame({ characters: this.characters });
+    this.state = createGame({
+      characters: this.setup.characters,
+      stage: getStage(this.setup.stageId),
+      rules: MATCH_RULES,
+    });
+    this.stats = createStats(this.state.fighters.length);
     this.prev = this.state.fighters.map((f) => ({ x: f.x, y: f.y }));
     this.lastStates = this.state.fighters.map((f) => f.state);
     this.overTicks = 0;
@@ -238,36 +271,56 @@ export class FightScene extends Phaser.Scene {
     this.decisiveShown = false;
   }
 
-  canRematch(): boolean {
-    return this.state.phase === 'over' && this.overTicks >= REMATCH_DELAY_TICKS;
+  /** Revanche (resultado) ou recomeçar (pausa): mesma luta do zero, com a contagem. */
+  rematch(): void {
+    this.scene.stop('result');
+    this.newMatch();
+    this.controls.suppressHeld();
+    this.pauseRequested = false;
   }
 
-  /** Volta para a seleção de personagem. */
-  backToSelect(): void {
-    this.scene.stop('hud');
-    this.scene.stop('debug');
-    this.scene.start('select', { characters: this.characters });
+  /** Sai da luta para outra tela, levando o que foi escolhido. */
+  leave(target: LeaveTarget): void {
+    for (const key of ['hud', 'debug', 'pause', 'result']) this.scene.stop(key);
+    if (target === 'title') this.scene.start('title', { menu: true });
+    else this.scene.start(target, this.setup);
   }
+
+  /** Esc, Enter ou Start do controle (ou perder o foco), com a luta ainda rolando. */
+  private wantsPause(): boolean {
+    const requested = this.pauseRequested;
+    this.pauseRequested = false;
+    if (!requested || this.state.phase === 'over') return false;
+    return this.game.loop.time - this.resumedAt >= PAUSE_COOLDOWN_MS;
+  }
+
+  private openPause(): void {
+    playSfx(this, 'ui_confirm');
+    this.scene.launch('pause');
+    this.scene.pause();
+  }
+
+  /** Voltando da pausa: o que estiver apertado só conta depois de soltar. */
+  private readonly onResume = (): void => {
+    this.controls.suppressHeld();
+    this.pauseRequested = false;
+    this.prevSystem = PAUSE_KEYS;
+    this.resumedAt = this.game.loop.time;
+  };
 
   private tick(): void {
     for (const [i, f] of this.state.fighters.entries()) this.prev[i] = { x: f.x, y: f.y };
-    const prevInputs = this.lastInputs;
     this.lastInputs = this.controls.sample(this.state.fighters.length);
+    const system = this.controls.system & PAUSE_KEYS;
+    if (system & ~this.prevSystem) this.pauseRequested = true;
+    this.prevSystem = system;
 
     if (this.state.phase === 'over') {
       this.overTicks++;
-      const pressed = (button: number) =>
-        this.lastInputs.some((m, i) => isPressed(m, prevInputs[i] ?? 0, button));
-      if (this.canRematch() && pressed(Button.SPECIAL)) {
-        this.backToSelect();
-        return;
-      }
-      if (this.canRematch() && pressed(Button.ATTACK | Button.JUMP)) {
-        this.newMatch();
-        return;
-      }
+      if (this.overTicks === RESULT_DELAY_TICKS) this.scene.launch('result');
     }
     stepGame(this.state, this.lastInputs);
+    recordEvents(this.stats, this.state.events);
     this.handleEvents();
     this.spawnTrails();
     this.spawnFx();
@@ -498,7 +551,7 @@ export class FightScene extends Phaser.Scene {
 
       this.drawBlockOutlines(f, r);
       // marcador do jogador em cima da cabeça
-      const player = PLAYER_COLORS[f.id % PLAYER_COLORS.length] ?? 0xffffff;
+      const player = playerColor(f.id);
       const mx = r.x + r.w / 2;
       const my = r.y + r.h - view.height - 8;
       g.fillStyle(player, 1);

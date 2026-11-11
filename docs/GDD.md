@@ -15,7 +15,9 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 - **Blast zones:** retângulo além das bordas da tela; sair dele inteiro = KO (inclusive cair do mapa).
 - **Respawn:** 1 s fora de cena, depois reaparece no alto do mapa com 0% e 2 s de invencibilidade. Sem stock, está fora; quando sobra 1 lutador, ele vence (se os últimos stocks caírem no mesmo tick, empate).
 - **Morte súbita:** só os empatados voltam, nos pontos de início, com 1 stock, 300% e 1 s de invencibilidade, sem limite de tempo.
-- **Revanche:** no fim da luta, Ataque, Pulo ou Enter (depois de 1 s) começa outra com os mesmos personagens; Especial ou Esc volta para a seleção.
+- **Contagem:** antes de cada luta, "3, 2, 1, LUTA!" (2,5 s). Na contagem ninguém age e o relógio não anda (fase `countdown` do `sim`).
+- **Pausa:** Esc, Enter ou Start do controle; a luta também pausa sozinha quando a janela perde o foco. Continuar (Esc, Start ou Especial), recomeçar, trocar lutador ou voltar ao menu. Voltando da pausa, botão que ficou apertado só conta depois de soltar.
+- **Resultado e revanche:** 1 s depois do fim, a tela de resultado mostra quem venceu e os números de cada um (KOs, quedas, dano causado, golpes, maior golpe). Revanche já vem escolhida (Ataque, Pulo ou Enter); Especial ou Esc troca de lutador.
 - **Simulação:** 60 ticks/s, passo fixo. Todos os tempos de golpe são contados em ticks.
 
 ## Movimento
@@ -32,7 +34,9 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 
 ## Controles
 
-Rascunho; o remapeamento entra na Etapa 6. Gamepad (Gamepad API) é o recomendado.
+Padrão abaixo; dá para trocar na tela **Controles** (menu inicial), e fica salvo no navegador. Uma tecla só vale para um botão: escolher uma que já é usada troca as duas. Enter, Esc, M, ` , Tab e F1–F12 são reservadas. No controle (o mesmo mapa para todos), as direções ficam sempre no analógico e no D-pad; Select e Start são reservados. Gamepad (Gamepad API) é o recomendado.
+
+Nos menus, além dos controles de cada jogador, sempre valem as setas, Enter (confirma) e Esc (volta).
 
 | Ação       | Jogador 1  | Jogador 2 | Gamepad (padrão)       |
 | ---------- | ---------- | --------- | ---------------------- |
@@ -126,8 +130,10 @@ Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 
 ## Seleção
 
-- Seletor mínimo do modo local: cada jogador escolhe com ←/→, confirma com Ataque ou Pulo e desfaz com Especial. Com os 2 prontos, a luta começa. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
-- No fim da luta: Ataque, Pulo ou Enter = revanche com os mesmos; Especial ou Esc = volta para a seleção.
+- **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; online "em breve"; controles) → personagem → mapa → luta → resultado → revanche.
+- **Personagem:** grade de 7 casas (os que existem e silhuetas "em breve"; cresce aos poucos). Cada jogador anda com as próprias direções, confirma com Ataque ou Pulo e desfaz com Especial; Especial com ninguém pronto (ou Esc) volta ao menu. O painel de cada um mostra o lutador, estilo, especial, barras e bordão. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
+- **Mapa:** um cursor só, qualquer jogador mexe; por enquanto só a Laje.
+- **HUD:** painel de cada jogador com retrato, % de dano (branco → amarelo → laranja → vermelho → vinho conforme sobe) e stocks com a cabecinha do personagem; relógio no alto.
 
 ## Ficha de personagem
 

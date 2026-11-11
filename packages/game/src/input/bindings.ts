@@ -27,7 +27,8 @@ export const P2_KEYS: KeyBindings = {
   TAUNT: ['KeyU'],
 };
 
-const BUTTON_NAMES = Object.keys(Button) as ButtonName[];
+/** Botões do sim, na ordem da tabela de controles. */
+export const BUTTON_NAMES = Object.keys(Button) as ButtonName[];
 
 /** Converte o conjunto de teclas apertadas na bitmask de um jogador. */
 export function maskFromKeys(down: ReadonlySet<string>, bindings: KeyBindings): InputMask {
@@ -53,26 +54,42 @@ export interface PadSnapshot {
 
 export const STICK_DEADZONE = 0.5;
 
+/** Ações que o controle deixa remapear (as direções ficam no analógico e no D-pad). */
+export const PAD_ACTIONS = ['JUMP', 'ATTACK', 'SPECIAL', 'DODGE', 'TAUNT'] as const;
+export type PadAction = (typeof PAD_ACTIONS)[number];
+
+/** Índices de botão do gamepad (mapeamento "standard") de cada ação. */
+export type PadBindings = Record<PadAction, readonly number[]>;
+
 /**
  * Mapeamento "standard" da Gamepad API:
- * 0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 LT, 7 RT, 12–15 D-pad (cima, baixo, esq., dir.).
+ * 0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 LT, 7 RT, 8 Select, 9 Start, 12–15 D-pad.
  */
-const PAD_BUTTONS: readonly (readonly [number, number])[] = [
-  [0, Button.JUMP],
-  [2, Button.ATTACK],
-  [1, Button.SPECIAL],
-  [5, Button.DODGE],
-  [7, Button.DODGE],
-  [3, Button.TAUNT],
+export const DEFAULT_PAD: PadBindings = {
+  JUMP: [0],
+  ATTACK: [2],
+  SPECIAL: [1],
+  DODGE: [5, 7],
+  TAUNT: [3],
+};
+
+/** D-pad: cima, baixo, esquerda, direita. */
+const PAD_DIRECTIONS: readonly (readonly [number, number])[] = [
   [12, Button.UP],
   [13, Button.DOWN],
   [14, Button.LEFT],
   [15, Button.RIGHT],
 ];
 
-export function maskFromPad(pad: PadSnapshot): InputMask {
+export const PAD_SELECT = 8;
+export const PAD_START = 9;
+
+export function maskFromPad(pad: PadSnapshot, bindings: PadBindings = DEFAULT_PAD): InputMask {
   let mask = 0;
-  for (const [index, button] of PAD_BUTTONS) {
+  for (const action of PAD_ACTIONS) {
+    if (bindings[action].some((index) => pad.buttons[index])) mask |= Button[action];
+  }
+  for (const [index, button] of PAD_DIRECTIONS) {
     if (pad.buttons[index]) mask |= button;
   }
   const x = pad.axes[0] ?? 0;

@@ -4,8 +4,11 @@ import { px } from './constants';
 import type { Fighter } from './fighter';
 import {
   cloneState,
+  COUNTDOWN_TICKS,
   createGame,
   DEFAULT_RULES,
+  getStage,
+  MATCH_RULES,
   RESPAWN_DELAY_TICKS,
   RESPAWN_INVULN_TICKS,
   SUDDEN_DEATH_DAMAGE,
@@ -13,7 +16,7 @@ import {
   type GameState,
 } from './game';
 import { Button } from './input';
-import { TEST_STAGE } from './stage';
+import { STAGES, TEST_STAGE } from './stage';
 
 function fighter(g: GameState, id: number): Fighter {
   const f = g.fighters[id];
@@ -221,5 +224,35 @@ describe('fim da partida', () => {
     stepGame(g, [0, 0]);
     expect(g.phase).toBe('over');
     expect(g.winner).toBe(0);
+  });
+
+  it('contagem: ninguém age e o relógio para até a luta começar', () => {
+    const g = createGame({ rules: MATCH_RULES });
+    expect(g.phase).toBe('countdown');
+    expect(g.countdown).toBe(COUNTDOWN_TICKS);
+    const start = fighter(g, 0).x;
+    for (let i = 0; i < COUNTDOWN_TICKS - 1; i++) stepGame(g, [Button.RIGHT | Button.ATTACK, 0]);
+    expect(g.phase).toBe('countdown');
+    expect(fighter(g, 0).x).toBe(start);
+    expect(fighter(g, 0).state).toBe('idle');
+    expect(g.timeLeft).toBe(MATCH_RULES.timeLimitTicks);
+    stepGame(g, [Button.RIGHT, 0]);
+    expect(g.phase).toBe('fight');
+    expect(g.countdown).toBe(0);
+    stepGame(g, [Button.RIGHT, 0]);
+    expect(fighter(g, 0).x).toBeGreaterThan(start);
+    expect(g.timeLeft).toBe(MATCH_RULES.timeLimitTicks - 1);
+  });
+
+  it('sem contagem nas regras, a luta começa direto', () => {
+    expect(createGame().phase).toBe('fight');
+  });
+
+  it('todo mapa tem spawn e respawn para 4 jogadores', () => {
+    for (const stage of STAGES) {
+      expect(stage.spawns.length).toBeGreaterThanOrEqual(4);
+      expect(stage.respawns.length).toBeGreaterThanOrEqual(4);
+      expect(getStage(stage.id)).toBe(stage);
+    }
   });
 });

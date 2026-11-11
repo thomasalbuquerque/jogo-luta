@@ -122,11 +122,11 @@ Objetivo: um golpe forte tem que doer de ver e de ouvir.
 
 Objetivo: o jogo local fica completo de ponta a ponta. **Este é o marco principal: mandar o link pro grupo.**
 
-- [ ] Fluxo: tela inicial → modo (local / online) → seleção de personagem → seleção de mapa → luta → resultado → revanche.
-- [ ] Tela de seleção com grade de 16 retratos. Quem ainda não existe aparece como silhueta com "em breve".
-- [ ] HUD: retrato, % de dano com cor que esquenta conforme sobe, stocks restantes.
-- [ ] Contagem "3, 2, 1, LUTA", pausa e tela de resultado.
-- [ ] Remapear controles e salvar no localStorage.
+- [x] Fluxo: tela inicial → modo (local / online) → seleção de personagem → seleção de mapa → luta → resultado → revanche.
+- [x] Tela de seleção com grade de 7 retratos. Quem ainda não existe aparece como silhueta com "em breve". O total é 16, mas por enquanto manter só 7 retratos (incluindo os dois personagens iniciais), para não dar expectativa para o grupo que vai ter 16 personagens. Estou pensando se realmente vai ter tudo isso, porque são muitos. Futuramente a silhueta com "em breve" pode ir aumentando gradualmente.
+- [x] HUD: retrato, % de dano com cor que esquenta conforme sobe, stocks restantes.
+- [x] Contagem "3, 2, 1, LUTA", pausa e tela de resultado.
+- [x] Remapear controles e salvar no localStorage.
 
 **Pronto quando:** dois amigos jogam no mesmo PC sem você explicar nada.
 

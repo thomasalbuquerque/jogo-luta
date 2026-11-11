@@ -30,6 +30,12 @@ export const SFX_NAMES = [
   'counter',
   'ko',
   'respawn',
+  'count',
+  'go',
+  'ui_move',
+  'ui_confirm',
+  'ui_back',
+  'ui_error',
 ] as const;
 
 export type SfxName = (typeof SFX_NAMES)[number];
@@ -176,9 +182,92 @@ function respawn(sr: number): Float32Array<ArrayBuffer> {
   );
 }
 
+/** Notas curtas em sequência (bipes de menu), `gap` segundos entre elas. */
+function blips(
+  sr: number,
+  notes: readonly number[],
+  gap: number,
+  tau: number,
+  wave: 'sine' | 'triangle' | 'square',
+): Float32Array<ArrayBuffer> {
+  const oscs = notes.map(() => new Osc(sr));
+  const seconds = gap * (notes.length - 1) + tau * 5;
+  return render(
+    sr,
+    seconds,
+    (t) => {
+      let v = 0;
+      for (const [i, note] of notes.entries()) {
+        const osc = oscs[i];
+        if (!osc) continue;
+        const f = midiFreq(note);
+        const tone = wave === 'square' ? osc.square(f) * 0.5 : osc[wave](f);
+        v += tone * adEnv(t - i * gap, 0.003, tau);
+      }
+      return v;
+    },
+    0.7,
+  );
+}
+
+/** Bipe da contagem "3, 2, 1": tom com um pouco de brilho em cima. */
+function count(sr: number): Float32Array<ArrayBuffer> {
+  const low = new Osc(sr);
+  const high = new Osc(sr);
+  return render(sr, 0.45, (t) => {
+    const env = adEnv(t, 0.004, 0.12);
+    return (low.triangle(midiFreq(69)) + high.sine(midiFreq(81)) * 0.35) * env;
+  });
+}
+
+/** "LUTA!": acorde aberto, com estalo de ruído e um baque grave. */
+function go(sr: number): Float32Array<ArrayBuffer> {
+  const notes = [69, 76, 81, 85, 88];
+  const oscs = notes.map(() => new Osc(sr));
+  const sub = new Osc(sr);
+  const r = rng(29);
+  const crash = new OnePole(sr);
+  return render(sr, 1.1, (t) => {
+    let v = 0;
+    for (const [i, note] of notes.entries()) {
+      v += (oscs[i]?.saw(midiFreq(note)) ?? 0) * adEnv(t, 0.006, 0.35) * 0.22;
+    }
+    const thump = sub.sine(sweep(t, 160, 50, 0.05)) * adEnv(t, 0.002, 0.12);
+    const hiss = crash.highpass(r() * 2 - 1, 3500) * decay(t, 0.12) * 0.4;
+    return drive(v + thump + hiss, 1.6);
+  });
+}
+
+/** Erro de menu (opção que ainda não existe): zumbido grave curto, duas vezes. */
+function uiError(sr: number): Float32Array<ArrayBuffer> {
+  const osc = new Osc(sr);
+  const lp = new OnePole(sr);
+  return render(
+    sr,
+    0.24,
+    (t) => {
+      const gate = t < 0.09 || (t > 0.12 && t < 0.21) ? 1 : 0;
+      return lp.lowpass(osc.square(midiFreq(43)), 1200) * gate;
+    },
+    0.6,
+  );
+}
+
 /** Amostras do efeito `name`, na taxa `sampleRate`. Sempre iguais para o mesmo nome. */
 export function renderSfx(name: SfxName, sampleRate: number): Float32Array<ArrayBuffer> {
   switch (name) {
+    case 'count':
+      return count(sampleRate);
+    case 'go':
+      return go(sampleRate);
+    case 'ui_move':
+      return blips(sampleRate, [84], 0, 0.025, 'sine');
+    case 'ui_confirm':
+      return blips(sampleRate, [76, 83], 0.06, 0.05, 'triangle');
+    case 'ui_back':
+      return blips(sampleRate, [79, 72], 0.06, 0.04, 'triangle');
+    case 'ui_error':
+      return uiError(sampleRate);
     case 'hit_light':
       return hit(sampleRate, 0);
     case 'hit_medium':

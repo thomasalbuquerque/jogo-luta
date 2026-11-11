@@ -1,29 +1,40 @@
 import type { InputMask } from '@jogo-luta/sim';
-import {
-  allCodes,
-  maskFromKeys,
-  maskFromPad,
-  P1_KEYS,
-  P2_KEYS,
-  type KeyBindings,
-} from './bindings';
+import { allCodes, maskFromKeys, maskFromPad, PAD_SELECT, PAD_START } from './bindings';
+import { getControls, type Controls } from './controls';
+import { Menu, type MenuMask } from './menu';
+
+/** Teclas fixas dos menus (valem mesmo com os controles remapeados). */
+const SYSTEM_KEYS: readonly (readonly [string, MenuMask])[] = [
+  ['ArrowUp', Menu.UP],
+  ['ArrowDown', Menu.DOWN],
+  ['ArrowLeft', Menu.LEFT],
+  ['ArrowRight', Menu.RIGHT],
+  ['Enter', Menu.CONFIRM],
+  ['NumpadEnter', Menu.CONFIRM],
+  ['Escape', Menu.BACK],
+];
+const SYSTEM_CODES = new Set(SYSTEM_KEYS.map(([code]) => code));
 
 /**
- * Junta teclado e gamepads e entrega uma bitmask por jogador a cada tick.
+ * Junta teclado e gamepads e entrega uma bitmask por jogador a cada tick, com
+ * os controles atuais (remapeáveis). Também lê as teclas fixas de menu.
  *
  * Teclas apertadas e soltas entre dois ticks não se perdem: ficam "travadas"
- * até a próxima amostra.
+ * até a próxima amostra. Tecla que já estava apertada quando o InputManager foi
+ * criado só conta depois de soltar e apertar de novo.
  */
 export class InputManager {
   private readonly held = new Set<string>();
   private readonly latched = new Set<string>();
-  private readonly gameCodes: Set<string>;
+  /** Bits ignorados até soltar (ver `suppressHeld`), por jogador. */
+  private suppressed: InputMask[] = [];
+  private lastRaw: InputMask[] = [];
+  private systemMask: MenuMask = 0;
 
   constructor(
-    private readonly keyboards: readonly KeyBindings[] = [P1_KEYS, P2_KEYS],
+    private readonly controls: () => Controls = getControls,
     private readonly target: Window = window,
   ) {
-    this.gameCodes = allCodes(keyboards);
     target.addEventListener('keydown', this.onKeyDown);
     target.addEventListener('keyup', this.onKeyUp);
     target.addEventListener('blur', this.onBlur);
@@ -33,14 +44,41 @@ export class InputManager {
   sample(playerCount: number): InputMask[] {
     const down = new Set([...this.held, ...this.latched]);
     this.latched.clear();
+    const { keys, pad: padBindings } = this.controls();
     const pads = readPads();
     const masks: InputMask[] = [];
     for (let i = 0; i < playerCount; i++) {
-      const keys = this.keyboards[i];
+      const k = keys[i];
       const pad = pads[i];
-      masks.push((keys ? maskFromKeys(down, keys) : 0) | (pad ? maskFromPad(pad) : 0));
+      const raw = (k ? maskFromKeys(down, k) : 0) | (pad ? maskFromPad(pad, padBindings) : 0);
+      const suppressed = (this.suppressed[i] ?? 0) & raw;
+      this.suppressed[i] = suppressed;
+      this.lastRaw[i] = raw;
+      masks.push(raw & ~suppressed);
     }
+
+    let system = 0;
+    for (const [code, bit] of SYSTEM_KEYS) if (down.has(code)) system |= bit;
+    for (const pad of pads) {
+      if (pad.buttons[PAD_START]) system |= Menu.START;
+      if (pad.buttons[PAD_SELECT]) system |= Menu.BACK;
+    }
+    this.systemMask = system;
     return masks;
+  }
+
+  /** Teclas fixas de menu (setas, Enter, Esc, Start e Select do controle) na última amostra. */
+  get system(): MenuMask {
+    return this.systemMask;
+  }
+
+  /**
+   * O que está apertado agora só volta a contar depois de soltar (ex.: voltar da
+   * pausa com Ataque apertado não solta um golpe).
+   */
+  suppressHeld(): void {
+    this.latched.clear();
+    this.suppressed = [...this.lastRaw];
   }
 
   destroy(): void {
@@ -50,8 +88,11 @@ export class InputManager {
   }
 
   private readonly onKeyDown = (e: KeyboardEvent): void => {
-    if (!this.gameCodes.has(e.code)) return;
+    const known = SYSTEM_CODES.has(e.code) || allCodes(this.controls().keys).has(e.code);
+    if (!known) return;
     e.preventDefault(); // setas não rolam a página
+    // repetição do teclado: ou já está em `held`, ou vem de antes deste InputManager
+    if (e.repeat) return;
     this.held.add(e.code);
     this.latched.add(e.code);
   };
@@ -68,7 +109,7 @@ export class InputManager {
 }
 
 /** Gamepads conectados, na ordem: o 1º vai para o jogador 1, o 2º para o jogador 2. */
-function readPads(): { buttons: boolean[]; axes: readonly number[] }[] {
+export function readPads(): { buttons: boolean[]; axes: readonly number[] }[] {
   if (typeof navigator.getGamepads !== 'function') return [];
   const result: { buttons: boolean[]; axes: readonly number[] }[] = [];
   for (const pad of navigator.getGamepads()) {

@@ -48,3 +48,6 @@ export const TEST_STAGE: Stage = {
   ],
   blastZone: { x: px(-1300), y: px(-1000), w: px(2600), h: px(1800) },
 };
+
+/** Mapas do jogo, na ordem da tela de seleção. */
+export const STAGES: readonly Stage[] = [TEST_STAGE];
