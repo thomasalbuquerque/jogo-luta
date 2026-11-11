@@ -39,6 +39,6 @@ export class BootScene extends Phaser.Scene {
     prepareSfx(this);
     // Só em dev: ?rig abre o visualizador de animações.
     const viewer = import.meta.env.DEV && new URLSearchParams(location.search).has('rig');
-    this.scene.start(viewer ? 'rig-viewer' : 'select');
+    this.scene.start(viewer ? 'rig-viewer' : 'title');
   }
 }
