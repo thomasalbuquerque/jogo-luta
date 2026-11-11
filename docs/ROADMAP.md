@@ -139,7 +139,7 @@ Objetivo: a mesma sequência de inputs sempre produz exatamente a mesma luta. Se
 - [x] Estado do jogo serializável e barato de clonar (snapshot e restore). Base dos replays, da checagem de dessincronização e do rollback, se ele vier (Etapa 12).
 - [x] Teste automatizado: rodar 10 mil ticks com inputs aleatórios (mesma seed) duas vezes e comparar o hash do estado.
 - [x] Replays: gravar seed + lista de inputs e reproduzir. De brinde, dá para compartilhar lances no grupo.
-- [ ] Simular latência localmente, atrasando os inputs de um jogador em N frames, para sentir o netcode antes de ter rede.
+- [x] Simular latência localmente, atrasando os inputs de um jogador em N frames, para sentir o netcode antes de ter rede.
 
 **Pronto quando:** um replay gravado reproduz a luta idêntica, frame a frame.
 
