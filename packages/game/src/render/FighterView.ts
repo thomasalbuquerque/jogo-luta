@@ -28,22 +28,6 @@ function lowestFoot(skin: Skin, placed: readonly PlacedBone[]): number {
   return poseBounds(skin, feet).maxY;
 }
 
-/**
- * Sombra dos membros do lado de trás (braço e perna de longe): a mesma peça da
- * frente, um pouco mais escura e puxada para o violeta, como as sombras do estilo.
- */
-const FAR_SHADE = 0xcdc3d4;
-
-/** Multiplica duas cores 0xrrggbb canal a canal (como uma camada "multiplicar"). */
-function multiplyColor(a: number, b: number): number {
-  let out = 0;
-  for (const shift of [16, 8, 0]) {
-    const v = Math.round((((a >> shift) & 255) * ((b >> shift) & 255)) / 255);
-    out |= v << shift;
-  }
-  return out;
-}
-
 /** Arte um pouco mais alta que a hurtbox: o cabelo e o boné passam do topo. */
 const ART_HEIGHT_FACTOR = 1.12;
 
@@ -127,12 +111,14 @@ export class FighterView {
     return this;
   }
 
-  /** Tinge as peças (0xffffff = cor normal). Os membros de trás ficam sempre um pouco mais escuros. */
+  /**
+   * Tinge as peças (0xffffff = cor normal). Todas recebem a mesma cor: os membros de
+   * trás ficam na cor original da arte, sem sombra extra.
+   */
   setTint(color: number): this {
-    for (const [bone, img] of this.images) {
-      const c = bone.endsWith('Far') ? multiplyColor(color, FAR_SHADE) : color;
-      if (c === 0xffffff) img.clearTint();
-      else img.setTint(c);
+    for (const img of this.images.values()) {
+      if (color === 0xffffff) img.clearTint();
+      else img.setTint(color);
     }
     return this;
   }
