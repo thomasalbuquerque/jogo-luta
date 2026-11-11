@@ -9,7 +9,7 @@ O jogo fica completo e divertido no modo local, com 2 personagens, antes de qual
 - **Retângulos antes de arte:** física e combate são validados com formas coloridas. A arte entra só quando o jogo já é bom.
 - **Moveset base compartilhado:** todos usam os mesmos golpes leves e aéreos. Cada amigo ganha visual próprio, 1 especial e uma provocação.
 - **Personagem é dado, não código:** cada personagem é uma ficha de configuração. Balancear é editar números.
-- **Lógica separada da renderização:** a simulação roda num pacote próprio (`sim`), em passo fixo de 60 ticks/s, sem física do Phaser. É isso que viabiliza o online com rollback depois.
+- **Lógica separada da renderização:** a simulação roda num pacote próprio (`sim`), em passo fixo de 60 ticks/s, sem física do Phaser. É isso que viabiliza o online por atraso e deixa o rollback possível, se um dia precisar.
 
 ### Fases
 
@@ -21,6 +21,7 @@ Cada fase só começa quando o marco da anterior foi atingido.
 | 2. Arte e polimento | 4 Arte com IA · 5 Game feel e áudio · 6 Menus e HUD           | **Jogo local completo, link enviado ao grupo** |
 | 3. Online           | 7 Determinismo · 8 Online 1x1 · 9 Online 2x2                  | 10 partidas online sem dessincronizar          |
 | 4. Conteúdo         | 10 Elenco completo · 11 Balanceamento e deploy                | 16 jogáveis e o grupo joga sem explicação      |
+| 5. Opcional         | 12 Online avançado (rollback, relay)                          | Só se o online por atraso incomodar ou falhar  |
 
 ## Regra de commits (vale para todas as etapas)
 
@@ -135,7 +136,7 @@ Objetivo: o jogo local fica completo de ponta a ponta. **Este é o marco princip
 Objetivo: a mesma sequência de inputs sempre produz exatamente a mesma luta. Sem isso, o online dessincroniza.
 
 - [ ] Determinismo do `sim`: nada de `Math.random` (usar RNG com seed), nada de tempo real, nada de `Math.sin`/`cos`/`pow` na lógica, porque podem variar entre navegadores. Usar tabela de valores ou inteiros (ponto fixo).
-- [ ] Estado do jogo serializável e barato de clonar (snapshot e restore). É a base do rollback.
+- [ ] Estado do jogo serializável e barato de clonar (snapshot e restore). Base dos replays, da checagem de dessincronização e do rollback, se ele vier (Etapa 12).
 - [ ] Teste automatizado: rodar 10 mil ticks com inputs aleatórios (mesma seed) duas vezes e comparar o hash do estado.
 - [ ] Replays: gravar seed + lista de inputs e reproduzir. De brinde, dá para compartilhar lances no grupo.
 - [ ] Simular latência localmente, atrasando os inputs de um jogador em N frames, para sentir o netcode antes de ter rede.
@@ -150,8 +151,7 @@ Objetivo: dois amigos em casas diferentes jogando sem lag perceptível. Modelo: 
 - [ ] Conexão WebRTC DataChannel sem ordenação e sem retransmissão (comportamento parecido com UDP), via PeerJS.
 - [ ] Sinalização: o servidor gratuito do PeerJS para começar; um servidor próprio em Node se ele der problema.
 - [ ] STUN público + TURN de fallback para quem estiver atrás de NAT restritivo (comum em 4G).
-- [ ] Netcode v1, por atraso: cada lado espera o input do outro com 2 a 3 frames de atraso.
-- [ ] Netcode v2, rollback: prever o input remoto e, quando o real chegar, voltar ao snapshot e re-simular. Usa tudo da Etapa 7.
+- [ ] Netcode por atraso: cada lado espera o input do outro com 2 a 3 frames de atraso. Com todos em São Paulo e na fibra, o ping deve ficar baixo o bastante para isso não ser perceptível. O rollback ficou para a Etapa 12, opcional.
 - [ ] Detecção de dessincronização: trocar o hash do estado a cada N ticks e registrar quando divergir.
 - [ ] Desconexão, reconexão e indicador de ping.
 
@@ -161,8 +161,7 @@ Objetivo: dois amigos em casas diferentes jogando sem lag perceptível. Modelo: 
 
 Objetivo: lutas em dupla, locais e online.
 
-- [ ] Generalizar sala e netcode para 4 jogadores: o host recebe os inputs de todos e repassa (estrela, não malha completa).
-- [ ] Se a conexão P2P com 4 ficar instável: mover o papel do host para um servidor relay pequeno em Node, que só repassa inputs.
+- [ ] Generalizar sala e netcode para 4 jogadores: o host recebe os inputs de todos e repassa (estrela, não malha completa). Se a conexão P2P com 4 ficar instável, o relay está na Etapa 12.
 - [ ] Times: cores por time, fogo amigo liga/desliga, HUD agrupado por time.
 - [ ] Câmera e mapa ajustados para 4 lutadores.
 - [ ] 2x2 local com 4 gamepads no mesmo PC.
@@ -206,8 +205,18 @@ Objetivo: nenhum personagem domina, e o jogo roda bem em qualquer PC do grupo.
 
 **Pronto quando:** o grupo marca partidas sozinho, sem você organizar.
 
+## Etapa 12 — Online avançado (opcional)
+
+Objetivo: resolver problemas do online que de fato apareceram. Só entra se o online por atraso das Etapas 8 e 9 incomodar ou falhar; cada item é independente e pode nunca ser feito.
+
+- [ ] Rollback (se o atraso de input incomodar): prever o input remoto e, quando o real chegar, voltar ao snapshot e re-simular. Usa tudo da Etapa 7. Efeitos de render e áudio não podem tocar duas vezes na re-simulação.
+- [ ] Servidor relay pequeno em Node com WebSocket (se a conexão P2P falhar por NAT/4G ou ficar instável com 4 jogadores): substitui o host e o TURN, e só repassa inputs.
+
+**Pronto quando:** o problema que motivou o item sumiu nas partidas do grupo.
+
 ## Riscos principais
 
 - **Arte inconsistente entre personagens:** travar o guia de estilo na Etapa 4 e não mudar mais.
 - **Online dessincronizando:** não pular a Etapa 7.
+- **Complexidade do netcode:** começar só com atraso; rollback e relay ficam para a Etapa 12, e só se fizerem falta.
 - **Escopo de 16 personagens:** o jogo já é divertido com 4; os lotes deixam o elenco crescer sem travar o resto.
