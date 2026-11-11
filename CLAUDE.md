@@ -19,12 +19,15 @@ O plano completo, com etapas e tarefas, está em `docs/ROADMAP.md`. Leia o roadm
 packages/
   sim/      lógica pura do jogo: física, combate, estados, personagens. SEM Phaser, SEM DOM.
   game/     Phaser: renderização, input, áudio, menus, HUD. Lê o estado do sim e desenha.
+            src/rig: esqueleto único e animações (dados); public/assets: atlas gerados pelo pnpm art
   server/   (Etapa 8+) sinalização/relay do online.
+art/        PNGs gerados por IA + recortes.json (onde está cada peça e as juntas)
+scripts/art pipeline de arte (tira o fundo, recorta, gera os atlas)
 docs/
   ROADMAP.md
   GDD.md    regras do jogo, controles, moveset base, formato da ficha de personagem
   ELENCO.md os 16 amigos: traços, bordão, especial, provocação, cores
-  ARTE.md   guia de estilo visual (travado) e prompts de imagem para o ChatGPT
+  ARTE.md   guia de estilo visual (travado), prompts de imagem e o caminho do PNG até o jogo
 ```
 
 ## Regras de arquitetura (não quebrar)
@@ -69,6 +72,9 @@ pnpm lint             ESLint + checagem do Prettier
 pnpm format           formatar com Prettier
 pnpm typecheck        tsc em todos os pacotes
 pnpm build            build de produção (packages/game/dist)
+pnpm art [pasta]      recorta a arte de art/ e gera os atlas (--debug <pasta> mostra as juntas)
 ```
+
+Visualizador de animações (só em dev): `http://localhost:5173/?rig`.
 
 Deploy: todo push na `main` roda `.github/workflows/deploy.yml` (lint, testes, build) e publica no GitHub Pages: https://thomasalbuquerque.github.io/jogo-luta/
