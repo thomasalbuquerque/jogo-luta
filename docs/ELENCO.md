@@ -8,7 +8,7 @@ veja `docs/GDD.md`.
 
 | #   | Apelido     | Traço mais caricato                                                  | Bordão                       | Especial (bloco)                    | Provocação                                  | Cores                                    | Autorizou |
 | --- | ----------- | -------------------------------------------------------------------- | ---------------------------- | ----------------------------------- | ------------------------------------------- | ---------------------------------------- | --------- |
-| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral | "Vem com o Schummy, mermão!" | **Arrancada** (investida)           | Gira um volante imaginário e grita o bordão | Azul-petróleo, grafite, prata            |           |
+| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral | "Vem com o Schummy, mermão!" | **Arrancada** (investida)           | Gira um volante imaginário e grita o bordão | Vermelho, branco, grafite                |           |
 | 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil) | Mãos em concha, gritando o bordão           | Branco (avental), laranja, amarelo-milho |           |
 | 3   |             |                                                                      |                              |                                     |                                             |                                          |           |
 | 4   |             |                                                                      |                              |                                     |                                             |                                          |           |
@@ -39,11 +39,13 @@ controla de longe (projétil).
   na horizontal, acertando quem estiver no caminho. Startup mais longo, alcance e knockback altos;
   no ar a distância é menor (não vira recuperação infinita).
 - **Provocação:** gira um volante imaginário, faz "vrum vrum" e solta "Vem com o Schummy, mermão!".
-- **Visual:** roupa casual de quem curte carro (jaqueta/camisa estilo equipe de corrida genérica,
-  boné), toques de praia do litoral. Cores frias: azul-petróleo, grafite e prata.
-- **Cuidado com a referência ao piloto:** a semelhança aparece só em detalhes pontuais (traços do
-  rosto, um ou outro elemento de corrida). **Não usar** macacão vermelho, nome, número ou visual do
-  piloto, nem nada que lembre o acidente dele.
+- **Visual:** roupa de quem curte carro. Jaqueta de corrida vermelha (`#D62839`), aberta, com
+  listras brancas nas mangas e laterais grafite (`#2E3138`), sem logos; camiseta grafite; bermuda
+  cargo grafite; luvas de piloto sem dedos, cinza; tênis vermelho e branco. Sem boné, para o topete
+  aparecer. Cores: vermelho, branco e grafite. Concept art: `art/schummaki/1-conceito.png`.
+- **Sem referências ao piloto:** o apelido vem da semelhança, mas o personagem não faz referência a
+  ele: nada de nome, número, capacete, macacão ou logos de equipe, nem nada que lembre o acidente
+  dele. Usar vermelho tudo bem.
 
 ### 2. João Frango
 
@@ -62,4 +64,5 @@ controla de longe (projétil).
 
 ### Arte
 
-Na Etapa 4, fotos de cada amigo servem de referência para a concept art.
+Na Etapa 4, fotos de cada amigo servem de referência para a concept art. O guia de estilo, a ficha
+de arte de cada personagem e os prompts para o ChatGPT ficam em [`docs/ARTE.md`](ARTE.md).

@@ -23,6 +23,8 @@ packages/
 docs/
   ROADMAP.md
   GDD.md    regras do jogo, controles, moveset base, formato da ficha de personagem
+  ELENCO.md os 16 amigos: traços, bordão, especial, provocação, cores
+  ARTE.md   guia de estilo visual (travado) e prompts de imagem para o ChatGPT
 ```
 
 ## Regras de arquitetura (não quebrar)

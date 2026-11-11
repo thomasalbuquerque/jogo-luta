@@ -92,8 +92,8 @@ Objetivo: trocar ou criar um personagem é editar um arquivo, não escrever cód
 
 Objetivo: os 2 primeiros personagens animados e reconhecíveis. Esta etapa define o processo que será repetido 14 vezes depois.
 
-- [ ] Guia de estilo único: proporção caricata (cabeça grande ajuda a reconhecer os amigos), tipo de contorno, paleta e iluminação. Um prompt base fixo para todos os personagens.
-- [ ] Concept art de cada um: frente, perfil e 3 expressões, a partir da descrição e de fotos.
+- [x] Guia de estilo único: proporção caricata (cabeça grande ajuda a reconhecer os amigos), tipo de contorno, paleta e iluminação. Um prompt base fixo para todos os personagens.
+- [x] Concept art de cada um: frente, perfil e 3 expressões, a partir da descrição e de fotos.
 - [ ] Gerar o personagem em partes separadas, em pose neutra e fundo transparente: cabeça, tronco, braços (2 partes), mãos, pernas (2 partes), pés.
 - [ ] Montar um esqueleto humanoide único no DragonBones (grátis) ou no Spine (pago). Todos os amigos usam o mesmo esqueleto e só trocam as peças (skins).
 - [ ] Animar o esqueleto base: idle, run, jump, fall, os 8 golpes base, hit, dodge, ledge e KO.
