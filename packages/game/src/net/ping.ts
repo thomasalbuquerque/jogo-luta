@@ -49,6 +49,32 @@ export function delayForPing(rttMs: number | null, jitterMs = 0): number {
   return Math.max(MIN_NET_DELAY, Math.min(MAX_NET_DELAY, ticks));
 }
 
+/** Ping de um caminho: ida e volta e variação, em ms (rtt null = sem medida). */
+export interface PathPing {
+  rtt: number | null;
+  jitter: number;
+}
+
+/**
+ * O pior caminho de um input numa sala em estrela, como um ping só (para o
+ * `delayForPing`). Cada um que entrou só fala com o host: do host até ele, o
+ * caminho é o ping dele; entre dois que entraram, o input passa pelo host, então
+ * soma os dois maiores pings (e as duas maiores variações). Falta medir alguém:
+ * sem medida.
+ */
+export function starPing(pings: readonly PathPing[]): PathPing {
+  if (pings.length === 0 || pings.some((p) => p.rtt === null)) return { rtt: null, jitter: 0 };
+  const sumTop2 = (values: number[]): number =>
+    values
+      .sort((a, b) => b - a)
+      .slice(0, 2)
+      .reduce((a, b) => a + b, 0);
+  return {
+    rtt: sumTop2(pings.map((p) => p.rtt ?? 0)),
+    jitter: sumTop2(pings.map((p) => p.jitter)),
+  };
+}
+
 export type PingQuality = 'good' | 'ok' | 'bad';
 
 /** Cor do indicador: verde até 60 ms, amarelo até 120 ms, vermelho acima. */
