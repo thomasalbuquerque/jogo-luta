@@ -1,16 +1,23 @@
 import Phaser from 'phaser';
 import {
   activeHitboxes,
-  createGame,
+  createReplay,
   currentMove,
+  finishReplay,
   FixedStepLoop,
   getStage,
   hurtbox,
+  InputDelay,
   isActiveFrame,
   isCountering,
   MATCH_RULES,
   moveFrame,
   PLAYABLE_CHARACTERS,
+  recordInputs,
+  replayGame,
+  replayInputs,
+  replayLength,
+  replayMatches,
   STAGES,
   stepGame,
   SUBPX,
@@ -23,12 +30,15 @@ import {
   type HitEvent,
   type InputMask,
   type KoEvent,
+  type Replay,
 } from '@jogo-luta/sim';
 import { music } from '../audio/music';
 import { playSfx } from '../audio/sfx';
 import { playKoVoice, playVoice } from '../audio/voice';
+import { delaysFromSearch } from '../input/delay';
 import { InputManager } from '../input/InputManager';
 import { Menu, type MenuMask } from '../input/menu';
+import { newSeed } from '../match/replayFile';
 import { createStats, recordEvents, type MatchStats } from '../match/stats';
 import {
   DEFAULT_CAMERA,
@@ -116,6 +126,11 @@ export interface MatchSetup {
   stageId: string;
 }
 
+/** Dados para abrir a luta: o que foi escolhido nos menus, ou um replay para assistir. */
+export interface FightData extends Partial<MatchSetup> {
+  replay?: Replay;
+}
+
 /** Telas para onde dá para sair da luta (pausa e resultado). */
 export type LeaveTarget = 'select' | 'stage' | 'title';
 
@@ -134,6 +149,20 @@ export class FightScene extends Phaser.Scene {
   /** KOs, quedas e dano de cada jogador nesta luta. */
   stats: MatchStats = createStats(0);
   setup: MatchSetup = { characters: PLAYABLE_CHARACTERS, stageId: STAGES[0]?.id ?? '' };
+  /**
+   * Atraso de input por jogador, para sentir o netcode por atraso sem rede
+   * (`?atraso=3` na URL, ou as teclas do modo debug). Vale entre lutas.
+   */
+  readonly inputDelay = new InputDelay(delaysFromSearch(window.location.search));
+  /** Replay sendo assistido (null = luta de verdade, com os controles). */
+  playback: Replay | null = null;
+  /** No fim de um replay: reproduziu a luta gravada? (null = ainda rodando, ou luta de verdade) */
+  replayOk: boolean | null = null;
+
+  /** Gravação da luta em andamento (seed + inputs de cada tick). */
+  private recording: Replay | null = null;
+  /** A gravação fechou: a luta acabou e o replay está completo. */
+  private recorded = false;
 
   private readonly loop = new FixedStepLoop();
   private controls!: InputManager;
@@ -167,10 +196,11 @@ export class FightScene extends Phaser.Scene {
     super('fight');
   }
 
-  init(data: Partial<MatchSetup>): void {
+  init(data: FightData): void {
+    this.playback = data.replay ?? null;
     this.setup = {
-      characters: data.characters ?? PLAYABLE_CHARACTERS,
-      stageId: data.stageId ?? STAGES[0]?.id ?? '',
+      characters: data.replay?.characters ?? data.characters ?? PLAYABLE_CHARACTERS,
+      stageId: data.replay?.stageId ?? data.stageId ?? STAGES[0]?.id ?? '',
     };
   }
 
@@ -250,13 +280,38 @@ export class FightScene extends Phaser.Scene {
     this.updateCamera(alpha, delta);
   }
 
-  /** Começa uma luta nova (início e revanche), com os mesmos personagens e mapa. */
+  /** Replay da luta que acabou (ou o que está sendo assistido), para ver de novo ou salvar. */
+  get replay(): Replay | null {
+    return this.playback ?? (this.recorded ? this.recording : null);
+  }
+
+  /** Seed da luta em andamento (ou do replay sendo assistido). */
+  get seed(): number {
+    return (this.playback ?? this.recording)?.seed ?? 0;
+  }
+
+  /** A luta chegou ao fim (num replay: a fita acabou, mesmo que a luta tenha saído diferente). */
+  get ended(): boolean {
+    if (this.state.phase === 'over') return true;
+    return this.playback !== null && this.state.tick >= replayLength(this.playback);
+  }
+
+  /**
+   * Começa uma luta nova (início e revanche), com os mesmos personagens e mapa.
+   * Assistindo a um replay, começa o replay do tick 0.
+   */
   newMatch(): void {
-    this.state = createGame({
-      characters: this.setup.characters,
-      stage: getStage(this.setup.stageId),
-      rules: MATCH_RULES,
-    });
+    if (this.playback) {
+      this.recording = null;
+      this.state = replayGame(this.playback);
+    } else {
+      // a seed é sorteada fora do sim; dentro dele, tudo sai dela
+      this.recording = createReplay({ ...this.setup, rules: MATCH_RULES, seed: newSeed() });
+      this.state = replayGame(this.recording);
+    }
+    this.recorded = false;
+    this.replayOk = null;
+    this.inputDelay.reset();
     this.stats = createStats(this.state.fighters.length);
     this.prev = this.state.fighters.map((f) => ({ x: f.x, y: f.y }));
     this.lastStates = this.state.fighters.map((f) => f.state);
@@ -271,12 +326,28 @@ export class FightScene extends Phaser.Scene {
     this.decisiveShown = false;
   }
 
+  /** Assiste ao replay da luta que acabou (ou de novo ao que está passando). */
+  watchReplay(): void {
+    const replay = this.replay;
+    if (!replay) return;
+    this.playback = replay;
+    this.rematch();
+  }
+
+  /** Sai do replay e joga a mesma luta (personagens e mapa) de verdade. */
+  playLive(): void {
+    this.playback = null;
+    this.rematch();
+  }
+
   /** Revanche (resultado) ou recomeçar (pausa): mesma luta do zero, com a contagem. */
   rematch(): void {
     this.scene.stop('result');
     this.newMatch();
     this.controls.suppressHeld();
     this.pauseRequested = false;
+    // o Enter que confirmou a revanche ainda está apertado: não é um pedido de pausa
+    this.prevSystem = PAUSE_KEYS;
   }
 
   /** Sai da luta para outra tela, levando o que foi escolhido. */
@@ -290,7 +361,7 @@ export class FightScene extends Phaser.Scene {
   private wantsPause(): boolean {
     const requested = this.pauseRequested;
     this.pauseRequested = false;
-    if (!requested || this.state.phase === 'over') return false;
+    if (!requested || this.ended) return false;
     return this.game.loop.time - this.resumedAt >= PAUSE_COOLDOWN_MS;
   }
 
@@ -303,6 +374,7 @@ export class FightScene extends Phaser.Scene {
   /** Voltando da pausa: o que estiver apertado só conta depois de soltar. */
   private readonly onResume = (): void => {
     this.controls.suppressHeld();
+    this.inputDelay.reset();
     this.pauseRequested = false;
     this.prevSystem = PAUSE_KEYS;
     this.resumedAt = this.game.loop.time;
@@ -310,22 +382,51 @@ export class FightScene extends Phaser.Scene {
 
   private tick(): void {
     for (const [i, f] of this.state.fighters.entries()) this.prev[i] = { x: f.x, y: f.y };
-    this.lastInputs = this.controls.sample(this.state.fighters.length);
+    // lê os controles mesmo num replay: as teclas de pausa vêm daqui
+    const sampled = this.controls.sample(this.state.fighters.length);
     const system = this.controls.system & PAUSE_KEYS;
     if (system & ~this.prevSystem) this.pauseRequested = true;
     this.prevSystem = system;
 
-    if (this.state.phase === 'over') {
+    if (this.ended) {
       this.overTicks++;
       if (this.overTicks === RESULT_DELAY_TICKS) this.scene.launch('result');
     }
-    stepGame(this.state, this.lastInputs);
+    this.lastInputs = this.playback
+      ? replayInputs(this.playback, this.state.tick)
+      : this.inputDelay.push(sampled);
+    this.stepRecorded(this.lastInputs);
     recordEvents(this.stats, this.state.events);
     this.handleEvents();
     this.spawnTrails();
     this.spawnFx();
     this.fx.step();
     this.backFx.step();
+  }
+
+  /**
+   * Avança o sim 1 tick. Luta de verdade: grava os inputs até ela acabar e fecha
+   * a gravação com o hash do estado final. Replay: no fim da fita, confere se a
+   * luta chegou ao mesmo estado da gravação.
+   */
+  private stepRecorded(inputs: readonly InputMask[]): void {
+    const wasOver = this.state.phase === 'over';
+    if (this.recording && !wasOver) recordInputs(this.recording, inputs);
+    stepGame(this.state, inputs);
+    if (this.recording && !wasOver && this.state.phase === 'over') {
+      finishReplay(this.recording, this.state);
+      this.recorded = true;
+    }
+    if (
+      this.playback &&
+      this.replayOk === null &&
+      this.state.tick === replayLength(this.playback)
+    ) {
+      this.replayOk = replayMatches(this.playback, this.state);
+      if (!this.replayOk) {
+        console.warn('Replay: o estado final não bate com o gravado (outra versão das regras?).');
+      }
+    }
   }
 
   /** Efeitos do que aconteceu no tick (`state.events`). */

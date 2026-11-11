@@ -3,6 +3,7 @@ import { getCharacter, STAGES, type Fighter } from '@jogo-luta/sim';
 import { playVoice } from '../audio/voice';
 import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
+import { saveReplayFile } from '../match/replayFile';
 import type { PlayerStats } from '../match/stats';
 import { resultText } from '../render/hud';
 import { MenuList, type MenuOption } from '../ui/MenuList';
@@ -14,14 +15,21 @@ const PLAYERS = 2;
 const COLUMN_W = 400;
 const COLUMN_H = 330;
 const COLUMN_Y = 130;
+/** Menu: centro da 1ª e da última opção (as opções se apertam para caber). */
+const MENU_TOP = 516;
+const MENU_BOTTOM = 692;
+const MENU_PITCH = 56;
 
 /**
  * Resultado, por cima da luta que acabou: quem venceu, os números de cada um e
  * revanche (já escolhida: Ataque, Pulo ou Enter). Especial ou Esc troca de lutador.
+ * Dá para ver o replay da luta e salvar em arquivo; no fim de um replay, as
+ * opções são ver de novo, salvar e jogar a mesma luta.
  */
 export class ResultScene extends Phaser.Scene {
   private controls!: MenuInput;
   private menu!: MenuList;
+  private note!: Phaser.GameObjects.Text;
 
   constructor() {
     super('result');
@@ -62,11 +70,52 @@ export class ResultScene extends Phaser.Scene {
       playVoice(this, c.taunt.sound, c.taunt.text);
     }
 
+    const options = fight.playback ? this.replayOptions() : this.matchOptions();
+    const pitch = Math.min(MENU_PITCH, (MENU_BOTTOM - MENU_TOP) / Math.max(1, options.length - 1));
+    const gap = 8;
+    this.menu = new MenuList(this, options, {
+      x: width / 2,
+      y: MENU_TOP,
+      width: 320,
+      height: pitch - gap,
+      gap,
+      fontSize: pitch < 44 ? 20 : 24,
+    });
+
+    // avisos: replay salvo, replay que não reproduziu a luta gravada
+    this.note = uiText(this, width / 2, COLUMN_Y - 16, '', {
+      fontSize: '17px',
+      fontStyle: 'bold',
+      color: '#ffd166',
+      stroke: '#0b0e16',
+      strokeThickness: 5,
+    }).setOrigin(0.5);
+    if (fight.playback && fight.replayOk === false) {
+      this.note.setText(
+        'Este replay é de outra versão do jogo: a luta pode ter saído diferente da gravada.',
+      );
+    }
+  }
+
+  /** Fim de uma luta de verdade. */
+  private matchOptions(): MenuOption[] {
     const options: MenuOption[] = [
       {
         label: 'Revanche',
         onSelect: () => {
           this.fight.rematch();
+        },
+      },
+      {
+        label: 'Ver replay',
+        onSelect: () => {
+          this.fight.watchReplay();
+        },
+      },
+      {
+        label: 'Salvar replay',
+        onSelect: () => {
+          this.saveReplay();
         },
       },
       {
@@ -90,13 +139,44 @@ export class ResultScene extends Phaser.Scene {
         this.leave('title');
       },
     });
-    this.menu = new MenuList(this, options, {
-      x: width / 2,
-      y: COLUMN_Y + COLUMN_H + 60,
-      width: 320,
-      height: 46,
-      gap: 10,
-    });
+    return options;
+  }
+
+  /** Fim de um replay. */
+  private replayOptions(): MenuOption[] {
+    return [
+      {
+        label: 'Ver de novo',
+        onSelect: () => {
+          this.fight.watchReplay();
+        },
+      },
+      {
+        label: 'Salvar replay',
+        onSelect: () => {
+          this.saveReplay();
+        },
+      },
+      {
+        label: 'Jogar esta luta',
+        onSelect: () => {
+          this.fight.playLive();
+        },
+      },
+      {
+        label: 'Menu inicial',
+        onSelect: () => {
+          this.leave('title');
+        },
+      },
+    ];
+  }
+
+  private saveReplay(): void {
+    const replay = this.fight.replay;
+    if (!replay) return;
+    const name = saveReplayFile(replay);
+    this.note.setText(`Replay salvo nos downloads: ${name}`);
   }
 
   override update(_time: number, delta: number): void {

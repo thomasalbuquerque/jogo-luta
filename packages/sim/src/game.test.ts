@@ -3,7 +3,6 @@ import { canBeHit } from './combat';
 import { px } from './constants';
 import type { Fighter } from './fighter';
 import {
-  cloneState,
   COUNTDOWN_TICKS,
   createGame,
   DEFAULT_RULES,
@@ -16,6 +15,7 @@ import {
   type GameState,
 } from './game';
 import { Button } from './input';
+import { cloneState } from './snapshot';
 import { STAGES, TEST_STAGE } from './stage';
 
 function fighter(g: GameState, id: number): Fighter {

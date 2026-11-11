@@ -17,7 +17,7 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 - **Morte súbita:** só os empatados voltam, nos pontos de início, com 1 stock, 300% e 1 s de invencibilidade, sem limite de tempo.
 - **Contagem:** antes de cada luta, "3, 2, 1, LUTA!" (2,5 s). Na contagem ninguém age e o relógio não anda (fase `countdown` do `sim`).
 - **Pausa:** Esc, Enter ou Start do controle; a luta também pausa sozinha quando a janela perde o foco. Continuar (Esc, Start ou Especial), recomeçar, trocar lutador ou voltar ao menu. Voltando da pausa, botão que ficou apertado só conta depois de soltar.
-- **Resultado e revanche:** 1 s depois do fim, a tela de resultado mostra quem venceu e os números de cada um (KOs, quedas, dano causado, golpes, maior golpe). Revanche já vem escolhida (Ataque, Pulo ou Enter); Especial ou Esc troca de lutador.
+- **Resultado e revanche:** 1 s depois do fim, a tela de resultado mostra quem venceu e os números de cada um (KOs, quedas, dano causado, golpes, maior golpe). Revanche já vem escolhida (Ataque, Pulo ou Enter); Especial ou Esc troca de lutador. Também dá para ver o replay da luta e salvar em arquivo (ver [Determinismo e replays](#determinismo-e-replays)).
 - **Simulação:** 60 ticks/s, passo fixo. Todos os tempos de golpe são contados em ticks.
 
 ## Movimento
@@ -91,7 +91,7 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames) 
 - **Hitstun:** `6 + 1,2 × knockback` ticks (knockback em px/tick). Levar golpe cancela o golpe em andamento e devolve pulo aéreo, dodge e recuperação.
 - **Hitstop:** `3 + dano ÷ 3` ticks (máx. 12), para os dois.
 - **Referência de KO** (sem o alvo reagir): aéreo lado ~100% perto da borda e ~130% no meio; leve lado ~125% / ~155%; golpes para cima ~175%.
-- **Determinismo:** seno e cosseno vêm de uma tabela de inteiros; todo o estado do combate é inteiro.
+- **Determinismo:** seno e cosseno vêm de uma tabela de inteiros; todo o estado do combate é inteiro. Ver [Determinismo e replays](#determinismo-e-replays).
 
 ## Especiais e provocação
 
@@ -130,10 +130,23 @@ Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 
 ## Seleção
 
-- **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; online "em breve"; controles) → personagem → mapa → luta → resultado → revanche.
+- **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; online "em breve"; ver replay; controles) → personagem → mapa → luta → resultado → revanche.
 - **Personagem:** grade de 7 casas (os que existem e silhuetas "em breve"; cresce aos poucos). Cada jogador anda com as próprias direções, confirma com Ataque ou Pulo e desfaz com Especial; Especial com ninguém pronto (ou Esc) volta ao menu. O painel de cada um mostra o lutador, estilo, especial, barras e bordão. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
 - **Mapa:** um cursor só, qualquer jogador mexe; por enquanto só a Laje.
 - **HUD:** painel de cada jogador com retrato, % de dano (branco → amarelo → laranja → vermelho → vinho conforme sobe) e stocks com a cabecinha do personagem; relógio no alto.
+
+## Determinismo e replays
+
+A mesma seed com os mesmos inputs dá sempre a mesma luta, tick a tick, em qualquer navegador. É a base do online (Etapa 8).
+
+- **Regras do `sim`:** nada de `Math.random`, relógio, `Math.sin`/`cos`/`pow`/`sqrt` nem `**` (o ESLint barra). Seno e cosseno vêm de tabela (`trig.ts`), raiz e divisão são inteiras (`math.ts`), e todo número do estado é inteiro.
+- **Sorte:** RNG com seed (`rng.ts`), com o estado guardado em `GameState.rng`. A seed é sorteada pelo jogo ao criar a luta; dentro do `sim`, tudo sai dela. Hoje nenhuma regra usa sorte: quando uma usar, tem que ser por este RNG.
+- **Snapshot** (`snapshot.ts`): `cloneState` copia o estado campo a campo (barato, dá para fazer todo tick), `restoreState` volta a um snapshot, `serializeState`/`deserializeState` passam por texto e `hashState` dá um hash de 32 bits do estado inteiro. Dois lados com hashes diferentes no mesmo tick = dessincronizou.
+- **Teste de determinismo:** 10 mil ticks de inputs aleatórios rodados duas vezes têm o mesmo hash em todos os ticks; voltar a um snapshot e refazer chega ao mesmo estado.
+- **Replay** (`replay.ts`): seed + personagens + mapa + regras + a bitmask de cada jogador em cada tick, e o hash do estado final. Toda luta é gravada. Na tela de resultado: **Ver replay** e **Salvar replay** (baixa um `.json` pequeno, bom de mandar no grupo). No menu inicial, **Ver replay** abre um arquivo salvo (ou arraste o arquivo para o jogo). Assistindo, aparece "● REPLAY" embaixo do relógio; pausa funciona; no fim dá para ver de novo, salvar ou jogar a mesma luta.
+- **Validade do replay:** só reproduz na mesma versão das regras. Se um número de golpe ou de personagem mudou desde a gravação, a luta sai diferente; o jogo percebe pelo hash final e avisa na tela de resultado. Arquivo que não é replay (ou quebrado) é recusado com o motivo.
+- **Atraso de input** (para sentir o netcode por atraso antes de ter rede): os inputs de um jogador só chegam ao `sim` N ticks depois (0 a 15; 3 ticks = 50 ms). `?atraso=3` na URL atrasa o jogador 1 e `?atraso=3,2` os dois; com o debug ligado (`), as teclas 1/2 diminuem/aumentam o do P1 e 3/4 o do P2. O replay grava os inputs já atrasados.
+- **Debug:** a 1ª linha do overlay mostra o hash do estado e a seed; num replay, o tick atual e, no fim, se ficou igual à gravação.
 
 ## Ficha de personagem
 

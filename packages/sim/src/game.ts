@@ -7,6 +7,7 @@ import { NO_INPUT, type InputMask } from './input';
 import { idiv } from './math';
 import { overlaps } from './physics';
 import { stepProjectiles, type Projectile } from './projectile';
+import { seedRng } from './rng';
 import { STAGES, TEST_STAGE, type Spawn, type Stage } from './stage';
 
 /** Ticks fora de cena depois de um KO, antes de reaparecer. */
@@ -41,6 +42,8 @@ export type MatchPhase = 'countdown' | 'fight' | 'over';
 /** Estado completo da luta: só dados simples, serializável. */
 export interface GameState {
   tick: number;
+  /** Estado do RNG com seed (`rng.ts`): a sorte da luta, se alguma regra usar, sai daqui. */
+  rng: number;
   stageId: string;
   rules: MatchRules;
   phase: MatchPhase;
@@ -69,6 +72,8 @@ export interface GameSetup {
   characters?: readonly string[];
   stage?: Stage;
   rules?: MatchRules;
+  /** Seed do RNG da luta. A mesma seed com os mesmos inputs dá a mesma luta. */
+  seed?: number;
 }
 
 export function createGame(setup: GameSetup = {}): GameState {
@@ -83,6 +88,7 @@ export function createGame(setup: GameSetup = {}): GameState {
   const countdown = Math.max(0, rules.countdownTicks ?? 0);
   return {
     tick: 0,
+    rng: seedRng(setup.seed ?? 1),
     stageId: stage.id,
     rules: { ...rules },
     phase: countdown > 0 ? 'countdown' : 'fight',
@@ -153,7 +159,26 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
   checkLastStanding(state);
   if (counting) stepCountdown(state);
   else stepClock(state, stage);
+  clearNegativeZeros(state);
   state.tick++;
+}
+
+/**
+ * Lado × 0 dá -0 (ex.: `facing * 0` olhando para a esquerda). Nas contas -0 e 0
+ * valem igual, mas o JSON grava -0 como 0: sem isto, um estado que passou por
+ * texto (replay, rede) deixaria de ser idêntico ao original. "+ 0" troca -0 por 0.
+ */
+function clearNegativeZeros(state: GameState): void {
+  for (const f of state.fighters) {
+    f.vx += 0;
+    f.vy += 0;
+    f.kbx += 0;
+    f.kby += 0;
+  }
+  for (const p of state.projectiles) {
+    p.vx += 0;
+    p.vy += 0;
+  }
 }
 
 /** Conta a contagem antes da luta; no fim dela, a luta começa (o relógio só anda depois). */
@@ -216,9 +241,4 @@ function timeUp(state: GameState, stage: Stage): void {
       f.stocks = 0;
     }
   }
-}
-
-/** Cópia profunda do estado (snapshot). */
-export function cloneState(state: GameState): GameState {
-  return JSON.parse(JSON.stringify(state)) as GameState;
 }

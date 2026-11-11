@@ -20,5 +20,6 @@ export function approach(value: number, target: number, step: number): number {
 
 /** Divisão inteira que trunca em direção a zero. */
 export function idiv(a: number, b: number): number {
-  return Math.trunc(a / b);
+  // "+ 0": -1 ÷ 2 truncado daria -0
+  return Math.trunc(a / b) + 0;
 }

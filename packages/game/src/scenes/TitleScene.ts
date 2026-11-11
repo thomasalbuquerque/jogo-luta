@@ -5,10 +5,12 @@ import { playSfx } from '../audio/sfx';
 import { addAudioHint } from '../audio/unlock';
 import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
+import { pickReplayFile, readReplayFile } from '../match/replayFile';
 import { MenuList } from '../ui/MenuList';
 import { addPortrait } from '../ui/portrait';
 import { fadeIn, titleText, UI, uiText } from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
+import type { FightData } from './FightScene';
 
 export interface TitleData {
   /** Voltando de outra tela: já abre no menu (sem o "aperte para começar"). */
@@ -20,12 +22,14 @@ const PLAYERS = 2;
 
 /**
  * Tela inicial: nome do jogo e "aperte para começar" (o 1º aperto também libera
- * o som); depois o menu de modo: mesmo PC, online (em breve) e controles.
+ * o som); depois o menu de modo: mesmo PC, online (em breve), ver um replay
+ * salvo (escolhendo o arquivo ou arrastando para a janela) e controles.
  */
 export class TitleScene extends Phaser.Scene {
   private controls!: MenuInput;
   private menu!: MenuList;
   private press!: Phaser.GameObjects.Text;
+  private note!: Phaser.GameObjects.Text;
   private inMenu = false;
 
   constructor() {
@@ -39,9 +43,22 @@ export class TitleScene extends Phaser.Scene {
   create(): void {
     const { width, height } = this.scale;
     this.controls = new MenuInput();
+    // arrastar um arquivo de replay para a janela abre o replay
+    const onDragOver = (e: DragEvent): void => {
+      e.preventDefault();
+    };
+    const onDrop = (e: DragEvent): void => {
+      e.preventDefault();
+      const file = e.dataTransfer?.files[0];
+      if (file) this.openReplay(file);
+    };
+    window.addEventListener('dragover', onDragOver);
+    window.addEventListener('drop', onDrop);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.controls.destroy();
       this.scene.stop('backdrop');
+      window.removeEventListener('dragover', onDragOver);
+      window.removeEventListener('drop', onDrop);
     });
     const stageId = STAGES[0]?.id;
     if (stageId) this.scene.launch('backdrop', { stageId, drift: true } satisfies BackdropData);
@@ -89,14 +106,30 @@ export class TitleScene extends Phaser.Scene {
         },
         { label: 'Jogar online', disabled: 'em breve' },
         {
+          label: 'Ver replay',
+          onSelect: () => {
+            this.note.setText('Escolha o arquivo do replay (ou arraste o arquivo para o jogo).');
+            pickReplayFile((file) => {
+              this.openReplay(file);
+            });
+          },
+        },
+        {
           label: 'Controles',
           onSelect: () => {
             this.go('controls');
           },
         },
       ],
-      { x: width / 2, y: 400, width: 420, height: 56, fontSize: 26 },
+      { x: width / 2, y: 392, width: 420, height: 54, fontSize: 26 },
     );
+    this.note = uiText(this, width / 2, 336, '', {
+      fontSize: '17px',
+      fontStyle: 'bold',
+      color: '#ffd166',
+      stroke: '#0b0e16',
+      strokeThickness: 5,
+    }).setOrigin(0.5);
     uiText(this, width / 2, height - 24, 'M liga e desliga o som', {
       fontSize: '15px',
       color: UI.muted,
@@ -138,6 +171,23 @@ export class TitleScene extends Phaser.Scene {
     this.inMenu = visible;
     this.menu.setVisible(visible);
     this.press.setVisible(!visible);
+    this.note.setVisible(visible);
+  }
+
+  /** Abre um arquivo de replay e assiste; arquivo estranho só mostra o motivo. */
+  private openReplay(file: File): void {
+    readReplayFile(file).then(
+      (replay) => {
+        if (!this.scene.isActive()) return;
+        this.scene.start('fight', { replay } satisfies FightData);
+      },
+      (error: unknown) => {
+        if (!this.scene.isActive()) return;
+        this.showMenu(true);
+        this.note.setText(error instanceof Error ? error.message : 'Replay inválido.');
+        playSfx(this, 'ui_error');
+      },
+    );
   }
 
   private go(scene: 'select' | 'controls'): void {

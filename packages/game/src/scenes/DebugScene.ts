@@ -2,11 +2,15 @@ import Phaser from 'phaser';
 import {
   Button,
   getCharacter,
+  hashState,
   moveFrame,
+  replayLength,
+  TICK_MS,
   toPx,
   type ButtonName,
   type Fighter,
 } from '@jogo-luta/sim';
+import { delayLabel } from '../input/delay';
 import { fighterClip } from '../rig/fighterPose';
 import { DEBUG_KEY, type FightScene } from './FightScene';
 
@@ -38,6 +42,8 @@ function stateLabel(f: Fighter): string {
 /**
  * Overlay de debug por cima da luta, com câmera própria (sem zoom). Tecla ` liga
  * e desliga o modo debug (este texto e as caixas de hitbox/hurtbox na luta).
+ * Com o debug ligado, 1/2 e 3/4 diminuem/aumentam o atraso de input do P1 e do
+ * P2 (simula o netcode por atraso sem rede).
  */
 export class DebugScene extends Phaser.Scene {
   private text!: Phaser.GameObjects.Text;
@@ -57,16 +63,51 @@ export class DebugScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-BACKTICK', () => {
       this.registry.set(DEBUG_KEY, this.registry.get(DEBUG_KEY) !== true);
     });
+    const delayKeys: [string, number, number][] = [
+      ['ONE', 0, -1],
+      ['TWO', 0, 1],
+      ['THREE', 1, -1],
+      ['FOUR', 1, 1],
+    ];
+    for (const [key, player, step] of delayKeys) {
+      this.input.keyboard?.on(`keydown-${key}`, () => {
+        if (this.registry.get(DEBUG_KEY) !== true) return;
+        const delay = this.fight.inputDelay;
+        delay.setDelay(player, delay.getDelay(player) + step);
+      });
+    }
+  }
+
+  private get fight(): FightScene {
+    return this.scene.get('fight') as FightScene;
+  }
+
+  /** Assistindo a um replay: em que tick está e, no fim, se reproduziu a gravação. */
+  private replayLabel(): string {
+    const fight = this.fight;
+    if (!fight.playback) return '';
+    const length = replayLength(fight.playback);
+    const check =
+      fight.replayOk === null
+        ? ''
+        : fight.replayOk
+          ? ' igual à gravação'
+          : ' DIFERENTE da gravação';
+    return `   REPLAY ${String(Math.min(fight.state.tick, length))}/${String(length)}${check}`;
   }
 
   override update(): void {
     const visible = this.registry.get(DEBUG_KEY) === true;
     this.text.setVisible(visible);
     if (!visible) return;
-    const fight = this.scene.get('fight') as FightScene;
+    const fight = this.fight;
     const state = fight.state;
+    const hash = hashState(state).toString(16).padStart(8, '0');
+    const delays = state.fighters
+      .map((f) => `P${String(f.id + 1)} ${delayLabel(fight.inputDelay.getDelay(f.id), TICK_MS)}`)
+      .join('   ');
     const lines = [
-      `FPS ${this.game.loop.actualFps.toFixed(0)}   tick ${String(state.tick)}`,
+      `FPS ${this.game.loop.actualFps.toFixed(0)}   tick ${String(state.tick)}   hash ${hash}   seed ${String(fight.seed)}${this.replayLabel()}`,
       ...state.fighters.map((f) => {
         const vx = toPx(f.vx + f.kbx)
           .toFixed(1)
@@ -94,6 +135,7 @@ export class DebugScene extends Phaser.Scene {
       }),
       'P1: WASD, Espaço pula, V ataque, B especial, Shift esq. esquiva, R provoca',
       'P2: setas, J pula, K ataque, L especial, I esquiva, U provoca     ` debug',
+      `atraso de input  ${delays}     1/2: P1 −/+   3/4: P2 −/+`,
     ];
     this.text.setText(lines);
   }
