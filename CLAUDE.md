@@ -21,6 +21,7 @@ packages/
   game/     Phaser: renderização, input, áudio, menus, HUD. Lê o estado do sim e desenha.
             src/rig: esqueleto único e animações (dados); public/assets: atlas gerados pelo pnpm art
             src/audio: sons, música e vozes provisórias gerados em código; src/render: efeitos (game feel)
+            src/net: online 1x1 (sala por código, lockstep por atraso, PeerJS/WebRTC); ver "Online" no GDD
   server/   (Etapa 8+) sinalização do online, se precisar; relay só na Etapa 12 (opcional).
 art/        PNGs gerados por IA + recortes.json (onde está cada peça e as juntas)
 audio/      áudios gravados (vozes dos amigos, música, efeitos): entram sozinhos no jogo (LEIAME.md)
@@ -80,5 +81,7 @@ pnpm art [pasta]      recorta a arte de art/ e gera os atlas (--debug <pasta> mo
 Visualizador de animações (só em dev): `http://localhost:5173/?rig`.
 
 Atraso de input para testar o netcode sem rede: `http://localhost:5173/?atraso=3` (ou 1/2 e 3/4 com o debug ligado). Replays, snapshot e hash do estado: ver "Determinismo e replays" no `docs/GDD.md`.
+
+Online: "Jogar online" no menu, ou `http://localhost:5173/?sala=ABCD` para entrar direto numa sala (duas abas no mesmo PC servem para testar). Ver "Online" no `docs/GDD.md`.
 
 Deploy: todo push na `main` roda `.github/workflows/deploy.yml` (lint, testes, build) e publica no GitHub Pages: https://thomasalbuquerque.github.io/jogo-luta/
