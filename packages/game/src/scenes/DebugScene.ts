@@ -11,6 +11,7 @@ import {
   type Fighter,
 } from '@jogo-luta/sim';
 import { delayLabel } from '../input/delay';
+import { pingLabel } from '../net/ping';
 import { fighterClip } from '../rig/fighterPose';
 import { DEBUG_KEY, type FightScene } from './FightScene';
 
@@ -96,6 +97,31 @@ export class DebugScene extends Phaser.Scene {
     return `   REPLAY ${String(Math.min(fight.state.tick, length))}/${String(length)}${check}`;
   }
 
+  /** Online: a sala, a conexão e as filas do lockstep. */
+  private netLabel(): string[] {
+    const net = this.fight.net;
+    if (!net) return [];
+    const match = this.fight.onlineMatch;
+    const parts = [
+      `online ${net.role} sala ${net.code}`,
+      net.status,
+      `${pingLabel(net.ping.rtt)} ±${net.ping.jitter.toFixed(0)}`,
+      net.route ?? 'rota ?',
+    ];
+    if (match) {
+      const desync = match.desync.first;
+      parts.push(
+        `atraso ${delayLabel(match.delay, TICK_MS)}`,
+        `folga ${String(match.lockstep.remoteLead)}`,
+        `sem confirmar ${String(match.lockstep.unacked)}`,
+        desync
+          ? `DESSINCRONIZOU no tick ${String(desync.tick)}`
+          : `hashes ok ${String(match.desync.checked)}`,
+      );
+    }
+    return [parts.join('   ')];
+  }
+
   override update(): void {
     const visible = this.registry.get(DEBUG_KEY) === true;
     this.text.setVisible(visible);
@@ -107,6 +133,7 @@ export class DebugScene extends Phaser.Scene {
       .map((f) => `P${String(f.id + 1)} ${delayLabel(fight.inputDelay.getDelay(f.id), TICK_MS)}`)
       .join('   ');
     const lines = [
+      ...this.netLabel(),
       `FPS ${this.game.loop.actualFps.toFixed(0)}   tick ${String(state.tick)}   hash ${hash}   seed ${String(fight.seed)}${this.replayLabel()}`,
       ...state.fighters.map((f) => {
         const vx = toPx(f.vx + f.kbx)
