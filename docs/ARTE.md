@@ -140,7 +140,7 @@ Bold dark plum-brown outline, flat 2-tone cel shading, light from above. Solid f
 
 **Confira:** as peças do manequim, agora com a roupa dele, mais as 2 mãos segurando o volante.
 Nada encostando, nada cortado. Basta 1 de cada peça de braço e perna: o braço e a perna de trás
-usam a mesma peça, escurecida na animação.
+usam a mesma peça, na mesma cor.
 
 **Salve como:** `art/schummaki/3-pecas.png`
 
@@ -423,7 +423,7 @@ Transparent background. No text, no numbers, no labels.
 
 **Confira:** à esquerda o manequim montado; à direita 10 peças soltas, sem encostar umas nas outras
 e sem nada cortado na borda. Só existe 1 braço e 1 perna: o braço e a perna de trás usam a mesma
-peça, escurecida na animação.
+peça, na mesma cor.
 
 **Salve como:** `art/style/shape.png`
 
@@ -768,7 +768,8 @@ parece virada ao contrário.
 **Todas as peças viradas para a direita.** O gerador costuma desenhar os pares espelhados (uma
 coxa e uma canela de cada lado, como vistas de frente). Use só a peça com o joelho na frente (à
 direita) e a panturrilha atrás, para as duas pernas; a outra fica fora do manifesto. O jogo
-escurece sozinho o braço e a perna de trás, e espelha tudo quando o personagem vira.
+espelha tudo quando o personagem vira. O braço, a mão, a perna e o pé de trás ficam na cor
+original da arte, iguais aos da frente: o jogo não escurece o lado de trás.
 
 **Regra das juntas.** Em cada junta, uma peça fica na frente e a outra atrás: a manga na frente
 do antebraço, o short na frente da coxa, a coxa na frente da canela, o pé na frente da canela, a
