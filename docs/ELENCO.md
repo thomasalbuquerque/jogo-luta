@@ -64,5 +64,6 @@ controla de longe (projétil).
 
 ### Arte
 
-Na Etapa 4, fotos de cada amigo servem de referência para a concept art. O guia de estilo, a ficha
-de arte de cada personagem e os prompts para o ChatGPT ficam em [`docs/ARTE.md`](ARTE.md).
+Fotos de cada amigo servem de referência para a concept art. O guia de estilo, a ficha de arte de
+cada personagem e os prompts (Firefly e ChatGPT) ficam em [`docs/ARTE.md`](ARTE.md), na seção
+"Personagem novo".
