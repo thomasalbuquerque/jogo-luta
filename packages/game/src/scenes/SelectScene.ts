@@ -19,7 +19,8 @@ import { addPortrait, drawSilhouette } from '../ui/portrait';
 import { cssColor, fadeIn, panel, playerColor, titleText, UI, uiText } from '../ui/theme';
 import type { MatchSetup } from './FightScene';
 
-const PLAYERS = 2;
+/** Jogadores no mesmo PC (o modo local; online, cada PC é um jogador com qualquer controle). */
+const LOCAL_PLAYERS = 2;
 const TILE_W = 136;
 const TILE_H = 150;
 const TILE_GAP = 14;
@@ -29,6 +30,12 @@ const PANEL_W = 580;
 const PANEL_H = 368;
 /** Altura do lutador desenhado no painel (px). */
 const PANEL_FIGHTER_H = 290;
+/** Com 3 ou 4 na sala (online), os painéis ficam lado a lado, mais estreitos. */
+const COMPACT_MARGIN = 24;
+const COMPACT_GAP = 12;
+const COMPACT_FIGHTER_H = 190;
+/** Onde ficam os pés do lutador no painel estreito. */
+const COMPACT_FLOOR_Y = 238;
 /** Com os 2 prontos, espera isto antes de ir para o mapa (dá tempo de ver e de desfazer). */
 const START_DELAY_MS = 700;
 
@@ -43,10 +50,11 @@ interface PlayerPanel {
 /**
  * Seleção de personagem: grade com 7 casas (os que existem e silhuetas "em
  * breve"). Cada jogador anda com as próprias direções, confirma com Ataque ou
- * Pulo e desfaz com Especial. Com os 2 prontos, vai para a seleção de mapa.
+ * Pulo e desfaz com Especial. Com todos prontos, vai para a seleção de mapa.
  *
  * Online, cada PC só mexe no próprio cursor (com qualquer um dos controles) e
- * vê o do outro jogador pela rede.
+ * vê o dos outros pela rede: um painel para cada um na sala (2 a 4). Quem entra
+ * ou sai no meio muda os painéis na hora.
  */
 export class SelectScene extends Phaser.Scene {
   private controls!: MenuInput;
@@ -61,6 +69,13 @@ export class SelectScene extends Phaser.Scene {
   /** Sala online (null = jogo local, os 2 no mesmo PC). */
   private net: OnlineSession | null = null;
   private netText: Phaser.GameObjects.Text | null = null;
+  private hint!: Phaser.GameObjects.Text;
+  /** Online: aviso de quem entrou ou saiu da sala. */
+  private notice: Phaser.GameObjects.Text | null = null;
+  /** Online: quem estava na sala quando os painéis foram montados. */
+  private rosterKey = '';
+  /** Online: a tela de seleção da sala para a qual os painéis foram montados. */
+  private screenSeq = -1;
   /** Online: o host já pediu a tela de mapa. */
   private stageOpened = false;
 
@@ -71,14 +86,18 @@ export class SelectScene extends Phaser.Scene {
   /** Voltando da luta ou do mapa, os cursores começam nos personagens escolhidos antes. */
   init(data: Partial<MatchSetup>): void {
     this.slots = selectSlots(PLAYABLE_CHARACTERS);
-    this.cursors = Array.from({ length: PLAYERS }, (_, i) => {
+    this.net = getOnline();
+    const seats = this.net ? Math.max(2, this.net.players) : LOCAL_PLAYERS;
+    this.cursors = Array.from({ length: seats }, (_, i) => {
       const index = this.slots.indexOf(data.characters?.[i] ?? '');
       return index >= 0 ? index : i % PLAYABLE_CHARACTERS.length;
     });
     this.ready = this.cursors.map(() => false);
     this.readyMs = 0;
-    this.net = getOnline();
     this.netText = null;
+    this.notice = null;
+    this.rosterKey = '';
+    this.screenSeq = -1;
     this.stageOpened = false;
   }
 
@@ -99,6 +118,39 @@ export class SelectScene extends Phaser.Scene {
 
     this.tiles = this.slots.map((id, i) => this.drawTile(id, i));
     this.cursorGfx = this.add.graphics();
+    this.tags = [];
+    this.panels = [];
+
+    if (this.net) {
+      this.netText = uiText(this, width - 16, 14, netLabel(this.net), {
+        fontSize: '16px',
+        fontStyle: 'bold',
+        color: '#ced4da',
+      }).setOrigin(1, 0);
+      this.notice = uiText(this, width / 2, height - 50, '', {
+        fontSize: '17px',
+        fontStyle: 'bold',
+        color: '#ffd166',
+        stroke: '#0b0e16',
+        strokeThickness: 4,
+      }).setOrigin(0.5);
+    }
+    this.hint = uiText(this, width / 2, height - 22, '', {
+      fontSize: '15px',
+      color: UI.muted,
+    }).setOrigin(0.5);
+    if (this.net) this.syncRoster(this.net);
+    else this.buildSeats();
+    this.refresh();
+  }
+
+  /** Etiqueta e painel de cada lugar (de novo, quando alguém entra ou sai da sala). */
+  private buildSeats(): void {
+    for (const tag of this.tags) tag.destroy();
+    for (const state of this.panels) {
+      state.view?.container.destroy();
+      state.container.destroy();
+    }
     this.tags = this.cursors.map((_, p) =>
       uiText(this, 0, 0, `P${String(p + 1)}`, {
         fontSize: '16px',
@@ -117,19 +169,28 @@ export class SelectScene extends Phaser.Scene {
     this.cursors.forEach((_, p) => {
       this.rebuildPanel(p);
     });
+    this.hint.setText(this.net ? this.onlineHint(this.net) : this.hintText());
+  }
 
-    if (this.net) {
-      this.netText = uiText(this, width - 16, 14, netLabel(this.net), {
-        fontSize: '16px',
-        fontStyle: 'bold',
-        color: '#ced4da',
-      }).setOrigin(1, 0);
-    }
-    uiText(this, width / 2, height - 22, this.net ? this.onlineHint(this.net) : this.hintText(), {
-      fontSize: '15px',
-      color: UI.muted,
-    }).setOrigin(0.5);
-    this.refresh();
+  /**
+   * Online: monta um lugar para cada um na sala, com a seleção de cada um como a
+   * sessão sabe (quem estava num lugar que andou leva a seleção junto).
+   */
+  private syncRoster(net: OnlineSession): void {
+    this.rosterKey = net.roster.join(',');
+    this.screenSeq = net.screen?.seq ?? -1;
+    this.stageOpened = false;
+    const last = this.slots.length - 1;
+    this.cursors = Array.from({ length: Math.max(2, net.players) }, (_, p) => {
+      const sel = net.selection(p);
+      if (sel) return Math.min(sel.cursor, last);
+      return this.cursors[p] ?? p % PLAYABLE_CHARACTERS.length;
+    });
+    this.ready = this.cursors.map(
+      (cursor, p) => net.selection(p)?.ready === true && Boolean(this.slots[cursor]),
+    );
+    this.readyMs = 0;
+    this.buildSeats();
   }
 
   override update(_time: number, delta: number): void {
@@ -141,8 +202,13 @@ export class SelectScene extends Phaser.Scene {
         return;
       }
       this.netText?.setText(netLabel(net));
+      this.notice?.setText(net.notice);
+      // alguém entrou ou saiu (ou a sala abriu outra seleção): monta os lugares de novo
+      if (net.roster.join(',') !== this.rosterKey || (net.screen?.seq ?? -1) !== this.screenSeq) {
+        this.syncRoster(net);
+      }
     }
-    const frame = this.controls.poll(PLAYERS, delta);
+    const frame = this.controls.poll(LOCAL_PLAYERS, delta);
     if (frame.system & Menu.BACK) {
       this.backToTitle();
       return;
@@ -151,7 +217,7 @@ export class SelectScene extends Phaser.Scene {
     const cols = gridColumns(count);
     // online: este PC só mexe no próprio cursor, com qualquer um dos controles
     const mine = frame.players.reduce((a, b) => a | b, 0);
-    for (let p = 0; p < PLAYERS; p++) {
+    for (let p = 0; p < this.cursors.length; p++) {
       if (net && p !== net.local) {
         this.followRemote(p, net);
         continue;
@@ -185,7 +251,7 @@ export class SelectScene extends Phaser.Scene {
           this.scene.start('stage', { characters } satisfies Partial<MatchSetup>);
           return;
         }
-        // online: o host abre o mapa para os dois (quem entrou segue a tela da sala)
+        // online: o host abre o mapa para todos (quem entrou segue a tela da sala)
         if (net.role === 'host' && !this.stageOpened) {
           this.stageOpened = true;
           net.openStage(characters, STAGES[0]?.id ?? '');
@@ -292,7 +358,47 @@ export class SelectScene extends Phaser.Scene {
     return tile;
   }
 
-  /** Painel grande do jogador `p`: o lutador animado, nome, estilo, especial e barras. */
+  /**
+   * Onde fica o painel do jogador `p`: com 2, um em cada canto, grandes; com 3
+   * ou 4 (online), lado a lado e estreitos. Também onde o lutador pisa nele.
+   */
+  private panelLayout(p: number): {
+    x: number;
+    w: number;
+    compact: boolean;
+    floorX: number;
+    floorY: number;
+    fighterH: number;
+    facing: -1 | 1;
+  } {
+    const n = this.cursors.length;
+    const width = this.scale.width;
+    if (n <= 2) {
+      const x = p === 0 ? 40 : width - 40 - PANEL_W;
+      const floorY = PANEL_H - 34;
+      return {
+        x,
+        w: PANEL_W,
+        compact: false,
+        floorX: 130,
+        floorY,
+        fighterH: PANEL_FIGHTER_H,
+        facing: p === 0 ? 1 : -1,
+      };
+    }
+    const w = (width - COMPACT_MARGIN * 2 - COMPACT_GAP * (n - 1)) / n;
+    return {
+      x: COMPACT_MARGIN + p * (w + COMPACT_GAP),
+      w,
+      compact: true,
+      floorX: w / 2,
+      floorY: COMPACT_FLOOR_Y,
+      fighterH: COMPACT_FIGHTER_H,
+      facing: p < n / 2 ? 1 : -1,
+    };
+  }
+
+  /** Painel do jogador `p`: o lutador animado, nome, estilo, especial e barras (menos, se estreito). */
   private rebuildPanel(p: number): void {
     const state = this.panels[p];
     if (!state) return;
@@ -300,21 +406,34 @@ export class SelectScene extends Phaser.Scene {
     state.view = null;
     const box = state.container;
     box.removeAll(true);
-    const x = p === 0 ? 40 : this.scale.width - 40 - PANEL_W;
-    const y = PANEL_Y;
-    box.setPosition(x, y);
+    const layout = this.panelLayout(p);
+    box.setPosition(layout.x, PANEL_Y);
+    const w = layout.w;
     const color = playerColor(p);
     const ready = this.ready[p] === true;
     const id = this.slots[this.cursors[p] ?? 0] ?? null;
 
     const g = this.add.graphics();
-    panel(g, 0, 0, PANEL_W, PANEL_H, UI.panel, 0.95);
+    panel(g, 0, 0, w, PANEL_H, UI.panel, 0.95);
     g.lineStyle(ready ? 6 : 3, color, 1);
-    g.strokeRoundedRect(0, 0, PANEL_W, PANEL_H, 14);
+    g.strokeRoundedRect(0, 0, w, PANEL_H, 14);
     box.add(g);
     // chão do lutador
     g.fillStyle(0x000000, 0.25);
-    g.fillEllipse(130, PANEL_H - 34, 170, 22);
+    g.fillEllipse(layout.floorX, layout.floorY, layout.compact ? 140 : 170, 22);
+
+    const you = this.net?.local === p ? ' · VOCÊ' : '';
+    box.add(
+      uiText(this, 16, 14, `P${String(p + 1)}${you}`, {
+        fontFamily: UI.titleFont,
+        fontSize: layout.compact ? '22px' : '26px',
+        color: cssColor(color),
+      }),
+    );
+    if (layout.compact) {
+      this.fillCompactPanel(p, box, g, id, layout.floorY);
+      return;
+    }
 
     const textX = 262;
     const text = (dy: number, value: string, style: Phaser.Types.GameObjects.Text.TextStyle) => {
@@ -322,13 +441,6 @@ export class SelectScene extends Phaser.Scene {
       box.add(t);
       return t;
     };
-    box.add(
-      uiText(this, 16, 14, `P${String(p + 1)}${this.net?.local === p ? ' · VOCÊ' : ''}`, {
-        fontFamily: UI.titleFont,
-        fontSize: '26px',
-        color: cssColor(color),
-      }),
-    );
 
     if (!id) {
       drawSilhouette(g, 130, PANEL_H / 2 + 10, 230, 0x0b0e16);
@@ -371,6 +483,60 @@ export class SelectScene extends Phaser.Scene {
     this.poseFighter(p);
   }
 
+  /** Painel estreito (3 ou 4 na sala): o lutador em cima, nome e especial embaixo. */
+  private fillCompactPanel(
+    p: number,
+    box: Phaser.GameObjects.Container,
+    g: Phaser.GameObjects.Graphics,
+    id: string | null,
+    floorY: number,
+  ): void {
+    const state = this.panels[p];
+    if (!state) return;
+    const w = this.panelLayout(p).w;
+    const color = playerColor(p);
+    const center = (dy: number, value: string, style: Phaser.Types.GameObjects.Text.TextStyle) => {
+      const t = uiText(this, w / 2, dy, value, { align: 'center', ...style }).setOrigin(0.5, 0);
+      box.add(t);
+      return t;
+    };
+    if (!id) {
+      drawSilhouette(g, w / 2, floorY - 80, 170, 0x0b0e16);
+      center(floorY + 26, 'Em breve.', { fontSize: '20px', color: UI.muted });
+      return;
+    }
+    const c = getCharacter(id);
+    const view = new FighterView(this, id, COMPACT_FIGHTER_H / 1.12);
+    state.view = view;
+    box.add(view.container);
+    center(floorY + 18, c.name, { fontFamily: UI.titleFont, fontSize: '28px' });
+    center(floorY + 58, `Especial: ${c.special?.name ?? '—'}`, {
+      fontSize: '16px',
+      fontStyle: 'bold',
+      color: c.colors.secondary,
+      wordWrap: { width: w - 24 },
+    });
+    if (this.ready[p]) {
+      const badge = center(PANEL_H - 50, 'PRONTO!', {
+        fontFamily: UI.titleFont,
+        fontSize: '24px',
+        color: '#0b0e16',
+        backgroundColor: cssColor(color),
+        padding: { x: 10, y: 4 },
+      });
+      badge.setScale(1.4);
+      this.tweens.add({ targets: badge, scale: 1, duration: 180, ease: 'Back.Out' });
+    } else {
+      center(PANEL_H - 44, `“${c.taunt.text}”`, {
+        fontSize: '14px',
+        fontStyle: 'italic',
+        color: '#8d99ae',
+        wordWrap: { width: w - 24 },
+      });
+    }
+    this.poseFighter(p);
+  }
+
   /** Barras de peso, velocidade e pulo (só para comparar de relance). */
   private drawBars(
     box: Phaser.GameObjects.Container,
@@ -407,8 +573,8 @@ export class SelectScene extends Phaser.Scene {
       state.clip = 'idle';
       state.t = 0;
     }
-    const facing = p === 0 ? 1 : -1;
-    state.view.setPose(sampleClip(clip, state.t), 130, PANEL_H - 34, facing, clip.ground === true);
+    const { floorX, floorY, facing } = this.panelLayout(p);
+    state.view.setPose(sampleClip(clip, state.t), floorX, floorY, facing, clip.ground === true);
   }
 
   /** Molduras e etiquetas de cada jogador sobre a casa escolhida. */
@@ -428,7 +594,10 @@ export class SelectScene extends Phaser.Scene {
         TILE_H + 12 - inset * 2,
         12,
       );
-      this.tags[p]?.setPosition(x + (p === 0 ? 22 : TILE_W - 22), y - 6);
+      // um canto da casa para cada um: P1 e P2 em cima, P3 e P4 embaixo
+      const right = p % 2 === 1;
+      const below = p >= 2;
+      this.tags[p]?.setPosition(x + (right ? TILE_W - 22 : 22), below ? y + TILE_H + 6 : y - 6);
     }
   }
 
