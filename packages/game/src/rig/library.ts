@@ -32,5 +32,5 @@ export function moveForClip(c: Character, key: string): MoveDef | null {
 
 /** Nomes dos clipes, na ordem do visualizador. */
 export function clipNames(): string[] {
-  return [...Object.keys(BASE_CLIPS), 'special', 'taunt'];
+  return [...new Set([...Object.keys(BASE_CLIPS), 'special', 'taunt'])];
 }
