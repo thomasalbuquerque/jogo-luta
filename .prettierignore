@@ -1,3 +1,5 @@
 dist
 coverage
 pnpm-lock.yaml
+# gerados pelo pnpm art
+packages/game/public/assets
