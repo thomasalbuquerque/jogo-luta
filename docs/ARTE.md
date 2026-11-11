@@ -85,17 +85,27 @@ O que muda em relação ao ChatGPT:
 
 #### 2.1 Conceito → `1-conceito.png`
 
-**Formato:** Wide (4:3). **Referências:** `style.png` + 2 ou 3 fotos do Schummaki.
+O rosto do Schummaki já está pronto na imagem base `art/schummaki/0-base.webp`: corpo de frente,
+pose de luta em 3/4 e 3 cabeças. Este passo **não gera do zero**: ele só troca a roupa da base pelo
+visual do jogo (jaqueta vermelha, tênis branco com vermelho). Rosto, cabelo, poses e expressões
+ficam iguais.
+
+**Formato:** Wide (4:3). **Referências:** `0-base.webp` (só ela).
 
 ```text
-Character concept sheet of my friend from the attached photos, drawn in the exact style of the attached cartoon reference (do not copy that character's face). Keep his real face shape, hair, nose, eyebrows and facial hair; exaggerate his most distinctive features by about 30%.
-Character: Schummaki, car lover from the coast, solid build, determined grin. Petrol-blue (#1F6F78) racing-style zip jacket with graphite side panels and two silver stripes, no logos; graphite cap; silver fingerless driving gloves; graphite board shorts; petrol-blue sneakers. No red suit, no helmet.
-The same character 3 times side by side, same scale, feet aligned: front view, 3/4 view facing right, side profile facing right. Neutral standing pose.
-Big head (3 heads tall), bold dark plum-brown outline, flat 2-tone cel shading, light from above. Plain light-gray background. No text, logos or numbers.
+Edit the attached character sheet. Keep exactly the same: face, hair, beard, expressions, poses, proportions, layout and drawing style. Change only the outfit:
+- open red (#D62839) zip jacket in a casual sporty cut, with two off-white stripes down each sleeve, no logos, no patches;
+- graphite (#2E3138) t-shirt under the jacket;
+- graphite board shorts instead of the khaki shorts;
+- graphite fingerless driving gloves;
+- chunky white sneakers with red details: a red side stripe and a red heel, white soles, no logos.
+No cap, no helmet, no racing suit, no numbers, no text. Plain light-gray background.
 ```
 
-**Confira:** dá para reconhecer o amigo? Se não, use a correção "Não parece o amigo". Este é o
-desenho que define o personagem; as próximas imagens copiam dele.
+**Confira:** o rosto continua igual ao da base? Se o Firefly mexeu no rosto, gere de novo. Se só um
+detalhe da roupa saiu errado, corrija com a tabela [Se der errado no Firefly](#se-der-errado-no-firefly).
+A base não tem a vista de perfil; tudo bem, o jogo usa a vista 3/4. Este é o desenho que define o
+personagem; as próximas imagens copiam dele.
 
 **Salve como:** `art/schummaki/1-conceito.png`. **Mande para o amigo aprovar antes de seguir.**
 
@@ -293,16 +303,19 @@ No text.
 
 ### Personagem novo no Firefly
 
-Copie os textos da parte 2 e troque só o que é do Schummaki:
+Copie os textos da parte 3 (João Frango, feito do zero) e troque só o que é do João:
 
-- **Conceito (2.1):** troque a linha que começa com `Character:` pela descrição do novo amigo, em
+- **Conceito (3.1):** troque a linha que começa com `Character:` pela descrição do novo amigo, em
   inglês, no mesmo tamanho (nome, de onde é, físico, expressão, roupa peça por peça com as cores, o
   que evitar). A ficha da [Referência](#ficha-para-um-personagem-novo) ajuda a pensar no que
   escrever.
-- **Peças (2.3):** troque o que vem depois de `Extra:` pelas mãos especiais dele (ou apague o
-  `Extra:`), e `shoe` pelo calçado dele.
-- **Efeitos (2.4):** troque a lista de itens pelos efeitos do especial dele.
-- **Cabeças (2.2) e figurinha (2.5):** iguais para todos, não mude nada.
+- **Peças (3.3):** troque o que vem depois de `Extra:` pelas mãos especiais dele (ou apague o
+  `Extra:`), e `foot with flip-flop` pelo calçado dele.
+- **Efeitos (3.4):** troque a lista de itens pelos efeitos do especial dele.
+- **Cabeças (3.2) e figurinha (3.5):** iguais para todos, não mude nada.
+
+Se você já tiver uma imagem do amigo de que gostou, faça como no Schummaki: use o texto do 2.1,
+anexe só essa imagem e troque a lista de roupas.
 
 Antes de gerar, confira se o texto passou de 1.000 caracteres (o Firefly corta o excesso).
 
@@ -429,15 +442,15 @@ CHARACTER SHEET
 Name: Schummaki — 30-year-old guy from the coast of São Paulo state (a "caiçara"), crazy about cars.
 Fighting style: rusher — fast on the ground, heavy, always charging forward. Grounded, leaning-forward posture.
 Body: based on the photos; solid, medium-heavy build.
-Outfit: generic racing-team style zip jacket in petrol blue (#1F6F78) with graphite (#3A3F47) side panels and two silver (#C9D1D9) stripes, no logos and no patches; graphite baseball cap; fingerless driving gloves in silver-gray; graphite board shorts (beach touch); chunky petrol-blue sneakers with silver soles.
-Signature details: cap, racing-style jacket, driving gloves.
-Colors: primary #1F6F78, secondary #3A3F47, accent #C9D1D9.
+Outfit: open red (#D62839) zip jacket in a casual sporty cut, with two off-white (#F6F0E4) stripes down each sleeve, no logos and no patches; graphite (#2E3138) t-shirt underneath; graphite fingerless driving gloves; graphite board shorts (beach touch); chunky white sneakers with red details (red side stripe and red heel), white soles. No cap: his hair must show.
+Signature details: red jacket, driving gloves, his hair.
+Colors: primary #D62839, secondary #F6F0E4, accent #2E3138.
 Face/personality: competitive, determined grin.
 Special move: "Arrancada" — he burns rubber in place (thick tire smoke at his feet), then shoots forward like a car.
 Taunt: turns an imaginary steering wheel with both hands, making "vroom vroom", then shouts his catchphrase.
 Extra parts for the parts sheet: two hands gripping an invisible steering wheel (left and right).
 Props and effects for the effects sheet: 4 tire-smoke puffs in different sizes (light gray, inked); 2 horizontal speed-streak shapes; 1 burnt-rubber skid mark seen from the side.
-Avoid: red racing suit or red as a main color, helmets, racing numbers, names, sponsor logos, and any resemblance to a famous racing driver beyond what is in the photos.
+Avoid: one-piece racing suits, helmets, racing numbers, names, team or sponsor logos, and any resemblance to a famous racing driver beyond what is in the photos.
 
 [INSTRUÇÕES]
 Attached: (1) the style anchor, for style only — do not copy its face; (2) the body template, only as the list of animation parts; (3) photos of my friend, for likeness.
@@ -694,7 +707,7 @@ No fim, a pasta `art/` fica assim (só as versões aprovadas):
 ```text
 art/
   style/           style.png, shape.png
-  schummaki/       1-conceito.png, 2-cabecas.png, 3-pecas.png, 4-efeitos.png, 5-figurinha.png
+  schummaki/       0-base.webp, 1-conceito.png, 2-cabecas.png, 3-pecas.png, 4-efeitos.png, 5-figurinha.png
   joao-frango/     (mesmos nomes)
   cenario-laje/    1-mapa.png, 2-ceu.png, 3-longe.png, 4-meio.png, 5-pecas.png
 ```
