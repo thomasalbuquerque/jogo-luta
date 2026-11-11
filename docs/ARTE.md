@@ -6,12 +6,12 @@ regra) e o modelo de ficha para os próximos personagens.
 
 ## Visão geral
 
-| Parte | O quê            | O que sai                                                             | Imagens | Situação    |
-| ----- | ---------------- | --------------------------------------------------------------------- | ------- | ----------- |
-| 1     | Estilo do jogo   | `style.png` (boneco no estilo do jogo) e `shape.png` (molde do corpo) | 2       | ✅ feita    |
-| 2     | Schummaki        | Conceito, cabeças com expressões, peças do corpo, efeitos, figurinha  | 5       | conceito ✅ |
-| 3     | João Frango      | Igual à parte 2                                                       | 5       |             |
-| 4     | Cenário (a laje) | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       |             |
+| Parte | O quê            | O que sai                                                             | Imagens | Situação |
+| ----- | ---------------- | --------------------------------------------------------------------- | ------- | -------- |
+| 1     | Estilo do jogo   | `style.png` (boneco no estilo do jogo) e `shape.png` (molde do corpo) | 2       | ✅ feita |
+| 2     | Schummaki        | Conceito, cabeças com expressões, peças do corpo, efeitos, figurinha  | 5       | ✅ feita |
+| 3     | João Frango      | Igual à parte 2                                                       | 5       | ✅ feita |
+| 4     | Cenário (a laje) | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feita |
 
 As partes 2 a 4 podem ser feitas por dois caminhos. Os dois usam as mesmas imagens de referência e
 salvam com os mesmos nomes:
