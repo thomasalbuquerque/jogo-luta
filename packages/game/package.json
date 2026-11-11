@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@jogo-luta/sim": "workspace:*",
-    "phaser": "~3.90.0"
+    "peerjs": "^1.5.5",
+    "phaser": "~3.90.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

@@ -6,6 +6,7 @@ import { ControlsScene } from './scenes/ControlsScene';
 import { DebugScene } from './scenes/DebugScene';
 import { FightScene } from './scenes/FightScene';
 import { HudScene } from './scenes/HudScene';
+import { OnlineScene } from './scenes/OnlineScene';
 import { PauseScene } from './scenes/PauseScene';
 import { ResultScene } from './scenes/ResultScene';
 import { RigViewerScene } from './scenes/RigViewerScene';
@@ -30,6 +31,7 @@ const game = new Phaser.Game({
     BootScene,
     BackdropScene,
     TitleScene,
+    OnlineScene,
     SelectScene,
     StageSelectScene,
     ControlsScene,

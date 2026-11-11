@@ -14,6 +14,9 @@ const PLAYERS = 2;
 /**
  * Pausa, por cima da luta parada: continuar, recomeçar ou sair, com os
  * controles de cada um para consulta. Esc, Start ou Especial continua.
+ *
+ * Online a luta não para: o menu abre por cima (continuar ou sair da sala) e o
+ * lutador fica parado enquanto ele está aberto.
  */
 export class PauseScene extends Phaser.Scene {
   private controls!: MenuInput;
@@ -32,8 +35,43 @@ export class PauseScene extends Phaser.Scene {
       this.controls.destroy();
     });
     this.add.rectangle(0, 0, width, height, 0x05070b, 0.6).setOrigin(0);
-    titleText(this, width / 2, 80, 'PAUSA', 64);
+    const online = this.fight.net !== null;
+    titleText(this, width / 2, 80, online ? 'MENU' : 'PAUSA', 64);
+    if (online) {
+      uiText(this, width / 2, 134, 'A luta online não para!', {
+        fontSize: '20px',
+        fontStyle: 'bold',
+        color: '#ffd166',
+      }).setOrigin(0.5);
+    }
 
+    const options: MenuOption[] = online ? this.onlineOptions() : this.localOptions();
+    this.menu = new MenuList(this, options, { x: 300, y: 220, width: 340 });
+    drawControlsCard(this, getControls(), 520, 175);
+    uiText(this, width / 2, height - 28, 'Esc, Start ou Especial: continuar', {
+      fontSize: '16px',
+      color: UI.muted,
+    }).setOrigin(0.5);
+  }
+
+  private onlineOptions(): MenuOption[] {
+    return [
+      {
+        label: 'Continuar',
+        onSelect: () => {
+          this.resume();
+        },
+      },
+      {
+        label: 'Sair da sala',
+        onSelect: () => {
+          this.leave('title');
+        },
+      },
+    ];
+  }
+
+  private localOptions(): MenuOption[] {
     const options: MenuOption[] = [
       {
         label: 'Continuar',
@@ -68,12 +106,7 @@ export class PauseScene extends Phaser.Scene {
         this.leave('title');
       },
     });
-    this.menu = new MenuList(this, options, { x: 300, y: 220, width: 340 });
-    drawControlsCard(this, getControls(), 520, 175);
-    uiText(this, width / 2, height - 28, 'Esc, Start ou Especial: continuar', {
-      fontSize: '16px',
-      color: UI.muted,
-    }).setOrigin(0.5);
+    return options;
   }
 
   override update(_time: number, delta: number): void {

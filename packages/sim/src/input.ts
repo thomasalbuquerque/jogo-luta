@@ -21,6 +21,9 @@ export type InputMask = number;
 
 export const NO_INPUT: InputMask = 0;
 
+/** Todos os bits de botão que existem (9 botões): o que vem de fora é cortado nisto. */
+export const INPUT_BITS: InputMask = 0x1ff;
+
 /** Botão segurado neste tick. */
 export function isHeld(mask: InputMask, button: number): boolean {
   return (mask & button) !== 0;

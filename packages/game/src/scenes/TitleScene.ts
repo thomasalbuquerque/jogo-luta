@@ -6,11 +6,14 @@ import { addAudioHint } from '../audio/unlock';
 import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
 import { pickReplayFile, readReplayFile } from '../match/replayFile';
+import { closeOnline } from '../net/online';
+import { roomFromSearch } from '../net/roomCode';
 import { MenuList } from '../ui/MenuList';
 import { addPortrait } from '../ui/portrait';
 import { fadeIn, titleText, UI, uiText } from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
 import type { FightData } from './FightScene';
+import type { OnlineData } from './OnlineScene';
 
 export interface TitleData {
   /** Voltando de outra tela: já abre no menu (sem o "aperte para começar"). */
@@ -20,9 +23,12 @@ export interface TitleData {
 /** Jogadores que podem mexer no menu (teclado e controle de cada um). */
 const PLAYERS = 2;
 
+/** O link com `?sala=ABCD` só entra na sala uma vez (voltar ao menu não entra de novo). */
+let roomLinkUsed = false;
+
 /**
  * Tela inicial: nome do jogo e "aperte para começar" (o 1º aperto também libera
- * o som); depois o menu de modo: mesmo PC, online (em breve), ver um replay
+ * o som); depois o menu de modo: mesmo PC, online, ver um replay
  * salvo (escolhendo o arquivo ou arrastando para a janela) e controles.
  */
 export class TitleScene extends Phaser.Scene {
@@ -42,6 +48,8 @@ export class TitleScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.scale;
+    // voltar ao menu inicial é sair da sala online
+    closeOnline();
     this.controls = new MenuInput();
     // arrastar um arquivo de replay para a janela abre o replay
     const onDragOver = (e: DragEvent): void => {
@@ -104,7 +112,12 @@ export class TitleScene extends Phaser.Scene {
             this.go('select');
           },
         },
-        { label: 'Jogar online', disabled: 'em breve' },
+        {
+          label: 'Jogar online',
+          onSelect: () => {
+            this.go('online');
+          },
+        },
         {
           label: 'Ver replay',
           onSelect: () => {
@@ -144,6 +157,11 @@ export class TitleScene extends Phaser.Scene {
       if (!this.inMenu) this.openMenu();
     });
     this.showMenu(this.inMenu);
+
+    // link de sala (`?sala=ABCD`): entra direto
+    const room = roomLinkUsed ? null : roomFromSearch(window.location.search);
+    roomLinkUsed = true;
+    if (room) this.scene.start('online', { code: room } satisfies OnlineData);
   }
 
   override update(_time: number, delta: number): void {
@@ -190,7 +208,7 @@ export class TitleScene extends Phaser.Scene {
     );
   }
 
-  private go(scene: 'select' | 'controls'): void {
+  private go(scene: 'select' | 'controls' | 'online'): void {
     this.scene.start(scene);
   }
 }

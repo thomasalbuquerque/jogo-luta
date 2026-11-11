@@ -4,6 +4,7 @@ import { playVoice } from '../audio/voice';
 import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
 import { saveReplayFile } from '../match/replayFile';
+import { endMessage } from '../net/transport';
 import type { PlayerStats } from '../match/stats';
 import { resultText } from '../render/hud';
 import { MenuList, type MenuOption } from '../ui/MenuList';
@@ -25,11 +26,16 @@ const MENU_PITCH = 56;
  * revanche (já escolhida: Ataque, Pulo ou Enter). Especial ou Esc troca de lutador.
  * Dá para ver o replay da luta e salvar em arquivo; no fim de um replay, as
  * opções são ver de novo, salvar e jogar a mesma luta.
+ *
+ * Online, a revanche precisa do voto dos dois, e trocar de lutador leva a sala
+ * inteira para a seleção.
  */
 export class ResultScene extends Phaser.Scene {
   private controls!: MenuInput;
   private menu!: MenuList;
   private note!: Phaser.GameObjects.Text;
+  /** Último aviso do online mostrado (para só trocar o texto quando mudar). */
+  private netNote = '';
 
   constructor() {
     super('result');
@@ -70,7 +76,12 @@ export class ResultScene extends Phaser.Scene {
       playVoice(this, c.taunt.sound, c.taunt.text);
     }
 
-    const options = fight.playback ? this.replayOptions() : this.matchOptions();
+    this.netNote = '';
+    const options = fight.net
+      ? this.onlineOptions()
+      : fight.playback
+        ? this.replayOptions()
+        : this.matchOptions();
     const pitch = Math.min(MENU_PITCH, (MENU_BOTTOM - MENU_TOP) / Math.max(1, options.length - 1));
     const gap = 8;
     this.menu = new MenuList(this, options, {
@@ -142,6 +153,66 @@ export class ResultScene extends Phaser.Scene {
     return options;
   }
 
+  /** Fim de uma luta online (ou do replay dela, ainda na sala). */
+  private onlineOptions(): MenuOption[] {
+    return [
+      {
+        label: 'Revanche',
+        onSelect: () => {
+          this.voteRematch();
+        },
+      },
+      {
+        label: this.fight.playback ? 'Ver de novo' : 'Ver replay',
+        onSelect: () => {
+          this.fight.watchReplay();
+        },
+      },
+      {
+        label: 'Salvar replay',
+        onSelect: () => {
+          this.saveReplay();
+        },
+      },
+      {
+        label: 'Trocar lutador',
+        onSelect: () => {
+          this.leave('select');
+        },
+      },
+      {
+        label: 'Sair da sala',
+        onSelect: () => {
+          this.leave('title');
+        },
+      },
+    ];
+  }
+
+  /** Online: vota na revanche (ela começa quando o outro jogador também votar). */
+  private voteRematch(): void {
+    const net = this.fight.net;
+    if (!net) return;
+    if (net.ended) this.leave('online');
+    else net.voteRematch();
+  }
+
+  /** Online: avisos da sala (revanche pedida, dessincronização, o outro saiu). */
+  private updateNetNote(): void {
+    const net = this.fight.net;
+    if (!net) return;
+    const desync = net.match?.desync.first;
+    let text = '';
+    if (net.ended) text = `${endMessage(net.ended)} Ainda dá para ver e salvar o replay.`;
+    else if (desync) {
+      text = `A luta dessincronizou no tick ${String(desync.tick)}: cada um viu uma luta diferente. Salvem o replay dos dois lados.`;
+    } else if (net.rematch.local) text = 'Esperando o outro jogador aceitar a revanche…';
+    else if (net.rematch.remote) text = 'O outro jogador quer revanche!';
+    if (text === this.netNote) return;
+    this.netNote = text;
+    this.note.setText(text);
+  }
+
   /** Fim de um replay. */
   private replayOptions(): MenuOption[] {
     return [
@@ -180,6 +251,7 @@ export class ResultScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number): void {
+    this.updateNetNote();
     const frame = this.controls.poll(PLAYERS, delta);
     if (frame.any & Menu.BACK) {
       this.leave('select');
@@ -211,7 +283,8 @@ export class ResultScene extends Phaser.Scene {
     g.strokeRoundedRect(x, COLUMN_Y, COLUMN_W, COLUMN_H, 14);
     const portrait = addPortrait(this, f.character, cx - 100, COLUMN_Y + 110, won ? 190 : 150);
     if (!won) portrait.setAlpha(0.7);
-    uiText(this, x + 16, COLUMN_Y + 12, `P${String(f.id + 1)}`, {
+    const you = this.fight.net?.local === f.id ? ' · VOCÊ' : '';
+    uiText(this, x + 16, COLUMN_Y + 12, `P${String(f.id + 1)}${you}`, {
       fontFamily: UI.titleFont,
       fontSize: '24px',
       color: cssColor(color),

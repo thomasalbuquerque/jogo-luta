@@ -130,14 +130,14 @@ Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 
 ## Seleção
 
-- **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; online "em breve"; ver replay; controles) → personagem → mapa → luta → resultado → revanche.
+- **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; online; ver replay; controles) → personagem → mapa → luta → resultado → revanche.
 - **Personagem:** grade de 7 casas (os que existem e silhuetas "em breve"; cresce aos poucos). Cada jogador anda com as próprias direções, confirma com Ataque ou Pulo e desfaz com Especial; Especial com ninguém pronto (ou Esc) volta ao menu. O painel de cada um mostra o lutador, estilo, especial, barras e bordão. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
 - **Mapa:** um cursor só, qualquer jogador mexe; por enquanto só a Laje.
 - **HUD:** painel de cada jogador com retrato, % de dano (branco → amarelo → laranja → vermelho → vinho conforme sobe) e stocks com a cabecinha do personagem; relógio no alto.
 
 ## Determinismo e replays
 
-A mesma seed com os mesmos inputs dá sempre a mesma luta, tick a tick, em qualquer navegador. É a base do online (Etapa 8).
+A mesma seed com os mesmos inputs dá sempre a mesma luta, tick a tick, em qualquer navegador. É a base do [online](#online).
 
 - **Regras do `sim`:** nada de `Math.random`, relógio, `Math.sin`/`cos`/`pow`/`sqrt` nem `**` (o ESLint barra). Seno e cosseno vêm de tabela (`trig.ts`), raiz e divisão são inteiras (`math.ts`), e todo número do estado é inteiro.
 - **Sorte:** RNG com seed (`rng.ts`), com o estado guardado em `GameState.rng`. A seed é sorteada pelo jogo ao criar a luta; dentro do `sim`, tudo sai dela. Hoje nenhuma regra usa sorte: quando uma usar, tem que ser por este RNG.
@@ -147,6 +147,25 @@ A mesma seed com os mesmos inputs dá sempre a mesma luta, tick a tick, em qualq
 - **Validade do replay:** só reproduz na mesma versão das regras. Se um número de golpe ou de personagem mudou desde a gravação, a luta sai diferente; o jogo percebe pelo hash final e avisa na tela de resultado. Arquivo que não é replay (ou quebrado) é recusado com o motivo.
 - **Atraso de input** (para sentir o netcode por atraso antes de ter rede): os inputs de um jogador só chegam ao `sim` N ticks depois (0 a 15; 3 ticks = 50 ms). `?atraso=3` na URL atrasa o jogador 1 e `?atraso=3,2` os dois; com o debug ligado (`), as teclas 1/2 diminuem/aumentam o do P1 e 3/4 o do P2. O replay grava os inputs já atrasados.
 - **Debug:** a 1ª linha do overlay mostra o hash do estado e a seed; num replay, o tick atual e, no fim, se ficou igual à gravação.
+
+## Online
+
+Luta 1x1 entre dois PCs, direto de um para o outro (P2P por WebRTC). Um dos jogadores é o host.
+
+- **Sala por código:** no menu, **Jogar online** → **Criar sala** mostra um código de 4 letras (sem I nem O) para mandar no grupo; o amigo escolhe **Entrar com código** e digita (ou cola). `C` (ou clique) copia um link que já entra na sala (`?sala=ABCD`). Só cabem 2 na sala; um terceiro é recusado.
+- **Quem é quem:** o host é o P1 e quem entrou é o P2. Cada um joga no seu PC com qualquer um dos controles (as teclas do P1, as do P2 ou o gamepad).
+- **Telas:** as mesmas do jogo local, sincronizadas. Na seleção, cada um mexe só no próprio cursor e vê o do outro; o mapa é escolhido pelo host; no resultado, a revanche começa quando os dois escolhem **Revanche**, e **Trocar lutador** leva a sala inteira de volta à seleção. Esc na seleção (ou **Sair da sala** no menu) sai da sala, e o outro lado é avisado.
+- **Sem pausa:** Esc/Start abre um menu por cima (continuar ou sair da sala), mas a luta continua; com o menu aberto o lutador fica parado. Trocar de aba não pausa: o outro lado fica esperando.
+- **Netcode por atraso (lockstep):** o que cada um aperta só vale alguns ticks depois (2 a 3 com ping baixo; o host escolhe pelo ping ao começar a partida, até 8), e nesse meio-tempo viaja até o outro lado. O `sim` só roda um tick quando tem o input dos dois, então os dois veem exatamente a mesma luta. Se o input do outro atrasa, a luta espera ("Esperando o outro jogador…"). Sem rollback (Etapa 12, opcional).
+- **Canais:** o lobby e o controle vão por um canal confiável; os inputs vão por um DataChannel sem ordenação e sem retransmissão (parecido com UDP). Cada pacote leva todos os inputs que o outro lado ainda não confirmou, então pacote perdido é coberto pelo seguinte.
+- **Ping:** no canto do HUD, com o atraso de input da partida: verde até 60 ms, amarelo até 120 ms, vermelho acima; "relay" quando o tráfego passa por TURN.
+- **Dessincronização:** a cada 30 ticks (e no fim da luta) os dois lados trocam o hash do estado. Se divergir, fica registrado no console (tick e os dois hashes), aparece "DESSINCRONIZOU" no HUD e um aviso no resultado pedindo para salvar o replay dos dois lados.
+- **Queda e reconexão:** 1 s sem ouvir o outro lado mostra "Conexão instável…"; se a conexão cai, os dois veem "Reconectando…" e a luta fica parada; quem entrou disca de novo e a luta segue do mesmo tick. Depois de 30 s sem voltar, a sala acaba ("A conexão caiu e não voltou").
+- **Mesma versão:** os dois precisam do mesmo build do jogo (senão a luta sairia diferente); com builds diferentes, quem entra é avisado para recarregar a página.
+- **Servidores:** a sinalização (só para os dois se acharem) usa o servidor gratuito do PeerJS; STUN público do Google e da Cloudflare; TURN de fallback público do PeerJS, que fica longe do Brasil. Para trocar, defina no build `VITE_TURN_URLS` (separadas por vírgula), `VITE_TURN_USERNAME` e `VITE_TURN_CREDENTIAL` (TURN próprio) e/ou `VITE_PEER_HOST`, `VITE_PEER_PORT`, `VITE_PEER_PATH` e `VITE_PEER_SECURE` (PeerServer próprio).
+- **Debug:** com o debug ligado (`), a 1ª linha mostra sala, estado da conexão, ping, rota (direta ou relay), atraso, folga de inputs e quantos hashes já bateram.
+
+O código fica em `packages/game/src/net`: `lockstep.ts` (filas de input), `protocol.ts` (mensagens e pacotes), `session.ts` (sala, telas, partida, reconexão), `peerLink.ts` (PeerJS/WebRTC). Tudo menos o `peerLink` roda em teste, com uma rede de mentira que perde e embaralha pacotes (`loopback.ts`).
 
 ## Ficha de personagem
 

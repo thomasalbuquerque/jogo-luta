@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { hasCharacter } from './characters';
 import { TICK_RATE } from './constants';
 import { createGame, getStage, stepGame, type GameState, type MatchRules } from './game';
-import { NO_INPUT, type InputMask } from './input';
+import { INPUT_BITS, NO_INPUT, type InputMask } from './input';
 import { hashState } from './snapshot';
 import { STAGES } from './stage';
 
@@ -18,8 +18,6 @@ export const REPLAY_VERSION = 1;
 export const REPLAY_TAG = 'jogo-luta-replay';
 /** Tamanho máximo de um replay (30 min): arquivo maior que isso é recusado. */
 export const MAX_REPLAY_TICKS = 30 * 60 * TICK_RATE;
-/** Bits de botão que existem (9 botões). */
-const INPUT_BITS = 0x1ff;
 
 export interface ReplaySetup {
   characters: readonly string[];

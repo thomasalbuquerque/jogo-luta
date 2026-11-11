@@ -1,0 +1,64 @@
+import { MAX_INPUT_DELAY, TICK_MS } from '@jogo-luta/sim';
+
+/** Atraso de input do online: nunca menos que isto (2 ticks = 33 ms, não dá para sentir). */
+export const MIN_NET_DELAY = 2;
+/** Nem mais que isto (com ping tão alto, é melhor travar de vez em quando que jogar atrasado). */
+export const MAX_NET_DELAY = Math.min(8, MAX_INPUT_DELAY);
+/** Sem medida de ping ainda. */
+export const DEFAULT_NET_DELAY = 3;
+/** Folga somada à ida do input: 1 tick até o outro lado ler o pacote. */
+const MARGIN_MS = TICK_MS;
+
+/** Quanto pesa cada medida nova na média (0..1). */
+const SMOOTHING = 0.2;
+/** Medida maior que isto não é ping, é engasgo (aba em segundo plano): limita. */
+const MAX_SAMPLE_MS = 2000;
+
+/** Ping (ida e volta) com média móvel, e o quanto ele varia. */
+export class PingMeter {
+  /** Ida e volta, em ms (null = ainda sem medida). */
+  rtt: number | null = null;
+  /** Variação média entre medidas, em ms. */
+  jitter = 0;
+
+  add(sampleMs: number): void {
+    if (!Number.isFinite(sampleMs) || sampleMs < 0) return;
+    const sample = Math.min(sampleMs, MAX_SAMPLE_MS);
+    if (this.rtt === null) {
+      this.rtt = sample;
+      return;
+    }
+    this.jitter += (Math.abs(sample - this.rtt) - this.jitter) * SMOOTHING;
+    this.rtt += (sample - this.rtt) * SMOOTHING;
+  }
+
+  reset(): void {
+    this.rtt = null;
+    this.jitter = 0;
+  }
+}
+
+/**
+ * Atraso de input para um ping: o input precisa chegar do outro lado (metade da
+ * ida e volta, mais a variação) antes do tick em que vale. Ping baixo (fibra,
+ * mesma cidade) dá 2 a 3 ticks.
+ */
+export function delayForPing(rttMs: number | null, jitterMs = 0): number {
+  if (rttMs === null) return DEFAULT_NET_DELAY;
+  const ticks = Math.ceil((rttMs / 2 + jitterMs + MARGIN_MS) / TICK_MS);
+  return Math.max(MIN_NET_DELAY, Math.min(MAX_NET_DELAY, ticks));
+}
+
+export type PingQuality = 'good' | 'ok' | 'bad';
+
+/** Cor do indicador: verde até 60 ms, amarelo até 120 ms, vermelho acima. */
+export function pingQuality(rttMs: number | null): PingQuality {
+  if (rttMs === null) return 'ok';
+  if (rttMs <= 60) return 'good';
+  return rttMs <= 120 ? 'ok' : 'bad';
+}
+
+/** "ping 23 ms" (ou "ping …" sem medida). */
+export function pingLabel(rttMs: number | null): string {
+  return rttMs === null ? 'ping …' : `ping ${String(Math.round(rttMs))} ms`;
+}
