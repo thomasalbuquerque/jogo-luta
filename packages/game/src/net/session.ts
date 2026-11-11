@@ -242,7 +242,7 @@ export class OnlineSession {
         break;
       case 'hash':
         if (this.match && message.seq === this.match.seq) {
-          this.reportDesync(this.match.desync.addRemote(message.tick, message.hash));
+          this.reportDesync(this.match.desync.addRemote(this.remote, message.tick, message.hash));
         }
         break;
       case 'bye':

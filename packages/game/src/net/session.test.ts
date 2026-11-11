@@ -392,8 +392,8 @@ describe('OnlineSession: partida', () => {
     s.host.reportHash(30, 111);
     s.guest.reportHash(30, 222);
     s.run();
-    expect(s.host.match?.desync.first).toEqual({ tick: 30, local: 111, remote: 222 });
-    expect(s.guest.match?.desync.first).toEqual({ tick: 30, local: 222, remote: 111 });
+    expect(s.host.match?.desync.first).toEqual({ tick: 30, player: 1, local: 111, remote: 222 });
+    expect(s.guest.match?.desync.first).toEqual({ tick: 30, player: 0, local: 222, remote: 111 });
     expect(error).toHaveBeenCalledTimes(2);
     expect(String(error.mock.calls[0]?.[0])).toContain('tick 30');
   });
