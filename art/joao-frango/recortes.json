@@ -14,6 +14,10 @@
       "file": "3-pecas-tronco.png",
       "scale": 0.6
     },
+    "maos": {
+      "file": "3-pecas-maos.png",
+      "scale": 0.225
+    },
     "cabecas": {
       "file": "2-cabecas.png",
       "scale": 0.535
@@ -160,6 +164,21 @@
       ],
       "stretch": [1.1, 1.1]
     },
+    "hand_fist2": {
+      "sheet": "maos",
+      "rect": [130, 205, 575, 480],
+      "pivot": [276, 505],
+      "tip": [643, 507],
+      "erase": [
+        [
+          [120, 200],
+          [236, 200],
+          [236, 700],
+          [120, 700]
+        ]
+      ],
+      "stretch": [0.97, 0.97]
+    },
     "hand_open": {
       "sheet": "pecas",
       "rect": [991, 157, 226, 163],
@@ -174,6 +193,21 @@
         ]
       ],
       "stretch": [1.1, 1.1]
+    },
+    "hand_open2": {
+      "sheet": "maos",
+      "rect": [878, 180, 780, 530],
+      "pivot": [1020, 497],
+      "tip": [1300, 481],
+      "erase": [
+        [
+          [870, 170],
+          [980, 170],
+          [980, 720],
+          [870, 720]
+        ]
+      ],
+      "stretch": [0.95, 0.95]
     },
     "hand_taunt": {
       "sheet": "pecas",
