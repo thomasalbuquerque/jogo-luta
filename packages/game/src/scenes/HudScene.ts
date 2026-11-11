@@ -4,6 +4,8 @@ import { playSfx } from '../audio/sfx';
 import { addAudioHint } from '../audio/unlock';
 import { countdownNumber, damageColor, formatClock } from '../render/hud';
 import { KoBurstLayer } from '../render/koBurst';
+import { pingLabel, pingQuality } from '../net/ping';
+import { UNSTABLE_MS } from '../net/session';
 import type { EdgePoint } from '../render/koEdge';
 import { addPortrait } from '../ui/portrait';
 import { cssColor, playerColor, UI, uiText } from '../ui/theme';
@@ -16,6 +18,10 @@ const PANEL_W = 300;
 const PANEL_H = 92;
 const PORTRAIT = 84;
 const STOCK_ICON = 26;
+/** Online: parado esperando o input do outro por mais que isto, avisa na tela (ms). */
+const WAITING_NOTICE_MS = 400;
+/** Cor do ping: bom, médio, ruim. */
+const PING_COLORS = { good: '#80ed99', ok: '#ffd166', bad: '#ff5a3c' } as const;
 /** Quanto tempo o "LUTA!" fica na tela depois da contagem (ms). */
 const GO_MS = 900;
 
@@ -28,7 +34,8 @@ interface Panel {
 /**
  * HUD por cima da luta, com câmera própria (sem zoom): painel de cada jogador
  * (retrato, % de dano que esquenta conforme sobe, stocks), tempo, contagem
- * "3, 2, 1, LUTA!" e a explosão do KO na borda da tela.
+ * "3, 2, 1, LUTA!" e a explosão do KO na borda da tela. Online, também o ping
+ * e os avisos de conexão (esperando o outro jogador, reconectando, dessincronizou).
  */
 export class HudScene extends Phaser.Scene {
   private panels: Panel[] = [];
@@ -36,6 +43,11 @@ export class HudScene extends Phaser.Scene {
   private countdown!: Phaser.GameObjects.Text;
   private replayTag!: Phaser.GameObjects.Text;
   private replayMs = 0;
+  /** Online: ping e atraso de input, no canto. */
+  private netText!: Phaser.GameObjects.Text;
+  /** Online: aviso de conexão no meio da tela. */
+  private netBanner!: Phaser.GameObjects.Text;
+  private desyncTag!: Phaser.GameObjects.Text;
   private koBursts!: KoBurstLayer;
   /** Último % mostrado e tamanho atual do texto, por jogador. */
   private shownDamage: number[] = [];
@@ -69,7 +81,7 @@ export class HudScene extends Phaser.Scene {
       stroke: '#0b0e16',
       strokeThickness: 6,
     }).setOrigin(0.5, 0);
-    uiText(this, width - 14, 12, 'Esc · Start: pausa', {
+    uiText(this, width - 14, 12, this.fight.net ? 'Esc · Start: menu' : 'Esc · Start: pausa', {
       fontSize: '14px',
       color: '#e9ecef',
       stroke: '#0b0e16',
@@ -77,6 +89,30 @@ export class HudScene extends Phaser.Scene {
     })
       .setOrigin(1, 0)
       .setAlpha(0.75);
+    this.netText = uiText(this, width - 14, 34, '', {
+      fontSize: '15px',
+      fontStyle: 'bold',
+      stroke: '#0b0e16',
+      strokeThickness: 4,
+    }).setOrigin(1, 0);
+    this.netBanner = uiText(this, width / 2, 120, '', {
+      fontFamily: UI.titleFont,
+      fontSize: '26px',
+      color: '#ffd166',
+      stroke: '#0b0e16',
+      strokeThickness: 7,
+    })
+      .setOrigin(0.5, 0)
+      .setVisible(false);
+    this.desyncTag = uiText(this, width / 2, 56, 'DESSINCRONIZOU', {
+      fontFamily: UI.titleFont,
+      fontSize: '18px',
+      color: '#ff5a3c',
+      stroke: '#0b0e16',
+      strokeThickness: 6,
+    })
+      .setOrigin(0.5, 0)
+      .setVisible(false);
     // assistindo a um replay: etiqueta piscando embaixo do relógio
     this.replayTag = uiText(this, width / 2, 56, '● REPLAY', {
       fontFamily: UI.titleFont,
@@ -119,7 +155,8 @@ export class HudScene extends Phaser.Scene {
     g.fillStyle(0x0b0e16, 0.35);
     g.fillCircle(px, py, PORTRAIT / 2 - 4);
     const portrait = addPortrait(this, f.character, px, py - 4, PORTRAIT + 8);
-    uiText(this, px, y + PANEL_H - 6, `P${String(f.id + 1)}`, {
+    const you = this.fight.net?.local === f.id ? ' VOCÊ' : '';
+    uiText(this, px, y + PANEL_H - 6, `P${String(f.id + 1)}${you}`, {
       fontFamily: UI.titleFont,
       fontSize: '18px',
       color: '#0b0e16',
@@ -186,10 +223,38 @@ export class HudScene extends Phaser.Scene {
       this.clock.setText(state.rules.timeLimitTicks > 0 ? formatClock(state.timeLeft) : '');
     }
     this.updateCountdown(delta);
+    this.updateNet();
     this.replayMs += delta;
     this.replayTag
       .setVisible(this.fight.playback !== null)
       .setAlpha(this.replayMs % 1200 < 800 ? 1 : 0.35);
+  }
+
+  /** Online: ping no canto e, se a conexão engasgar, o aviso no meio da tela. */
+  private updateNet(): void {
+    const fight = this.fight;
+    const net = fight.net;
+    const match = fight.onlineMatch;
+    this.netText.setVisible(net !== null);
+    this.desyncTag.setVisible(Boolean(match?.desync.first));
+    if (!net) {
+      this.netBanner.setVisible(false);
+      return;
+    }
+    const delay = match ? ` · atraso ${String(match.delay)}f` : '';
+    const relay = net.route === 'relay' ? ' · relay' : '';
+    this.netText
+      .setText(`${pingLabel(net.ping.rtt)}${delay}${relay}`)
+      .setColor(PING_COLORS[pingQuality(net.ping.rtt)]);
+
+    let banner = '';
+    if (net.status === 'reconnecting') {
+      banner = `Reconectando… ${String(Math.ceil(net.reconnectLeftMs / 1000))} s`;
+    } else if (!net.ended && match && !fight.ended) {
+      if (net.silentMs > UNSTABLE_MS) banner = 'Conexão instável…';
+      else if (fight.stalledMs > WAITING_NOTICE_MS) banner = 'Esperando o outro jogador…';
+    }
+    this.netBanner.setVisible(banner !== '').setText(banner);
   }
 
   /** "3, 2, 1" enquanto o sim conta, e "LUTA!" quando a luta começa. */
