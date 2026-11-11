@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { characterTextureKey } from './FighterView';
 
 /**
  * Efeitos do especial de cada personagem, com as peças da folha de efeitos
@@ -33,31 +32,60 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
 };
 
 export interface ParticleSpec {
-  character: string;
-  frame: string;
+  /** Textura (atlas do personagem ou uma de `FX_TEXTURE`) e quadro, se for atlas. */
+  texture: string;
+  frame?: string;
   x: number;
   y: number;
   /** px de mundo por tick. */
   vx?: number;
   vy?: number;
+  /** Somado a `vy` a cada tick. */
+  gravity?: number;
+  /** Fração da velocidade que sobra a cada tick (1 = não freia). */
+  drag?: number;
   /** Duração em ticks. */
   life: number;
   /** Escala (px de mundo por px da textura) no começo e no fim. */
   scale: number;
   scaleEnd?: number;
+  /** Estica na horizontal (faíscas): escala X = escala × stretch. */
+  stretch?: number;
   alpha?: number;
+  /** Rotação inicial e giro por tick, em radianos. */
+  rotation?: number;
+  spin?: number;
+  /** Gira junto com a velocidade (faíscas apontam para onde vão). */
+  alignToVelocity?: boolean;
+  tint?: number;
+  /** Mistura aditiva: brilha por cima do que estiver atrás. */
+  additive?: boolean;
   flipX?: boolean;
   /** Origem da imagem (padrão: centro). */
   originX?: number;
   originY?: number;
 }
 
-interface Particle extends Required<Omit<ParticleSpec, 'character' | 'frame' | 'flipX'>> {
+interface Particle {
   img: Phaser.GameObjects.Image;
   age: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  gravity: number;
+  drag: number;
+  life: number;
+  scale: number;
+  scaleEnd: number;
+  stretch: number;
+  alpha: number;
+  rotation: number;
+  spin: number;
+  alignToVelocity: boolean;
 }
 
-/** Partículas simples (fumaça, linhas de velocidade), avançadas a cada tick. */
+/** Partículas simples (fumaça, faíscas, linhas de velocidade), avançadas a cada tick. */
 export class FxLayer {
   private readonly particles: Particle[] = [];
 
@@ -68,25 +96,32 @@ export class FxLayer {
 
   spawn(spec: ParticleSpec): void {
     const img = this.scene.add
-      .image(spec.x, spec.y, characterTextureKey(spec.character), spec.frame)
+      .image(spec.x, spec.y, spec.texture, spec.frame)
       .setOrigin(spec.originX ?? 0.5, spec.originY ?? 0.5)
       .setDepth(this.depth)
       .setFlipX(spec.flipX ?? false);
-    this.particles.push({
+    if (spec.tint !== undefined) img.setTint(spec.tint);
+    if (spec.additive) img.setBlendMode(Phaser.BlendModes.ADD);
+    const p: Particle = {
       img,
       age: 0,
       x: spec.x,
       y: spec.y,
       vx: spec.vx ?? 0,
       vy: spec.vy ?? 0,
+      gravity: spec.gravity ?? 0,
+      drag: spec.drag ?? 1,
       life: spec.life,
       scale: spec.scale,
       scaleEnd: spec.scaleEnd ?? spec.scale,
+      stretch: spec.stretch ?? 1,
       alpha: spec.alpha ?? 1,
-      originX: spec.originX ?? 0.5,
-      originY: spec.originY ?? 0.5,
-    });
-    this.apply(this.particles[this.particles.length - 1]);
+      rotation: spec.rotation ?? 0,
+      spin: spec.spin ?? 0,
+      alignToVelocity: spec.alignToVelocity ?? false,
+    };
+    this.particles.push(p);
+    this.apply(p);
   }
 
   /** Um tick: move, cresce e apaga; tira as que acabaram. */
@@ -95,8 +130,12 @@ export class FxLayer {
       const p = this.particles[i];
       if (!p) continue;
       p.age++;
+      p.vy += p.gravity;
+      p.vx *= p.drag;
+      p.vy *= p.drag;
       p.x += p.vx;
       p.y += p.vy;
+      p.rotation += p.spin;
       if (p.age >= p.life) {
         p.img.destroy();
         this.particles.splice(i, 1);
@@ -111,11 +150,12 @@ export class FxLayer {
     this.particles.length = 0;
   }
 
-  private apply(p: Particle | undefined): void {
-    if (!p) return;
+  private apply(p: Particle): void {
     const k = p.age / p.life;
+    const scale = p.scale + (p.scaleEnd - p.scale) * k;
     p.img.setPosition(p.x, p.y);
-    p.img.setScale(p.scale + (p.scaleEnd - p.scale) * k);
+    p.img.setScale(scale * p.stretch, scale);
+    p.img.setRotation(p.alignToVelocity ? Math.atan2(p.vy, p.vx) : p.rotation);
     p.img.setAlpha(p.alpha * (1 - k));
   }
 }

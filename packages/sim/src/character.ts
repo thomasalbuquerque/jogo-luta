@@ -244,6 +244,8 @@ export const CharacterSchema = z.strictObject({
   /** Só o boneco de teste não tem especial. */
   special: SpecialSchema.optional(),
   taunt: TauntSchema,
+  /** Voz do amigo no KO (áudio em `audio/vozes/`). Sem isso: `<id com _>_ko`. */
+  koSound: AssetId.optional(),
   animations: z.partialRecord(z.enum(ANIMATION_KEYS), AssetId).default({}),
 });
 
@@ -280,6 +282,8 @@ export interface Character {
   moves: Readonly<Record<BaseMoveId, MoveDef>>;
   special: Special | null;
   taunt: Taunt;
+  /** Id do áudio da voz no KO; sem o arquivo, o jogo toca um grito sintetizado. */
+  koSound: string;
   animations: Readonly<Partial<Record<AnimationKey, string>>>;
 }
 
@@ -304,6 +308,7 @@ function compileCharacter(s: ParsedSheet): Character {
     moves,
     special: s.special ? compileSpecial(s.special) : null,
     taunt: { ...s.taunt },
+    koSound: s.koSound ?? `${s.id.replaceAll('-', '_')}_ko`,
     animations: { ...s.animations },
   };
 }

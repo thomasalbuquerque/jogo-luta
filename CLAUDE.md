@@ -20,8 +20,10 @@ packages/
   sim/      lógica pura do jogo: física, combate, estados, personagens. SEM Phaser, SEM DOM.
   game/     Phaser: renderização, input, áudio, menus, HUD. Lê o estado do sim e desenha.
             src/rig: esqueleto único e animações (dados); public/assets: atlas gerados pelo pnpm art
+            src/audio: sons, música e vozes provisórias gerados em código; src/render: efeitos (game feel)
   server/   (Etapa 8+) sinalização/relay do online.
 art/        PNGs gerados por IA + recortes.json (onde está cada peça e as juntas)
+audio/      áudios gravados (vozes dos amigos, música, efeitos): entram sozinhos no jogo (LEIAME.md)
 scripts/art pipeline de arte (tira o fundo, recorta, gera os atlas)
 docs/
   ROADMAP.md

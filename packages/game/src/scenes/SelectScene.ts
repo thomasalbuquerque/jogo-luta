@@ -7,6 +7,8 @@ import {
   type Character,
   type InputMask,
 } from '@jogo-luta/sim';
+import { music } from '../audio/music';
+import { addAudioHint } from '../audio/unlock';
 import { InputManager } from '../input/InputManager';
 import { characterTextureKey } from '../render/FighterView';
 import { colorValue, statBars } from '../render/fighterLook';
@@ -61,6 +63,12 @@ export class SelectScene extends Phaser.Scene {
     this.controls = new InputManager();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.controls.destroy();
+    });
+    music.play(this, 'menu');
+    addAudioHint(this, 2);
+    // gera a música da luta enquanto escolhem, para não travar ao começar
+    this.time.delayedCall(1500, () => {
+      music.warm(this, 'luta');
     });
     const { width, height } = this.scale;
     this.add

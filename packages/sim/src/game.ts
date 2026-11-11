@@ -1,8 +1,10 @@
 import { BASE_CHARACTER_ID } from './characters';
 import { resolveHits, resolveProjectileHits, stepGrabs } from './combat';
 import { TICK_RATE } from './constants';
+import { cueNames, type GameEvent } from './events';
 import { createFighter, knockOut, respawn, stepFighter, type Fighter } from './fighter';
 import type { InputMask } from './input';
+import { idiv } from './math';
 import { overlaps } from './physics';
 import { stepProjectiles, type Projectile } from './projectile';
 import { TEST_STAGE, type Spawn, type Stage } from './stage';
@@ -40,6 +42,8 @@ export interface GameState {
   fighters: Fighter[];
   /** Projéteis em voo (especiais). */
   projectiles: Projectile[];
+  /** O que aconteceu no último tick (som e efeitos); nenhuma regra lê. */
+  events: GameEvent[];
 }
 
 const STAGES: Record<string, Stage> = { [TEST_STAGE.id]: TEST_STAGE };
@@ -76,6 +80,7 @@ export function createGame(setup: GameSetup = {}): GameState {
     winner: null,
     fighters,
     projectiles: [],
+    events: [],
   };
 }
 
@@ -92,10 +97,13 @@ function respawnPoint(stage: Stage, id: number): Spawn {
 }
 
 /** Conta o tempo fora de cena e devolve o lutador ao mapa, se ainda tiver stock. */
-function stepKnockedOut(f: Fighter, stage: Stage): void {
+function stepKnockedOut(f: Fighter, stage: Stage, events: GameEvent[]): void {
   if (f.stocks <= 0) return;
   if (f.respawnTicks > 0) f.respawnTicks--;
-  if (f.respawnTicks === 0) respawn(f, respawnPoint(stage, f.id), RESPAWN_INVULN_TICKS);
+  if (f.respawnTicks === 0) {
+    respawn(f, respawnPoint(stage, f.id), RESPAWN_INVULN_TICKS);
+    events.push({ type: 'respawn', fighter: f.id });
+  }
 }
 
 /**
@@ -103,22 +111,29 @@ function stepKnockedOut(f: Fighter, stage: Stage): void {
  * Depois do fim da luta, só o contador de ticks anda.
  */
 export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
+  const events: GameEvent[] = [];
+  state.events = events;
   if (state.phase === 'over') {
     state.tick++;
     return;
   }
   const stage = getStage(state.stageId);
   for (const f of state.fighters) {
-    if (f.state === 'ko') stepKnockedOut(f, stage);
+    if (f.state === 'ko') stepKnockedOut(f, stage, events);
     stepFighter(f, inputs[f.id] ?? 0, stage.solids, state.projectiles);
+    for (const action of cueNames(f.cues)) events.push({ type: 'action', fighter: f.id, action });
   }
   stepProjectiles(state.projectiles, stage.solids, stage.blastZone);
-  resolveHits(state.fighters);
-  resolveProjectileHits(state.fighters, state.projectiles);
-  stepGrabs(state.fighters, stage.solids);
+  resolveHits(state.fighters, events);
+  resolveProjectileHits(state.fighters, state.projectiles, events);
+  stepGrabs(state.fighters, stage.solids, events);
   // Saiu inteiro da blast zone = KO.
   for (const f of state.fighters) {
-    if (f.state !== 'ko' && !overlaps(f, stage.blastZone)) knockOut(f, RESPAWN_DELAY_TICKS);
+    if (f.state === 'ko' || overlaps(f, stage.blastZone)) continue;
+    const x = f.x + idiv(f.w, 2);
+    const y = f.y + idiv(f.h, 2);
+    knockOut(f, RESPAWN_DELAY_TICKS);
+    events.push({ type: 'ko', fighter: f.id, x, y, stocksLeft: f.stocks });
   }
   checkLastStanding(state);
   stepClock(state, stage);
@@ -169,6 +184,7 @@ function timeUp(state: GameState, stage: Stage): void {
   for (const f of state.fighters) {
     if (leaders.includes(f)) {
       respawn(f, spawnPoint(stage, f.id), SUDDEN_DEATH_INVULN_TICKS);
+      state.events.push({ type: 'respawn', fighter: f.id });
       f.stocks = 1;
       f.damage = SUDDEN_DEATH_DAMAGE;
     } else {

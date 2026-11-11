@@ -108,13 +108,13 @@ Objetivo: os 2 primeiros personagens animados e reconhecíveis. Esta etapa defin
 
 Objetivo: um golpe forte tem que doer de ver e de ouvir.
 
-- [ ] Screen shake proporcional ao knockback, flash branco no personagem atingido, partículas de impacto.
-- [ ] Rastro visual nos golpes fortes e efeito de KO na borda da tela.
-- [ ] Zoom e câmera lenta curta no golpe que decide a partida.
-- [ ] Efeitos sonoros: golpes, pulo, dodge, KO, respawn.
-- [ ] Voz de cada amigo na provocação e no KO. Áudios gravados pelos próprios amigos no WhatsApp funcionam melhor que IA.
-- [ ] Música de menu e de luta.
-- [ ] Liberar o áudio no primeiro clique (os navegadores bloqueiam autoplay).
+- [x] Screen shake proporcional ao knockback, flash branco no personagem atingido, partículas de impacto.
+- [x] Rastro visual nos golpes fortes e efeito de KO na borda da tela.
+- [x] Zoom e câmera lenta curta no golpe que decide a partida.
+- [x] Efeitos sonoros: golpes, pulo, dodge, KO, respawn.
+- [ ] Voz de cada amigo na provocação e no KO. Áudios gravados pelos próprios amigos no WhatsApp funcionam melhor que IA. O jogo já toca o que estiver em `audio/vozes/` (com voz provisória sintetizada enquanto não há): falta gravar (ver `audio/LEIAME.md`).
+- [x] Música de menu e de luta.
+- [x] Liberar o áudio no primeiro clique (os navegadores bloqueiam autoplay).
 
 **Pronto quando:** quem assiste reage aos golpes.
 

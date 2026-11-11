@@ -16,19 +16,44 @@ import {
   SUBPX,
   toPx,
   type Box,
+  type CueName,
   type Fighter,
   type FighterState,
   type GameState,
+  type HitEvent,
   type InputMask,
+  type KoEvent,
 } from '@jogo-luta/sim';
-import { playVoice } from '../audio/voice';
+import { music } from '../audio/music';
+import { playSfx } from '../audio/sfx';
+import { playKoVoice, playVoice } from '../audio/voice';
 import { InputManager } from '../input/InputManager';
-import { frameTargets, smooth, type Rect } from '../render/camera';
+import {
+  DEFAULT_CAMERA,
+  frameTargets,
+  smooth,
+  type CameraOptions,
+  type Rect,
+} from '../render/camera';
+import { isDecisiveHit } from '../render/decisive';
 import { characterOfFighter, colorValue } from '../render/fighterLook';
 import { FighterView, characterTextureKey } from '../render/FighterView';
 import { CHARACTER_FX, FxLayer } from '../render/fx';
+import { FX_TEXTURE } from '../render/fxTextures';
+import {
+  hitStrength,
+  spawnDust,
+  spawnHitBurst,
+  spawnRespawnGlow,
+  spawnTrailPuff,
+  TRAIL_MIN_KNOCKBACK,
+} from '../render/impact';
+import { exitDirection, koEdgePoint } from '../render/koEdge';
+import { hitTrauma, Shake } from '../render/shake';
+import { SlowMo } from '../render/slowmo';
 import { StageView } from '../render/stageView';
 import { fighterPose } from '../rig/fighterPose';
+import type { HudScene } from './HudScene';
 
 /** Cor de cada jogador (marcador e HUD); a cor do corpo vem da arte. */
 export const PLAYER_COLORS = [0xe63946, 0x4cc9f0, 0x80ed99, 0xffd166];
@@ -39,6 +64,24 @@ const HURTBOX_INVULN_COLOR = 0x9aa0a6;
 /** Pulo de posição maior que isso entre ticks (respawn) não é interpolado. */
 const TELEPORT_PX = 150;
 const CAMERA_RATE = 5;
+/** Ticks de clarão branco em quem leva golpe (mais nos golpes fortes). */
+const FLASH_TICKS = 3;
+/** Tremor do KO (trauma, 0..1). */
+const KO_TRAUMA = 0.8;
+/** Golpe que decide a luta: câmera lenta (tempo real e escala) e zoom em quem voa. */
+const DECISIVE_SLOWMO_MS = 1300;
+const DECISIVE_SLOWMO_SCALE = 0.2;
+const FOCUS_CAMERA_RATE = 12;
+const FOCUS_CAMERA: CameraOptions = {
+  ...DEFAULT_CAMERA,
+  padding: 90,
+  minWidth: 520,
+  minHeight: 300,
+  maxZoom: 1.7,
+};
+/** Luta que acabou sem o golpe decisivo aparecer (caiu sozinho): câmera lenta mais curta. */
+const FINAL_KO_SLOWMO_MS = 700;
+const FINAL_KO_SLOWMO_SCALE = 0.35;
 /** Ticks depois do fim da luta antes de aceitar revanche (evita apertar sem querer). */
 const REMATCH_DELAY_TICKS = 60;
 /** Enquadramento da câmera quando ninguém está em cena. */
@@ -49,6 +92,8 @@ const DEPTH = {
   background: -10,
   stage: 0,
   decoration: 2,
+  /** Rastro de arremesso e poeira: atrás dos lutadores. */
+  backFx: 5,
   fighters: 10,
   fx: 20,
   projectiles: 25,
@@ -62,6 +107,10 @@ export const DEBUG_KEY = 'debug';
 export interface FightData {
   /** Id da ficha de cada jogador. Sem isso: os 2 primeiros do elenco. */
   characters?: readonly string[];
+}
+
+function playerColor(id: number): number {
+  return PLAYER_COLORS[id % PLAYER_COLORS.length] ?? 0xffffff;
 }
 
 interface PrevPos {
@@ -84,6 +133,17 @@ export class FightScene extends Phaser.Scene {
   private lastStates: FighterState[] = [];
   private views: FighterView[] = [];
   private fx!: FxLayer;
+  private backFx!: FxLayer;
+  private readonly shake = new Shake();
+  private readonly slowMo = new SlowMo();
+  /** Câmera sem o tremor (o tremor é somado só na hora de posicionar). */
+  private camPos = { x: 0, y: 0, zoom: 1 };
+  /** Tick até o qual cada lutador fica branco (clarão do impacto). */
+  private flashUntil: number[] = [];
+  /** Lutador em foco na câmera lenta do golpe decisivo. */
+  private focus: number | null = null;
+  /** O golpe decisivo (ou o KO final) já ganhou câmera lenta nesta luta. */
+  private decisiveShown = false;
   private projectileImages: Phaser.GameObjects.Image[] = [];
   private projectileTrails: Phaser.GameObjects.Image[] = [];
   private overlayGfx!: Phaser.GameObjects.Graphics;
@@ -105,6 +165,7 @@ export class FightScene extends Phaser.Scene {
     this.projectileImages = [];
     this.projectileTrails = [];
     this.fx = new FxLayer(this, DEPTH.fx);
+    this.backFx = new FxLayer(this, DEPTH.backFx);
     this.newMatch();
     this.controls = new InputManager();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -140,15 +201,19 @@ export class FightScene extends Phaser.Scene {
 
     const cam = this.cameras.main;
     const target = this.cameraTarget(0);
+    this.camPos = { ...target };
     cam.setZoom(target.zoom);
     cam.centerOn(target.x, target.y);
 
     this.scene.launch('hud');
     this.scene.launch('debug');
+    music.play(this, 'luta');
   }
 
   override update(_time: number, delta: number): void {
-    const alpha = this.loop.advance(delta, () => {
+    const timeScale = this.slowMo.update(delta);
+    if (!this.slowMo.active) this.focus = null;
+    const alpha = this.loop.advance(delta * timeScale, () => {
       this.tick();
     });
     this.drawFighters(alpha);
@@ -165,6 +230,12 @@ export class FightScene extends Phaser.Scene {
     this.overTicks = 0;
     this.loop.reset();
     this.fx.clear();
+    this.backFx.clear();
+    this.shake.reset();
+    this.slowMo.reset();
+    this.flashUntil = [];
+    this.focus = null;
+    this.decisiveShown = false;
   }
 
   canRematch(): boolean {
@@ -197,8 +268,184 @@ export class FightScene extends Phaser.Scene {
       }
     }
     stepGame(this.state, this.lastInputs);
+    this.handleEvents();
+    this.spawnTrails();
     this.spawnFx();
     this.fx.step();
+    this.backFx.step();
+  }
+
+  /** Efeitos do que aconteceu no tick (`state.events`). */
+  private handleEvents(): void {
+    for (const e of this.state.events) {
+      switch (e.type) {
+        case 'hit':
+          this.onHit(e);
+          break;
+        case 'ko':
+          this.onKo(e);
+          break;
+        case 'respawn':
+          this.onRespawn(e.fighter);
+          break;
+        case 'action':
+          this.onAction(e.fighter, e.action);
+          break;
+        case 'grab':
+          playSfx(this, 'grab');
+          break;
+      }
+    }
+  }
+
+  private onHit(e: HitEvent): void {
+    const victim = this.state.fighters[e.victim];
+    if (!victim) return;
+    const kb = toPx(e.knockback);
+    const strength = hitStrength(kb);
+    spawnHitBurst(this.fx, {
+      x: toPx(e.x),
+      y: toPx(e.y),
+      dirX: victim.kbx,
+      dirY: victim.kby,
+      strength,
+      color: playerColor(e.attacker),
+    });
+    this.shake.add(hitTrauma(kb));
+    const sound = strength > 0.6 ? 'hit_heavy' : strength > 0.25 ? 'hit_medium' : 'hit_light';
+    playSfx(this, sound, { volume: 0.85 + 0.25 * strength });
+    if (e.kind === 'counter') playSfx(this, 'counter');
+    this.flashUntil[e.victim] = this.state.tick + FLASH_TICKS + Math.round(3 * strength);
+    if (!this.decisiveShown && isDecisiveHit(this.state, e.victim)) {
+      this.decisiveShown = true;
+      this.focus = e.victim;
+      this.slowMo.trigger(DECISIVE_SLOWMO_MS, DECISIVE_SLOWMO_SCALE);
+    }
+  }
+
+  /** KO: explosão na borda da tela por onde saiu (desenhada no HUD, sem zoom). */
+  private onKo(e: KoEvent): void {
+    const b = getStage(this.state.stageId).blastZone;
+    const blast = { x: toPx(b.x), y: toPx(b.y), w: toPx(b.w), h: toPx(b.h) };
+    const x = toPx(e.x);
+    const y = toPx(e.y);
+    const view = this.cameras.main.worldView;
+    const at = koEdgePoint(
+      { x: view.x, y: view.y, w: view.width, h: view.height },
+      this.scale.width,
+      this.scale.height,
+      x,
+      y,
+      exitDirection(blast, x, y),
+    );
+    if (this.scene.isActive('hud')) {
+      (this.scene.get('hud') as HudScene).koBurst(at, playerColor(e.fighter));
+    }
+    this.shake.add(KO_TRAUMA);
+    playSfx(this, 'ko');
+    const f = this.state.fighters[e.fighter];
+    if (f) playKoVoice(this, characterOfFighter(f));
+    if (this.focus === e.fighter) this.focus = null;
+    if (this.state.phase === 'over' && !this.decisiveShown) {
+      this.decisiveShown = true;
+      this.slowMo.trigger(FINAL_KO_SLOWMO_MS, FINAL_KO_SLOWMO_SCALE);
+    }
+  }
+
+  private onRespawn(id: number): void {
+    const f = this.state.fighters[id];
+    if (!f) return;
+    spawnRespawnGlow(this.fx, toPx(f.x + f.w / 2), toPx(f.y + f.h / 2), playerColor(id));
+    playSfx(this, 'respawn');
+  }
+
+  /** Som, poeira e lufadas das ações do lutador. */
+  private onAction(id: number, action: CueName): void {
+    const f = this.state.fighters[id];
+    if (!f) return;
+    const feetX = toPx(f.x + f.w / 2);
+    const feetY = toPx(f.y + f.h);
+    switch (action) {
+      case 'JUMP':
+        playSfx(this, 'jump');
+        spawnDust(this.backFx, feetX, feetY, 4);
+        break;
+      case 'LAND':
+        playSfx(this, 'land');
+        spawnDust(this.backFx, feetX, feetY, 6);
+        break;
+      case 'DASH':
+        playSfx(this, 'dash');
+        spawnDust(this.backFx, feetX, feetY, 3, f.facing === 1 ? -1 : 1);
+        break;
+      case 'SWING':
+        playSfx(this, 'swing', { detune: f.move === 'special' ? -300 : 0 });
+        break;
+      case 'TAUNT': {
+        const taunt = characterOfFighter(f).taunt;
+        playVoice(this, taunt.sound, taunt.text);
+        break;
+      }
+      case 'WALL_JUMP':
+        playSfx(this, 'jump');
+        spawnDust(
+          this.backFx,
+          feetX - f.facing * toPx(f.w / 2),
+          toPx(f.y + f.h * 0.6),
+          3,
+          f.facing,
+        );
+        break;
+      case 'AIR_JUMP':
+        playSfx(this, 'air_jump');
+        this.fx.spawn({
+          texture: FX_TEXTURE.ring,
+          x: feetX,
+          y: feetY,
+          life: 14,
+          scale: 0.15,
+          scaleEnd: 0.5,
+          stretch: 1.6,
+          alpha: 0.6,
+        });
+        break;
+      case 'AIR_DODGE':
+        playSfx(this, 'dodge');
+        this.fx.spawn({
+          texture: FX_TEXTURE.glow,
+          x: feetX,
+          y: toPx(f.y + f.h / 2),
+          life: 12,
+          scale: 2.4,
+          scaleEnd: 1.2,
+          alpha: 0.5,
+          additive: true,
+        });
+        break;
+      default:
+        break;
+    }
+  }
+
+  /** Rastro de fumaça (ou fogo) atrás de quem voa de um golpe forte. */
+  private spawnTrails(): void {
+    for (const f of this.state.fighters) {
+      if (f.state !== 'hitstun' || f.hitstop > 0) continue;
+      const kb = toPx(Math.hypot(f.kbx, f.kby));
+      if (kb < TRAIL_MIN_KNOCKBACK) continue;
+      const heat = Math.min((kb - TRAIL_MIN_KNOCKBACK) / 16, 1);
+      const x = toPx(f.x + f.w / 2);
+      const y = toPx(f.y + f.h / 2);
+      const prev = this.prev[f.id] ?? f;
+      // 2 por tick: o corpo anda muito entre um tick e outro
+      spawnTrailPuff(this.backFx, x, y, heat);
+      spawnTrailPuff(
+        this.backFx,
+        (x + toPx(prev.x + f.w / 2)) / 2,
+        (y + toPx(prev.y + f.h / 2)) / 2,
+        heat,
+      );
+    }
   }
 
   /** Posição do lutador em px, interpolada entre o tick anterior e o atual. */
@@ -242,8 +489,12 @@ export class FightScene extends Phaser.Scene {
       view.setPose(fighterPose(f), r.x + r.w / 2 + shake, r.y + r.h, f.facing, f.grounded);
       // invencível pisca; levando golpe, pisca claro
       view.setAlpha(f.invulnTicks > 0 && Math.floor(this.state.tick / 4) % 2 === 0 ? 0.35 : 1);
-      const flash = f.state === 'hitstun' && Math.floor(f.stateTicks / 3) % 2 === 0;
-      view.setTint(flash ? 0xffb0b0 : 0xffffff);
+      if (this.state.tick < (this.flashUntil[f.id] ?? 0)) {
+        view.setFlash();
+      } else {
+        const hurt = f.state === 'hitstun' && Math.floor(f.stateTicks / 3) % 2 === 0;
+        view.setTint(hurt ? 0xffb0b0 : 0xffffff);
+      }
 
       this.drawBlockOutlines(f, r);
       // marcador do jogador em cima da cabeça
@@ -303,7 +554,7 @@ export class FightScene extends Phaser.Scene {
       if (frame <= move.startup) {
         if (frame === 1 && fx.chargeMark && f.grounded) {
           this.fx.spawn({
-            character: f.character,
+            texture: characterTextureKey(f.character),
             frame: fx.chargeMark,
             x: feetX - f.facing * w * 0.4,
             y: feetY,
@@ -318,7 +569,7 @@ export class FightScene extends Phaser.Scene {
         const puffs = fx.chargePuffs ?? [];
         if (puffs.length > 0 && t % 3 === 0) {
           this.fx.spawn({
-            character: f.character,
+            texture: characterTextureKey(f.character),
             frame: puffs[Math.floor(Math.random() * puffs.length)] ?? '',
             x: feetX - f.facing * (w / 2 + 6 + Math.random() * 10),
             y: feetY - 6 - Math.random() * 10,
@@ -335,7 +586,7 @@ export class FightScene extends Phaser.Scene {
         const streaks = fx.activeStreaks ?? [];
         if (streaks.length > 0 && t % 2 === 0) {
           this.fx.spawn({
-            character: f.character,
+            texture: characterTextureKey(f.character),
             frame: streaks[Math.floor(Math.random() * streaks.length)] ?? '',
             x: feetX - f.facing * (w / 2),
             y: feetY - toPx(f.h) * (0.25 + Math.random() * 0.5),
@@ -358,7 +609,7 @@ export class FightScene extends Phaser.Scene {
       if (!owner || !puffs || !view || t % 5 !== 0) continue;
       const side = p.vx < 0 ? -1 : 1;
       this.fx.spawn({
-        character: owner.character,
+        texture: characterTextureKey(owner.character),
         frame: puffs[Math.floor(Math.random() * puffs.length)] ?? '',
         x: toPx(p.x + p.w / 2) - side * toPx(p.w) * 0.6,
         y: toPx(p.y),
@@ -424,7 +675,7 @@ export class FightScene extends Phaser.Scene {
     }
   }
 
-  /** Provocação: balão com o bordão e a voz ao começar. */
+  /** Provocação: balão com o bordão (a voz sai do evento TAUNT). */
   private updateTaunts(alpha: number): void {
     for (const f of this.state.fighters) {
       const bubble = this.bubbles[f.id];
@@ -433,7 +684,6 @@ export class FightScene extends Phaser.Scene {
       const c = characterOfFighter(f);
       if (taunting && this.lastStates[f.id] !== 'taunt') {
         bubble.setText(c.taunt.text);
-        playVoice(this, c.taunt.sound, c.taunt.text);
       }
       this.lastStates[f.id] = f.state;
       bubble.setVisible(taunting);
@@ -446,6 +696,15 @@ export class FightScene extends Phaser.Scene {
   }
 
   private cameraTarget(alpha: number): { x: number; y: number; zoom: number } {
+    const focused = this.focus !== null ? this.state.fighters[this.focus] : undefined;
+    if (focused && focused.state !== 'ko') {
+      return frameTargets(
+        [this.renderRect(focused, alpha)],
+        this.scale.width,
+        this.scale.height,
+        FOCUS_CAMERA,
+      );
+    }
     const rects = this.state.fighters
       .filter((f) => f.state !== 'ko')
       .map((f) => this.renderRect(f, alpha));
@@ -459,12 +718,24 @@ export class FightScene extends Phaser.Scene {
   private updateCamera(alpha: number, delta: number): void {
     const cam = this.cameras.main;
     const target = this.cameraTarget(alpha);
-    const zoom = smooth(cam.zoom, target.zoom, CAMERA_RATE, delta);
-    const x = smooth(cam.midPoint.x, target.x, CAMERA_RATE, delta);
-    const y = smooth(cam.midPoint.y, target.y, CAMERA_RATE, delta);
-    cam.setZoom(zoom);
+    const rate = this.focus !== null ? FOCUS_CAMERA_RATE : CAMERA_RATE;
+    const c = this.camPos;
+    c.zoom = smooth(c.zoom, target.zoom, rate, delta);
+    c.x = smooth(c.x, target.x, rate, delta);
+    c.y = smooth(c.y, target.y, rate, delta);
+    // o tremor vem em px de tela: divide pelo zoom para virar px de mundo
+    const offset = this.shake.update(delta);
+    const x = c.x + offset.x / c.zoom;
+    const y = c.y + offset.y / c.zoom;
+    cam.setZoom(c.zoom);
     cam.centerOn(x, y);
-    this.stageView.update({ x, y, zoom, width: this.scale.width, height: this.scale.height });
+    this.stageView.update({
+      x,
+      y,
+      zoom: c.zoom,
+      width: this.scale.width,
+      height: this.scale.height,
+    });
   }
 }
 
