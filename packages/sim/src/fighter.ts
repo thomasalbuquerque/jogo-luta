@@ -65,6 +65,11 @@ export type FighterState =
 
 export interface Fighter extends Body {
   id: number;
+  /**
+   * Time do lutador. Quem é do mesmo time não se acerta (a menos que o fogo
+   * amigo esteja ligado) e vence junto. Sem times, cada um é o próprio time (= id).
+   */
+  team: number;
   /** Id da ficha do personagem: golpes e especial vêm dela (`getCharacter`). */
   character: string;
   /** Copiados da ficha ao criar o lutador. */
@@ -148,6 +153,7 @@ export function createFighter(
   const stats = getCharacter(character).stats;
   const f: Fighter = {
     id,
+    team: id,
     character,
     stats,
     damage: 0,

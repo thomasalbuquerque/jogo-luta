@@ -98,17 +98,26 @@ export function isCountering(f: Fighter): boolean {
 }
 
 /**
+ * `attacker` pode acertar `victim`? Ninguém acerta a si mesmo, e companheiro de
+ * time só com o fogo amigo ligado.
+ */
+export function isFoe(attacker: Fighter, victim: Fighter, friendlyFire: boolean): boolean {
+  if (attacker === victim) return false;
+  return friendlyFire || attacker.team !== victim.team;
+}
+
+/**
  * Todos os acertos deste tick. Calcula antes de aplicar, então dois golpes que
  * se acertam no mesmo tick trocam (os dois levam).
  */
-export function findHits(fighters: readonly Fighter[]): Hit[] {
+export function findHits(fighters: readonly Fighter[], friendlyFire = true): Hit[] {
   const hits: Hit[] = [];
   for (const a of fighters) {
     const boxes = activeHitboxes(a);
     if (boxes.length === 0 || !a.move) continue;
     const grab = currentMove(a)?.grab !== undefined;
     for (const v of fighters) {
-      if (v === a || !canBeHit(v) || (a.moveHits & (1 << v.id)) !== 0) continue;
+      if (!isFoe(a, v, friendlyFire) || !canBeHit(v) || (a.moveHits & (1 << v.id)) !== 0) continue;
       const hurt = hurtbox(v);
       const box = boxes.find((b) => overlaps(b, hurt));
       if (!box) continue;
@@ -217,9 +226,16 @@ export function applyCounter(counterer: Fighter, striker: Fighter): number {
   return damage;
 }
 
-/** Procura e aplica os acertos do tick; `events` recebe o que aconteceu. */
-export function resolveHits(fighters: readonly Fighter[], events?: GameEvent[]): Hit[] {
-  const hits = findHits(fighters);
+/**
+ * Procura e aplica os acertos do tick; `events` recebe o que aconteceu.
+ * `friendlyFire` desligado: companheiros de time não se acertam.
+ */
+export function resolveHits(
+  fighters: readonly Fighter[],
+  events?: GameEvent[],
+  friendlyFire = true,
+): Hit[] {
+  const hits = findHits(fighters, friendlyFire);
   for (const h of hits) {
     const attacker = fighters.find((f) => f.id === h.attacker);
     const victim = fighters.find((f) => f.id === h.victim);
@@ -241,16 +257,25 @@ export function resolveHits(fighters: readonly Fighter[], events?: GameEvent[]):
 /**
  * Projéteis que encostam num lutador (que não seja o dono) acertam e somem.
  * Só o alvo congela no impacto: quem soltou está longe. Quem está no
- * contra-ataque devolve o projétil (vira o dono dele).
+ * contra-ataque devolve o projétil (vira o dono dele). Sem fogo amigo, o
+ * projétil passa pelos companheiros do dono.
  */
 export function resolveProjectileHits(
   fighters: readonly Fighter[],
   projectiles: Projectile[],
   events?: GameEvent[],
+  friendlyFire = true,
 ): void {
   let alive = 0;
   for (const p of projectiles) {
-    const victim = fighters.find((v) => v.id !== p.owner && canBeHit(v) && overlaps(p, hurtbox(v)));
+    const owner = fighters.find((f) => f.id === p.owner);
+    const victim = fighters.find(
+      (v) =>
+        v.id !== p.owner &&
+        (!owner || isFoe(owner, v, friendlyFire)) &&
+        canBeHit(v) &&
+        overlaps(p, hurtbox(v)),
+    );
     if (!victim) {
       projectiles[alive++] = p;
       continue;
