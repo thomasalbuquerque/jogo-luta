@@ -20,7 +20,6 @@ import { cssColor, fadeIn, panel, teamColor, titleText, UI, uiText } from '../ui
 import type { BackdropData } from './BackdropScene';
 import type { MatchSetup } from './FightScene';
 
-const PLAYERS = 2;
 /** Miniatura do mapa (16:9, como a tela). */
 const THUMB_W = 720;
 const THUMB_H = 405;
@@ -82,7 +81,11 @@ export class StageSelectScene extends Phaser.Scene {
       STAGES.findIndex((s) => s.id === data.stageId),
     );
     const characters = data.characters ?? [];
-    this.setup = { characters, stageId: STAGES[this.index]?.id ?? '' };
+    this.setup = {
+      characters,
+      stageId: STAGES[this.index]?.id ?? '',
+      ...(data.pads ? { pads: data.pads } : {}),
+    };
     this.team = fitTeams(
       { teams: data.teams ? [...data.teams] : null, friendlyFire: data.friendlyFire === true },
       characters.length,
@@ -179,7 +182,8 @@ export class StageSelectScene extends Phaser.Scene {
       this.netText?.setText(netLabel(net));
       this.followHost(net);
     }
-    const actions = this.controls.poll(PLAYERS, delta).any;
+    const players = Math.max(2, this.setup.characters.length);
+    const actions = this.controls.poll(players, delta, this.setup.pads).any;
     if (actions & Menu.BACK) {
       playSfx(this, 'ui_back');
       // online: a sala inteira volta para a seleção (quem entrou pede ao host)
