@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { hasTeams } from '../match/teams';
 
 /** Cores e fontes dos menus e do HUD. */
 export const UI = {
@@ -19,6 +20,26 @@ export const PLAYER_COLORS = [0xe63946, 0x4cc9f0, 0x80ed99, 0xffd166];
 
 export function playerColor(id: number): number {
   return PLAYER_COLORS[id % PLAYER_COLORS.length] ?? 0xffffff;
+}
+
+/** Cor de cada time (vermelho e azul), no lugar da cor do jogador quando a luta tem times. */
+export const TEAM_COLORS = [0xe63946, 0x4cc9f0];
+
+export function teamColor(team: number): number {
+  return TEAM_COLORS[team % TEAM_COLORS.length] ?? 0xffffff;
+}
+
+/**
+ * Cor do lutador `id` na luta: a do time, quando há times; senão, a do jogador.
+ * Assim o marcador, o HUD e os efeitos mostram quem é de qual lado.
+ */
+export function fighterColor(
+  fighters: readonly { id: number; team: number }[],
+  id: number,
+): number {
+  const f = fighters.find((x) => x.id === id);
+  if (!f || !hasTeams(fighters)) return playerColor(id);
+  return teamColor(f.team);
 }
 
 /** 0xrrggbb → '#rrggbb' (cor de texto do Phaser). */
