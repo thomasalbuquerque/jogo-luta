@@ -1,0 +1,267 @@
+{
+  "out": "characters/dadazinho",
+  "scale": 0.15,
+  "outline": {
+    "color": "#2b1a22",
+    "width": 9
+  },
+  "sheets": {
+    "pecas": {
+      "file": "3-pecas.png"
+    },
+    "cabecas": {
+      "file": "2-cabecas.png",
+      "scale": 0.67
+    },
+    "arma": {
+      "file": "4-efeitos.png",
+      "key": false,
+      "scale": 0.45
+    },
+    "efeitos": {
+      "file": "4-efeitos.png",
+      "key": false,
+      "scale": 1.2
+    },
+    "figurinha": {
+      "file": "5-figurinha.png",
+      "key": false,
+      "scale": 1.4
+    }
+  },
+  "parts": {
+    "torso": {
+      "sheet": "pecas",
+      "rect": [25, 45, 305, 360],
+      "pivot": [200, 385],
+      "tip": [200, 285],
+      "sockets": {
+        "neck": [215, 110],
+        "shoulderNear": [138, 165],
+        "shoulderFar": [285, 165]
+      },
+      "erase": [
+        [
+          [20, 90],
+          [110, 90],
+          [130, 120],
+          [145, 165],
+          [145, 215],
+          [135, 260],
+          [115, 300],
+          [80, 312],
+          [20, 312]
+        ]
+      ],
+      "outline": [
+        [
+          [110, 92],
+          [130, 120],
+          [145, 165],
+          [145, 215],
+          [135, 260],
+          [115, 300],
+          [80, 312]
+        ]
+      ]
+    },
+    "hips": {
+      "sheet": "pecas",
+      "rect": [80, 450, 272, 220],
+      "pivot": [215, 470],
+      "tip": [215, 370],
+      "sockets": {
+        "legNear": [160, 600],
+        "legFar": [290, 605]
+      }
+    },
+    "upperArm": {
+      "sheet": "pecas",
+      "rect": [362, 98, 140, 268],
+      "pivot": [432, 165],
+      "tip": [432, 315]
+    },
+    "forearm": {
+      "sheet": "pecas",
+      "rect": [524, 183, 200, 140],
+      "pivot": [580, 258],
+      "tip": [697, 268]
+    },
+    "hand_fist": {
+      "sheet": "pecas",
+      "rect": [742, 163, 158, 148],
+      "pivot": [778, 240],
+      "tip": [872, 236],
+      "erase": [
+        [
+          [735, 155],
+          [762, 155],
+          [762, 315],
+          [735, 315]
+        ]
+      ]
+    },
+    "hand_fist2": {
+      "sheet": "pecas",
+      "rect": [920, 162, 158, 154],
+      "pivot": [950, 245],
+      "tip": [1045, 240]
+    },
+    "hand_open": {
+      "sheet": "pecas",
+      "rect": [1092, 138, 210, 178],
+      "pivot": [1130, 268],
+      "tip": [1255, 232]
+    },
+    "hand_open2": {
+      "sheet": "pecas",
+      "rect": [1315, 137, 202, 180],
+      "pivot": [1355, 268],
+      "tip": [1480, 225]
+    },
+    "hand_taunt": {
+      "sheet": "pecas",
+      "rect": [1100, 728, 205, 166],
+      "pivot": [1128, 815],
+      "tip": [1240, 815],
+      "erase": [
+        [
+          [1095, 720],
+          [1112, 720],
+          [1112, 900],
+          [1095, 900]
+        ]
+      ]
+    },
+    "hand_taunt2": {
+      "sheet": "pecas",
+      "rect": [1140, 427, 186, 230],
+      "pivot": [1168, 595],
+      "tip": [1280, 590],
+      "erase": [
+        [
+          [1135, 420],
+          [1152, 420],
+          [1152, 660],
+          [1135, 660]
+        ]
+      ]
+    },
+    "thigh": {
+      "sheet": "pecas",
+      "rect": [444, 436, 278, 168],
+      "pivot": [490, 515],
+      "tip": [668, 518]
+    },
+    "shin": {
+      "sheet": "pecas",
+      "rect": [451, 641, 260, 140],
+      "pivot": [485, 710],
+      "tip": [680, 712]
+    },
+    "foot": {
+      "sheet": "pecas",
+      "rect": [440, 803, 292, 180],
+      "pivot": [505, 872],
+      "tip": [640, 872]
+    },
+    "head_normal": {
+      "sheet": "cabecas",
+      "rect": [90, 12, 475, 595],
+      "pivot": [280, 555],
+      "tip": [280, 355],
+      "fill": [
+        {
+          "poly": [
+            [502, 287],
+            [538, 284],
+            [535, 347],
+            [500, 352]
+          ],
+          "color": "#dfe6ea"
+        }
+      ]
+    },
+    "head_hurt": {
+      "sheet": "cabecas",
+      "rect": [681, 13, 485, 589],
+      "pivot": [870, 560],
+      "tip": [870, 360],
+      "fill": [
+        {
+          "poly": [
+            [1103, 265],
+            [1138, 262],
+            [1135, 330],
+            [1100, 335]
+          ],
+          "color": "#dfe6ea"
+        }
+      ]
+    },
+    "head_taunt": {
+      "sheet": "cabecas",
+      "rect": [67, 627, 488, 600],
+      "pivot": [275, 1185],
+      "tip": [275, 985],
+      "fill": [
+        {
+          "poly": [
+            [497, 843],
+            [523, 840],
+            [522, 906],
+            [499, 909]
+          ],
+          "color": "#dfe6ea"
+        }
+      ]
+    },
+    "head_ko": {
+      "sheet": "cabecas",
+      "rect": [662, 635, 498, 598],
+      "pivot": [880, 1190],
+      "tip": [880, 990],
+      "fill": [
+        {
+          "poly": [
+            [1110, 846],
+            [1135, 843],
+            [1133, 912],
+            [1112, 916]
+          ],
+          "color": "#dfe6ea"
+        }
+      ]
+    },
+    "fx_gun": {
+      "sheet": "arma",
+      "rect": [40, 223, 845, 312],
+      "pivot": [130, 425],
+      "tip": [330, 425]
+    },
+    "fx_flash": {
+      "sheet": "efeitos",
+      "rect": [910, 143, 487, 427]
+    },
+    "fx_pellets": {
+      "sheet": "efeitos",
+      "rect": [1420, 190, 258, 368]
+    },
+    "fx_smoke1": {
+      "sheet": "efeitos",
+      "rect": [1948, 248, 192, 178]
+    },
+    "fx_smoke2": {
+      "sheet": "efeitos",
+      "rect": [1804, 281, 148, 134]
+    },
+    "fx_smoke3": {
+      "sheet": "efeitos",
+      "rect": [1706, 314, 101, 92]
+    },
+    "portrait": {
+      "sheet": "figurinha",
+      "rect": [130, 10, 990, 1240]
+    }
+  }
+}
