@@ -183,8 +183,9 @@ const TRUMPET_UP: Rot = {
 /**
  * Tchula mirando a scout (peça `fx_rifle` na mão da frente, cabo no pivô): a mão da
  * frente no cabo, perto do peito (a coronha encosta no ombro), cotovelo para baixo;
- * a mão de trás aberta embaixo do cano, mais à frente. A arma fica reta: a soma dos
- * ângulos do tronco ao punho dá 0 nos dois braços. Pernas abertas, firmes.
+ * a mão de trás fechada embaixo do cano, mais à frente (o punho visto pela palma, com
+ * a arma por cima). A arma fica reta: a soma dos ângulos do tronco ao punho dá 0 nos
+ * dois braços. Pernas abertas, firmes.
  */
 const SCOPE: Rot = {
   ...STANCE,
@@ -565,14 +566,14 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
     keys: [
       { t: 0, rot: STANCE },
       { t: 0.15, rot: RIFLE_LOW, prop: 'fx_rifle' },
-      { t: 0.45, rot: SCOPE, handFar: 'open', ease: 'out' },
+      { t: 0.45, rot: SCOPE, ease: 'out' },
       { t: 1, rot: { ...SCOPE, head: 12 } },
       { t: 2.1, rot: SCOPE_KICK, x: -3, ease: 'out' },
       // ferrolho: a arma sobe um pouco e volta (a cápsula sai aqui)
       { t: 2.3, rot: { ...SCOPE, handNear: 6 }, x: -2, ease: 'inOut' },
       { t: 2.45, rot: SCOPE, x: -1.5, ease: 'inOut' },
       { t: 2.7, rot: RIFLE_LOW, prop: null, x: -1, ease: 'inOut' },
-      { t: 3, rot: STANCE, handFar: 'fist', ease: 'inOut' },
+      { t: 3, rot: STANCE, ease: 'inOut' },
     ],
   },
   // Tira a chave de boca do bolso, gira na mão como um revólver, aponta para o

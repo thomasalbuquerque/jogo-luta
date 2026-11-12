@@ -129,9 +129,12 @@ export class FighterView {
         if (img) this.container.bringToTop(img);
       }
     }
-    // a peça fica atrás da mão que segura, na frente do resto
+    // a peça fica atrás da mão que segura, na frente do resto (inclusive da outra mão,
+    // que apoia a arma por baixo). `moveBelow` não sobe a peça quando ela já está
+    // abaixo da mão (no fundo, depois de reordenar os ossos): por isso os dois no topo.
     const handImg = this.images.get('handNear');
-    if (handImg) this.container.moveBelow(this.propImage, handImg);
+    this.container.bringToTop(this.propImage);
+    if (handImg) this.container.bringToTop(handImg);
     const unit = this.height / 100;
     this.container.setPosition(x + pose.x * unit * facing, y + pose.y * unit);
     this.container.setScale(this.scale * facing, this.scale);
