@@ -162,7 +162,7 @@ Objetivo: dois amigos em casas diferentes jogando sem lag perceptível. Modelo: 
 Objetivo: lutas em dupla, locais e online.
 
 - [x] Generalizar sala e netcode para 4 jogadores: o host recebe os inputs de todos e repassa (estrela, não malha completa). Se a conexão P2P com 4 ficar instável, o relay está na Etapa 12.
-- [ ] Times: cores por time, fogo amigo liga/desliga, HUD agrupado por time.
+- [x] Times: cores por time, fogo amigo liga/desliga, HUD agrupado por time.
 - [ ] Câmera e mapa ajustados para 4 lutadores.
 - [ ] 2x2 local com 4 gamepads no mesmo PC.
 

@@ -5,9 +5,9 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 
 ## Partida
 
-- **Formato:** 1x1 no mesmo PC; online, de 2 a 4 (todos contra todos; 2x2 a caminho). Plataforma de luta, sem barra de vida: quem sai da tela perde uma vida.
+- **Formato:** 1x1 no mesmo PC; online, de 2 a 4: todos contra todos ou em [times](#times) (2 contra 2 ou 2 contra 1). Plataforma de luta, sem barra de vida: quem sai da tela perde uma vida.
 - **Stocks:** 3 vidas por jogador.
-- **Tempo limite:** 4 minutos. No fim do tempo vence quem tiver mais stocks; empate em stocks → menor % de dano; empate total → morte súbita (1 stock, 300%).
+- **Tempo limite:** 4 minutos. No fim do tempo vence quem tiver mais stocks; empate em stocks → menor % de dano; empate total → morte súbita (1 stock, 300%). Com times, conta a soma do time.
 - **Dano:** cada golpe soma % ao alvo (começa em 0%, sem teto). Quanto maior o %, mais longe o golpe arremessa.
 - **Knockback:** `(força base + dano acumulado × escala do golpe) × 100 ÷ peso` (peso 100 = médio), com o dano do alvo já somado o do golpe. Ver [Combate](#combate).
 - **Hitstun:** proporcional ao knockback; durante o hitstun o lutador não age.
@@ -19,6 +19,17 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 - **Pausa:** Esc, Enter ou Start do controle; a luta também pausa sozinha quando a janela perde o foco. Continuar (Esc, Start ou Especial), recomeçar, trocar lutador ou voltar ao menu. Voltando da pausa, botão que ficou apertado só conta depois de soltar.
 - **Resultado e revanche:** 1 s depois do fim, a tela de resultado mostra quem venceu e os números de cada um (KOs, quedas, dano causado, golpes, maior golpe). Revanche já vem escolhida (Ataque, Pulo ou Enter); Especial ou Esc troca de lutador. Também dá para ver o replay da luta e salvar em arquivo (ver [Determinismo e replays](#determinismo-e-replays)).
 - **Simulação:** 60 ticks/s, passo fixo. Todos os tempos de golpe são contados em ticks.
+
+### Times
+
+- **Quando:** com 3 ou 4 jogadores (por enquanto, no online). Escolhido na tela de mapa, no painel **Opções da luta** (↑/↓ escolhe a linha, ←/→ muda): **Modo** (todos contra todos, ou times: 2 contra 2 com 4, 2 contra 1 com 3), **Times** (qual das 3 divisões; o P1 fica sempre no time vermelho) e **Fogo amigo**. Online, quem escolhe é o host; os outros veem as opções mudando.
+- **Cores:** time vermelho e time azul. Com times, o marcador em cima da cabeça, o painel do HUD, os efeitos de golpe/KO/respawn e o resultado usam a cor do time (sem times, a cor de cada jogador).
+- **Fogo amigo:** desligado por padrão: golpes, agarrões e projéteis atravessam o companheiro. Ligado, acertam como em qualquer um.
+- **Vitória:** vence o time que sobrar com alguém com stock; o time inteiro vence, mesmo quem já caiu. No fim do tempo, compara a soma dos stocks de quem ainda está na luta, depois a soma do % (menor vence); empate total → morte súbita para quem ainda está na luta nos times empatados.
+- **Começo:** companheiros nascem e reaparecem do mesmo lado do mapa.
+- **HUD:** os painéis ficam agrupados por time (vermelho à esquerda), com o nome do time em cima de cada grupo. O resultado mostra "TIME AZUL VENCEU!" e marca os dois do time como vencedores.
+- **Revanche:** mantém os times; se alguém saiu da sala e não sobra uma divisão válida (ficaram 2), volta a ser todos contra todos.
+- **No `sim`:** `Fighter.team` (sem times, o time é o próprio id), `MatchRules.friendlyFire`, `GameSetup.teams`; `GameState.winnerTeam` diz o time vencedor. O replay grava os times e o fogo amigo.
 
 ## Movimento
 
@@ -132,7 +143,7 @@ Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 
 - **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; online; ver replay; controles) → personagem → mapa → luta → resultado → revanche.
 - **Personagem:** grade de 7 casas (os que existem e silhuetas "em breve"; cresce aos poucos). Cada jogador anda com as próprias direções, confirma com Ataque ou Pulo e desfaz com Especial; Especial com ninguém pronto (ou Esc) volta ao menu. O painel de cada um mostra o lutador, estilo, especial, barras e bordão. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
-- **Mapa:** um cursor só, qualquer jogador mexe; por enquanto só a Laje.
+- **Mapa:** um cursor só, qualquer jogador mexe; por enquanto só a Laje. Com 3 ou 4 jogadores, ao lado do mapa ficam as opções de [times](#times).
 - **HUD:** painel de cada jogador com retrato, % de dano (branco → amarelo → laranja → vermelho → vinho conforme sobe) e stocks com a cabecinha do personagem; relógio no alto.
 
 ## Determinismo e replays
@@ -143,14 +154,14 @@ A mesma seed com os mesmos inputs dá sempre a mesma luta, tick a tick, em qualq
 - **Sorte:** RNG com seed (`rng.ts`), com o estado guardado em `GameState.rng`. A seed é sorteada pelo jogo ao criar a luta; dentro do `sim`, tudo sai dela. Hoje nenhuma regra usa sorte: quando uma usar, tem que ser por este RNG.
 - **Snapshot** (`snapshot.ts`): `cloneState` copia o estado campo a campo (barato, dá para fazer todo tick), `restoreState` volta a um snapshot, `serializeState`/`deserializeState` passam por texto e `hashState` dá um hash de 32 bits do estado inteiro. Dois lados com hashes diferentes no mesmo tick = dessincronizou.
 - **Teste de determinismo:** 10 mil ticks de inputs aleatórios rodados duas vezes têm o mesmo hash em todos os ticks; voltar a um snapshot e refazer chega ao mesmo estado.
-- **Replay** (`replay.ts`): seed + personagens + mapa + regras + a bitmask de cada jogador em cada tick, e o hash do estado final. Toda luta é gravada. Na tela de resultado: **Ver replay** e **Salvar replay** (baixa um `.json` pequeno, bom de mandar no grupo). No menu inicial, **Ver replay** abre um arquivo salvo (ou arraste o arquivo para o jogo). Assistindo, aparece "● REPLAY" embaixo do relógio; pausa funciona; no fim dá para ver de novo, salvar ou jogar a mesma luta.
+- **Replay** (`replay.ts`): seed + personagens + mapa + regras (com o fogo amigo) + times + a bitmask de cada jogador em cada tick, e o hash do estado final. Toda luta é gravada. Na tela de resultado: **Ver replay** e **Salvar replay** (baixa um `.json` pequeno, bom de mandar no grupo). No menu inicial, **Ver replay** abre um arquivo salvo (ou arraste o arquivo para o jogo). Assistindo, aparece "● REPLAY" embaixo do relógio; pausa funciona; no fim dá para ver de novo, salvar ou jogar a mesma luta.
 - **Validade do replay:** só reproduz na mesma versão das regras. Se um número de golpe ou de personagem mudou desde a gravação, a luta sai diferente; o jogo percebe pelo hash final e avisa na tela de resultado. Arquivo que não é replay (ou quebrado) é recusado com o motivo.
 - **Atraso de input** (para sentir o netcode por atraso antes de ter rede): os inputs de um jogador só chegam ao `sim` N ticks depois (0 a 15; 3 ticks = 50 ms). `?atraso=3` na URL atrasa o jogador 1 e `?atraso=3,2` os dois; com o debug ligado (`), as teclas 1/2 diminuem/aumentam o do P1 e 3/4 o do P2. O replay grava os inputs já atrasados.
 - **Debug:** a 1ª linha do overlay mostra o hash do estado e a seed; num replay, o tick atual e, no fim, se ficou igual à gravação.
 
 ## Online
 
-Luta de 2 a 4 jogadores, cada um no seu PC, direto entre eles (P2P por WebRTC). Quem cria a sala é o host. Por enquanto é todos contra todos; os times são a próxima tarefa da Etapa 9.
+Luta de 2 a 4 jogadores, cada um no seu PC, direto entre eles (P2P por WebRTC). Quem cria a sala é o host. Todos contra todos ou em times (ver [Times](#times)); o host escolhe na tela de mapa.
 
 - **Sala por código:** no menu, **Jogar online** → **Criar sala** mostra um código de 4 letras (sem I nem O) para mandar no grupo; os amigos escolhem **Entrar com código** e digitam (ou colam). `C` (ou clique) copia um link que já entra na sala (`?sala=ABCD`). Cabem 4 na sala; um quinto é recusado ("Essa sala já está cheia").
 - **Quando dá para entrar:** com a sala esperando ou na seleção de lutador. Assim que o primeiro amigo entra, o host vai para a seleção, e quem chega depois entra direto nela (aparece um painel novo e "P3 entrou na sala."). No mapa e na luta (resultado incluído), quem chega é recusado e avisado para tentar quando voltarem à seleção.
