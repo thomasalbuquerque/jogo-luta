@@ -159,12 +159,12 @@ function trumpet(lean: number): Rot {
     ...STANCE,
     torso: -4 - lean,
     head: -6 - lean * 0.4,
-    upperArmNear: -86,
-    forearmNear: -95,
+    upperArmNear: -78,
+    forearmNear: -101,
     handNear: 86,
-    upperArmFar: -92,
-    forearmFar: -122,
-    handFar: 80,
+    upperArmFar: -86,
+    forearmFar: -126,
+    handFar: 82,
   };
 }
 
