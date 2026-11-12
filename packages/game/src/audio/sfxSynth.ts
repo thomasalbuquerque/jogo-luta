@@ -32,6 +32,8 @@ export const SFX_NAMES = [
   'respawn',
   'vanish',
   'appear',
+  'rifle_shot',
+  'rifle_bolt',
   'count',
   'go',
   'ui_move',
@@ -263,6 +265,45 @@ function callChime(sr: number, rising: boolean): Float32Array<ArrayBuffer> {
   return blips(sr, rising ? [76, 83] : [83, 76], 0.09, 0.09, 'sine');
 }
 
+/**
+ * Tiro de rifle (a scout do Tchula): estalo seco bem agudo, um estouro grave que cai
+ * de tom e a cauda do eco rolando longe.
+ */
+function rifleShot(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(31);
+  const crack = new OnePole(sr);
+  const body = new OnePole(sr);
+  const tail = new OnePole(sr);
+  const osc = new Osc(sr);
+  return render(sr, 0.9, (t) => {
+    const n = r() * 2 - 1;
+    const c = crack.highpass(n, 3000) * decay(t, 0.004);
+    const b = body.lowpass(n, 1800) * decay(t, 0.03) * 0.9;
+    const boom = osc.sine(sweep(t, 150, 38, 0.06)) * adEnv(t, 0.001, 0.12);
+    const echo = tail.lowpass(n, 700) * adEnv(t - 0.05, 0.03, 0.22) * 0.45;
+    return drive(c + b + boom + echo, 2.6);
+  });
+}
+
+/** Ferrolho: dois estalos metálicos (puxa e empurra), com um tilintar curto. */
+function rifleBolt(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(37);
+  const bp = new BandPass(sr);
+  const ring = new Osc(sr);
+  return render(
+    sr,
+    0.32,
+    (t) => {
+      const clack = (at: number, freq: number) => {
+        const env = adEnv(t - at, 0.0015, 0.012);
+        return bp.process(r() * 2 - 1, freq, 2.5) * env * 2.2 + ring.sine(freq * 1.5) * env * 0.3;
+      };
+      return clack(0, 2600) + clack(0.15, 3400);
+    },
+    0.75,
+  );
+}
+
 /** Amostras do efeito `name`, na taxa `sampleRate`. Sempre iguais para o mesmo nome. */
 export function renderSfx(name: SfxName, sampleRate: number): Float32Array<ArrayBuffer> {
   switch (name) {
@@ -308,6 +349,10 @@ export function renderSfx(name: SfxName, sampleRate: number): Float32Array<Array
       return callChime(sampleRate, false);
     case 'appear':
       return callChime(sampleRate, true);
+    case 'rifle_shot':
+      return rifleShot(sampleRate);
+    case 'rifle_bolt':
+      return rifleBolt(sampleRate);
   }
 }
 
