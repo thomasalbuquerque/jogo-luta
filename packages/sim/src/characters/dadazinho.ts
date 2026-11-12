@@ -9,7 +9,8 @@ export const DADAZINHO = defineCharacter({
   id: 'dadazinho',
   name: 'Dadazinho',
   blurb: 'Punisher: leve, rápido e baixinho. A doze pune quem chega perto.',
-  colors: { primary: '#3f9a4e', secondary: '#4f5b32' },
+  // secundária: destaque na interface (texto e barras sobre o fundo escuro)
+  colors: { primary: '#3f9a4e', secondary: '#8fd16a' },
   stats: {
     weight: 84,
     walkSpeed: 7,
