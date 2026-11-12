@@ -264,8 +264,11 @@ const WRENCH_POINT: Rot = {
   footNear: -30,
 };
 
-/** 4 voltas inteiras: a chave termina virada como começou. */
-const SPUN = 1440;
+/**
+ * 3 voltas e 3/4: a chave para em pé no punho (boca para cima, −90° em relação à mão),
+ * como se segura uma chave de verdade, e não apontando para a frente.
+ */
+const SPUN = 1440 - 90;
 
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.

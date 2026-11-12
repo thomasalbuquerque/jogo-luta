@@ -235,8 +235,8 @@ Trechos prontos para os textos do Firefly (pasta `art/tauba/`):
 - **No jogo:** jogável. No especial a scout aparece com uma fumacinha, ele mira (uma linha de mira
   clara sai do cano, cada vez mais forte e piscando no fim, e a luneta brilha), o tiro sai com
   clarão e estampido, o coice joga o corpo para trás, ele puxa o ferrolho (a cápsula salta com um
-  clique-claque) e a arma some. Na provocação ele tira a chave de boca do bolso de trás, gira 4
-  voltas na mão, aponta para a frente e grita "Nooola!". Sem áudio gravado, o tiro e o ferrolho são
+  clique-claque) e a arma some. Na provocação ele tira a chave de boca do bolso de trás, gira a
+  chave na mão, que para em pé no punho, aponta para a frente e grita "Nooola!". Sem áudio gravado, o tiro e o ferrolho são
   sintetizados (`rifle_shot`, `rifle_bolt`). Ficha em `packages/sim/src/characters/tchula.ts`.
 - **Ideias guardadas:** "Nooola!" ao acertar o tiro de longe ou ao levar KO; respawn limpando as
   mãos na flanela; headshot (acertar a cabeça) com dano extra, se um dia o `sim` tiver hurtbox de
