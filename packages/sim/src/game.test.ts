@@ -248,6 +248,30 @@ describe('fim da partida', () => {
     expect(createGame().phase).toBe('fight');
   });
 
+  it('com 4, cada um começa num lugar diferente, sem encostar, e pousa no mapa', () => {
+    for (const stage of STAGES) {
+      const g = createGame({ characters: ['base', 'base', 'base', 'base'], stage });
+      for (let i = 0; i < 90; i++) stepGame(g, [0, 0, 0, 0]);
+      for (const f of g.fighters) {
+        expect(f.grounded).toBe(true);
+        for (const o of g.fighters) {
+          if (o === f) continue;
+          const apart =
+            f.x + f.w <= o.x || o.x + o.w <= f.x || f.y + f.h <= o.y || o.y + o.h <= f.y;
+          expect(apart).toBe(true);
+        }
+      }
+      // os respawns ficam acima do mapa e longe da blast zone
+      const b = stage.blastZone;
+      for (const r of stage.respawns.slice(0, 4)) {
+        expect(r.x).toBeGreaterThan(b.x + px(300));
+        expect(r.x).toBeLessThan(b.x + b.w - px(300));
+        expect(r.y).toBeGreaterThan(b.y + px(300));
+        expect(r.y).toBeLessThan(0);
+      }
+    }
+  });
+
   it('todo mapa tem spawn e respawn para 4 jogadores', () => {
     for (const stage of STAGES) {
       expect(stage.spawns.length).toBeGreaterThanOrEqual(4);

@@ -46,6 +46,7 @@ import { closeOnline, getOnline } from '../net/online';
 import { onlineRoute } from '../net/route';
 import type { OnlineMatch, OnlineSession } from '../net/session';
 import {
+  cameraBounds,
   DEFAULT_CAMERA,
   frameTargets,
   smooth,
@@ -106,6 +107,11 @@ const PAUSE_COOLDOWN_MS = 250;
 const PAUSE_KEYS = Menu.CONFIRM | Menu.BACK | Menu.START;
 /** Online: os dois lados trocam o hash do estado a cada tantos ticks (0,5 s). */
 const HASH_EVERY_TICKS = 30;
+/**
+ * Câmera da luta: enquadra os lutadores acima dos painéis do HUD (que, com 3
+ * ou 4, ocupam a largura toda embaixo).
+ */
+const FIGHT_CAMERA: CameraOptions = { ...DEFAULT_CAMERA, insetBottom: 110 };
 /** Enquadramento da câmera quando ninguém está em cena. */
 const STAGE_VIEW: Rect = { x: -450, y: -200, w: 900, h: 200 };
 
@@ -1013,6 +1019,8 @@ export class FightScene extends Phaser.Scene {
   }
 
   private cameraTarget(alpha: number): { x: number; y: number; zoom: number } {
+    const b = getStage(this.state.stageId).blastZone;
+    const bounds = cameraBounds({ x: toPx(b.x), y: toPx(b.y), w: toPx(b.w), h: toPx(b.h) });
     const focused = this.focus !== null ? this.state.fighters[this.focus] : undefined;
     if (focused && focused.state !== 'ko') {
       return frameTargets(
@@ -1020,6 +1028,7 @@ export class FightScene extends Phaser.Scene {
         this.scale.width,
         this.scale.height,
         FOCUS_CAMERA,
+        bounds,
       );
     }
     const rects = this.state.fighters
@@ -1029,6 +1038,8 @@ export class FightScene extends Phaser.Scene {
       rects.length > 0 ? rects : [STAGE_VIEW],
       this.scale.width,
       this.scale.height,
+      FIGHT_CAMERA,
+      bounds,
     );
   }
 
