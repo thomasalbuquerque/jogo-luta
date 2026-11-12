@@ -122,7 +122,7 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames) 
 | Agarrão       | active         | A hitbox segura o alvo na frente por um tempo; ←/→ escolhe o lado; depois arremessa. Ganha do contra-ataque. Quem segura levando golpe solta.          |
 
 - **Opções do especial:** recarga (`cooldownTicks`, contada do começo), 1 vez por ar (`oncePerAir`, volta como a recuperação) e ficar parado no ar no startup (`hoverStartup`).
-- **Provocação** (R / U / Y): só no chão, parado pela duração da ficha; levar golpe desfaz. Sem efeito de jogo. Mostra o bordão num balão e toca o áudio do amigo (`audio/vozes/<taunt.sound>`); enquanto não há áudio gravado, toca uma voz provisória sintetizada a partir do bordão.
+- **Provocação** (R / U / Y): só no chão, parado pela duração da ficha; levar golpe desfaz. Sem efeito de jogo. Mostra o bordão num balão e toca o áudio do amigo (`audio/vozes/<taunt.sound>`); enquanto não há áudio gravado, toca uma voz provisória sintetizada a partir do bordão. Com `taunt.voiceAt` na ficha, a voz e o balão só saem nesse tick da provocação (o Dadazinho toca a air guitar e só depois fala).
 
 ## Game feel e áudio
 
@@ -226,6 +226,7 @@ export const FULANO = defineCharacter({
     ],
   },
   taunt: { text: 'Bordão!', sound: 'fulano_bordao', animation: 'fulano_taunt', durationTicks: 60 },
+  // taunt.voiceAt: opcional; tick em que a voz e o balão saem (padrão 0, menor que durationTicks)
   koSound: 'fulano_ko', // opcional; sem valor = '<id com _>_ko' (áudio em audio/vozes/)
   animations: { idle: 'fulano_parado' }, // opcional; sem valor = '<id>_<chave>'
 });
@@ -235,11 +236,12 @@ Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `b
 
 `animations` e `taunt.animation` são nomes de clipes do esqueleto (`packages/game/src/rig/characterClips.ts`). Sem clipe com esse nome, o personagem usa o do esqueleto base (`rig/clips.ts`). Os golpes são animados nas fases da ficha, então mudar os frames de um golpe não desalinha a animação. A arte e o esqueleto estão em [`docs/ARTE.md`](ARTE.md).
 
-### Os 2 primeiros
+### Os personagens jogáveis
 
-| Personagem  | Estilo | Peso | Chão (px/tick) | Ar (px/tick) | Pulo | Pulos aéreos | Especial                                                                            |
-| ----------- | ------ | ---- | -------------- | ------------ | ---- | ------------ | ----------------------------------------------------------------------------------- |
-| Schummaki   | Rusher | 112  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 13%, 1 vez por ar, parado no ar no startup |
-| João Frango | Zoner  | 86   | 5,6            | 6,2          | 180  | 2            | **Frango assado voador** (projétil): 10 / 1 / 16, 5%, reto, ~570 px, recarga de 42  |
+| Personagem  | Estilo   | Peso | Chão (px/tick) | Ar (px/tick) | Pulo | Pulos aéreos | Especial                                                                            |
+| ----------- | -------- | ---- | -------------- | ------------ | ---- | ------------ | ----------------------------------------------------------------------------------- |
+| Schummaki   | Rusher   | 112  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 13%, 1 vez por ar, parado no ar no startup |
+| João Frango | Zoner    | 86   | 5,6            | 6,2          | 180  | 2            | **Frango assado voador** (projétil): 10 / 1 / 16, 5%, reto, ~570 px, recarga de 42  |
+| Dadazinho   | Punisher | 84   | 7              | 6            | 180  | 1            | **Doze** (projétil): 20 / 1 / 26, 15%, tiro curto (~200 px) e forte, recarga de 100 |
 
 O elenco (apelidos, traços, especial e provocação de cada um) fica em [`docs/ELENCO.md`](ELENCO.md).

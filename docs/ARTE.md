@@ -10,6 +10,7 @@ fim o guia de estilo (o porquê de cada regra) e o modelo de ficha.
 | ----------------------------------------------- | --------------------------------------------------------------------- | ------- | -------- |
 | [Estilo do jogo](#parte-1--estilo-do-jogo-)     | `style.png` (boneco no estilo do jogo) e `shape.png` (molde do corpo) | 2       | ✅ feito |
 | Schummaki e João Frango                         | Conceito, cabeças, peças do corpo, efeitos, figurinha                 | 5 cada  | ✅ feito |
+| Dadazinho                                       | As 5 imagens, já pelo caminho "Personagem novo"                       | 5       | ✅ feito |
 | [Cenário: a laje](#cenário-a-laje)              | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feito |
 | **[Personagem novo](#personagem-novo-firefly)** | **As mesmas 5 imagens, uma de cada**                                  | 5       | a fazer  |
 
@@ -507,7 +508,9 @@ do jogo e grava um atlas em `packages/game/public/assets/`. As imagens de `art/`
 jogo direto. `pnpm art fulano --debug <pasta>` grava também o atlas com as juntas marcadas.
 
 Cada folha (`sheets`) tem uma escala própria: a folha de peças, a de cabeças e a de efeitos podem
-vir desenhadas em tamanhos diferentes. Campos de cada peça:
+vir desenhadas em tamanhos diferentes. A mesma imagem pode entrar em duas folhas com escalas
+diferentes (no Dadazinho, a arma sai do `4-efeitos.png` menor que o clarão e o chumbo). Folha que
+já veio sem fundo (tirado no Photoshop) leva `"key": false`. Campos de cada peça:
 
 | Campo     | O que é                                                                                         |
 | --------- | ----------------------------------------------------------------------------------------------- |
@@ -520,12 +523,17 @@ vir desenhadas em tamanhos diferentes. Campos de cada peça:
 | `outline` | Linha de contorno desenhada num corte de roupa (manga, punho da luva), para não ficar "aberta". |
 | `paint`   | Pinta um polígono de uma cor (`auto` = a cor em volta). Esconde o anel do toco ou um texto.     |
 | `stretch` | Estica ou encolhe a peça (`[largura, altura]`), para acertar a proporção com o conceito.        |
+| `fill`    | Põe uma cor por trás do desenho: vidro dos óculos que veio rosa (misturado com o magenta).      |
 
 Nomes das peças: `torso`, `hips`, `upperArm`, `forearm`, `thigh`, `shin`, `foot`, `hand_fist`,
 `hand_open`, `hand_taunt`, `head_normal`, `head_hurt`, `head_taunt`, `head_ko`, `portrait` e os
 efeitos `fx_*`. Uma peça com `2` no fim é a versão do lado de trás; sem ela, os dois lados usam a
 mesma. Nas mãos isso importa: `hand_fist2` e `hand_open2` são as mãos vistas pela palma, e
 `hand_taunt2` é a outra mão do par especial.
+
+Um efeito com `pivot` e `tip` pode ser **segurado na mão da frente** (a doze do Dadazinho): o
+`pivot` é o cabo, que fica no meio da mão, e a peça aponta para onde a mão aponta. Um socket
+`muzzle` marca a boca da arma (onde sai o clarão).
 
 **Todas as peças viradas para a direita.** O jogo espelha tudo quando o personagem vira, e usa a
 mesma peça para o braço e a perna de trás, na cor original da arte (o lado de trás não é escurecido).
@@ -564,7 +572,10 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
 - Golpes são animados nas fases do sim (startup, active, recovery). A pose do impacto aparece no 1º
   frame ativo, quando a hitbox liga, mesmo se a ficha mudar os frames.
 - A cabeça troca inteira conforme o estado: normal, golpe levado (`hurt`), provocação e KO.
-- `render/fx.ts`: quais peças `fx_*` cada especial usa (fumaça, linhas de velocidade, projétil).
+- Peça na mão: a chave `prop: 'fx_...'` de um clipe põe a peça na mão da frente, e `prop: null`
+  guarda (como a arma aparecendo e sumindo no especial do Dadazinho).
+- `render/fx.ts`: quais peças `fx_*` cada especial usa (fumaça, linhas de velocidade, projétil,
+  clarão na boca da arma e a fumacinha quando a peça da mão aparece ou some).
 
 Para ver as animações, abra o jogo com `?rig` no fim do endereço (só no `pnpm dev`):
 `http://localhost:5173/?rig`. ←/→ troca o clipe, F mostra 4 quadros lado a lado com a hitbox

@@ -15,6 +15,8 @@ Enquanto um áudio não existe, o jogo toca uma versão gerada em código com a 
   O mesmo áudio em dois formatos (ex.: `luta.ogg` e `luta.mp3`) também vale: o navegador toca o primeiro que conseguir.
 - **Nome:** minúsculas, números e `_`, igual ao id na ficha (`packages/sim/src/characters/`).
   Os ids de cada personagem: `taunt.sound` (provocação) e `koSound` (KO; sem ele, `<id com _>_ko`).
+- **Vozes de cada personagem hoje:** `schummaki_bordao`, `schummaki_ko`, `joao_frango_bordao`,
+  `joao_frango_ko`, `dadazinho_bordao` (o "sexo" seco, que sai no fim da air guitar) e `dadazinho_ko`.
 - **Vozes:** curtas (provocação até ~3 s, KO até ~1,5 s), sem silêncio no começo. Áudios gravados pelos
   próprios amigos no WhatsApp funcionam melhor que IA.
 - **Música:** tem que emendar no loop (o fim encaixa no começo). Use só música que o grupo pode usar.

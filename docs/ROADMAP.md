@@ -173,6 +173,8 @@ Objetivo: lutas em dupla, locais e online.
 Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da Etapa 4.
 
 - [ ] Lote 1 (3–4 personagens)
+  - [x] Dadazinho: jogável (ficha, arte no esqueleto, especial, provocação, efeitos, retrato). Falta o
+        OK do concept pelo amigo, a voz gravada e as 5 lutas de teste.
 - [ ] Lote 2 (3–4 personagens)
 - [ ] Lote 3 (3–4 personagens)
 - [ ] Lote 4 (restantes)
