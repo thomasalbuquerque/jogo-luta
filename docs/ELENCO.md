@@ -6,24 +6,24 @@ veja `docs/GDD.md`.
 
 **Autorização:** marque ✅ quando o amigo aceitar ter a imagem (e a voz) no jogo.
 
-| #   | Apelido     | Traço mais caricato                                                           | Bordão                       | Especial (bloco)                    | Provocação                                  | Cores                                    | Autorizou |
-| --- | ----------- | ----------------------------------------------------------------------------- | ---------------------------- | ----------------------------------- | ------------------------------------------- | ---------------------------------------- | --------- |
-| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral          | "Vem com o Schummy, mermão!" | **Arrancada** (investida)           | Gira um volante imaginário e grita o bordão | Vermelho, branco, grafite                |           |
-| 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango          | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil) | Mãos em concha, gritando o bordão           | Branco (avental), laranja, amarelo-milho |           |
-| 3   | Dadazinho   | Óculos preto, cavanhaque, baixinho e magro, guitarrista, jogador de CS        | "sexo"                       | **Doze** (projétil)                 | Air guitar, depois solta "sexo" na seca     | Verde, verde-oliva, preto                |           |
-| 4   | Tauba       | Careca, barbudo, baixinho, dev frontend, trompetista, some do Discord do nada | "🎵🎶" (toca o trompete)     | **Silent quit** (teleporte)         | Toca um trechinho clássico no trompete      | Preto, branco, dourado                   |           |
-| 5   |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 6   |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 7   |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 8   |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 9   |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 10  |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 11  |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 12  |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 13  |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 14  |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 15  |             |                                                                               |                              |                                     |                                             |                                          |           |
-| 16  |             |                                                                               |                              |                                     |                                             |                                          |           |
+| #   | Apelido     | Traço mais caricato                                                           | Bordão                       | Especial (bloco)                    | Provocação                                   | Cores                                    | Autorizou |
+| --- | ----------- | ----------------------------------------------------------------------------- | ---------------------------- | ----------------------------------- | -------------------------------------------- | ---------------------------------------- | --------- |
+| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral          | "Vem com o Schummy, mermão!" | **Arrancada** (investida)           | Gira um volante imaginário e grita o bordão  | Vermelho, branco, grafite                |           |
+| 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango          | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil) | Mãos em concha, gritando o bordão            | Branco (avental), laranja, amarelo-milho |           |
+| 3   | Dadazinho   | Óculos preto, cavanhaque, baixinho e magro, guitarrista, jogador de CS        | "sexo"                       | **Doze** (projétil)                 | Air guitar, depois solta "sexo" na seca      | Verde, verde-oliva, preto                |           |
+| 4   | Tauba       | Careca, barbudo, baixinho, dev frontend, trompetista, some do Discord do nada | "🎵🎶" (toca o trompete)     | **Silent quit** (teleporte)         | Toca um trechinho clássico no trompete       | Preto, branco, dourado                   |           |
+| 5   | Tchula      | Mecânico de macacão, olho verde, joga de scout no CS                          | "Nooola!"                    | **Scout** (projétil)                | Gira a chave de boca na mão e grita o bordão | Cinza, amarelo, preto                    |           |
+| 6   |             |                                                                               |                              |                                     |                                              |                                          |           |
+| 7   |             |                                                                               |                              |                                     |                                              |                                          |           |
+| 8   |             |                                                                               |                              |                                     |                                              |                                          |           |
+| 9   |             |                                                                               |                              |                                     |                                              |                                          |           |
+| 10  |             |                                                                               |                              |                                     |                                              |                                          |           |
+| 11  |             |                                                                               |                              |                                     |                                              |                                          |           |
+| 12  |             |                                                                               |                              |                                     |                                              |                                          |           |
+| 13  |             |                                                                               |                              |                                     |                                              |                                          |           |
+| 14  |             |                                                                               |                              |                                     |                                              |                                          |           |
+| 15  |             |                                                                               |                              |                                     |                                              |                                          |           |
+| 16  |             |                                                                               |                              |                                     |                                              |                                          |           |
 
 ## Os primeiros
 
@@ -196,6 +196,76 @@ Trechos prontos para os textos do Firefly (pasta `art/tauba/`):
   `upper arm with sleeve; forearm with sleeve, without hand`.
 - `<ITEMS>`:
   `1 shiny brass trumpet, side view with the bell pointing right, no hands; 3 black music notes; 8 small glowing squares for vanishing; 3 small gray smoke puffs`
+
+### 5. Tchula
+
+- **Quem é:** 35 anos, mecânico. Estatura média (1,74 m), cabelo castanho, olhos verdes, pele
+  branca. No CS do grupo, joga de scout (a SSG 08).
+- **Bordão:** "Nooola!", gritado, puxando o "o".
+- **Estilo de luta:** sniper. Peso médio-alto (braço de mecânico), meio lento no chão e no ar,
+  golpes normais fortes e um pouco lentos. O jogo dele é manter distância e acertar o tiro de
+  longe; de perto, sofre. Contraste com o Dadazinho: a doze pune de perto, a scout pune de longe.
+- **Especial — Scout (projétil):** a scout aparece nas mãos dele, ele mira, dá um tiro e a arma
+  some. O tiro é um projétil **muito rápido, fino e de longo alcance**: atravessa o palco inteiro.
+  - **Tiro:** reto para a frente (`launchAngle` 0, sem gravidade), velocidade alta (~36 px/tick) e
+    vida de ~30 ticks (uns 1000 px: passa do palco de 900 px). Caixa baixa e comprida (~64×14 px):
+    fina para dar para desviar pulando ou abaixando, comprida para não atravessar a hurtbox sem
+    acertar.
+  - **Dano:** alto (~18), knockback médio-alto (ângulo baixo, ~20°). É o golpe que mata de longe,
+    então precisa ser bem telegrafado.
+  - **Tempo:** startup longo (~28 ticks: a arma aparece e ele mira), recovery longo (~30 ticks:
+    puxa o ferrolho e a arma some). Recarga longa (~150 ticks, 2,5 s): errar custa caro.
+  - **No ar:** funciona, mas não ajuda a voltar ao palco (não tem impulso).
+  - **Efeitos:** fumacinha quando a arma aparece e some; durante a mira, uma linha de mira fininha
+    e um brilho na luneta (aviso para o adversário, só visual); no tiro, clarão do cano, rastro
+    branco do projétil e coice para trás; no recovery, cápsula saltando do ferrolho.
+  - **Sem código novo no `sim`:** cabe no bloco projétil como está. A linha de mira, o rastro e a
+    cápsula são só efeitos do `game`.
+- **Provocação:** tira uma chave de boca do bolso, gira na mão como um revólver, aponta com ela para
+  o adversário e grita "Nooola!".
+- **Visual:** macacão de mecânico cinza (`#6E737B`) de manga comprida, com zíper na frente e
+  detalhes em amarelo (`#F2C230`): faixas nos punhos, nos joelhos e no peito, e costuras amarelas;
+  bolsos no peito e nas pernas; flanela vermelha saindo do bolso de trás. Bota preta (`#1F2023`) de
+  segurança, de cano médio, com bico reforçado e sola grossa. Cabelo castanho curto, olhos verdes
+  (bem visíveis na cabeça). Um pouco de graxa nas mãos e no rosto. Cores: cinza, amarelo e preto (o
+  amarelo ajuda a ler o personagem nos menus escuros).
+- **A arma:** rifle de ferrolho leve e comprido, com luneta, como a SSG 08 na pintura padrão
+  (escura, preta e grafite). A arte é genérica, inspirada nela: nada de nomes, emblemas ou logos do
+  CS.
+- **Ideias guardadas:** "Nooola!" ao acertar o tiro de longe ou ao levar KO; respawn limpando as
+  mãos na flanela; headshot (acertar a cabeça) com dano extra, se um dia o `sim` tiver hurtbox de
+  cabeça.
+
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Tchula — 35-year-old car mechanic, plays shooter games with his friends as a long-range sniper.
+Fighting style: sniper — sturdy and steady, keeps his distance, calm aiming stance.
+Body: based on the photos; average height and medium build, strong forearms.
+Outfit: gray (#6E737B) long-sleeve mechanic coverall with a front zipper, yellow (#F2C230) bands on the cuffs, knees and chest, yellow stitching, chest and leg pockets, a red rag hanging from the back pocket; black (#1F2023) mid-height steel-toe safety work boots with thick soles.
+Signature details: short brown hair, green eyes, the gray coverall with yellow bands, a few grease smudges on his hands and cheek.
+Colors: primary #6E737B, secondary #F2C230, accent #1F2023.
+Face/personality: focused, one eye slightly squinted as if aiming, confident half smile.
+Special move: "Scout" — a long bolt-action scoped rifle appears in his hands, he aims, fires one shot straight across the stage, and the rifle vanishes.
+Taunt: pulls a wrench from his pocket, spins it in his hand like a revolver, points it at the opponent and shouts his catchphrase.
+Extra parts for the parts sheet: two hands holding a wrench, one gripping it, one open.
+Props and effects for the effects sheet: the rifle (side view, pointing right, no hands); the wrench; 1 muzzle-flash burst; a long thin bullet trail; 1 small brass shell casing; a small scope glint; smoke puffs for the rifle appearing and vanishing.
+Avoid: text, logos or brand names on the coverall and the rifle; game emblems.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
+
+- `<EXPRESSION>`: `focused squint, confident half smile`
+- `<CHARACTER>`:
+  `Tchula, 35-year-old car mechanic, average height, medium build, fair skin, short brown hair, green eyes, a few grease smudges. Gray (#6E737B) long-sleeve mechanic coverall with a front zipper, yellow (#F2C230) bands on the cuffs, knees and chest, yellow stitching, a red rag in the back pocket; black steel-toe safety work boots.`
+- `<LEGWEAR>`: `coverall pants with yellow knee bands`
+- `<SHOE>`: `steel-toe safety work boot`
+- `<EXTRA>`: `two hands holding a wrench, one gripping it, one open`
+- Manga comprida até o punho: no passo 3, troque `upper arm with sleeve; forearm without hand` por
+  `upper arm with sleeve; forearm with sleeve, without hand`.
+- `<ITEMS>`:
+  `1 long bolt-action sniper rifle with a scope, side view pointing right, no hands, matte black and dark graphite; 1 chrome wrench; 1 muzzle-flash burst; 1 long thin white bullet trail; 1 small brass shell casing; 1 small scope glint; 3 small gray smoke puffs`
 
 ### Arte
 
