@@ -1,16 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { createGame, stepGame } from '../game';
 import { cloneState } from '../snapshot';
+import { px } from '../constants';
 import { Button } from '../input';
 import { getCharacter, PLAYABLE_CHARACTERS } from './index';
 
-const [SCHUMMAKI, JOAO, DADA, TAUBA] = PLAYABLE_CHARACTERS.map(getCharacter);
-if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA) throw new Error('elenco incompleto');
+const [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA] = PLAYABLE_CHARACTERS.map(getCharacter);
+if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA) throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango, Dadazinho e Tauba, cada um com especial e provocação', () => {
-    expect(PLAYABLE_CHARACTERS).toEqual(['schummaki', 'joao-frango', 'dadazinho', 'tauba']);
-    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA]) {
+  it('Schummaki, João Frango, Dadazinho, Tauba e Tchula, cada um com especial e provocação', () => {
+    expect(PLAYABLE_CHARACTERS).toEqual([
+      'schummaki',
+      'joao-frango',
+      'dadazinho',
+      'tauba',
+      'tchula',
+    ]);
+    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
       expect(c.blurb.length).toBeGreaterThan(0);
@@ -59,6 +66,33 @@ describe('elenco', () => {
     expect(TAUBA.stats.weight).toBeGreaterThan(DADA.stats.weight);
     // golpes do moveset base, sem ajuste
     expect(TAUBA.moves.sideLight).toBe(getCharacter('base').moves.sideLight);
+  });
+
+  it('Tchula pune de longe: tiro rápido, fino e forte que atravessa o palco; pesado e lento', () => {
+    const special = TCHULA.special;
+    const shot = special?.move.projectile;
+    const pellets = DADA.special?.move.projectile;
+    const chicken = JOAO.special?.move.projectile;
+    if (!special || !shot || !pellets || !chicken) throw new Error('sem projétil');
+    // atravessa o palco de 900 px, reto e sem cair
+    expect(shot.speed * shot.lifetimeTicks).toBeGreaterThan(px(900));
+    expect(shot.launchAngle).toBe(0);
+    expect(shot.gravity).toBe(0);
+    expect(shot.speed).toBeGreaterThan(chicken.speed * 3);
+    // fino: dá para desviar pulando ou abaixando; comprido: não atravessa a hurtbox sem acertar
+    expect(shot.h).toBeLessThan(TCHULA.stats.height / 4);
+    expect(shot.w).toBeGreaterThan(shot.speed);
+    // mata de longe: mais dano que a doze, e bem telegrafado (mira e recarga longas)
+    expect(shot.hit.damage).toBeGreaterThan(pellets.hit.damage);
+    expect(special.move.startup).toBeGreaterThan(DADA.special?.move.startup ?? 0);
+    expect(special.cooldownTicks).toBeGreaterThanOrEqual(150);
+    // braço de mecânico: pesado e lento
+    expect(TCHULA.stats.weight).toBeGreaterThan(100);
+    expect(TCHULA.stats.walkSpeed).toBeLessThan(getCharacter('base').stats.walkSpeed);
+    expect(TCHULA.stats.airSpeed).toBeLessThan(getCharacter('base').stats.airSpeed);
+    expect(TCHULA.moves.sideLight.damage).toBeGreaterThan(
+      getCharacter('base').moves.sideLight.damage,
+    );
   });
 
   it.each(PLAYABLE_CHARACTERS)('%s alcança a plataforma atravessável com 1 pulo', (id) => {
