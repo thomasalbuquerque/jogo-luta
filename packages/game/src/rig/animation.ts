@@ -26,6 +26,8 @@ export interface Key {
   handFar?: HandPose;
   /** Peça na mão da frente a partir desta chave (null guarda). */
   prop?: string | null;
+  /** Giro da peça na mão em volta do pivô dela, em graus (interpolado; sem valor = 0). */
+  propSpin?: number;
   /** Curva do trecho que termina nesta chave. */
   ease?: Ease;
 }
@@ -111,7 +113,7 @@ export function sampleClip(clip: Clip, t: number): Pose {
     rot[bone] = ra + (rb - ra) * u;
   }
   // sem valor na chave = 0 (como as rotações)
-  const lerp = (prop: 'x' | 'y') => {
+  const lerp = (prop: 'x' | 'y' | 'propSpin') => {
     const va = a[prop] ?? 0;
     const vb = b ? (b[prop] ?? 0) : va;
     return va + (vb - va) * u;
@@ -124,5 +126,6 @@ export function sampleClip(clip: Clip, t: number): Pose {
     handNear: stepValue(keys, ia, 'handNear') ?? 'fist',
     handFar: stepValue(keys, ia, 'handFar') ?? 'fist',
     prop: stepValue(keys, ia, 'prop') ?? null,
+    propSpin: lerp('propSpin'),
   };
 }

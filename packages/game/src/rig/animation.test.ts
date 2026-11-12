@@ -62,6 +62,22 @@ describe('sampleClip', () => {
     expect(sampleClip(c, 2.8).prop).toBeNull();
   });
 
+  it('o giro da peça na mão é interpolado (sem valor = 0)', () => {
+    const c: Clip = {
+      timing: 'once',
+      length: 20,
+      keys: [
+        { t: 0, rot: {}, prop: 'fx_wrench' },
+        { t: 10, rot: {}, propSpin: 720 },
+        { t: 20, rot: {} },
+      ],
+    };
+    expect(sampleClip(c, 0).propSpin).toBe(0);
+    expect(sampleClip(c, 5).propSpin).toBe(360);
+    expect(sampleClip(c, 10).propSpin).toBe(720);
+    expect(sampleClip(c, 15).propSpin).toBe(360);
+  });
+
   it('clipe "once" para na última chave', () => {
     const once: Clip = { ...clip, timing: 'once' };
     expect(sampleClip(once, 50).rot.torso).toBe(10);
