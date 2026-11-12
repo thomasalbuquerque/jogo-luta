@@ -111,18 +111,19 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames) 
 - Botão **Especial**: cada personagem tem **1 especial**, que sai com Especial parado ou com qualquer direção (exceto Especial + ↓ no ar, que é o ground pound do moveset base). ←/→ ao começar vira o lutador para aquele lado.
 - O especial é um golpe como os outros (startup / active / recovery), montado com **blocos** do `sim` (`packages/sim/src/character.ts`). Os instantâneos disparam no 1º frame ativo; os contínuos duram o active. Cada bloco aparece no máximo 1 vez, e só 1 bloco liga hitbox (investida, área ou agarrão).
 
-| Bloco         | Quando         | O que faz                                                                                                                                              |
-| ------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Projétil      | 1º frame ativo | Solta um projétil na frente (ângulo, velocidade, gravidade, duração). Some ao acertar, ao bater em bloco sólido ou no fim do tempo. Só o alvo congela. |
-| Investida     | active         | Avança reto com a hitbox; no ar não cai e é mais curta (`airSpeed`). No fim freia para a velocidade normal.                                            |
-| Área          | active         | Hitbox em volta do corpo; arremessa para longe do centro.                                                                                              |
-| Contra-ataque | active         | Quem acerta o lutador na janela leva o golpe do bloco; projétil volta para quem soltou. Errar deixa exposto no recovery.                               |
-| Buff          | 1º frame ativo | Por um tempo: % de dano causado, % de velocidade (chão e ar), % de peso.                                                                               |
-| Teleporte     | 1º frame ativo | Reaparece a uma distância na direção apertada (8 direções; sem direção, para a frente). Para em bloco sólido. Pode dar invencibilidade curta.          |
-| Agarrão       | active         | A hitbox segura o alvo na frente por um tempo; ←/→ escolhe o lado; depois arremessa. Ganha do contra-ataque. Quem segura levando golpe solta.          |
+| Bloco         | Quando         | O que faz                                                                                                                                                                         |
+| ------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Projétil      | 1º frame ativo | Solta um projétil na frente (ângulo, velocidade, gravidade, duração). Some ao acertar, ao bater em bloco sólido ou no fim do tempo. Só o alvo congela.                            |
+| Investida     | active         | Avança reto com a hitbox; no ar não cai e é mais curta (`airSpeed`). No fim freia para a velocidade normal.                                                                       |
+| Área          | active         | Hitbox em volta do corpo; arremessa para longe do centro.                                                                                                                         |
+| Contra-ataque | active         | Quem acerta o lutador na janela leva o golpe do bloco; projétil volta para quem soltou. Errar deixa exposto no recovery.                                                          |
+| Buff          | 1º frame ativo | Por um tempo: % de dano causado, % de velocidade (chão e ar), % de peso.                                                                                                          |
+| Teleporte     | 1º frame ativo | Reaparece a uma distância na direção apertada (8 direções; sem direção, para a frente). Para em bloco sólido. Pode dar invencibilidade curta. Com `target: 'random'`, ver abaixo. |
+| Agarrão       | active         | A hitbox segura o alvo na frente por um tempo; ←/→ escolhe o lado; depois arremessa. Ganha do contra-ataque. Quem segura levando golpe solta.                                     |
 
+- **Teleporte sorteado** (`target: 'random'`, o Silent quit do Tauba): no active o lutador some (parado, invisível e intangível); no fim do active reaparece em pé num chão do palco, longe das pontas e nunca dentro de bloco. Sorteia `candidates` pontos (padrão 3) com o RNG da luta (`state.rng`, então replay e online continuam determinísticos) e vai para o mais longe do adversário mais perto, ou, em `nearChance`% das vezes (padrão 25), para o mais perto. Volta virado para o adversário e sem invencibilidade no recovery. Como sempre cai num chão, do ar serve de recuperação.
 - **Opções do especial:** recarga (`cooldownTicks`, contada do começo), 1 vez por ar (`oncePerAir`, volta como a recuperação) e ficar parado no ar no startup (`hoverStartup`).
-- **Provocação** (R / U / Y): só no chão, parado pela duração da ficha; levar golpe desfaz. Sem efeito de jogo. Mostra o bordão num balão e toca o áudio do amigo (`audio/vozes/<taunt.sound>`); enquanto não há áudio gravado, toca uma voz provisória sintetizada a partir do bordão. Com `taunt.voiceAt` na ficha, a voz e o balão só saem nesse tick da provocação (o Dadazinho toca a air guitar e só depois fala).
+- **Provocação** (R / U / Y): só no chão, parado pela duração da ficha; levar golpe desfaz. Sem efeito de jogo. Mostra o bordão num balão e toca o áudio do amigo (`audio/vozes/<taunt.sound>`); enquanto não há áudio gravado, toca uma voz provisória sintetizada a partir do bordão (ou um instrumento: o Tauba toca uma fanfarra de trompete sintetizada). Com `taunt.voiceAt` na ficha, a voz e o balão só saem nesse tick da provocação (o Dadazinho toca a air guitar e só depois fala).
 
 ## Game feel e áudio
 
@@ -238,10 +239,11 @@ Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `b
 
 ### Os personagens jogáveis
 
-| Personagem  | Estilo   | Peso | Chão (px/tick) | Ar (px/tick) | Pulo | Pulos aéreos | Especial                                                                            |
-| ----------- | -------- | ---- | -------------- | ------------ | ---- | ------------ | ----------------------------------------------------------------------------------- |
-| Schummaki   | Rusher   | 112  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 13%, 1 vez por ar, parado no ar no startup |
-| João Frango | Zoner    | 86   | 5,6            | 6,2          | 180  | 2            | **Frango assado voador** (projétil): 10 / 1 / 16, 5%, reto, ~570 px, recarga de 42  |
-| Dadazinho   | Punisher | 84   | 7              | 6            | 180  | 1            | **Doze** (projétil): 20 / 1 / 26, 15%, tiro curto (~200 px) e forte, recarga de 100 |
+| Personagem  | Estilo   | Peso | Chão (px/tick) | Ar (px/tick) | Pulo | Pulos aéreos | Especial                                                                                   |
+| ----------- | -------- | ---- | -------------- | ------------ | ---- | ------------ | ------------------------------------------------------------------------------------------ |
+| Schummaki   | Rusher   | 112  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 13%, 1 vez por ar, parado no ar no startup        |
+| João Frango | Zoner    | 86   | 5,6            | 6,2          | 180  | 2            | **Frango assado voador** (projétil): 10 / 1 / 16, 5%, reto, ~570 px, recarga de 42         |
+| Dadazinho   | Punisher | 84   | 7              | 6            | 180  | 1            | **Doze** (projétil): 20 / 1 / 26, 15%, tiro curto (~200 px) e forte, recarga de 100        |
+| Tauba       | Fujão    | 92   | 6,8            | 6            | 178  | 1            | **Silent quit** (teleporte sorteado): 14 / 20 / 18, sem dano, 1 vez por ar, recarga de 240 |
 
 O elenco (apelidos, traços, especial e provocação de cada um) fica em [`docs/ELENCO.md`](ELENCO.md).
