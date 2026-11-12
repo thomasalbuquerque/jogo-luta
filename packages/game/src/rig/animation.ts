@@ -24,6 +24,8 @@ export interface Key {
   expression?: Expression;
   handNear?: HandPose;
   handFar?: HandPose;
+  /** Peça na mão da frente a partir desta chave (null guarda). */
+  prop?: string | null;
   /** Curva do trecho que termina nesta chave. */
   ease?: Ease;
 }
@@ -50,8 +52,8 @@ function eased(u: number, ease: Ease | undefined): number {
   }
 }
 
-/** Valor "em degrau" (expressão, mão): o da última chave que definiu, até `t`. */
-function stepValue<K extends 'expression' | 'handNear' | 'handFar'>(
+/** Valor "em degrau" (expressão, mão, peça): o da última chave que definiu, até `t`. */
+function stepValue<K extends 'expression' | 'handNear' | 'handFar' | 'prop'>(
   keys: readonly Key[],
   index: number,
   prop: K,
@@ -121,5 +123,6 @@ export function sampleClip(clip: Clip, t: number): Pose {
     expression: stepValue(keys, ia, 'expression') ?? 'normal',
     handNear: stepValue(keys, ia, 'handNear') ?? 'fist',
     handFar: stepValue(keys, ia, 'handFar') ?? 'fist',
+    prop: stepValue(keys, ia, 'prop') ?? null,
   };
 }
