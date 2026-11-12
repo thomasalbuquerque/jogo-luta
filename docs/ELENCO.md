@@ -6,24 +6,24 @@ veja `docs/GDD.md`.
 
 **Autorização:** marque ✅ quando o amigo aceitar ter a imagem (e a voz) no jogo.
 
-| #   | Apelido     | Traço mais caricato                                                    | Bordão                       | Especial (bloco)                    | Provocação                                  | Cores                                    | Autorizou |
-| --- | ----------- | ---------------------------------------------------------------------- | ---------------------------- | ----------------------------------- | ------------------------------------------- | ---------------------------------------- | --------- |
-| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral   | "Vem com o Schummy, mermão!" | **Arrancada** (investida)           | Gira um volante imaginário e grita o bordão | Vermelho, branco, grafite                |           |
-| 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango   | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil) | Mãos em concha, gritando o bordão           | Branco (avental), laranja, amarelo-milho |           |
-| 3   | Dadazinho   | Óculos preto, cavanhaque, baixinho e magro, guitarrista, jogador de CS | "sexo"                       | **Doze** (projétil)                 | Air guitar, depois solta "sexo" na seca     | Verde, verde-oliva, preto                |           |
-| 4   |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 5   |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 6   |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 7   |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 8   |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 9   |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 10  |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 11  |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 12  |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 13  |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 14  |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 15  |             |                                                                        |                              |                                     |                                             |                                          |           |
-| 16  |             |                                                                        |                              |                                     |                                             |                                          |           |
+| #   | Apelido     | Traço mais caricato                                                           | Bordão                       | Especial (bloco)                    | Provocação                                  | Cores                                    | Autorizou |
+| --- | ----------- | ----------------------------------------------------------------------------- | ---------------------------- | ----------------------------------- | ------------------------------------------- | ---------------------------------------- | --------- |
+| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral          | "Vem com o Schummy, mermão!" | **Arrancada** (investida)           | Gira um volante imaginário e grita o bordão | Vermelho, branco, grafite                |           |
+| 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango          | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil) | Mãos em concha, gritando o bordão           | Branco (avental), laranja, amarelo-milho |           |
+| 3   | Dadazinho   | Óculos preto, cavanhaque, baixinho e magro, guitarrista, jogador de CS        | "sexo"                       | **Doze** (projétil)                 | Air guitar, depois solta "sexo" na seca     | Verde, verde-oliva, preto                |           |
+| 4   | Tauba       | Careca, barbudo, baixinho, dev frontend, trompetista, some do Discord do nada | "🎵🎶" (toca o trompete)     | **Silent quit** (teleporte)         | Toca um trechinho clássico no trompete      | Preto, branco, dourado                   |           |
+| 5   |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 6   |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 7   |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 8   |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 9   |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 10  |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 11  |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 12  |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 13  |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 14  |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 15  |             |                                                                               |                              |                                     |                                             |                                          |           |
+| 16  |             |                                                                               |                              |                                     |                                             |                                          |           |
 
 ## Os primeiros
 
@@ -118,6 +118,78 @@ Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):
   `upper arm with sleeve; forearm with sleeve, without hand`.
 - `<ITEMS>`:
   `1 compact boxy pump-action shotgun with a short barrel and a box magazine, side view pointing right, no hands, off-white with blue and gold details; 1 big muzzle-flash burst; 5 short pellet streaks; 3 small gray smoke puffs`
+
+### 4. Tauba
+
+- **Quem é:** 30 anos, baixinho (1,64 m), careca, barbudo, pele um pouco morena. Desenvolvedor de
+  software frontend. Toca trompete. A piada do grupo: ele sai do Discord do nada, sem avisar
+  ("silent quit").
+- **Bordão:** não fala: toca. O balão mostra notas musicais (🎵🎶) e o som é o trompete.
+- **Estilo de luta:** fujão (trickster). Peso médio-leve, bom no chão e no ar, golpes normais sem
+  nada de especial. O jogo dele é sumir quando aperta e voltar quando o adversário se distrai.
+- **Especial — Silent quit (teleporte):** ele some do nada e reaparece num lugar **sorteado** do
+  palco: o jogador não escolhe para onde vai. Na maioria das vezes cai longe do adversário; às vezes
+  cai do lado dele (o "efeito negativo").
+  - **Sorteio:** sorteia 3 pontos em cima das plataformas do palco (nunca fora dele, nunca dentro
+    de bloco). Com 3 em 4 de chance vai para o ponto mais longe do adversário mais próximo; com 1 em
+    4, para o mais perto. O sorteio usa o RNG com seed do estado (`state.rng`), então replay e online
+    continuam determinísticos.
+  - **Tempo:** startup de 14 (ele congela e começa a sumir, ainda vulnerável), uns 20 ticks fora da
+    luta (invisível e intangível), reaparece e tem recovery de 18 sem invencibilidade: se cair do
+    lado do adversário, apanha.
+  - **Sem hitbox:** é só fuga e reposicionamento, não causa dano.
+  - **Recarga longa:** uns 240 ticks (4 s), contada do começo. Funciona no ar 1 vez (`oncePerAir`):
+    como sempre cai num palco, serve de recuperação, e por isso a recarga é tão longa. Usar fora do
+    palco é seguro, mas gasta o especial por 4 s.
+  - **Efeitos:** ao sumir, o corpo se desfaz em quadradinhos (como uma chamada caindo) com um "plim"
+    de desconexão; ao voltar, os quadradinhos se juntam com um "plim" de conexão. Nada de logo ou
+    som do Discord: tudo genérico.
+  - **Precisa de código novo:** o bloco teleporte de hoje só vai na direção apertada. Falta uma
+    opção de destino sorteado (`target: 'random'`, com a chance de cair perto) no mesmo bloco, em
+    vez de um bloco novo.
+- **Provocação:** um trompete aparece na mão dele com uma fumacinha, ele toca um trechinho de uns
+  2 s e o trompete some. Enquanto toca, saem notas musicais do trompete e o balão mostra 🎵🎶. A
+  música é original, no clima de fanfarra clássica de concerto: em Dó maior, Sol–Dó–Mi–Sol (curtas),
+  Mi (curta), Sol (longa). Sem áudio gravado, o jogo sintetiza o trompete com essas notas, em vez da
+  voz provisória.
+- **Visual:** terno preto de músico de concerto: paletó preto (`#1E1F24`) abotoado, até o quadril,
+  sem cauda, com lenço dourado (`#E0A93B`) no bolso; camisa social branca (`#F4F1EA`) e gravata
+  borboleta preta; calça social preta; sapato social preto. Careca e barba cheia escura. Cores:
+  preto, branco e dourado (o dourado do trompete e do lenço ajuda a ler o personagem nos menus
+  escuros).
+- **Ideias guardadas:** "fulano saiu da chamada" como balão ao levar KO; reaparecer no respawn com
+  o "plim" de conexão; o trompete dando uma nota desafinada quando ele leva golpe na provocação.
+
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Tauba — 30-year-old frontend developer and trumpet player, famous among his friends for silently leaving voice calls without saying goodbye.
+Fighting style: trickster — evasive and sneaky, light on his feet, upright confident stance.
+Body: based on the photos; short build.
+Outfit: black (#1E1F24) concert suit: buttoned hip-length jacket with no tails and a gold (#E0A93B) pocket square; white (#F4F1EA) dress shirt with a black bow tie; black dress pants; black dress shoes.
+Signature details: shaved bald head, full dark beard, the concert suit with bow tie and gold pocket square.
+Colors: primary #1E1F24, secondary #F4F1EA, accent #E0A93B.
+Face/personality: calm poker face, eyes glancing to the side, as if about to sneak away.
+Special move: "Silent quit" — he dissolves into small squares and vanishes, then reappears somewhere else on the stage.
+Taunt: a trumpet appears in his hands, he plays a short classical fanfare, and music notes come out of the bell.
+Extra parts for the parts sheet: two hands holding a trumpet, one gripping it, one pressing the valves.
+Props and effects for the effects sheet: the trumpet (side view, bell pointing right, no hands); 3 music notes; small square particles for vanishing and reappearing; smoke puffs for the trumpet appearing and vanishing.
+Avoid: text or logos on the clothes; chat app logos or icons; tails on the jacket.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/tauba/`):
+
+- `<EXPRESSION>`: `poker face glancing sideways`
+- `<CHARACTER>`:
+  `Tauba, 30-year-old trumpet player, short, bald, full dark beard, light brown skin, calm poker face. Black (#1E1F24) concert suit: buttoned hip-length jacket, no tails, gold (#E0A93B) pocket square; white dress shirt, black bow tie; black dress pants; black dress shoes.`
+- `<LEGWEAR>`: `dress pants`
+- `<SHOE>`: `dress shoe`
+- `<EXTRA>`: `two hands holding a trumpet, one gripping it, one pressing the valves`
+- Manga comprida até o punho: no passo 3, troque `upper arm with sleeve; forearm without hand` por
+  `upper arm with sleeve; forearm with sleeve, without hand`.
+- `<ITEMS>`:
+  `1 shiny brass trumpet, side view with the bell pointing right, no hands; 3 black music notes; 8 small glowing squares for vanishing; 3 small gray smoke puffs`
 
 ### Arte
 
