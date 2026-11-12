@@ -149,9 +149,19 @@ const BuffBlock = z.strictObject({
 
 const TeleportBlock = z.strictObject({
   type: z.literal('teleport'),
-  /** px. */
-  distance: num(10, 600),
+  /**
+   * `direction`: vai `distance` px na direção apertada, no 1º frame ativo.
+   * `random`: some durante o active e reaparece, no fim dele, num chão sorteado do
+   * palco (o jogador não escolhe). Usa o RNG da luta: replay e online continuam iguais.
+   */
+  target: z.enum(['direction', 'random']).default('direction'),
+  /** px (só no `direction`). */
+  distance: num(10, 600).default(200),
   invulnTicks: int(0, 60).default(0),
+  /** `random`: quantos pontos do palco sorteia. */
+  candidates: int(1, 8).default(3),
+  /** `random`: chance (%) de ir para o ponto mais perto do adversário; senão, o mais longe. */
+  nearChance: int(0, 100).default(25),
 });
 
 const GrabBlock = z.strictObject({
@@ -467,6 +477,9 @@ function compileSpecial(s: ParsedSpecial): Special {
         break;
       case 'teleport':
         move.teleport = { distance: px(b.distance), invulnTicks: b.invulnTicks };
+        if (b.target === 'random') {
+          move.teleport.random = { candidates: b.candidates, nearChance: b.nearChance };
+        }
         break;
     }
   }

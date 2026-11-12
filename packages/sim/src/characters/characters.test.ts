@@ -4,13 +4,13 @@ import { cloneState } from '../snapshot';
 import { Button } from '../input';
 import { getCharacter, PLAYABLE_CHARACTERS } from './index';
 
-const [SCHUMMAKI, JOAO, DADA] = PLAYABLE_CHARACTERS.map(getCharacter);
-if (!SCHUMMAKI || !JOAO || !DADA) throw new Error('elenco incompleto');
+const [SCHUMMAKI, JOAO, DADA, TAUBA] = PLAYABLE_CHARACTERS.map(getCharacter);
+if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA) throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango e Dadazinho, cada um com especial e provocação', () => {
-    expect(PLAYABLE_CHARACTERS).toEqual(['schummaki', 'joao-frango', 'dadazinho']);
-    for (const c of [SCHUMMAKI, JOAO, DADA]) {
+  it('Schummaki, João Frango, Dadazinho e Tauba, cada um com especial e provocação', () => {
+    expect(PLAYABLE_CHARACTERS).toEqual(['schummaki', 'joao-frango', 'dadazinho', 'tauba']);
+    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
       expect(c.blurb.length).toBeGreaterThan(0);
@@ -46,6 +46,19 @@ describe('elenco', () => {
     expect(DADA.stats.weight).toBeLessThan(100);
     expect(DADA.stats.walkSpeed).toBeGreaterThan(JOAO.stats.walkSpeed);
     expect(DADA.stats.height).toBeLessThan(JOAO.stats.height);
+  });
+
+  it('Tauba foge: some e reaparece num lugar sorteado, sem bater; recarga longa', () => {
+    const special = TAUBA.special;
+    expect(special?.move.teleport?.random).toEqual({ candidates: 3, nearChance: 25 });
+    expect(special?.move.hitboxes).toEqual([]);
+    expect(special?.move.projectile).toBeUndefined();
+    expect(special?.oncePerAir).toBe(true);
+    expect(special?.cooldownTicks).toBeGreaterThanOrEqual(240);
+    expect(TAUBA.stats.weight).toBeLessThan(100);
+    expect(TAUBA.stats.weight).toBeGreaterThan(DADA.stats.weight);
+    // golpes do moveset base, sem ajuste
+    expect(TAUBA.moves.sideLight).toBe(getCharacter('base').moves.sideLight);
   });
 
   it.each(PLAYABLE_CHARACTERS)('%s alcança a plataforma atravessável com 1 pulo', (id) => {

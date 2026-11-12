@@ -5,6 +5,7 @@ import {
   effectiveWeight,
   enterGrabbed,
   enterHitstun,
+  isVanished,
   KNOCKBACK_DECAY,
   moveDef,
   moveFrame,
@@ -27,9 +28,9 @@ export function hurtbox(f: Fighter): Box {
   return { x: f.x, y: f.y, w: f.w, h: f.h };
 }
 
-/** Pode ser acertado agora (fora de KO e sem invencibilidade). */
+/** Pode ser acertado agora (fora de KO, sem invencibilidade e sem ter sumido no teleporte). */
 export function canBeHit(f: Fighter): boolean {
-  return f.state !== 'ko' && f.invulnTicks === 0;
+  return f.state !== 'ko' && f.invulnTicks === 0 && !isVanished(f);
 }
 
 /** Hitboxes ligadas neste tick, em coordenadas do mundo (subpx). */

@@ -148,11 +148,17 @@ export class FighterView {
     return this.toWorld(placedPoint(anchors, p.placed, socket), p.lift);
   }
 
-  /** O meio da mão da frente em px de mundo, na última pose desenhada. */
-  handPoint(): { x: number; y: number } | null {
+  /**
+   * O meio da mão da frente em px de mundo, na última pose desenhada. Com `socket`, um
+   * encaixe da peça da mão, se ela tiver (a boca do trompete do Tauba).
+   */
+  handPoint(socket?: string): { x: number; y: number } | null {
     const p = this.placedHand;
     const anchors = p && this.skin.get(p.placed.frame);
     if (!p || !anchors) return null;
+    if (socket && anchors.sockets[socket]) {
+      return this.toWorld(placedPoint(anchors, p.placed, socket), p.lift);
+    }
     const [px, py] = placedPoint(anchors, p.placed, 'pivot');
     const [tx, ty] = placedPoint(anchors, p.placed, 'tip');
     return this.toWorld([(px + tx) / 2, (py + ty) / 2], p.lift);

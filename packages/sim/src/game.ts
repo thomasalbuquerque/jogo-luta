@@ -177,7 +177,7 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
   for (const f of state.fighters) {
     if (f.state === 'ko') stepKnockedOut(f, slots[f.id] ?? f.id, stage, events);
     const input = counting ? NO_INPUT : (inputs[f.id] ?? NO_INPUT);
-    stepFighter(f, input, stage.solids, state.projectiles);
+    stepFighter(f, input, stage.solids, state.projectiles, state);
     for (const action of cueNames(f.cues)) events.push({ type: 'action', fighter: f.id, action });
   }
   stepProjectiles(state.projectiles, stage.solids, stage.blastZone);

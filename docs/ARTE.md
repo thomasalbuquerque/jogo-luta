@@ -11,6 +11,7 @@ fim o guia de estilo (o porquê de cada regra) e o modelo de ficha.
 | [Estilo do jogo](#parte-1--estilo-do-jogo-)     | `style.png` (boneco no estilo do jogo) e `shape.png` (molde do corpo) | 2       | ✅ feito |
 | Schummaki e João Frango                         | Conceito, cabeças, peças do corpo, efeitos, figurinha                 | 5 cada  | ✅ feito |
 | Dadazinho                                       | As 5 imagens, já pelo caminho "Personagem novo"                       | 5       | ✅ feito |
+| Tauba                                           | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | [Cenário: a laje](#cenário-a-laje)              | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feito |
 | **[Personagem novo](#personagem-novo-firefly)** | **As mesmas 5 imagens, uma de cada**                                  | 5       | a fazer  |
 
@@ -605,7 +606,8 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   com `outline` no corte.
 - **Mãos especiais segurando um objeto** (o trompete do Tauba): a mão com o objeto vira a mão da
   frente (`hand_taunt`), com o objeto junto; da outra, só a mão (`keep`/`erase`), como mão de trás
-  (`hand_taunt2`). O punho da camisa sai com `erase` nas duas. Objeto que aparece e some sem mão
+  (`hand_taunt2`). O punho da camisa sai com `erase` nas duas. Um socket na mão marca de onde sai
+  efeito (`bell`, a boca do trompete, solta as notas da provocação). Objeto que aparece e some sem mão
   (a doze do Dadazinho) vai na folha de efeitos, com `pivot` no cabo, e entra pela chave `prop`.
 - **Óculos com lente rosa** (vidro transparente na folha): `fill` com uma cor clara de vidro.
 
@@ -625,7 +627,8 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
 - Peça na mão: a chave `prop: 'fx_...'` de um clipe põe a peça na mão da frente, e `prop: null`
   guarda (como a arma aparecendo e sumindo no especial do Dadazinho).
 - `render/fx.ts`: quais peças `fx_*` cada especial usa (fumaça, linhas de velocidade, projétil,
-  clarão na boca da arma e a fumacinha quando a peça da mão aparece ou some).
+  clarão na boca da arma, a fumacinha quando a peça da mão aparece ou some, os quadradinhos do
+  teleporte sorteado e as notas que saem do socket `bell` na provocação).
 
 Para ver as animações, abra o jogo com `?rig` no fim do endereço (só no `pnpm dev`):
 `http://localhost:5173/?rig`. ←/→ troca o clipe, F mostra 4 quadros lado a lado com a hitbox
@@ -638,7 +641,9 @@ de cada um, C troca o personagem, Espaço pausa.
    `erase`, `paint` e `outline` da regra das juntas (com os casos de calça comprida, tampa da
    manga, mãos com objeto e óculos). Gerar com `pnpm art fulano --debug <pasta>` e conferir os
    pontos.
-3. Acertar a proporção com `stretch`, comparando com o `1-conceito.png` e com os outros personagens:
+3. Acertar a proporção com `stretch`, comparando com o `1-conceito.png` e com os outros personagens
+   (o jogo ajusta o boneco à altura da hurtbox: encurtar as pernas de um baixinho deixa cabeça e
+   tronco maiores, como no Tauba):
    cabeça uns 30% da altura, do pescoço à barra do short uns 40%, pernas abaixo do short uns 30%.
    Braço e antebraço com comprimentos parecidos, e o alcance total parecido com o dos outros, para
    o punho cair dentro da hitbox dos golpes. Mãos de trás do mesmo tamanho aparente das da frente.

@@ -11,6 +11,7 @@ import {
   InputDelay,
   isActiveFrame,
   isCountering,
+  isVanished,
   moveFrame,
   NO_INPUT,
   PLAYABLE_CHARACTERS,
@@ -31,6 +32,7 @@ import {
   type HitEvent,
   type InputMask,
   type KoEvent,
+  type MoveDef,
   type Replay,
 } from '@jogo-luta/sim';
 import { music } from '../audio/music';
@@ -174,6 +176,19 @@ interface PrevPos {
  * Online (sala aberta), os inputs passam pelo lockstep da sala: o tick só roda
  * quando o input dos dois chegou, e os dois lados veem a mesma luta.
  */
+/** Frames que o Tauba leva para se juntar de novo depois de voltar do teleporte sorteado. */
+const REAPPEAR_FADE = 8;
+
+/** Transparência do corpo se desfazendo antes do teleporte sorteado e se juntando depois. */
+function quitAlpha(f: Fighter): number {
+  const move = f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
+  if (!move?.teleport?.random) return 1;
+  const frame = moveFrame(f);
+  if (frame <= move.startup) return 1 - 0.65 * (frame / move.startup);
+  const back = frame - move.startup - move.active;
+  return back > 0 && back <= REAPPEAR_FADE ? 0.35 + 0.65 * (back / REAPPEAR_FADE) : 1;
+}
+
 export class FightScene extends Phaser.Scene {
   state!: GameState;
   /** Último input enviado ao sim, por jogador (para o overlay de debug). */
@@ -807,8 +822,10 @@ export class FightScene extends Phaser.Scene {
     for (const f of this.state.fighters) {
       const view = this.views[f.id];
       if (!view) continue;
-      view.setVisible(f.state !== 'ko');
-      if (f.state === 'ko') continue;
+      // sumido no teleporte sorteado: nem corpo, nem marcador, nem caixas
+      const hidden = f.state === 'ko' || isVanished(f);
+      view.setVisible(!hidden);
+      if (hidden) continue;
       const r = this.renderRect(f, alpha);
       // Desloca as caixas do sim para a posição interpolada.
       const dx = r.x - toPx(f.x);
@@ -819,7 +836,8 @@ export class FightScene extends Phaser.Scene {
 
       view.setPose(fighterPose(f), r.x + r.w / 2 + shake, r.y + r.h, f.facing, f.grounded);
       // invencível pisca; levando golpe, pisca claro
-      view.setAlpha(f.invulnTicks > 0 && Math.floor(this.state.tick / 4) % 2 === 0 ? 0.35 : 1);
+      const blink = f.invulnTicks > 0 && Math.floor(this.state.tick / 4) % 2 === 0;
+      view.setAlpha(Math.min(blink ? 0.35 : 1, quitAlpha(f)));
       if (this.state.tick < (this.flashUntil[f.id] ?? 0)) {
         view.setFlash();
       } else {
@@ -875,9 +893,13 @@ export class FightScene extends Phaser.Scene {
       const view = this.views[f.id];
       const fx = CHARACTER_FX[f.character];
       if (view && fx) this.spawnPropFx(f, view, fx);
+      if (view && fx?.tauntNotes) this.spawnTauntNotes(f, view, fx.tauntNotes);
       const move = f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
       if (!view || !fx || !move) continue;
       const frame = moveFrame(f);
+      if (fx.vanishSquares && move.teleport?.random) {
+        this.spawnQuitFx(f, view, fx.vanishSquares, move, frame);
+      }
       if (fx.muzzleFlash && frame === move.startup + 1) {
         const muzzle = view.propPoint('muzzle');
         this.fx.spawn({
@@ -1021,9 +1043,114 @@ export class FightScene extends Phaser.Scene {
     }
   }
 
-  /** Fumacinha na mão quando a peça segurada (a arma) aparece ou some. */
+  /**
+   * Silent quit: o corpo se desfaz em quadradinhos no startup, some com um "plim" no
+   * 1º frame ativo e, no fim do sumiço, os quadradinhos se juntam onde ele volta.
+   */
+  private spawnQuitFx(
+    f: Fighter,
+    view: FighterView,
+    squares: readonly string[],
+    move: MoveDef,
+    frame: number,
+  ): void {
+    const key = characterTextureKey(f.character);
+    const cx = toPx(f.x + f.w / 2);
+    const cy = toPx(f.y + f.h / 2);
+    const w = toPx(f.w);
+    const h = toPx(f.h);
+    const s = view.scale;
+    const pick = () => squares[Math.floor(Math.random() * squares.length)] ?? '';
+    if (frame <= move.startup) {
+      // desfazendo: quadradinhos soltam do corpo e sobem
+      if (frame % 2 === 0) {
+        this.fx.spawn({
+          texture: key,
+          frame: pick(),
+          x: cx + (Math.random() - 0.5) * w,
+          y: cy + (Math.random() - 0.5) * h,
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: -0.6 - Math.random(),
+          life: 18,
+          scale: s * 1.1,
+          scaleEnd: s * 0.4,
+        });
+      }
+    } else if (frame === move.startup + 1) {
+      playSfx(this, 'vanish');
+      for (let i = 0; i < 16; i++) {
+        const ox = (Math.random() - 0.5) * w;
+        const oy = (Math.random() - 0.5) * h;
+        this.fx.spawn({
+          texture: key,
+          frame: pick(),
+          x: cx + ox,
+          y: cy + oy,
+          vx: ox * 0.08 + (Math.random() - 0.5),
+          vy: oy * 0.05 - 1 - Math.random() * 1.5,
+          drag: 0.94,
+          life: 26 + Math.random() * 10,
+          scale: s * 1.4,
+          scaleEnd: s * 0.4,
+          rotation: Math.random(),
+          spin: (Math.random() - 0.5) * 0.2,
+        });
+      }
+    } else if (frame === move.startup + move.active + 1) {
+      // já está no lugar novo: os quadradinhos vêm de fora e se juntam no corpo
+      playSfx(this, 'appear');
+      const life = 10;
+      for (let i = 0; i < 16; i++) {
+        const a = (i / 16) * Math.PI * 2;
+        const r = 30 + Math.random() * 25;
+        const ox = Math.cos(a) * r * 0.8;
+        const oy = Math.sin(a) * r;
+        this.fx.spawn({
+          texture: key,
+          frame: pick(),
+          x: cx + ox,
+          y: cy + oy,
+          vx: -ox / life,
+          vy: -oy / life,
+          life,
+          scale: s * 0.6,
+          scaleEnd: s * 1.3,
+        });
+      }
+    }
+  }
+
+  /** Notas musicais saindo da boca do trompete, no tempo da fanfarra da provocação. */
+  private spawnTauntNotes(
+    f: Fighter,
+    view: FighterView,
+    notes: NonNullable<CharacterFx['tauntNotes']>,
+  ): void {
+    if (f.state !== 'taunt') return;
+    const i = notes.ticks.indexOf(f.stateTicks - characterOfFighter(f).taunt.voiceAt);
+    const bell = i >= 0 ? view.handPoint('bell') : null;
+    if (!bell) return;
+    this.fx.spawn({
+      texture: characterTextureKey(f.character),
+      frame: notes.frames[i % notes.frames.length] ?? '',
+      x: bell.x,
+      y: bell.y - 4,
+      vx: f.facing * (0.9 + Math.random() * 0.5),
+      vy: -0.9 - Math.random() * 0.4,
+      drag: 0.985,
+      life: 50,
+      scale: view.scale * 0.7,
+      scaleEnd: view.scale * 0.9,
+      rotation: (Math.random() - 0.5) * 0.4,
+      spin: (Math.random() - 0.5) * 0.02,
+    });
+  }
+
+  /** Fumacinha na mão quando a peça segurada (a arma, o trompete) aparece ou some. */
   private spawnPropFx(f: Fighter, view: FighterView, fx: CharacterFx): void {
-    const prop = fighterPose(f).prop;
+    const pose = fighterPose(f);
+    const tauntHand = fx.heldInTauntHand === true && pose.handNear === 'taunt';
+    const prop = pose.prop ?? (tauntHand ? 'hand_taunt' : null);
     const before = this.lastProps[f.id] ?? null;
     this.lastProps[f.id] = prop;
     const puffs = fx.propPuffs ?? [];
@@ -1090,7 +1217,7 @@ export class FightScene extends Phaser.Scene {
       );
     }
     const rects = this.state.fighters
-      .filter((f) => f.state !== 'ko')
+      .filter((f) => f.state !== 'ko' && !isVanished(f))
       .map((f) => this.renderRect(f, alpha));
     return frameTargets(
       rects.length > 0 ? rects : [STAGE_VIEW],

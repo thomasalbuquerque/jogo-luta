@@ -30,6 +30,8 @@ export const SFX_NAMES = [
   'counter',
   'ko',
   'respawn',
+  'vanish',
+  'appear',
   'count',
   'go',
   'ui_move',
@@ -253,6 +255,14 @@ function uiError(sr: number): Float32Array<ArrayBuffer> {
   );
 }
 
+/**
+ * "Plim" de chamada: duas notas limpas, descendo (alguém saiu: o Tauba sumindo no
+ * especial) ou subindo (alguém entrou: ele voltando). Genérico, sem lembrar app nenhum.
+ */
+function callChime(sr: number, rising: boolean): Float32Array<ArrayBuffer> {
+  return blips(sr, rising ? [76, 83] : [83, 76], 0.09, 0.09, 'sine');
+}
+
 /** Amostras do efeito `name`, na taxa `sampleRate`. Sempre iguais para o mesmo nome. */
 export function renderSfx(name: SfxName, sampleRate: number): Float32Array<ArrayBuffer> {
   switch (name) {
@@ -294,6 +304,10 @@ export function renderSfx(name: SfxName, sampleRate: number): Float32Array<Array
       return ko(sampleRate);
     case 'respawn':
       return respawn(sampleRate);
+    case 'vanish':
+      return callChime(sampleRate, false);
+    case 'appear':
+      return callChime(sampleRate, true);
   }
 }
 

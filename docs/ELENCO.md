@@ -157,6 +157,12 @@ Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):
   borboleta preta; calça social preta; sapato social preto. Careca e barba cheia escura. Ele é magro mas tem braço forte e busto forte (não muito, mas destaca um pouco na roupa) Cores:
   preto, branco e dourado (o dourado do trompete e do lenço ajuda a ler o personagem nos menus
   escuros).
+- **No jogo:** jogável. No especial ele ajeita a gravata, se desfaz em quadradinhos com um "plim"
+  descendo, fica 20 ticks sumido e volta num chão sorteado (quase sempre longe do adversário) com os
+  quadradinhos se juntando e um "plim" subindo. Na provocação o trompete aparece com fumacinha, as
+  notas saem da boca do trompete no ritmo da fanfarra e o balão mostra 🎵🎶. Sem áudio gravado, a
+  fanfarra é sintetizada (`packages/game/src/audio/fanfare.ts`). Ficha em
+  `packages/sim/src/characters/tauba.ts`.
 - **Ideias guardadas:** "fulano saiu da chamada" como balão ao levar KO; reaparecer no respawn com
   o "plim" de conexão; o trompete dando uma nota desafinada quando ele leva golpe na provocação.
 

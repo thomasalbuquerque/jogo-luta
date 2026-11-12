@@ -110,6 +110,76 @@ function strums(from: number, to: number): Key[] {
   return keys;
 }
 
+/** Pernas juntas, em pé e à vontade (sem a guarda). */
+const STANDING: Rot = {
+  thighNear: 6,
+  shinNear: 4,
+  footNear: -10,
+  thighFar: -8,
+  shinFar: 6,
+  footFar: 0,
+};
+
+/**
+ * Tauba saindo de fininho: em pé, ajeitando a gravata borboleta com a mão da
+ * frente e a outra solta do lado (a cabeça já olha de canto).
+ */
+const SNEAK: Rot = {
+  ...STANDING,
+  torso: 2,
+  head: 6,
+  upperArmNear: -25,
+  forearmNear: -150,
+  handNear: -10,
+  upperArmFar: 8,
+  forearmFar: -25,
+  handFar: 10,
+};
+
+/** Tauba de volta, como se nada tivesse acontecido: as duas mãos ajeitando o paletó. */
+const LAPELS: Rot = {
+  ...STANDING,
+  torso: 2,
+  head: -2,
+  upperArmNear: 5,
+  forearmNear: -140,
+  handNear: 20,
+  upperArmFar: 12,
+  forearmFar: -150,
+  handFar: 20,
+};
+
+/**
+ * Tauba tocando o trompete (mãos `taunt`): o cotovelo da frente para a frente e o
+ * antebraço subindo, com o bocal na boca e o trompete reto; a mão de trás com os
+ * dedos nos pistões. `lean` inclina o corpo para trás (a fanfarra subindo).
+ */
+function trumpet(lean: number): Rot {
+  return {
+    ...STANCE,
+    torso: -4 - lean,
+    head: -6 - lean * 0.4,
+    upperArmNear: -86,
+    forearmNear: -95,
+    handNear: 86,
+    upperArmFar: -92,
+    forearmFar: -122,
+    handFar: 80,
+  };
+}
+
+/** O trompete subindo até a boca (e descendo no fim). */
+const TRUMPET_UP: Rot = {
+  ...STANCE,
+  torso: 0,
+  upperArmNear: -50,
+  forearmNear: -110,
+  handNear: 60,
+  upperArmFar: -60,
+  forearmFar: -120,
+  handFar: 70,
+};
+
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.
   schummaki_special: {
@@ -359,6 +429,45 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
         },
       },
       { t: 110, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Silent quit: ajeita a gravata e some (no active ele está invisível); volta
+  // ajeitando o paletó, como se nada tivesse acontecido.
+  tauba_special: {
+    timing: 'move',
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 0.5, rot: SNEAK, handFar: 'open', ease: 'out' },
+      { t: 1, rot: { ...SNEAK, head: 10 }, ease: 'inOut' },
+      { t: 2, rot: LAPELS, handFar: 'fist' },
+      { t: 2.5, rot: { ...LAPELS, head: -6, upperArmNear: -2, upperArmFar: -12 }, ease: 'inOut' },
+      { t: 3, rot: STANCE, ease: 'inOut' },
+    ],
+  },
+  // O trompete aparece, ele toca a fanfarra e o trompete some. As notas saem do
+  // tick 30 (o `voiceAt` da ficha), nos tempos de `FANFARE` (audio/fanfare.ts):
+  // Sol–Dó–Mi–Sol curtas (30, 37, 44, 52), Mi (73) e o Sol longo (84 a 141).
+  tauba_taunt: {
+    timing: 'once',
+    length: 160,
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 8, rot: TRUMPET_UP, handNear: 'taunt', handFar: 'taunt', ease: 'out' },
+      { t: 24, rot: trumpet(0), ease: 'out' },
+      { t: 30, rot: trumpet(3), ease: 'out' },
+      { t: 37, rot: trumpet(1), ease: 'inOut' },
+      { t: 44, rot: trumpet(4), ease: 'inOut' },
+      { t: 52, rot: trumpet(6), ease: 'out' },
+      { t: 70, rot: trumpet(3), ease: 'inOut' },
+      { t: 73, rot: trumpet(5), ease: 'out' },
+      { t: 84, rot: trumpet(8), ease: 'out' },
+      { t: 100, rot: trumpet(14), ease: 'out' },
+      { t: 141, rot: trumpet(15) },
+      { t: 150, rot: TRUMPET_UP, ease: 'inOut' },
+      { t: 152, rot: TRUMPET_UP, handNear: 'fist', handFar: 'fist', expression: 'taunt' },
+      { t: 160, rot: STANCE, ease: 'inOut' },
     ],
   },
 };
