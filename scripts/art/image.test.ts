@@ -4,6 +4,7 @@ import {
   clipPolygon,
   colorAround,
   createImage,
+  fillBehind,
   opaqueBounds,
   packShelves,
   removeSpecks,
@@ -70,6 +71,24 @@ describe('clipPolygon', () => {
       'keep',
     );
     expect(opaqueBounds(img)).toEqual([2, 0, 2, 1]);
+  });
+});
+
+describe('fillBehind', () => {
+  it('deixa opaco, com o desenho por cima da cor na proporção do alfa', () => {
+    const img = createImage(3, 1);
+    // meio transparente fora do polígono, meio transparente e vazio dentro
+    img.data.set([200, 200, 200, 128, 200, 200, 200, 128, 0, 0, 0, 0]);
+    const lens = [
+      [1, 0],
+      [3, 0],
+      [3, 1],
+      [1, 1],
+    ] as const;
+    fillBehind(img, lens, '#000000');
+    expect(pixel(img, 0, 0)).toEqual([200, 200, 200, 128]);
+    expect(pixel(img, 1, 0)).toEqual([100, 100, 100, 255]);
+    expect(pixel(img, 2, 0)).toEqual([0, 0, 0, 255]);
   });
 });
 

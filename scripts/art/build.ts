@@ -17,6 +17,7 @@ import {
   clipPolygon,
   createImage,
   crop,
+  fillBehind,
   opaqueBounds,
   packShelves,
   paintPolygon,
@@ -61,6 +62,8 @@ interface PartDef {
   keep?: Polygon[];
   /** Polígonos pintados de uma cor só (tirar texto). */
   paint?: { poly: Polygon; color: string }[];
+  /** Cor posta por trás do desenho (vidro dos óculos que veio da cor do fundo). */
+  fill?: { poly: Polygon; color: string }[];
   /** Traço de contorno ao longo de um corte. */
   outline?: Polygon[];
   /**
@@ -139,6 +142,7 @@ async function processPart(
   for (const poly of def.keep ?? []) clipPolygon(img, local(poly), 'keep');
   for (const poly of def.erase ?? []) clipPolygon(img, local(poly), 'erase');
   for (const p of def.paint ?? []) paintPolygon(img, local(p.poly), p.color);
+  for (const f of def.fill ?? []) fillBehind(img, local(f.poly), f.color);
   for (const line of def.outline ?? []) {
     if (!outline) throw new Error(`${name}: "outline" precisa de outline no manifesto`);
     strokePolyline(img, local(line), outline.width, outline.color, before);
