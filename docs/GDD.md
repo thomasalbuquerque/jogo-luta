@@ -5,7 +5,7 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 
 ## Partida
 
-- **Formato:** 1x1 no mesmo PC; online, de 2 a 4: todos contra todos ou em [times](#times) (2 contra 2 ou 2 contra 1). Plataforma de luta, sem barra de vida: quem sai da tela perde uma vida.
+- **Formato:** de 2 a 4 jogadores, no mesmo PC (o 3º e o 4º com controle) ou online: todos contra todos ou em [times](#times) (2 contra 2 ou 2 contra 1). Plataforma de luta, sem barra de vida: quem sai da tela perde uma vida.
 - **Stocks:** 3 vidas por jogador.
 - **Tempo limite:** 4 minutos. No fim do tempo vence quem tiver mais stocks; empate em stocks → menor % de dano; empate total → morte súbita (1 stock, 300%). Com times, conta a soma do time.
 - **Dano:** cada golpe soma % ao alvo (começa em 0%, sem teto). Quanto maior o %, mais longe o golpe arremessa.
@@ -22,7 +22,7 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 
 ### Times
 
-- **Quando:** com 3 ou 4 jogadores (por enquanto, no online). Escolhido na tela de mapa, no painel **Opções da luta** (↑/↓ escolhe a linha, ←/→ muda): **Modo** (todos contra todos, ou times: 2 contra 2 com 4, 2 contra 1 com 3), **Times** (qual das 3 divisões; o P1 fica sempre no time vermelho) e **Fogo amigo**. Online, quem escolhe é o host; os outros veem as opções mudando.
+- **Quando:** com 3 ou 4 jogadores, no mesmo PC ou online. Escolhido na tela de mapa, no painel **Opções da luta** (↑/↓ escolhe a linha, ←/→ muda): **Modo** (todos contra todos, ou times: 2 contra 2 com 4, 2 contra 1 com 3), **Times** (qual das 3 divisões; o P1 fica sempre no time vermelho) e **Fogo amigo**. Online, quem escolhe é o host; os outros veem as opções mudando.
 - **Cores:** time vermelho e time azul. Com times, o marcador em cima da cabeça, o painel do HUD, os efeitos de golpe/KO/respawn e o resultado usam a cor do time (sem times, a cor de cada jogador).
 - **Fogo amigo:** desligado por padrão: golpes, agarrões e projéteis atravessam o companheiro. Ligado, acertam como em qualquer um.
 - **Vitória:** vence o time que sobrar com alguém com stock; o time inteiro vence, mesmo quem já caiu. No fim do tempo, compara a soma dos stocks de quem ainda está na luta, depois a soma do % (menor vence); empate total → morte súbita para quem ainda está na luta nos times empatados.
@@ -47,7 +47,9 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 
 Padrão abaixo; dá para trocar na tela **Controles** (menu inicial), e fica salvo no navegador. Uma tecla só vale para um botão: escolher uma que já é usada troca as duas. Enter, Esc, M, ` , Tab e F1–F12 são reservadas. No controle (o mesmo mapa para todos), as direções ficam sempre no analógico e no D-pad; Select e Start são reservados. Gamepad (Gamepad API) é o recomendado.
 
-Nos menus, além dos controles de cada jogador, sempre valem as setas, Enter (confirma) e Esc (volta).
+Nos menus, além dos controles de cada jogador, sempre valem as setas, Enter (confirma) e Esc (volta); nos menus com um cursor só (mapa, pausa, resultado), qualquer controle conectado mexe.
+
+**Até 4 no mesmo PC:** P1 e P2 usam o teclado deles e o 1º e o 2º controle. Com mais controles conectados, quem tem o 3º ou o 4º entra na seleção de personagem apertando A (vira P3, depois P4, na ordem em que entrou) e sai com B antes de confirmar o personagem; desconectar o controle também tira a pessoa. Os lugares continuam ao trocar de lutador ou de mapa.
 
 | Ação       | Jogador 1  | Jogador 2 | Gamepad (padrão)       |
 | ---------- | ---------- | --------- | ---------------------- |
@@ -144,6 +146,7 @@ Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 
 - **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; online; ver replay; controles) → personagem → mapa → luta → resultado → revanche.
 - **Personagem:** grade de 7 casas (os que existem e silhuetas "em breve"; cresce aos poucos). Cada jogador anda com as próprias direções, confirma com Ataque ou Pulo e desfaz com Especial; Especial com ninguém pronto (ou Esc) volta ao menu. O painel de cada um mostra o lutador, estilo, especial, barras e bordão. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
+- **Mais jogadores no mesmo PC:** com 3 ou 4 controles conectados, aparece "Mais gente? Controle 3: aperte A para entrar" e cada um que entra ganha um painel (os painéis ficam lado a lado, mais estreitos). Ver [Controles](#controles).
 - **Mapa:** um cursor só, qualquer jogador mexe; por enquanto só a Laje. Com 3 ou 4 jogadores, ao lado do mapa ficam as opções de [times](#times).
 - **HUD:** painel de cada jogador com retrato, % de dano (branco → amarelo → laranja → vermelho → vinho conforme sobe) e stocks com a cabecinha do personagem; relógio no alto.
 
