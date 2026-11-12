@@ -24,6 +24,8 @@ describe('mensagens de controle', () => {
       seed: 7,
       delay: 3,
       clients: ['a', 'b'],
+      teams: null,
+      friendlyFire: false,
     };
     const messages = [
       { t: 'hello', v: 1, build: 'dev', client: 'abc' },
@@ -32,9 +34,32 @@ describe('mensagens de controle', () => {
       { t: 'refuse', reason: 'busy' },
       { t: 'roster', clients: ['a', 'b', 'c', 'd'] },
       { t: 'screen', screen: { name: 'select', seq: 1 } },
-      { t: 'screen', screen: { name: 'stage', seq: 2, characters, stageId } },
+      {
+        t: 'screen',
+        screen: { name: 'stage', seq: 2, characters, stageId, teams: null, friendlyFire: false },
+      },
+      {
+        t: 'screen',
+        screen: {
+          name: 'stage',
+          seq: 2,
+          characters: four,
+          stageId,
+          teams: [0, 1, 0, 1],
+          friendlyFire: true,
+        },
+      },
       { t: 'screen', screen: fight },
       { t: 'screen', screen: { ...fight, characters: four, clients: ['a', 'b', 'c', 'd'] } },
+      {
+        t: 'screen',
+        screen: {
+          ...fight,
+          characters: four,
+          clients: ['a', 'b', 'c', 'd'],
+          teams: [0, 0, 1, 1],
+        },
+      },
       { t: 'sel', seq: 1, cursor: 2, ready: true },
       { t: 'sels', seq: 1, sels: [{ cursor: 2, ready: true }, null, { cursor: 0, ready: false }] },
       { t: 'goto', screen: 'select' },
@@ -55,6 +80,8 @@ describe('mensagens de controle', () => {
       seed: 7,
       delay: 3,
       clients: ['a', 'b'],
+      teams: null,
+      friendlyFire: false,
     };
     const bad: unknown[] = [
       null,
@@ -67,6 +94,9 @@ describe('mensagens de controle', () => {
       { t: 'screen', screen: { ...fight, characters: ['ninguem', 'ninguem'] } },
       { t: 'screen', screen: { ...fight, characters: [characters[0]] } },
       { t: 'screen', screen: { ...fight, stageId: 'lua' } },
+      { t: 'screen', screen: { ...fight, teams: [0, 1, 0] } },
+      { t: 'screen', screen: { ...fight, teams: [0, 2] } },
+      { t: 'screen', screen: { ...fight, friendlyFire: undefined } },
       { t: 'screen', screen: { ...fight, delay: 0 } },
       { t: 'screen', screen: { ...fight, delay: 99 } },
       { t: 'screen', screen: { ...fight, seed: -1 } },

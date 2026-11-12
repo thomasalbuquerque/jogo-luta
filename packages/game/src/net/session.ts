@@ -1,3 +1,4 @@
+import { fitTeams, FREE_FOR_ALL, keepTeams, type TeamSetup } from '../match/teams';
 import { DesyncDetector, type Desync } from './desync';
 import { Lockstep } from './lockstep';
 import { delayForPing, PingMeter, starPing } from './ping';
@@ -662,26 +663,46 @@ export class OnlineSession {
     else this.setScreen({ name: 'select', seq: this.seq + 1 });
   }
 
-  /** Host: abre a seleção de mapa (ou troca o mapa mostrado), com o personagem de cada lugar. */
-  openStage(characters: readonly string[], stageId: string): void {
+  /**
+   * Host: abre a seleção de mapa (ou troca o que ela mostra), com o personagem
+   * de cada lugar, o mapa e os times escolhidos.
+   */
+  openStage(
+    characters: readonly string[],
+    stageId: string,
+    teamSetup: TeamSetup = FREE_FOR_ALL,
+  ): void {
     if (this.role !== 'host') return;
     if (characters.length !== this.clients.length) {
       this.openSelect();
       return;
     }
-    this.setScreen({ name: 'stage', seq: this.seq + 1, characters: [...characters], stageId });
+    const { teams, friendlyFire } = fitTeams(teamSetup, characters.length);
+    this.setScreen({
+      name: 'stage',
+      seq: this.seq + 1,
+      characters: [...characters],
+      stageId,
+      teams,
+      friendlyFire,
+    });
   }
 
   /**
    * Host: começa uma partida com quem está na sala (o personagem de cada lugar),
    * com seed nova e o atraso de input que o pior caminho da sala pede.
    */
-  startMatch(characters: readonly string[], stageId: string): void {
+  startMatch(
+    characters: readonly string[],
+    stageId: string,
+    teamSetup: TeamSetup = FREE_FOR_ALL,
+  ): void {
     if (this.role !== 'host') return;
     if (characters.length !== this.clients.length) {
       this.openSelect();
       return;
     }
+    const { teams, friendlyFire } = fitTeams(teamSetup, characters.length);
     const path = starPing([...this.peers.values()].map((p) => p.ping));
     this.setScreen({
       name: 'fight',
@@ -691,6 +712,8 @@ export class OnlineSession {
       seed: this.newSeed() >>> 0,
       delay: delayForPing(path.rtt, path.jitter),
       clients: [...this.clients],
+      teams,
+      friendlyFire,
     });
   }
 
@@ -743,18 +766,24 @@ export class OnlineSession {
     this.broadcast({ t: 'votes', seq: screen.seq, count: this.voters.size });
   }
 
-  /** Mesma luta de novo, com quem ainda está na sala (cada um com o seu personagem). */
+  /**
+   * Mesma luta de novo, com quem ainda está na sala (cada um com o seu
+   * personagem e o seu time; se os times não fecham mais, todos contra todos).
+   */
   private startRematch(screen: FightScreen): void {
     const characters: string[] = [];
+    const keep: number[] = [];
     for (const client of this.clients) {
-      const character = screen.characters[screen.clients.indexOf(client)];
+      const seat = screen.clients.indexOf(client);
+      const character = screen.characters[seat];
       if (character === undefined) {
         this.openSelect();
         return;
       }
       characters.push(character);
+      keep.push(seat);
     }
-    this.startMatch(characters, screen.stageId);
+    this.startMatch(characters, screen.stageId, keepTeams(screen, keep));
   }
 
   /** Manda os inputs que cada lado ainda não confirmou (todo tick). */

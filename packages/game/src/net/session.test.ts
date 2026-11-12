@@ -314,6 +314,8 @@ describe('OnlineSession: telas', () => {
       seq: 2,
       characters: CHARACTERS,
       stageId: STAGE,
+      teams: null,
+      friendlyFire: false,
     });
     s.host.startMatch(CHARACTERS, STAGE);
     s.run();
@@ -337,6 +339,25 @@ describe('OnlineSession: telas', () => {
     s.run();
     expect(s.guests[1]?.match?.characters).toEqual([A, B, B]);
     expect(s.guests[1]?.match?.local).toBe(2);
+  });
+
+  it('os times escolhidos vão para todos, na tela de mapa e na luta', () => {
+    const s = setup({}, [], 2);
+    s.connectAll();
+    const teams = { teams: [0, 1, 1], friendlyFire: true };
+    s.host.openStage([A, B, A], STAGE, teams);
+    s.run();
+    const stage = s.guests[1]?.screen;
+    expect(stage?.name === 'stage' && [stage.teams, stage.friendlyFire]).toEqual([[0, 1, 1], true]);
+    s.host.startMatch([A, B, A], STAGE, teams);
+    s.run();
+    expect(s.guests[0]?.match?.teams).toEqual([0, 1, 1]);
+    expect(s.guests[0]?.match?.friendlyFire).toBe(true);
+    // times que não fecham com quem está na sala: todos contra todos
+    s.host.startMatch([A, B, A], STAGE, { teams: [0, 0, 0], friendlyFire: true });
+    s.run();
+    expect(s.guests[0]?.match?.teams).toBeNull();
+    expect(s.guests[0]?.match?.friendlyFire).toBe(false);
   });
 
   it('quem entra não muda a tela sozinho, mas pode pedir a seleção', () => {
@@ -567,7 +588,7 @@ describe('OnlineSession: partida', () => {
   it('quem sai no meio da luta fica parado, e a luta segue igual para os outros', () => {
     const s = setup({ loss: 0.1, maxDelay: 4 }, [], 2);
     s.connectAll();
-    s.host.startMatch([A, B, A], STAGE);
+    s.host.startMatch([A, B, A], STAGE, { teams: [0, 1, 1], friendlyFire: false });
     const [, p3] = s.guests;
     let leftAt = 0;
     const sides = play(s, 900, (frame) => {
@@ -591,6 +612,8 @@ describe('OnlineSession: partida', () => {
     s.guests[0]?.voteRematch();
     s.run();
     expect(s.guests[0]?.match?.characters).toEqual([A, B]);
+    // com 2, não tem time: todos contra todos
+    expect(s.guests[0]?.match?.teams).toBeNull();
     expect(s.guests[0]?.match?.clients).toEqual(s.host.roster);
   });
 

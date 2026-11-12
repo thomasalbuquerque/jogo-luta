@@ -6,7 +6,7 @@ import { MAX_PACKET_INPUTS, type InputBatch, type InputRun } from './lockstep';
  * Versão do protocolo do online. Muda quando uma mensagem muda de formato: os
  * lados precisam da mesma (e do mesmo build do jogo, para a luta ser igual).
  */
-export const NET_VERSION = 2;
+export const NET_VERSION = 3;
 
 /** Jogadores numa sala online, no máximo (o host e mais 3). */
 export const MAX_ROOM_PLAYERS = 4;
@@ -22,6 +22,11 @@ const stageId = z.string().refine((id) => STAGES.some((s) => s.id === id), {
 
 /** Id de cada um na sala (sorteado ao abrir; serve para reconhecer a reconexão). */
 const clientId = z.string().min(1).max(40);
+/** Time de cada lugar (0 ou 1; null = todos contra todos). */
+const teams = z.array(z.number().int().min(0).max(1)).min(2).max(MAX_ROOM_PLAYERS).nullable();
+const sameSize = (s: { characters: string[]; teams: number[] | null }) =>
+  s.teams === null || s.teams.length === s.characters.length;
+
 const SelectionSchema = z.object({ cursor: z.number().int().min(0).max(63), ready: z.boolean() });
 
 /**
@@ -30,8 +35,17 @@ const SelectionSchema = z.object({ cursor: z.number().int().min(0).max(63), read
  */
 const ScreenSchema = z.discriminatedUnion('name', [
   z.object({ name: z.literal('select'), seq: uint32 }),
-  /** `characters`: o de cada lugar da sala, na ordem. */
-  z.object({ name: z.literal('stage'), seq: uint32, characters, stageId }),
+  /** `characters`: o de cada lugar da sala, na ordem. `teams` e `friendlyFire`: o que o host escolheu. */
+  z
+    .object({
+      name: z.literal('stage'),
+      seq: uint32,
+      characters,
+      stageId,
+      teams,
+      friendlyFire: z.boolean(),
+    })
+    .refine(sameSize, { error: 'times não batem com os personagens' }),
   z
     .object({
       name: z.literal('fight'),
@@ -43,7 +57,10 @@ const ScreenSchema = z.discriminatedUnion('name', [
       delay: z.number().int().min(1).max(MAX_INPUT_DELAY),
       /** Quem joga com cada lutador (o id de cada um, na ordem de `characters`). */
       clients: z.array(clientId).min(2).max(MAX_ROOM_PLAYERS),
+      teams,
+      friendlyFire: z.boolean(),
     })
+    .refine(sameSize, { error: 'times não batem com os personagens' })
     .refine(
       (s) =>
         s.clients.length === s.characters.length && new Set(s.clients).size === s.clients.length,
