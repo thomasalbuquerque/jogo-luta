@@ -9,7 +9,8 @@ import { waitingLabel } from '../net/route';
 import { UNSTABLE_MS } from '../net/session';
 import type { EdgePoint } from '../render/koEdge';
 import { addPortrait } from '../ui/portrait';
-import { cssColor, playerColor, UI, uiText } from '../ui/theme';
+import { hasTeams, teamName } from '../match/teams';
+import { cssColor, fighterColor, teamColor, UI, uiText } from '../ui/theme';
 import type { FightScene } from './FightScene';
 
 /** O % cresce ao levar golpe e volta sozinho (até este tamanho). */
@@ -19,6 +20,8 @@ const PANEL_W = 300;
 const PANEL_H = 92;
 /** Espaço entre os painéis, com 3 ou 4 lutadores. */
 const PANEL_GAP = 12;
+/** Com times: espaço a mais entre um time e outro. */
+const TEAM_GAP = 28;
 const PORTRAIT = 84;
 const STOCK_ICON = 26;
 /** Online: parado esperando o input de alguém por mais que isto, avisa na tela (ms). */
@@ -74,15 +77,20 @@ export class HudScene extends Phaser.Scene {
     this.shownCount = 0;
     this.goMs = 0;
     const n = fighters.length;
-    // com 2, um de cada lado; com mais, lado a lado e centralizados (4 cabem na largura)
-    const row = n * PANEL_W + (n - 1) * PANEL_GAP;
-    this.panels = fighters.map((f, i) => {
-      const x =
-        n === 2
-          ? (width * (i + 1)) / 3 + (i === 0 ? -70 : 70) - PANEL_W / 2
-          : (width - row) / 2 + i * (PANEL_W + PANEL_GAP);
-      return this.drawPanel(f, x, height - PANEL_H - 14);
-    });
+    const y = height - PANEL_H - 14;
+    if (hasTeams(fighters)) {
+      this.panels = this.drawTeamPanels(fighters, y);
+    } else {
+      // com 2, um de cada lado; com mais, lado a lado e centralizados (4 cabem na largura)
+      const row = n * PANEL_W + (n - 1) * PANEL_GAP;
+      this.panels = fighters.map((f, i) => {
+        const x =
+          n === 2
+            ? (width * (i + 1)) / 3 + (i === 0 ? -70 : 70) - PANEL_W / 2
+            : (width - row) / 2 + i * (PANEL_W + PANEL_GAP);
+        return this.drawPanel(f, x, y);
+      });
+    }
     this.clock = uiText(this, width / 2, 14, '', {
       fontFamily: UI.titleFont,
       fontSize: '30px',
@@ -147,9 +155,43 @@ export class HudScene extends Phaser.Scene {
     return this.scene.get('fight') as FightScene;
   }
 
-  /** Painel de um jogador: retrato num círculo da cor dele, nome, % e stocks. */
+  /**
+   * Com times: os painéis agrupados por time (o time 0 à esquerda), com um
+   * espaço entre os times e o nome do time em cima de cada grupo. Devolve os
+   * painéis na ordem dos lutadores.
+   */
+  private drawTeamPanels(fighters: readonly Fighter[], y: number): Panel[] {
+    const order = [...fighters].sort((a, b) => a.team - b.team || a.id - b.id);
+    const groups = new Set(order.map((f) => f.team)).size;
+    const row = order.length * PANEL_W + (order.length - 1) * PANEL_GAP + (groups - 1) * TEAM_GAP;
+    const panels: Panel[] = [];
+    let x = (this.scale.width - row) / 2;
+    let groupX = x;
+    for (const [i, f] of order.entries()) {
+      panels[f.id] = this.drawPanel(f, x, y);
+      const next = order[i + 1];
+      if (next?.team === f.team) {
+        x += PANEL_W + PANEL_GAP;
+        continue;
+      }
+      // fim do grupo: nome do time centralizado em cima dele
+      const groupW = x + PANEL_W - groupX;
+      uiText(this, groupX + groupW / 2, y - 6, teamName(f.team), {
+        fontFamily: UI.titleFont,
+        fontSize: '17px',
+        color: cssColor(teamColor(f.team)),
+        stroke: '#0b0e16',
+        strokeThickness: 5,
+      }).setOrigin(0.5, 1);
+      x += PANEL_W + PANEL_GAP + TEAM_GAP;
+      groupX = x;
+    }
+    return panels;
+  }
+
+  /** Painel de um jogador: retrato num círculo da cor dele (ou do time), nome, % e stocks. */
   private drawPanel(f: Fighter, x: number, y: number): Panel {
-    const color = playerColor(f.id);
+    const color = fighterColor(this.fight.state.fighters, f.id);
     const c = getCharacter(f.character);
     const g = this.add.graphics();
     g.fillStyle(0x0b0e16, 0.72);
