@@ -154,7 +154,7 @@ Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):
   voz provisória.
 - **Visual:** terno preto de músico de concerto: paletó preto (`#1E1F24`) abotoado, até o quadril,
   sem cauda, com lenço dourado (`#E0A93B`) no bolso; camisa social branca (`#F4F1EA`) e gravata
-  borboleta preta; calça social preta; sapato social preto. Careca e barba cheia escura. Cores:
+  borboleta preta; calça social preta; sapato social preto. Careca e barba cheia escura. Ele é magro mas tem braço forte e busto forte (não muito, mas destaca um pouco na roupa) Cores:
   preto, branco e dourado (o dourado do trompete e do lenço ajuda a ler o personagem nos menus
   escuros).
 - **Ideias guardadas:** "fulano saiu da chamada" como balão ao levar KO; reaparecer no respawn com
@@ -166,7 +166,7 @@ Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):
 CHARACTER SHEET
 Name: Tauba — 30-year-old frontend developer and trumpet player, famous among his friends for silently leaving voice calls without saying goodbye.
 Fighting style: trickster — evasive and sneaky, light on his feet, upright confident stance.
-Body: based on the photos; short build.
+Body: based on the photos; short build; slightly muscular upper body giving extra volume to his chest and arms.
 Outfit: black (#1E1F24) concert suit: buttoned hip-length jacket with no tails and a gold (#E0A93B) pocket square; white (#F4F1EA) dress shirt with a black bow tie; black dress pants; black dress shoes.
 Signature details: shaved bald head, full dark beard, the concert suit with bow tie and gold pocket square.
 Colors: primary #1E1F24, secondary #F4F1EA, accent #E0A93B.
@@ -182,7 +182,7 @@ Trechos prontos para os textos do Firefly (pasta `art/tauba/`):
 
 - `<EXPRESSION>`: `poker face glancing sideways`
 - `<CHARACTER>`:
-  `Tauba, 30-year-old trumpet player, short, bald, full dark beard, light brown skin, calm poker face. Black (#1E1F24) concert suit: buttoned hip-length jacket, no tails, gold (#E0A93B) pocket square; white dress shirt, black bow tie; black dress pants; black dress shoes.`
+  `Tauba, 30-year-old trumpet player, short, bald, slightly muscular upper body giving extra volume to his chest and arms, bald, full dark beard, light brown skin, calm poker face. Black (#1E1F24) concert suit: buttoned hip-length jacket, no tails, gold (#E0A93B) pocket square; white dress shirt, black bow tie; black dress pants; black dress shoes.`
 - `<LEGWEAR>`: `dress pants`
 - `<SHOE>`: `dress shoe`
 - `<EXTRA>`: `two hands holding a trumpet, one gripping it, one pressing the valves`
