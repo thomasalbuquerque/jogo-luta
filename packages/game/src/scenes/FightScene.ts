@@ -835,6 +835,7 @@ export class FightScene extends Phaser.Scene {
         f.hitstop > 0 && f.state === 'hitstun' ? (this.state.tick % 2 === 0 ? 3 : -3) : 0;
 
       view.setPose(fighterPose(f), r.x + r.w / 2 + shake, r.y + r.h, f.facing, f.grounded);
+      this.drawAimLine(f, view);
       // invencível pisca; levando golpe, pisca claro
       const blink = f.invulnTicks > 0 && Math.floor(this.state.tick / 4) % 2 === 0;
       view.setAlpha(Math.min(blink ? 0.35 : 1, quitAlpha(f)));
@@ -913,6 +914,14 @@ export class FightScene extends Phaser.Scene {
           scale: view.scale * 0.55,
           scaleEnd: view.scale * 0.8,
         });
+      }
+      if (fx.shotSound && frame === move.startup + 1) playSfx(this, fx.shotSound);
+      if (fx.aim?.glint && (frame === aimStart(move, fx.aim) || frame === move.startup - 6)) {
+        this.spawnScopeGlint(f, view, fx.aim.glint);
+      }
+      const casing = fx.shellCasing;
+      if (casing && frame === move.startup + move.active + casing.delay) {
+        this.spawnCasing(f, view, casing);
       }
       const feetX = toPx(f.x + f.w / 2);
       const feetY = toPx(f.y + f.h);
@@ -1146,6 +1155,82 @@ export class FightScene extends Phaser.Scene {
     });
   }
 
+  /** Brilho na luneta (socket `scope` da arma na mão): o aviso de que a mira começou. */
+  private spawnScopeGlint(f: Fighter, view: FighterView, frame: string): void {
+    const scope = view.propPoint('scope');
+    if (!scope) return;
+    this.fx.spawn({
+      texture: characterTextureKey(f.character),
+      frame,
+      x: scope.x,
+      y: scope.y,
+      life: 14,
+      scale: view.scale * 0.5,
+      scaleEnd: view.scale * 1.1,
+      spin: 0.12,
+      additive: true,
+    });
+  }
+
+  /** Cápsula saltando do ferrolho (socket `bolt`) para trás e para cima, girando. */
+  private spawnCasing(
+    f: Fighter,
+    view: FighterView,
+    casing: NonNullable<CharacterFx['shellCasing']>,
+  ): void {
+    const bolt = view.propPoint('bolt');
+    if (!bolt) return;
+    this.fx.spawn({
+      texture: characterTextureKey(f.character),
+      frame: casing.frame,
+      x: bolt.x,
+      y: bolt.y,
+      vx: -f.facing * (1.6 + Math.random() * 0.8),
+      vy: -3.2 - Math.random() * 0.8,
+      gravity: 0.32,
+      life: 34,
+      scale: view.scale * 0.45,
+      rotation: Math.random() * Math.PI,
+      spin: -f.facing * 0.45,
+      flipX: f.facing === -1,
+    });
+    if (casing.sound) playSfx(this, casing.sound);
+  }
+
+  /**
+   * Linha de mira do especial (`aim` do personagem): sai da boca da arma na direção
+   * do cano, cada vez mais forte até o tiro, piscando nos últimos frames.
+   */
+  private drawAimLine(f: Fighter, view: FighterView): void {
+    const aim = CHARACTER_FX[f.character]?.aim;
+    const move = aim && f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
+    if (!aim || !move) return;
+    const frame = moveFrame(f);
+    const start = aimStart(move, aim);
+    if (frame < start || frame > move.startup) return;
+    // direção do cano: do cabo (pivô) para a ponta da peça, não para a boca (que fica
+    // acima do cabo)
+    const muzzle = view.propPoint('muzzle');
+    const grip = view.propPoint('pivot');
+    const tip = view.propPoint('tip');
+    if (!muzzle || !grip || !tip) return;
+    const dx = tip.x - grip.x;
+    const dy = tip.y - grip.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const reach = 1600;
+    const k = (frame - start) / Math.max(1, move.startup - start);
+    const blink = move.startup - frame < 6 && frame % 2 === 0;
+    const alpha = blink ? 1 : 0.3 + 0.6 * k;
+    const x2 = muzzle.x + (dx / len) * reach;
+    const y2 = muzzle.y + (dy / len) * reach;
+    // traço claro com contorno de tinta: lê no céu do pôr do sol e no fundo escuro
+    const g = this.overlayGfx;
+    g.lineStyle(blink ? 5 : 4, AIM_INK, alpha * 0.45);
+    g.lineBetween(muzzle.x, muzzle.y, x2, y2);
+    g.lineStyle(blink ? 2.5 : 1.5, aim.color, alpha);
+    g.lineBetween(muzzle.x, muzzle.y, x2, y2);
+  }
+
   /** Fumacinha na mão quando a peça segurada (a arma, o trompete) aparece ou some. */
   private spawnPropFx(f: Fighter, view: FighterView, fx: CharacterFx): void {
     const pose = fighterPose(f);
@@ -1155,6 +1240,8 @@ export class FightScene extends Phaser.Scene {
     this.lastProps[f.id] = prop;
     const puffs = fx.propPuffs ?? [];
     if (prop === before || puffs.length === 0) return;
+    const quiet = fx.quietProps ?? [];
+    if (quiet.includes(prop ?? '') || quiet.includes(before ?? '')) return;
     const hand = view.handPoint();
     if (!hand) return;
     puffs.forEach((frame, i) => {
@@ -1269,4 +1356,12 @@ function drawEllipseProjectile(
 /** Caixa do sim (subpx) em px de mundo, deslocada pela interpolação. */
 function toRect(b: Box, dx: number, dy: number): Rect {
   return { x: toPx(b.x) + dx, y: toPx(b.y) + dy, w: toPx(b.w), h: toPx(b.h) };
+}
+
+/** Contorno da linha de mira (a tinta do contorno dos personagens). */
+const AIM_INK = 0x2b1a22;
+
+/** Frame do especial em que a mira começa (fração `from` do startup). */
+function aimStart(move: MoveDef, aim: NonNullable<CharacterFx['aim']>): number {
+  return Math.max(1, Math.round(move.startup * aim.from));
 }

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { fanfareTicks } from '../audio/fanfare';
+import type { SfxName } from '../audio/sfxSynth';
 
 /**
  * Efeitos do especial de cada personagem, com as peças da folha de efeitos
@@ -27,6 +28,19 @@ export interface CharacterFx {
   muzzleFlash?: string;
   /** Fumacinha na mão quando a peça segurada aparece ou some. */
   propPuffs?: readonly string[];
+  /** Peças seguradas que aparecem e somem sem a fumacinha (a chave tirada do bolso). */
+  quietProps?: readonly string[];
+  /** Som do tiro, no 1º frame ativo. */
+  shotSound?: SfxName;
+  /**
+   * Mira (só aviso visual, o sim não sabe dela): da fração `from` do startup até o
+   * tiro, uma linha fininha na cor `color` (com contorno de tinta) sai da boca da arma (socket `muzzle` da peça na mão) na
+   * direção do cano, cada vez mais forte, piscando no fim; e um brilho (`glint`) na
+   * luneta (socket `scope`) quando a mira começa e pouco antes do tiro.
+   */
+  aim?: { from: number; color: number; glint?: string };
+  /** Cápsula saltando do ferrolho (socket `bolt`), `delay` ticks depois do tiro. */
+  shellCasing?: { frame: string; delay: number; sound?: SfxName };
   /**
    * A mão `taunt` segura um objeto (o trompete do Tauba): a fumacinha de `propPuffs`
    * sai também quando ela aparece ou some.
@@ -51,6 +65,15 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
     projectile: { frames: ['fx_pellets'], scale: 1.3 },
     muzzleFlash: 'fx_flash',
     propPuffs: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
+  },
+  tchula: {
+    projectile: { frames: ['fx_trail'], scale: 1.3 },
+    muzzleFlash: 'fx_flash',
+    shotSound: 'rifle_shot',
+    propPuffs: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
+    quietProps: ['fx_wrench'],
+    aim: { from: 0.45, color: 0xfff4e0, glint: 'fx_glint' },
+    shellCasing: { frame: 'fx_casing', delay: 8, sound: 'rifle_bolt' },
   },
   tauba: {
     vanishSquares: ['fx_square1', 'fx_square2', 'fx_square3'],
