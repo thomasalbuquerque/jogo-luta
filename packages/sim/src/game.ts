@@ -30,6 +30,11 @@ export interface MatchRules {
    * contagem o input é ignorado e o relógio não anda.
    */
   countdownTicks?: number;
+  /**
+   * Companheiros de time se acertam (golpes, agarrões e projéteis). Sem valor:
+   * desligado. Sem times não muda nada (cada um é o próprio time).
+   */
+  friendlyFire?: boolean;
 }
 
 export const DEFAULT_RULES: MatchRules = { stocks: 3, timeLimitTicks: 4 * 60 * TICK_RATE };
@@ -52,8 +57,13 @@ export interface GameState {
   /** Ticks até o fim do tempo (fica em 0 na morte súbita ou sem limite). */
   timeLeft: number;
   suddenDeath: boolean;
-  /** Id do vencedor quando a luta acaba; null = empate (ou luta em andamento). */
+  /**
+   * Id do vencedor quando a luta acaba; null = empate (ou luta em andamento).
+   * Com times, é um lutador do time vencedor (o que sobrou, se foi um só).
+   */
   winner: number | null;
+  /** Time vencedor (`Fighter.team`); null = empate (ou luta em andamento). */
+  winnerTeam: number | null;
   fighters: Fighter[];
   /** Projéteis em voo (especiais). */
   projectiles: Projectile[];
@@ -74,14 +84,22 @@ export interface GameSetup {
   rules?: MatchRules;
   /** Seed do RNG da luta. A mesma seed com os mesmos inputs dá a mesma luta. */
   seed?: number;
+  /**
+   * Time de cada jogador, na ordem (ex.: [0, 1, 0, 1]). Sem isso: todos contra
+   * todos (cada um é o próprio time). Companheiros nascem do mesmo lado.
+   */
+  teams?: readonly number[];
 }
 
 export function createGame(setup: GameSetup = {}): GameState {
   const { stage = TEST_STAGE, rules = DEFAULT_RULES } = setup;
   const characters = setup.characters ?? [BASE_CHARACTER_ID, BASE_CHARACTER_ID];
   const fighters: Fighter[] = [];
+  const teams = characters.map((_, i) => setup.teams?.[i] ?? i);
+  const slots = spawnSlots(teams);
   for (const [i, character] of characters.entries()) {
-    const f = createFighter(i, spawnPoint(stage, i), character);
+    const f = createFighter(i, spawnPoint(stage, slots[i] ?? i), character);
+    f.team = teams[i] ?? i;
     f.stocks = rules.stocks;
     fighters.push(f);
   }
@@ -96,30 +114,47 @@ export function createGame(setup: GameSetup = {}): GameState {
     timeLeft: rules.timeLimitTicks,
     suddenDeath: false,
     winner: null,
+    winnerTeam: null,
     fighters,
     projectiles: [],
     events: [],
   };
 }
 
-function spawnPoint(stage: Stage, id: number): Spawn {
-  const point = stage.spawns[id % stage.spawns.length];
+/**
+ * Lugar (spawn e respawn) de cada jogador, pelo time. Os mapas alternam os
+ * lugares entre a esquerda e a direita (0 e 2 à esquerda, 1 e 3 à direita):
+ * o 1º time fica com 0, 2…, o 2º com 1, 3… Sem times (cada um no seu), o
+ * lugar é o próprio id.
+ */
+export function spawnSlots(teams: readonly number[]): number[] {
+  const order = [...new Set(teams)].sort((a, b) => a - b);
+  const seen = new Map<number, number>();
+  return teams.map((team) => {
+    const member = seen.get(team) ?? 0;
+    seen.set(team, member + 1);
+    return order.indexOf(team) + member * order.length;
+  });
+}
+
+function spawnPoint(stage: Stage, slot: number): Spawn {
+  const point = stage.spawns[slot % stage.spawns.length];
   if (!point) throw new Error('Mapa sem spawn');
   return point;
 }
 
-function respawnPoint(stage: Stage, id: number): Spawn {
-  const point = stage.respawns[id % stage.respawns.length];
+function respawnPoint(stage: Stage, slot: number): Spawn {
+  const point = stage.respawns[slot % stage.respawns.length];
   if (!point) throw new Error('Mapa sem ponto de respawn');
   return point;
 }
 
 /** Conta o tempo fora de cena e devolve o lutador ao mapa, se ainda tiver stock. */
-function stepKnockedOut(f: Fighter, stage: Stage, events: GameEvent[]): void {
+function stepKnockedOut(f: Fighter, slot: number, stage: Stage, events: GameEvent[]): void {
   if (f.stocks <= 0) return;
   if (f.respawnTicks > 0) f.respawnTicks--;
   if (f.respawnTicks === 0) {
-    respawn(f, respawnPoint(stage, f.id), RESPAWN_INVULN_TICKS);
+    respawn(f, respawnPoint(stage, slot), RESPAWN_INVULN_TICKS);
     events.push({ type: 'respawn', fighter: f.id });
   }
 }
@@ -138,15 +173,17 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
   }
   const stage = getStage(state.stageId);
   const counting = state.phase === 'countdown';
+  const slots = spawnSlots(state.fighters.map((f) => f.team));
   for (const f of state.fighters) {
-    if (f.state === 'ko') stepKnockedOut(f, stage, events);
+    if (f.state === 'ko') stepKnockedOut(f, slots[f.id] ?? f.id, stage, events);
     const input = counting ? NO_INPUT : (inputs[f.id] ?? NO_INPUT);
     stepFighter(f, input, stage.solids, state.projectiles);
     for (const action of cueNames(f.cues)) events.push({ type: 'action', fighter: f.id, action });
   }
   stepProjectiles(state.projectiles, stage.solids, stage.blastZone);
-  resolveHits(state.fighters, events);
-  resolveProjectileHits(state.fighters, state.projectiles, events);
+  const friendlyFire = state.rules.friendlyFire === true;
+  resolveHits(state.fighters, events, friendlyFire);
+  resolveProjectileHits(state.fighters, state.projectiles, events, friendlyFire);
   stepGrabs(state.fighters, stage.solids, events);
   // Saiu inteiro da blast zone = KO.
   for (const f of state.fighters) {
@@ -193,16 +230,39 @@ export function aliveFighters(state: GameState): Fighter[] {
   return state.fighters.filter((f) => f.stocks > 0);
 }
 
-function endMatch(state: GameState, winner: number | null): void {
+/** Fim da luta: `winner` representa o time vencedor (null = empate). */
+function endMatch(state: GameState, winner: Fighter | null): void {
   state.phase = 'over';
-  state.winner = winner;
+  state.winner = winner?.id ?? null;
+  state.winnerTeam = winner?.team ?? null;
 }
 
-/** Sobrou 1 (vence) ou ninguém (empate: os últimos stocks caíram juntos). */
+/** Sobrou 1 time (vence) ou ninguém (empate: os últimos stocks caíram juntos). */
 function checkLastStanding(state: GameState): void {
-  if (state.fighters.length < 2) return;
+  if (new Set(state.fighters.map((f) => f.team)).size < 2) return;
   const alive = aliveFighters(state);
-  if (alive.length <= 1) endMatch(state, alive[0]?.id ?? null);
+  if (new Set(alive.map((f) => f.team)).size <= 1) endMatch(state, alive[0] ?? null);
+}
+
+interface TeamScore {
+  team: number;
+  stocks: number;
+  damage: number;
+}
+
+/** Stocks e % somados de quem de cada time ainda está na luta. */
+function teamScores(alive: readonly Fighter[]): TeamScore[] {
+  const scores: TeamScore[] = [];
+  for (const f of alive) {
+    let score = scores.find((s) => s.team === f.team);
+    if (!score) {
+      score = { team: f.team, stocks: 0, damage: 0 };
+      scores.push(score);
+    }
+    score.stocks += f.stocks;
+    score.damage += f.damage;
+  }
+  return scores;
 }
 
 function stepClock(state: GameState, stage: Stage): void {
@@ -212,26 +272,31 @@ function stepClock(state: GameState, stage: Stage): void {
 }
 
 /**
- * Fim do tempo: vence quem tiver mais stocks; empate em stocks → menor %;
- * empate total → morte súbita (1 stock, 300%) só entre os empatados.
+ * Fim do tempo: vence o time com mais stocks (somando os de quem ainda está na
+ * luta); empate em stocks → menor % somado; empate total → morte súbita (1
+ * stock, 300%) só para quem ainda está na luta nos times empatados. Sem times,
+ * cada um é o próprio time.
  */
 function timeUp(state: GameState, stage: Stage): void {
-  let leaders = aliveFighters(state);
-  const maxStocks = Math.max(...leaders.map((f) => f.stocks));
-  leaders = leaders.filter((f) => f.stocks === maxStocks);
-  const minDamage = Math.min(...leaders.map((f) => f.damage));
-  leaders = leaders.filter((f) => f.damage === minDamage);
+  const alive = aliveFighters(state);
+  let best = teamScores(alive);
+  const maxStocks = Math.max(...best.map((s) => s.stocks));
+  best = best.filter((s) => s.stocks === maxStocks);
+  const minDamage = Math.min(...best.map((s) => s.damage));
+  best = best.filter((s) => s.damage === minDamage);
 
-  const [first] = leaders;
-  if (leaders.length === 1 && first) {
-    endMatch(state, first.id);
+  const [first] = best;
+  if (best.length === 1 && first) {
+    endMatch(state, alive.find((f) => f.team === first.team) ?? null);
     return;
   }
 
+  const leaders = alive.filter((f) => best.some((s) => s.team === f.team));
+  const slots = spawnSlots(state.fighters.map((f) => f.team));
   state.suddenDeath = true;
   for (const f of state.fighters) {
     if (leaders.includes(f)) {
-      respawn(f, spawnPoint(stage, f.id), SUDDEN_DEATH_INVULN_TICKS);
+      respawn(f, spawnPoint(stage, slots[f.id] ?? f.id), SUDDEN_DEATH_INVULN_TICKS);
       state.events.push({ type: 'respawn', fighter: f.id });
       f.stocks = 1;
       f.damage = SUDDEN_DEATH_DAMAGE;

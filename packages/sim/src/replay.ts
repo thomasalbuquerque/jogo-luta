@@ -24,6 +24,8 @@ export interface ReplaySetup {
   stageId: string;
   rules: MatchRules;
   seed: number;
+  /** Time de cada jogador (sem isso: todos contra todos). */
+  teams?: readonly number[] | null;
 }
 
 export interface Replay {
@@ -33,6 +35,8 @@ export interface Replay {
   characters: string[];
   stageId: string;
   rules: MatchRules;
+  /** Time de cada jogador, na ordem (sem isso: todos contra todos). */
+  teams?: number[];
   /** `inputs[jogador][tick]`: a bitmask que o `sim` recebeu. */
   inputs: InputMask[][];
   /** Hash do estado depois do último tick gravado (0 enquanto a gravação não fechou). */
@@ -41,7 +45,7 @@ export interface Replay {
 
 /** Replay vazio, pronto para gravar a luta criada com este mesmo setup. */
 export function createReplay(setup: ReplaySetup): Replay {
-  return {
+  const replay: Replay = {
     version: REPLAY_VERSION,
     seed: setup.seed,
     characters: [...setup.characters],
@@ -50,6 +54,8 @@ export function createReplay(setup: ReplaySetup): Replay {
     inputs: setup.characters.map(() => []),
     finalHash: 0,
   };
+  if (setup.teams) replay.teams = [...setup.teams];
+  return replay;
 }
 
 /** A luta do replay, no tick 0. */
@@ -59,6 +65,7 @@ export function replayGame(replay: Replay): GameState {
     stage: getStage(replay.stageId),
     rules: replay.rules,
     seed: replay.seed,
+    ...(replay.teams ? { teams: replay.teams } : {}),
   });
 }
 
@@ -130,6 +137,7 @@ export function encodeReplay(replay: Replay): string {
     characters: replay.characters,
     stageId: replay.stageId,
     rules: replay.rules,
+    teams: replay.teams,
     inputs: replay.inputs.map(packTape),
     finalHash: replay.finalHash,
   });
@@ -161,7 +169,9 @@ const ReplayFileSchema = z
       stocks: z.number().int().min(1).max(99),
       timeLimitTicks: ticks,
       countdownTicks: ticks.optional(),
+      friendlyFire: z.boolean().optional(),
     }),
+    teams: z.array(z.number().int().min(0).max(3)).max(4).optional(),
     inputs: z
       .array(
         z
@@ -176,6 +186,9 @@ const ReplayFileSchema = z
       )
       .max(4),
     finalHash: uint32,
+  })
+  .refine((r) => !r.teams || r.teams.length === r.characters.length, {
+    error: 'times não batem com os jogadores',
   })
   .refine((r) => r.inputs.length === r.characters.length, {
     error: 'número de fitas diferente do número de jogadores',
@@ -203,7 +216,8 @@ export function decodeReplay(text: string): Replay {
     timeLimitTicks: file.rules.timeLimitTicks,
   };
   if (file.rules.countdownTicks !== undefined) rules.countdownTicks = file.rules.countdownTicks;
-  return {
+  if (file.rules.friendlyFire !== undefined) rules.friendlyFire = file.rules.friendlyFire;
+  const replay: Replay = {
     version: file.version,
     seed: file.seed,
     characters: file.characters,
@@ -212,4 +226,6 @@ export function decodeReplay(text: string): Replay {
     inputs: file.inputs.map(unpackTape),
     finalHash: file.finalHash,
   };
+  if (file.teams) replay.teams = file.teams;
+  return replay;
 }

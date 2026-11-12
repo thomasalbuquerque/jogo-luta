@@ -11,7 +11,6 @@ import {
   InputDelay,
   isActiveFrame,
   isCountering,
-  MATCH_RULES,
   moveFrame,
   NO_INPUT,
   PLAYABLE_CHARACTERS,
@@ -42,6 +41,7 @@ import { InputManager } from '../input/InputManager';
 import { Menu, type MenuMask } from '../input/menu';
 import { newSeed } from '../match/replayFile';
 import { createStats, recordEvents, type MatchStats } from '../match/stats';
+import { rulesFor } from '../match/teams';
 import { closeOnline, getOnline } from '../net/online';
 import { onlineRoute } from '../net/route';
 import type { OnlineMatch, OnlineSession } from '../net/session';
@@ -70,7 +70,7 @@ import { hitTrauma, Shake } from '../render/shake';
 import { SlowMo } from '../render/slowmo';
 import { StageView } from '../render/stageView';
 import { fighterPose } from '../rig/fighterPose';
-import { playerColor } from '../ui/theme';
+import { fighterColor } from '../ui/theme';
 import type { HudScene } from './HudScene';
 
 const STAGE_DEBUG_COLOR = 0x80ed99;
@@ -126,16 +126,30 @@ const DEPTH = {
 /** Registro do Phaser: modo debug ligado (overlay de texto + caixas). */
 export const DEBUG_KEY = 'debug';
 
-/** O que foi escolhido nos menus: personagem de cada jogador e mapa. */
+/** O que foi escolhido nos menus: personagem de cada jogador, mapa e times. */
 export interface MatchSetup {
   /** Id da ficha de cada jogador, na ordem. */
   characters: readonly string[];
   stageId: string;
+  /** Time de cada jogador (sem valor ou null: todos contra todos). */
+  teams?: readonly number[] | null;
+  /** Fogo amigo (só vale com times). */
+  friendlyFire?: boolean;
 }
 
 /** Dados para abrir a luta: o que foi escolhido nos menus, ou um replay para assistir. */
 export interface FightData extends Partial<MatchSetup> {
   replay?: Replay;
+}
+
+/** O setup da partida online (o que a sala mandou). */
+function matchSetup(match: OnlineMatch): MatchSetup {
+  return {
+    characters: match.characters,
+    stageId: match.stageId,
+    teams: match.teams,
+    friendlyFire: match.friendlyFire,
+  };
 }
 
 /** Telas para onde dá para sair da luta (pausa e resultado). */
@@ -224,10 +238,20 @@ export class FightScene extends Phaser.Scene {
     this.playback = data.replay ?? null;
     this.net = getOnline();
     this.leaving = false;
-    this.setup = {
-      characters: data.replay?.characters ?? data.characters ?? PLAYABLE_CHARACTERS,
-      stageId: data.replay?.stageId ?? data.stageId ?? STAGES[0]?.id ?? '',
-    };
+    const replay = data.replay;
+    this.setup = replay
+      ? {
+          characters: replay.characters,
+          stageId: replay.stageId,
+          teams: replay.teams ?? null,
+          friendlyFire: replay.rules.friendlyFire === true,
+        }
+      : {
+          characters: data.characters ?? PLAYABLE_CHARACTERS,
+          stageId: data.stageId ?? STAGES[0]?.id ?? '',
+          teams: data.teams ?? null,
+          friendlyFire: data.friendlyFire === true,
+        };
   }
 
   create(): void {
@@ -340,7 +364,7 @@ export class FightScene extends Phaser.Scene {
     if (match && match.seq !== this.matchId) {
       // revanche com menos gente (alguém saiu da sala): monta a luta de novo, com HUD e lutadores certos
       if (match.characters.length !== this.state.fighters.length) {
-        this.exit('fight', { characters: match.characters, stageId: match.stageId });
+        this.exit('fight', matchSetup(match));
         return true;
       }
       this.playback = null;
@@ -378,11 +402,13 @@ export class FightScene extends Phaser.Scene {
       const match = this.net?.match;
       if (match) {
         this.matchId = match.seq;
-        this.setup = { characters: match.characters, stageId: match.stageId };
+        this.setup = matchSetup(match);
       }
       // a seed é sorteada fora do sim; dentro dele, tudo sai dela
       const seed = match?.seed ?? newSeed();
-      this.recording = createReplay({ ...this.setup, rules: MATCH_RULES, seed });
+      const teams = this.setup.teams ? [...this.setup.teams] : null;
+      const rules = rulesFor({ teams, friendlyFire: this.setup.friendlyFire === true });
+      this.recording = createReplay({ ...this.setup, teams, rules, seed });
       this.state = replayGame(this.recording);
     }
     this.recorded = false;
@@ -595,7 +621,7 @@ export class FightScene extends Phaser.Scene {
       dirX: victim.kbx,
       dirY: victim.kby,
       strength,
-      color: playerColor(e.attacker),
+      color: fighterColor(this.state.fighters, e.attacker),
     });
     this.shake.add(hitTrauma(kb));
     const sound = strength > 0.6 ? 'hit_heavy' : strength > 0.25 ? 'hit_medium' : 'hit_light';
@@ -625,7 +651,7 @@ export class FightScene extends Phaser.Scene {
       exitDirection(blast, x, y),
     );
     if (this.scene.isActive('hud')) {
-      (this.scene.get('hud') as HudScene).koBurst(at, playerColor(e.fighter));
+      (this.scene.get('hud') as HudScene).koBurst(at, fighterColor(this.state.fighters, e.fighter));
     }
     this.shake.add(KO_TRAUMA);
     playSfx(this, 'ko');
@@ -641,7 +667,12 @@ export class FightScene extends Phaser.Scene {
   private onRespawn(id: number): void {
     const f = this.state.fighters[id];
     if (!f) return;
-    spawnRespawnGlow(this.fx, toPx(f.x + f.w / 2), toPx(f.y + f.h / 2), playerColor(id));
+    spawnRespawnGlow(
+      this.fx,
+      toPx(f.x + f.w / 2),
+      toPx(f.y + f.h / 2),
+      fighterColor(this.state.fighters, id),
+    );
     playSfx(this, 'respawn');
   }
 
@@ -784,7 +815,7 @@ export class FightScene extends Phaser.Scene {
 
       this.drawBlockOutlines(f, r);
       // marcador do jogador em cima da cabeça
-      const player = playerColor(f.id);
+      const player = fighterColor(this.state.fighters, f.id);
       const mx = r.x + r.w / 2;
       const my = r.y + r.h - view.height - 8;
       g.fillStyle(player, 1);

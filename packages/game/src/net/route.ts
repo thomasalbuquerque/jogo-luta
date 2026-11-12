@@ -8,7 +8,13 @@ export type OnlineSceneKey = 'online' | 'select' | 'stage' | 'fight';
 
 export interface OnlineRoute {
   scene: OnlineSceneKey;
-  data: { ended?: EndReason; characters?: string[]; stageId?: string };
+  data: {
+    ended?: EndReason;
+    characters?: string[];
+    stageId?: string;
+    teams?: number[] | null;
+    friendlyFire?: boolean;
+  };
 }
 
 /**
@@ -24,7 +30,12 @@ export function onlineRoute(net: OnlineSession, here: OnlineSceneKey): OnlineRou
   if (screen.name === 'select') return { scene: 'select', data: {} };
   return {
     scene: screen.name,
-    data: { characters: screen.characters, stageId: screen.stageId },
+    data: {
+      characters: screen.characters,
+      stageId: screen.stageId,
+      teams: screen.teams,
+      friendlyFire: screen.friendlyFire,
+    },
   };
 }
 

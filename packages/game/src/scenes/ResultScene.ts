@@ -10,7 +10,7 @@ import type { PlayerStats } from '../match/stats';
 import { resultText } from '../render/hud';
 import { MenuList, type MenuOption } from '../ui/MenuList';
 import { addPortrait } from '../ui/portrait';
-import { cssColor, fadeIn, panel, playerColor, titleText, UI, uiText } from '../ui/theme';
+import { cssColor, fadeIn, fighterColor, panel, titleText, UI, uiText } from '../ui/theme';
 import type { FightScene, LeaveTarget } from './FightScene';
 
 /** Jogadores no mesmo PC (controles lidos no menu). */
@@ -66,14 +66,15 @@ export class ResultScene extends Phaser.Scene {
       70,
       resultText(state),
       68,
-      winner ? cssColor(playerColor(winner.id)) : UI.text,
+      winner ? cssColor(fighterColor(state.fighters, winner.id)) : UI.text,
     );
     title.setScale(1.6);
     this.tweens.add({ targets: title, scale: 1, duration: 300, ease: 'Back.Out' });
 
     state.fighters.forEach((f, i) => {
       const n = state.fighters.length;
-      const won = f.id === state.winner;
+      // com times, o time inteiro vence (sem times, o time é o próprio id)
+      const won = state.winnerTeam !== null && f.team === state.winnerTeam;
       if (n <= 2) {
         const cx = (width * (i + 1)) / (n + 1) + (n === 2 ? (i === 0 ? -90 : 90) : 0);
         this.drawColumn(f, fight.stats.players[i], cx, won);
@@ -310,7 +311,7 @@ export class ResultScene extends Phaser.Scene {
     w: number,
     won: boolean,
   ): void {
-    const color = playerColor(f.id);
+    const color = fighterColor(this.fight.state.fighters, f.id);
     const c = getCharacter(f.character);
     const cx = x + w / 2;
     const g = this.add.graphics();
@@ -349,7 +350,7 @@ export class ResultScene extends Phaser.Scene {
 
   /** Coluna de um jogador: retrato (maior no vencedor), nome e números da luta. */
   private drawColumn(f: Fighter, stats: PlayerStats | undefined, cx: number, won: boolean): void {
-    const color = playerColor(f.id);
+    const color = fighterColor(this.fight.state.fighters, f.id);
     const c = getCharacter(f.character);
     const x = cx - COLUMN_W / 2;
     const g = this.add.graphics();
