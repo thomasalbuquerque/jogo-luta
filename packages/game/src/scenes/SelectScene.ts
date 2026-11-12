@@ -5,6 +5,14 @@ import { playSfx } from '../audio/sfx';
 import { addAudioHint } from '../audio/unlock';
 import { playVoice } from '../audio/voice';
 import { getControls, keyLabel } from '../input/controls';
+import { readPads } from '../input/InputManager';
+import {
+  extrasFromPads,
+  FIXED_SEATS,
+  joinablePads,
+  keepExtras,
+  seatPads,
+} from '../input/localSeats';
 import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
 import { getOnline } from '../net/online';
@@ -19,8 +27,6 @@ import { addPortrait, drawSilhouette } from '../ui/portrait';
 import { cssColor, fadeIn, panel, playerColor, titleText, UI, uiText } from '../ui/theme';
 import type { MatchSetup } from './FightScene';
 
-/** Jogadores no mesmo PC (o modo local; online, cada PC é um jogador com qualquer controle). */
-const LOCAL_PLAYERS = 2;
 const TILE_W = 136;
 const TILE_H = 150;
 const TILE_GAP = 14;
@@ -52,6 +58,10 @@ interface PlayerPanel {
  * breve"). Cada jogador anda com as próprias direções, confirma com Ataque ou
  * Pulo e desfaz com Especial. Com todos prontos, vai para a seleção de mapa.
  *
+ * No mesmo PC, P1 e P2 estão sempre; com mais controles conectados, o 3º e o
+ * 4º jogador entram apertando Ataque ou Pulo no controle deles e saem com
+ * Especial (antes de confirmar o personagem).
+ *
  * Online, cada PC só mexe no próprio cursor (com qualquer um dos controles) e
  * vê o dos outros pela rede: um painel para cada um na sala (2 a 4). Quem entra
  * ou sai no meio muda os painéis na hora.
@@ -78,6 +88,10 @@ export class SelectScene extends Phaser.Scene {
   private screenSeq = -1;
   /** Online: o host já pediu a tela de mapa. */
   private stageOpened = false;
+  /** Local: controles de quem entrou como P3 e P4, na ordem. */
+  private extras: number[] = [];
+  /** Local: como entrar com mais controles. */
+  private joinText: Phaser.GameObjects.Text | null = null;
 
   constructor() {
     super('select');
@@ -87,7 +101,8 @@ export class SelectScene extends Phaser.Scene {
   init(data: Partial<MatchSetup>): void {
     this.slots = selectSlots(PLAYABLE_CHARACTERS);
     this.net = getOnline();
-    const seats = this.net ? Math.max(2, this.net.players) : LOCAL_PLAYERS;
+    this.extras = this.net ? [] : keepExtras(extrasFromPads(data.pads), readPads().length);
+    const seats = this.net ? Math.max(2, this.net.players) : FIXED_SEATS + this.extras.length;
     this.cursors = Array.from({ length: seats }, (_, i) => {
       const index = this.slots.indexOf(data.characters?.[i] ?? '');
       return index >= 0 ? index : i % PLAYABLE_CHARACTERS.length;
@@ -99,6 +114,7 @@ export class SelectScene extends Phaser.Scene {
     this.rosterKey = '';
     this.screenSeq = -1;
     this.stageOpened = false;
+    this.joinText = null;
   }
 
   create(): void {
@@ -129,6 +145,15 @@ export class SelectScene extends Phaser.Scene {
       }).setOrigin(1, 0);
       this.notice = uiText(this, width / 2, height - 50, '', {
         fontSize: '17px',
+        fontStyle: 'bold',
+        color: '#ffd166',
+        stroke: '#0b0e16',
+        strokeThickness: 4,
+      }).setOrigin(0.5);
+    }
+    if (!this.net) {
+      this.joinText = uiText(this, width / 2, height - 50, '', {
+        fontSize: '16px',
         fontStyle: 'bold',
         color: '#ffd166',
         stroke: '#0b0e16',
@@ -208,11 +233,13 @@ export class SelectScene extends Phaser.Scene {
         this.syncRoster(net);
       }
     }
-    const frame = this.controls.poll(LOCAL_PLAYERS, delta);
+    const padOf = net ? undefined : seatPads(this.extras);
+    const frame = this.controls.poll(this.cursors.length, delta, padOf);
     if (frame.system & Menu.BACK) {
       this.backToTitle();
       return;
     }
+    if (!net && this.updateSeats(frame.pads)) return;
     const count = this.slots.length;
     const cols = gridColumns(count);
     // online: este PC só mexe no próprio cursor, com qualquer um dos controles
@@ -226,6 +253,11 @@ export class SelectScene extends Phaser.Scene {
       if (this.ready[p]) {
         if (actions & Menu.BACK) this.setReady(p, false);
         continue;
+      }
+      // P3 e P4 do mesmo PC: Especial sai do lugar
+      if (actions & Menu.BACK && !net && p >= FIXED_SEATS) {
+        this.leaveSeat(p);
+        return;
       }
       // online, Especial não sai da sala sem querer: só o Esc
       if (actions & Menu.BACK && !net && !this.ready.some(Boolean)) {
@@ -248,7 +280,10 @@ export class SelectScene extends Phaser.Scene {
       if (this.readyMs >= START_DELAY_MS) {
         const characters = this.cursors.map((i) => this.slots[i] ?? '');
         if (!net) {
-          this.scene.start('stage', { characters } satisfies Partial<MatchSetup>);
+          this.scene.start('stage', {
+            characters,
+            pads: seatPads(this.extras),
+          } satisfies Partial<MatchSetup>);
           return;
         }
         // online: o host abre o mapa para todos (quem entrou segue a tela da sala)
@@ -262,6 +297,65 @@ export class SelectScene extends Phaser.Scene {
     }
     this.animatePanels(delta);
     this.refresh();
+  }
+
+  /**
+   * Local: controle que apertou Ataque ou Pulo entra como P3/P4; controle
+   * desconectado sai. Devolve true quando os lugares mudaram (o quadro acaba aí).
+   */
+  private updateSeats(pads: readonly number[]): boolean {
+    const kept = keepExtras(this.extras, pads.length);
+    if (kept.length !== this.extras.length) {
+      for (let i = this.extras.length - 1; i >= 0; i--) {
+        if (!kept.includes(this.extras[i] ?? -1)) this.leaveSeat(FIXED_SEATS + i);
+      }
+      return true;
+    }
+    const pad = joinablePads(pads.length, this.extras).find(
+      (i) => ((pads[i] ?? 0) & Menu.CONFIRM) !== 0,
+    );
+    if (pad === undefined) {
+      this.joinText?.setText(this.joinHint(pads.length));
+      return false;
+    }
+    this.extras.push(pad);
+    this.cursors.push(this.cursors.length % PLAYABLE_CHARACTERS.length);
+    this.ready.push(false);
+    this.readyMs = 0;
+    playSfx(this, 'ui_confirm');
+    this.reseat();
+    return true;
+  }
+
+  /** Local: P3 ou P4 sai (quem estava depois anda um lugar para a frente). */
+  private leaveSeat(p: number): void {
+    if (p < FIXED_SEATS) return;
+    this.extras.splice(p - FIXED_SEATS, 1);
+    this.cursors.splice(p, 1);
+    this.ready.splice(p, 1);
+    this.readyMs = 0;
+    playSfx(this, 'ui_back');
+    this.reseat();
+  }
+
+  /** Monta os lugares de novo; o que estiver apertado agora não conta. */
+  private reseat(): void {
+    this.controls.reset();
+    this.buildSeats();
+    this.joinText?.setText(this.joinHint(readPads().length));
+    this.refresh();
+  }
+
+  /** "Mais gente? Controle 3: aperte A para entrar" (vazio sem controle sobrando). */
+  private joinHint(padCount: number): string {
+    const parts: string[] = [];
+    const free = joinablePads(padCount, this.extras);
+    if (free.length > 0) {
+      const pads = free.map((i) => String(i + 1)).join(' ou ');
+      parts.push(`Mais gente? Controle ${pads}: aperte A para entrar`);
+    }
+    if (this.extras.length > 0) parts.push('P3 e P4: B (antes de confirmar) sai');
+    return parts.join('      ');
   }
 
   /** Online: o cursor e a confirmação do outro jogador, como chegaram pela rede. */
