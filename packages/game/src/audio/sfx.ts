@@ -16,6 +16,8 @@ const VOLUME: Readonly<Record<SfxName, number>> = {
   counter: 0.6,
   ko: 1,
   respawn: 0.45,
+  vanish: 0.4,
+  appear: 0.4,
   count: 0.45,
   go: 0.6,
   ui_move: 0.18,
@@ -28,6 +30,8 @@ const VOLUME: Readonly<Record<SfxName, number>> = {
 const DETUNE_SPREAD = 160;
 /** Sons que tocam sempre no mesmo tom (contagem e menus). */
 const STEADY: ReadonlySet<SfxName> = new Set([
+  'vanish',
+  'appear',
   'count',
   'go',
   'ui_move',
