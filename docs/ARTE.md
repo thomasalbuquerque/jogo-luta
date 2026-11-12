@@ -148,8 +148,12 @@ Head expression sheet of the character in the attached concept sheet: same desig
 Bold dark plum-brown outline, flat 2-tone cel shading, light from above. Solid flat magenta (#FF00FF) background. No text.
 ```
 
+- **Óculos:** acrescente `Glasses with opaque light gray-blue lenses.` antes de `Bold`. Sem isso o
+  vidro sai transparente, com o magenta do fundo aparecendo (aconteceu no Dadazinho; o Claude
+  preenche com `fill`, mas o brilho da lente se perde).
+
 **Confira:** 4 cabeças iguais ao conceito, do mesmo tamanho, todas viradas para a direita, cada uma
-com um pedaço de pescoço.
+com um pedaço de pescoço. Nas lentes dos óculos, nada de rosa.
 
 **Salve como:** `art/<pasta>/2-cabecas.png`
 
@@ -160,18 +164,44 @@ com um pedaço de pescoço.
 **Formato:** Wide (4:3). **Referências:** só o `1-conceito.png`.
 
 ```text
-Cut-out animation parts of the character in the attached concept sheet: same outfit, colors, proportions and style, as seen in the 3/4 view.
-Draw each part once, separate, with empty space around it, all facing right: torso without sleeves, shoulders closed and rounded; hips (<LEGWEAR> only), separate from the torso; upper arm with sleeve; forearm without hand; fist from the back of the hand; the same fist from the palm, fingers curled toward the viewer; open hand from the back; the same open hand from the palm; thigh with the knee to the right; shin; <SHOE> with the toes to the right. Extra: <EXTRA>.
-No head. Straight limbs, not posed. Joint ends plain and rounded, slightly extended to overlap: no pegs, pins, rings or marks.
-No text or logos. Bold dark plum-brown outline, flat 2-tone cel shading, light from above. Solid flat magenta (#FF00FF) background, no glow or shadow. No labels.
+Cut-out animation parts of the character in the attached concept sheet: same outfit, colors, proportions and style.
+Draw each part once, separate, with space around it, all facing right: torso without sleeves or sleeve caps, shoulders closed and rounded; <HIPS>; upper arm with sleeve; forearm without hand; fist from the back of the hand; the same fist from the palm, fingers curled toward the viewer; open hand from the back; the same open hand from the palm; <LEGS>; <SHOE> with the toes to the right. Extra: <EXTRA>, cut at the wrist.
+No head. Straight limbs, not posed. <PANTS>Other ends rounded, no pegs or rings.
+No text or logos. Bold dark plum-brown outline, flat 2-tone cel shading, light from above. Solid flat magenta (#FF00FF) background, no glow or shadow.
 ```
 
-- `<LEGWEAR>`: o que ele usa na perna (`shorts`, `cargo shorts`, `jeans`...).
-- `<SHOE>`: o calçado (`chunky sneaker`, `foot with flip-flop`...).
-- `<EXTRA>`: as mãos especiais da provocação ou do especial, até uns 60 caracteres (ex.:
-  `two hands gripping an invisible steering wheel`). Sem mãos especiais, apague `Extra: <EXTRA>.`
-- Se a manga é comprida até o punho, troque `upper arm with sleeve; forearm without hand` por
-  `upper arm with sleeve; forearm with sleeve, without hand`.
+Os trechos `<HIPS>`, `<LEGS>` e `<PANTS>` mudam conforme o que ele usa na perna:
+
+| Trecho    | Calça comprida (social, jeans, cargo...)                                                                 | Short ou bermuda (perna à mostra)                     |
+| --------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `<HIPS>`  | `hips: belt and <dress pants> only down to just below the crotch`                                        | `hips (<cargo shorts> only), separate from the torso` |
+| `<LEGS>`  | `thigh; shin as wide as the thigh`                                                                       | `thigh with the knee to the right; shin`              |
+| `<PANTS>` | `Pant pieces: plain straight tubes, flat cut ends with no outline, hem or folds. ` (com o espaço no fim) | apague `<PANTS>`                                      |
+
+- `<SHOE>`: o calçado (`chunky sneaker`, `dress shoe`, `foot with flip-flop`...).
+- `<EXTRA>`: as mãos especiais da provocação ou do especial (ex.:
+  `two hands gripping an invisible steering wheel`, `two hands holding a trumpet, one gripping it, one pressing the valves`).
+  Se as mãos seguram um objeto, ele pode vir junto: o Claude usa a mão com o objeto como mão da
+  frente. Sem mãos especiais, apague `Extra: <EXTRA>, cut at the wrist.`
+- Se a manga é comprida até o punho, troque `forearm without hand` por
+  `forearm with sleeve, without hand`.
+- **Limite de ~1.000 caracteres:** com calça comprida, o `<EXTRA>` cabe com até uns 80
+  caracteres. Se passar, corte as palavras do `<EXTRA>`, nunca as regras.
+
+Por que o texto é assim (problemas que já aconteceram):
+
+- **Quadril de calça comprida só até a virilha.** Pedido como "calça", o gerador desenha um short
+  com barra e contorno embaixo, e a barra vira uma linha atravessada no quadril (Dadazinho e Tauba).
+- **Pontas da calça cortadas, sem contorno, e canela da largura da coxa.** Tubos fechados deixam
+  uma linha em cada joelho, e canela mais fina faz um degrau. A calça tem que parecer um pano só.
+- **Tronco sem a "tampa" da manga.** O gerador costuma desenhar a bola da manga no ombro da
+  frente; ela fica parada no tronco quando o braço gira.
+- **Mãos especiais cortadas no pulso.** Sem isso, vêm com antebraço e manga grudados.
+
+Mesmo seguindo o texto, alguns desses defeitos voltam (barra no short, contorno nas pontas da
+calça, tampa da manga, punho da camisa nas mãos especiais). **Não precisa gerar de novo por
+causa deles:** o Claude corrige no recorte. Gere de novo só se faltar peça, vier peça grudada em
+outra ou em pose.
 
 **Confira** antes de salvar. Cada item tem um motivo; se faltar um, corrija pela
 [tabela](#se-der-errado-no-firefly):
@@ -180,6 +210,7 @@ No text or logos. Bold dark plum-brown outline, flat 2-tone cel shading, light f
 | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | Tronco **sem manga**, ombros fechados e arredondados                       | A manga vai no braço. Grudada no tronco, ela não acompanha o braço; cava aberta mostra um buraco quando o braço sobe. |
 | Short (ou calça) **separado** do tronco                                    | O tronco inclina nos golpes. Grudados, abre um buraco na cintura.                                                     |
+| Calça comprida: coxa e canela **retas e da mesma largura**                 | A calça tem que seguir lisa do quadril ao sapato, sem degrau no joelho.                                               |
 | Braço, antebraço e mão **separados**                                       | O cotovelo e o punho dobram, e a mão troca (punho, aberta, especial).                                                 |
 | **4 mãos:** punho e mão aberta, cada um pelas costas e pela palma          | A mão de trás usa a versão da palma. Sem ela, a mão de trás aparece de costas e parece virada ao contrário.           |
 | **Uma** peça de cada (fora as 4 mãos), joelho e ponta do pé para a direita | O braço e a perna de trás usam a mesma peça da frente. Pares espelhados (vistos de frente) não servem.                |
@@ -241,6 +272,7 @@ o mesmo nome**. Troque os trechos entre `<...>`.
 | Peças grudadas (tronco com short, manga no tronco, mão no antebraço) | A folha de peças                                    | `Edit the attached parts sheet: draw <the torso and the shorts> as two separate parts, with empty space between them. Keep every other part exactly the same.`                                                                                                                                                                                                                        |
 | Faltou uma peça (ex.: a mão pela palma)                              | A folha de peças                                    | `Edit the attached parts sheet: add <the same fist seen from the palm side, fingers curled toward the viewer>, in an empty area, same style and size as the other parts. Keep every other part exactly the same.`                                                                                                                                                                     |
 | Pinos, anéis ou bolinhas nas pontas das peças                        | A folha de peças                                    | `Edit the attached parts sheet: remove the pegs and rings at the joint ends. Each end plain and rounded, the same color as the part. Keep everything else the same.`                                                                                                                                                                                                                  |
+| Barra no quadril, contorno nas pontas da calça, tampa da manga       | —                                                   | Não precisa corrigir: o Claude corta no recorte. Siga para a próxima imagem.                                                                                                                                                                                                                                                                                                          |
 | Peças em pose (braço dobrado, perna presa no short) ou em pares      | —                                                   | Gere de novo com o texto do passo 3. Esse defeito não costuma sair com correção.                                                                                                                                                                                                                                                                                                      |
 | Peças encostando ou cortadas                                         | A folha de peças                                    | `Redo the attached parts sheet with more empty space between all parts, every part complete. Same character, same style.`                                                                                                                                                                                                                                                             |
 | Apareceu texto ou logo                                               | A imagem                                            | `Edit the attached image: remove all text, letters, numbers and logos. Keep everything else the same.`                                                                                                                                                                                                                                                                                |
@@ -391,6 +423,7 @@ Use the attached concept sheet as the definitive design of this character. Creat
 2. Hurt: eyes squeezed shut, teeth clenched, recoiling from a hit.
 3. Taunt: mouth wide open shouting the catchphrase, eyebrows raised.
 4. KO: dizzy spiral eyes, mouth hanging open, tongue slightly out.
+If he wears glasses, the lenses are opaque light gray-blue, never see-through.
 Solid flat magenta (#FF00FF) background. No text.
 ```
 
@@ -399,14 +432,14 @@ Solid flat magenta (#FF00FF) background. No text.
 ```text
 Use the attached concept sheet as the definitive design. Create the CUT-OUT ANIMATION PARTS for this character in one wide image, same outfit, colors, proportions and style, as seen in the 3/4 view.
 Draw each part once, separate, with generous empty space around it, all facing right:
-- torso without sleeves, shoulders closed and rounded;
-- hips (only what he wears on the legs), separate from the torso;
-- upper arm with sleeve; forearm without hand;
+- torso without sleeves and without sleeve caps on the shoulders, shoulders closed and rounded;
+- hips, separate from the torso: shorts as they are; long pants only from the belt down to just below the crotch, with no hem;
+- upper arm with sleeve; forearm without hand (with the sleeve, if the sleeves are long);
 - fist seen from the back of the hand; the same fist seen from the palm, fingers curled toward the viewer;
 - open hand seen from the back; the same open hand seen from the palm;
 - thigh with the knee to the right; shin; shoe with the toes to the right;
-- the extra parts listed in the character sheet, if any.
-No head. Straight limbs, not posed, not in mirrored pairs. Joint ends plain and rounded, slightly extended so the parts overlap when rotated: no pegs, pins, rings or marks on them.
+- the extra hands listed in the character sheet, if any, cut at the wrist (an object they hold may come with them).
+No head. Straight limbs, not posed, not in mirrored pairs. Long pants: thigh and shin are plain straight tubes of the same width, with flat cut ends that have no outline, hem or folds, so the pants look like one continuous piece. Other joint ends plain and rounded, slightly extended so the parts overlap when rotated: no pegs, pins, rings or marks on them.
 No text or logos. Solid flat magenta (#FF00FF) background, no glow or shadow. No labels.
 ```
 
@@ -558,6 +591,21 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   ficar escondida atrás do short do quadril.
 - **Ponta que entra em outra peça** (canela dentro do pé): o toco da canela é apagado, a canela não
   pode ser mais larga que o tornozelo do pé, e o topo do pé fica arredondado (sem cantos retos).
+- **Calça comprida** (a calça tem que parecer um pano só, sem linha no quadril nem no joelho):
+  - Quadril: a barra das pernas sai com um `erase` reto, **sem** `outline`, e os `legNear`/`legFar`
+    ficam uns 10 px da folha acima do corte. A coxa continua por trás.
+  - Coxa: a ponta do joelho (que fica na frente da canela) sai com `erase`, sem contorno, uns 20 px
+    depois do `tip`. A ponta do quadril, escondida, fica com `paint` `auto` no contorno.
+  - Canela: a ponta do joelho, atrás da coxa, fica com `paint` `auto` no contorno, para não
+    aparecer linha quando o joelho dobra. Se for mais fina que a coxa, engrosse com `stretch`
+    (na folha deitada, a grossura é a altura da imagem).
+- **Tampa da manga no tronco** (bola da manga desenhada no ombro da frente): apagada como a cava,
+  com `outline` no corte.
+- **Mãos especiais segurando um objeto** (o trompete do Tauba): a mão com o objeto vira a mão da
+  frente (`hand_taunt`), com o objeto junto; da outra, só a mão (`keep`/`erase`), como mão de trás
+  (`hand_taunt2`). O punho da camisa sai com `erase` nas duas. Objeto que aparece e some sem mão
+  (a doze do Dadazinho) vai na folha de efeitos, com `pivot` no cabo, e entra pela chave `prop`.
+- **Óculos com lente rosa** (vidro transparente na folha): `fill` com uma cor clara de vidro.
 
 ### 2. Esqueleto e animação: `packages/game/src/rig`
 
@@ -585,14 +633,16 @@ de cada um, C troca o personagem, Espaço pausa.
 
 1. Listar as peças da folha e medir cada uma com uma grade de coordenadas.
 2. Escrever o `recortes.json`: escala de cada folha, `rect`, `pivot`, `tip` e `sockets`, e os
-   `erase`, `paint` e `outline` da regra das juntas. Gerar com `pnpm art fulano --debug <pasta>` e
-   conferir os pontos.
+   `erase`, `paint` e `outline` da regra das juntas (com os casos de calça comprida, tampa da
+   manga, mãos com objeto e óculos). Gerar com `pnpm art fulano --debug <pasta>` e conferir os
+   pontos.
 3. Acertar a proporção com `stretch`, comparando com o `1-conceito.png` e com os outros personagens:
    cabeça uns 30% da altura, do pescoço à barra do short uns 40%, pernas abaixo do short uns 30%.
    Braço e antebraço com comprimentos parecidos, e o alcance total parecido com o dos outros, para
    o punho cair dentro da hitbox dos golpes. Mãos de trás do mesmo tamanho aparente das da frente.
 4. Conferir no `?rig`: repouso, guarda, corrida, pulo, borda, golpes (punho e pé dentro da hitbox no
-   frame ativo), levar golpe, arremessado. Olhar de perto ombro, cotovelo, joelho e tornozelo.
+   frame ativo), levar golpe, arremessado. Olhar de perto ombro, cotovelo, joelho e tornozelo, e
+   procurar linhas atravessadas na roupa (barra ou contorno de uma peça por cima da outra).
 5. Escrever o especial e a provocação em `characterClips.ts` e os efeitos em `render/fx.ts`.
 6. Conferir na luta, com o console sem erros.
 
