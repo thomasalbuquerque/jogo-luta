@@ -182,7 +182,7 @@ export class FightScene extends Phaser.Scene {
   overTicks = 0;
   /** KOs, quedas e dano de cada jogador nesta luta. */
   stats: MatchStats = createStats(0);
-  setup: MatchSetup = { characters: PLAYABLE_CHARACTERS, stageId: STAGES[0]?.id ?? '' };
+  setup: MatchSetup = { characters: PLAYABLE_CHARACTERS.slice(0, 2), stageId: STAGES[0]?.id ?? '' };
   /**
    * Atraso de input por jogador, para sentir o netcode por atraso sem rede
    * (`?atraso=3` na URL, ou as teclas do modo debug). Vale entre lutas.
@@ -255,7 +255,7 @@ export class FightScene extends Phaser.Scene {
           friendlyFire: replay.rules.friendlyFire === true,
         }
       : {
-          characters: data.characters ?? PLAYABLE_CHARACTERS,
+          characters: data.characters ?? PLAYABLE_CHARACTERS.slice(0, 2),
           stageId: data.stageId ?? STAGES[0]?.id ?? '',
           teams: data.teams ?? null,
           friendlyFire: data.friendlyFire === true,
@@ -534,6 +534,7 @@ export class FightScene extends Phaser.Scene {
     this.handleEvents();
     this.spawnTrails();
     this.spawnFx();
+    this.lateTauntVoices();
     this.fx.step();
     this.backFx.step();
   }
@@ -710,7 +711,7 @@ export class FightScene extends Phaser.Scene {
         break;
       case 'TAUNT': {
         const taunt = characterOfFighter(f).taunt;
-        playVoice(this, taunt.sound, taunt.text);
+        if (taunt.voiceAt === 0) playVoice(this, taunt.sound, taunt.text);
         break;
       }
       case 'WALL_JUMP':
@@ -1002,7 +1003,17 @@ export class FightScene extends Phaser.Scene {
     }
   }
 
-  /** Provocação: balão com o bordão (a voz sai do evento TAUNT). */
+  /** Voz da provocação que sai no meio dela (`taunt.voiceAt` da ficha), a cada tick. */
+  private lateTauntVoices(): void {
+    for (const f of this.state.fighters) {
+      const taunt = characterOfFighter(f).taunt;
+      if (f.state === 'taunt' && taunt.voiceAt > 0 && f.stateTicks === taunt.voiceAt) {
+        playVoice(this, taunt.sound, taunt.text);
+      }
+    }
+  }
+
+  /** Provocação: balão com o bordão (a voz sai do evento TAUNT ou no `voiceAt`). */
   private updateTaunts(alpha: number): void {
     for (const f of this.state.fighters) {
       const bubble = this.bubbles[f.id];
@@ -1013,7 +1024,7 @@ export class FightScene extends Phaser.Scene {
         bubble.setText(c.taunt.text);
       }
       this.lastStates[f.id] = f.state;
-      bubble.setVisible(taunting);
+      bubble.setVisible(taunting && f.stateTicks >= c.taunt.voiceAt);
       if (taunting) {
         const r = this.renderRect(f, alpha);
         const top = r.y + r.h - (this.views[f.id]?.height ?? r.h);
