@@ -4,13 +4,13 @@ import { cloneState } from '../snapshot';
 import { Button } from '../input';
 import { getCharacter, PLAYABLE_CHARACTERS } from './index';
 
-const [SCHUMMAKI, JOAO] = PLAYABLE_CHARACTERS.map(getCharacter);
-if (!SCHUMMAKI || !JOAO) throw new Error('elenco incompleto');
+const [SCHUMMAKI, JOAO, DADA] = PLAYABLE_CHARACTERS.map(getCharacter);
+if (!SCHUMMAKI || !JOAO || !DADA) throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('os 2 primeiros: Schummaki e João Frango, cada um com especial e provocação', () => {
-    expect(PLAYABLE_CHARACTERS).toEqual(['schummaki', 'joao-frango']);
-    for (const c of [SCHUMMAKI, JOAO]) {
+  it('Schummaki, João Frango e Dadazinho, cada um com especial e provocação', () => {
+    expect(PLAYABLE_CHARACTERS).toEqual(['schummaki', 'joao-frango', 'dadazinho']);
+    for (const c of [SCHUMMAKI, JOAO, DADA]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
       expect(c.blurb.length).toBeGreaterThan(0);
@@ -30,6 +30,22 @@ describe('elenco', () => {
     expect(JOAO.stats.weight).toBeLessThan(100);
     expect(JOAO.stats.airJumps).toBeGreaterThan(SCHUMMAKI.stats.airJumps);
     expect(JOAO.stats.airSpeed).toBeGreaterThan(SCHUMMAKI.stats.airSpeed);
+  });
+
+  it('Dadazinho pune de perto: tiro curto, forte e lento; leve, rápido e baixinho', () => {
+    const shot = DADA.special?.move.projectile;
+    const chicken = JOAO.special?.move.projectile;
+    if (!shot || !chicken) throw new Error('sem projétil');
+    // alcance: velocidade × duração
+    expect(shot.speed * shot.lifetimeTicks).toBeLessThan(
+      (chicken.speed * chicken.lifetimeTicks) / 2,
+    );
+    expect(shot.hit.damage).toBeGreaterThan(chicken.hit.damage * 2);
+    expect(DADA.special?.move.startup).toBeGreaterThan(JOAO.special?.move.startup ?? 0);
+    expect(DADA.special?.cooldownTicks).toBeGreaterThan(JOAO.special?.cooldownTicks ?? 0);
+    expect(DADA.stats.weight).toBeLessThan(100);
+    expect(DADA.stats.walkSpeed).toBeGreaterThan(JOAO.stats.walkSpeed);
+    expect(DADA.stats.height).toBeLessThan(JOAO.stats.height);
   });
 
   it.each(PLAYABLE_CHARACTERS)('%s alcança a plataforma atravessável com 1 pulo', (id) => {
