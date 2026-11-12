@@ -112,8 +112,17 @@ export interface MoveDef extends HitProps {
   projectile?: ProjectileDef;
   /** Buff temporário no 1º frame ativo. */
   buff?: BuffDef;
-  /** Teleporte no 1º frame ativo, na direção apertada (ou para a frente). */
-  teleport?: { distance: number; invulnTicks: number };
+  /**
+   * Teleporte no 1º frame ativo, na direção apertada (ou para a frente). Com
+   * `random`, o lutador some durante todo o active (parado e intangível) e, no fim
+   * dele, reaparece num chão sorteado do palco: sorteia `candidates` pontos e vai
+   * para o mais perto do adversário em `nearChance`% das vezes (senão, o mais longe).
+   */
+  teleport?: {
+    distance: number;
+    invulnTicks: number;
+    random?: { candidates: number; nearChance: number };
+  };
   /** Contra-ataque: levar golpe durante o active devolve este acerto em quem bateu. */
   counter?: HitProps;
   /** Agarrão: a hitbox segura o alvo por `holdTicks` e depois arremessa com o HitProps do golpe. */

@@ -12,8 +12,9 @@ import {
   type MoveDef,
   type MoveId,
 } from './moves';
-import { moveAndCollide, touchingWall, type Body, type Solid } from './physics';
+import { moveAndCollide, overlaps, touchingWall, type Body, type Solid } from './physics';
 import { spawnProjectile, type Projectile } from './projectile';
+import { rngChance, rngInt, type RngHolder } from './rng';
 import type { Spawn } from './stage';
 import type { FighterStats } from './stats';
 
@@ -504,6 +505,10 @@ function stepAttack(f: Fighter, input: InputMask, prev: InputMask, world: World)
     if (dir !== 0) f.facing = dir;
     return;
   }
+  const random = move?.teleport?.random;
+  if (move && random && moveFrame(f) === move.startup + move.active + 1) {
+    reappear(f, random, world);
+  }
   if (!move || moveFrame(f) > totalFrames(move)) {
     finishAction(f, input, prev);
     return;
@@ -520,7 +525,7 @@ function stepAttack(f: Fighter, input: InputMask, prev: InputMask, world: World)
  * frame só avança fora do hitstop.
  */
 function fireBlocks(f: Fighter, move: MoveDef, input: InputMask, world: World): void {
-  if (move.teleport) teleport(f, move.teleport, input, world.solids);
+  if (move.teleport && !move.teleport.random) teleport(f, move.teleport, input, world.solids);
   if (move.buff) {
     f.buffTicks = move.buff.durationTicks;
     f.buffDamage = move.buff.damagePercent;
@@ -557,6 +562,117 @@ function teleport(
   f.fastFalling = false;
   if (dx !== 0) f.facing = dx > 0 ? 1 : -1;
   f.invulnTicks = Math.max(f.invulnTicks, def.invulnTicks);
+}
+
+/**
+ * Sumiu no teleporte sorteado (Silent quit): durante o active do especial fica
+ * parado, invisível e intangível. O render esconde o corpo e o combate ignora.
+ */
+export function isVanished(f: Fighter): boolean {
+  if (f.state !== 'attack' || f.move !== 'special') return false;
+  const move = moveDef(f, 'special');
+  return move.teleport?.random !== undefined && isActiveFrame(move, moveFrame(f));
+}
+
+/** Distância das pontas do chão em que o teleporte sorteado não deixa cair. */
+export const TELEPORT_EDGE_MARGIN = px(12);
+
+/**
+ * Pontos sorteados para o teleporte: pés em cima de um chão do palco (bloco ou
+ * plataforma), longe das pontas e sem o corpo entrar num bloco sólido. Cada
+ * ponto do chão tem a mesma chance. Devolve até `count` pontos (menos, se o
+ * palco não tiver lugar).
+ */
+export function teleportSpots(
+  f: Pick<Fighter, 'w' | 'h'>,
+  solids: readonly Solid[],
+  count: number,
+  rng: RngHolder,
+): Spawn[] {
+  const half = idiv(f.w, 2);
+  const floors: { solid: Solid; minX: number; span: number }[] = [];
+  let total = 0;
+  for (const s of solids) {
+    const minX = s.x + half + TELEPORT_EDGE_MARGIN;
+    const span = s.x + s.w - half - TELEPORT_EDGE_MARGIN - minX + 1;
+    if (span <= 0) continue;
+    floors.push({ solid: s, minX, span });
+    total += span;
+  }
+  const spots: Spawn[] = [];
+  if (total === 0) return spots;
+  for (let tries = 0; tries < count * 4 && spots.length < count; tries++) {
+    let r = rngInt(rng, total);
+    for (const floor of floors) {
+      if (r >= floor.span) {
+        r -= floor.span;
+        continue;
+      }
+      const spot = { x: floor.minX + r, y: floor.solid.y };
+      const body = { x: spot.x - half, y: spot.y - f.h, w: f.w, h: f.h };
+      if (!solids.some((s) => s.kind === 'solid' && overlaps(body, s))) spots.push(spot);
+      break;
+    }
+  }
+  return spots;
+}
+
+/** Centro dos pés de um lutador (subpx). */
+function feet(f: Fighter): Spawn {
+  return { x: f.x + idiv(f.w, 2), y: f.y + f.h };
+}
+
+/** Distância² entre dois pontos (subpx², inteiro exato). */
+function dist2(a: Spawn, b: Spawn): number {
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+  return dx * dx + dy * dy;
+}
+
+/**
+ * Fim do sumiço: reaparece em pé num dos pontos sorteados, virado para o
+ * adversário mais perto. Vai para o ponto mais longe dele, ou, em `nearChance`%
+ * das vezes, para o mais perto. Sem a luta (lutador solto, nos testes), fica onde está.
+ */
+function reappear(
+  f: Fighter,
+  def: NonNullable<NonNullable<MoveDef['teleport']>['random']>,
+  world: World,
+): void {
+  const match = world.match;
+  if (!match) return;
+  const spots = teleportSpots(f, world.solids, def.candidates, match);
+  if (spots.length === 0) return;
+  const foes = match.fighters.filter((o) => o.team !== f.team && o.state !== 'ko');
+  const near = rngChance(match, def.nearChance);
+  // distância de cada ponto até o adversário mais perto dele
+  const gaps = spots.map((p) => Math.min(...foes.map((o) => dist2(p, feet(o)))));
+  let best = 0;
+  for (let i = 1; i < spots.length; i++) {
+    const gap = gaps[i] ?? 0;
+    const bestGap = gaps[best] ?? 0;
+    if (near ? gap < bestGap : gap > bestGap) best = i;
+  }
+  const spot = spots[best];
+  if (!spot) return;
+  f.x = spot.x - idiv(f.w, 2);
+  f.y = spot.y - f.h;
+  f.vx = 0;
+  f.vy = 0;
+  f.kbx = 0;
+  f.kby = 0;
+  f.grounded = false;
+  f.onPlatform = false;
+  f.fastFalling = false;
+  f.dropTicks = 0;
+  let closest: Fighter | undefined;
+  for (const o of foes) {
+    if (!closest || dist2(feet(o), spot) < dist2(feet(closest), spot)) closest = o;
+  }
+  if (closest) {
+    const dx = feet(closest).x - spot.x;
+    if (dx !== 0) f.facing = dx > 0 ? 1 : -1;
+  }
 }
 
 function clearBuff(f: Fighter): void {
@@ -601,7 +717,12 @@ function moveFrameEffects(f: Fighter): void {
       f.canCutJump = false;
     }
   }
-  if (move.hoverStartup && !f.grounded && frame <= move.startup) {
+  if (move.teleport?.random && isActiveFrame(move, frame)) {
+    // sumido: parado onde estava até reaparecer
+    f.vx = 0;
+    f.vy = 0;
+    f.fastFalling = false;
+  } else if (move.hoverStartup && !f.grounded && frame <= move.startup) {
     f.vx = 0;
     f.vy = 0;
     f.fastFalling = false;
@@ -775,6 +896,7 @@ function moveOverridesGravity(f: Fighter): boolean {
   // Parado no ar no startup (só no ar: no chão, sem gravidade, ele "sairia" do chão).
   if (move.hoverStartup && !f.grounded && frame <= move.startup) return true;
   if (move.dash && !f.grounded && isActiveFrame(move, frame)) return true;
+  if (move.teleport?.random && isActiveFrame(move, frame)) return true;
   return move.fallSpeed !== undefined && isActiveFrame(move, frame);
 }
 
@@ -818,24 +940,32 @@ export function isFree(f: Fighter): boolean {
   return FREE_STATES.has(f.state);
 }
 
+/** O resto da luta que alguns especiais leem: o RNG e os outros lutadores. */
+export interface MatchContext extends RngHolder {
+  fighters: readonly Fighter[];
+}
+
 /** O que o lutador enxerga do resto da luta num tick. */
 interface World {
   solids: readonly Solid[];
   /** Onde entram os projéteis soltos (sem isso, não solta). */
   projectiles: Projectile[] | undefined;
+  /** A luta (sem isso, o teleporte sorteado não sai do lugar). */
+  match: MatchContext | undefined;
 }
 
 /**
  * Avança um lutador um tick. `projectiles` é a lista da luta, onde entram os
- * projéteis que ele soltar.
+ * projéteis que ele soltar; `match` dá o RNG e os outros lutadores (o estado da luta).
  */
 export function stepFighter(
   f: Fighter,
   input: InputMask,
   solids: readonly Solid[],
   projectiles?: Projectile[],
+  match?: MatchContext,
 ): void {
-  const world: World = { solids, projectiles };
+  const world: World = { solids, projectiles, match };
   f.cues = 0;
   // Hitstop: congelado no impacto. O input anterior não muda, então um botão
   // apertado durante o congelamento vale como aperto quando ele acaba.

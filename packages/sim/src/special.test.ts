@@ -1,22 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import { defineCharacter, type CharacterSheet } from './character';
 import { BASE_CHARACTER_ID, getCharacter, registerCharacter } from './characters';
-import { resolveHits, resolveProjectileHits } from './combat';
+import { canBeHit, resolveHits, resolveProjectileHits } from './combat';
 import { px } from './constants';
 import {
   canUseSpecial,
   createFighter,
   DEFAULT_STATS,
   effectiveWeight,
+  isVanished,
   moveFrame,
   stepFighter,
+  TELEPORT_EDGE_MARGIN,
+  teleportSpots,
   type Fighter,
 } from './fighter';
 import { createGame, stepGame, type GameState } from './game';
 import { Button } from './input';
 import type { ProjectileDef } from './moves';
-import type { Solid } from './physics';
+import { overlaps, type Solid } from './physics';
 import { spawnProjectile, stepProjectiles, type Projectile } from './projectile';
+import { seedRng } from './rng';
+import { TEST_STAGE } from './stage';
 
 const { LEFT, SPECIAL } = Button;
 
@@ -348,6 +353,172 @@ const COUNTER = character('t-counter', {
   blocks: [
     { type: 'counter', hit: { damage: 10, angle: 45, baseKnockback: 12, knockbackScale: 0.2 } },
   ],
+});
+
+const QUITTER = character('t-quit', {
+  name: 'Silent quit',
+  startup: 14,
+  active: 20,
+  recovery: 18,
+  oncePerAir: true,
+  blocks: [{ type: 'teleport', target: 'random' }],
+});
+
+/** Sempre para o ponto mais longe (0%) ou o mais perto (100%) do adversário. */
+const FAR_QUITTER = character('t-quit-far', {
+  name: 'Longe',
+  startup: 14,
+  active: 20,
+  recovery: 18,
+  blocks: [{ type: 'teleport', target: 'random', candidates: 6, nearChance: 0 }],
+});
+const NEAR_QUITTER = character('t-quit-near', {
+  name: 'Perto',
+  startup: 14,
+  active: 20,
+  recovery: 18,
+  blocks: [{ type: 'teleport', target: 'random', candidates: 6, nearChance: 100 }],
+});
+
+/** Luta no mapa de teste com o lutador 0 já parado no chão; o 1 é o boneco. */
+function quitGame(id: string, seed: number): GameState {
+  const g = createGame({ characters: [id, BASE_CHARACTER_ID], seed });
+  for (let i = 0; i < 5; i++) stepGame(g, [0, 0]);
+  return g;
+}
+
+/** Aperta o especial e avança até o fim do sumiço (1º frame do recovery). */
+function quit(g: GameState): void {
+  stepGame(g, [SPECIAL, 0]);
+  for (let i = 0; i < 14 + 20; i++) stepGame(g, [0, 0]);
+}
+
+/** O Tauba de teste (0) e o boneco (1). */
+function pair(g: GameState): [Fighter, Fighter] {
+  const [f, foe] = g.fighters;
+  if (!f || !foe) throw new Error('sem lutadores');
+  return [f, foe];
+}
+
+function feetOf(f: Fighter): { x: number; y: number } {
+  return { x: f.x + f.w / 2, y: f.y + f.h };
+}
+
+describe('bloco teleporte sorteado (Silent quit)', () => {
+  it('some no active: parado, intangível e sem levar golpe', () => {
+    const g = quitGame(QUITTER, 7);
+    const [f] = pair(g);
+    stepGame(g, [SPECIAL, 0]);
+    for (let i = 0; i < 13; i++) stepGame(g, [0, 0]);
+    expect(isVanished(f)).toBe(false); // startup: ainda dá para bater
+    expect(canBeHit(f)).toBe(true);
+    stepGame(g, [0, 0]);
+    expect(isVanished(f)).toBe(true);
+    expect(canBeHit(f)).toBe(false);
+    const x = f.x;
+    const y = f.y;
+    for (let i = 0; i < 19; i++) {
+      stepGame(g, [Button.RIGHT, 0]);
+      expect(isVanished(f)).toBe(true);
+      expect([f.x, f.y]).toEqual([x, y]);
+    }
+    stepGame(g, [0, 0]);
+    expect(isVanished(f)).toBe(false);
+    expect(canBeHit(f)).toBe(true); // volta sem invencibilidade: se cair perto, apanha
+  });
+
+  it('reaparece em pé em cima de um chão do palco, longe das pontas', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      const g = quitGame(QUITTER, seed);
+      const [f] = pair(g);
+      quit(g);
+      stepGame(g, [0, 0]);
+      expect(f.grounded).toBe(true);
+      const feet = feetOf(f);
+      const floor = TEST_STAGE.solids.find(
+        (s) => s.y === feet.y && feet.x >= s.x && feet.x <= s.x + s.w,
+      );
+      expect(floor).toBeDefined();
+      if (!floor) continue;
+      expect(feet.x - f.w / 2).toBeGreaterThanOrEqual(floor.x + TELEPORT_EDGE_MARGIN);
+      expect(feet.x + f.w / 2).toBeLessThanOrEqual(floor.x + floor.w - TELEPORT_EDGE_MARGIN);
+    }
+  });
+
+  it('a mesma seed cai no mesmo lugar; seeds diferentes variam', () => {
+    const spot = (seed: number) => {
+      const g = quitGame(QUITTER, seed);
+      quit(g);
+      return feetOf(pair(g)[0]);
+    };
+    expect(spot(3)).toEqual(spot(3));
+    const spots = new Set([1, 2, 3, 4, 5, 6, 7, 8].map((s) => JSON.stringify(spot(s))));
+    expect(spots.size).toBeGreaterThan(3);
+  });
+
+  it('vira para o adversário ao reaparecer', () => {
+    for (let seed = 1; seed <= 10; seed++) {
+      const g = quitGame(QUITTER, seed);
+      quit(g);
+      const [f, foe] = pair(g);
+      const dx = feetOf(foe).x - feetOf(f).x;
+      if (dx !== 0) expect(f.facing).toBe(Math.sign(dx));
+    }
+  });
+
+  it('em geral vai para longe do adversário; com nearChance 100, para perto', () => {
+    let far = 0;
+    let near = 0;
+    for (let seed = 1; seed <= 30; seed++) {
+      const a = quitGame(FAR_QUITTER, seed);
+      quit(a);
+      far += Math.abs(feetOf(pair(a)[0]).x - feetOf(pair(a)[1]).x);
+      const b = quitGame(NEAR_QUITTER, seed);
+      quit(b);
+      near += Math.abs(feetOf(pair(b)[0]).x - feetOf(pair(b)[1]).x);
+    }
+    expect(far / 30).toBeGreaterThan(px(350));
+    expect(near / 30).toBeLessThan(px(200));
+  });
+
+  it('do ar, 1 vez só: cai num chão e serve de recuperação', () => {
+    const g = quitGame(QUITTER, 11);
+    const [f] = pair(g);
+    // fora do palco, caindo
+    f.x = px(-700);
+    f.y = px(200);
+    f.grounded = false;
+    stepGame(g, [0, 0]);
+    expect(canUseSpecial(f)).toBe(true);
+    quit(g);
+    for (let i = 0; i < 20; i++) stepGame(g, [0, 0]);
+    expect(f.grounded).toBe(true);
+    expect(f.state).toBe('idle');
+  });
+
+  it('sem a luta (lutador solto), não sai do lugar', () => {
+    const f = onGround(0, QUITTER);
+    const x0 = f.x;
+    run([f], [SPECIAL]);
+    run([f], [0], 40);
+    expect(f.x).toBe(x0);
+  });
+
+  it('os pontos nunca põem o corpo dentro de um bloco sólido', () => {
+    const floor: Solid = { kind: 'solid', x: px(-400), y: 0, w: px(800), h: px(200) };
+    const pillar: Solid = { kind: 'solid', x: px(-100), y: px(-300), w: px(200), h: px(300) };
+    const platform: Solid = { kind: 'platform', x: px(-300), y: px(-150), w: px(600), h: px(16) };
+    const world = [floor, pillar, platform];
+    const body = { w: px(48), h: px(96) };
+    const rng = { rng: seedRng(5) };
+    for (let i = 0; i < 50; i++) {
+      for (const p of teleportSpots(body, world, 3, rng)) {
+        const box = { x: p.x - body.w / 2, y: p.y - body.h, ...body };
+        expect(world.some((s) => s.kind === 'solid' && overlaps(box, s))).toBe(false);
+        expect(world.some((s) => s.y === p.y)).toBe(true);
+      }
+    }
+  });
 });
 
 describe('bloco contra-ataque', () => {
