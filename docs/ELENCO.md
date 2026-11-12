@@ -6,26 +6,26 @@ veja `docs/GDD.md`.
 
 **Autorização:** marque ✅ quando o amigo aceitar ter a imagem (e a voz) no jogo.
 
-| #   | Apelido     | Traço mais caricato                                                  | Bordão                       | Especial (bloco)                    | Provocação                                  | Cores                                    | Autorizou |
-| --- | ----------- | -------------------------------------------------------------------- | ---------------------------- | ----------------------------------- | ------------------------------------------- | ---------------------------------------- | --------- |
-| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral | "Vem com o Schummy, mermão!" | **Arrancada** (investida)           | Gira um volante imaginário e grita o bordão | Vermelho, branco, grafite                |           |
-| 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil) | Mãos em concha, gritando o bordão           | Branco (avental), laranja, amarelo-milho |           |
-| 3   |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 4   |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 5   |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 6   |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 7   |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 8   |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 9   |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 10  |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 11  |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 12  |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 13  |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 14  |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 15  |             |                                                                      |                              |                                     |                                             |                                          |           |
-| 16  |             |                                                                      |                              |                                     |                                             |                                          |           |
+| #   | Apelido     | Traço mais caricato                                                    | Bordão                       | Especial (bloco)                    | Provocação                                  | Cores                                    | Autorizou |
+| --- | ----------- | ---------------------------------------------------------------------- | ---------------------------- | ----------------------------------- | ------------------------------------------- | ---------------------------------------- | --------- |
+| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral   | "Vem com o Schummy, mermão!" | **Arrancada** (investida)           | Gira um volante imaginário e grita o bordão | Vermelho, branco, grafite                |           |
+| 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango   | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil) | Mãos em concha, gritando o bordão           | Branco (avental), laranja, amarelo-milho |           |
+| 3   | Dadazinho   | Óculos preto, cavanhaque, baixinho e magro, guitarrista, jogador de CS | "sexo"                       | **Doze** (projétil)                 | Air guitar, depois solta "sexo" na seca     | Verde, verde-oliva, preto                |           |
+| 4   |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 5   |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 6   |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 7   |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 8   |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 9   |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 10  |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 11  |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 12  |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 13  |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 14  |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 15  |             |                                                                        |                              |                                     |                                             |                                          |           |
+| 16  |             |                                                                        |                              |                                     |                                             |                                          |           |
 
-## Os 2 primeiros
+## Os primeiros
 
 Escolhidos porque são bem diferentes de jogar: Schummaki vai para cima (investida), João Frango
 controla de longe (projétil).
@@ -61,6 +61,60 @@ controla de longe (projétil).
   galinha), cara de sono. Cores: branco do avental, laranja e amarelo-milho.
 - **Ideias guardadas** (para efeito cômico, KO ou provocação alternativa): "clone" dele aparecendo
   no fundo do mapa; flash de celular tirando foto do prato; bocejo ao respawnar (acorda tarde).
+
+### 3. Dadazinho
+
+- **Quem é:** 30 anos, também chamado de Broder. Baixinho (1,68 m) e magro, pele branca, óculos de
+  armação preta e cavanhaque clássico. Guitarrista. No CS do grupo, gosta de jogar de doze (a
+  MAG-7). Solta "sexo" do nada, sem motivo nenhum: é só uma brincadeira dele, sem teor sexual.
+- **Bordão:** "sexo", assim mesmo, tudo minúsculo: falado seco, sem emoção.
+- **Estilo de luta:** punisher de curta distância. Leve e rápido (é baixinho e magro), mas o
+  especial é lento para sair e pune quem chega perto.
+- **Especial — Doze (projétil):** a doze aparece nas mãos dele, ele dá um tiro para a frente e a
+  arma some. O tiro é um projétil curto e forte: alcance de uns 200 px (bem menor que o frango do
+  João), dano e knockback altos, startup e recovery longos, recarga longa. Efeitos: fumacinha
+  quando a arma aparece e some, clarão do cano, rastro de chumbo.
+- **Provocação:** toca uma air guitar (uma mão no braço da guitarra, a outra palhetando), para,
+  olha para a tela e diz "sexo" na seca.
+- **Visual:** camisa verde (`#3F9A4E`) de manga comprida, de botão, com gola e dois bolsos no peito,
+  por dentro da calça; calça comprida verde-oliva escura (`#4F5B32`) com cinto preto; tênis
+  off-white. Óculos de armação preta (`#23262B`) e cavanhaque. Cores: verde, verde-oliva e preto.
+- **A arma:** escopeta compacta de bomba, de cano curto e carregador na frente do cabo, como a
+  MAG-7. A arte é genérica, inspirada nela: nada de copiar o desenho da skin Justice, emblemas,
+  nomes ou logos do CS. Troque as cores da arma em `<ITEMS>` abaixo se quiser lembrar a skin.
+- **Ideias guardadas:** "sexo" aleatório como fala de vitória ou ao respawnar; cápsula saltando da
+  arma no tiro; coice pequeno para trás ao atirar.
+
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Dadazinho ("Broder") — 30-year-old guy, guitarist, plays shooter games with his friends, likes to say one random word out of nowhere with a straight face.
+Fighting style: close-range punisher — light and quick, compact relaxed stance, ready to pull out a shotgun.
+Body: based on the photos; short and skinny build.
+Outfit: green (#3F9A4E) long-sleeve button-down shirt with a collar and two chest pockets, tucked into dark olive (#4F5B32) long pants with a black belt; off-white (#F6F0E4) sneakers.
+Signature details: black rectangular glasses, classic goatee, the green shirt with two chest pockets.
+Colors: primary #3F9A4E, secondary #4F5B32, accent #23262B.
+Face/personality: deadpan, slight smug smirk.
+Special move: "Doze" — a compact pump shotgun appears in his hands, he fires one blast forward, and the gun vanishes.
+Taunt: plays air guitar, stops, looks at the camera and says one word with a straight face.
+Extra parts for the parts sheet: two hands playing air guitar, one fretting, one strumming.
+Props and effects for the effects sheet: the shotgun (side view, pointing right, no hands); 1 muzzle-flash burst; pellet streaks; smoke puffs for the gun appearing and vanishing.
+Avoid: text, logos or game emblems on the clothes and the gun; copying a real game skin.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):
+
+- `<EXPRESSION>`: `deadpan smug smirk`
+- `<CHARACTER>`:
+  `Dadazinho, 30-year-old guitarist, short and skinny, fair skin, black rectangular glasses, classic goatee, deadpan smirk. Green (#3F9A4E) long-sleeve button-down shirt with a collar and two chest pockets, tucked into dark olive (#4F5B32) long pants with a black belt; off-white sneakers.`
+- `<LEGWEAR>`: `long pants with belt`
+- `<SHOE>`: `chunky sneaker`
+- `<EXTRA>`: `two hands playing air guitar, one fretting, one strumming`
+- Manga comprida até o punho: no passo 3, troque `upper arm with sleeve; forearm without hand` por
+  `upper arm with sleeve; forearm with sleeve, without hand`.
+- `<ITEMS>`:
+  `1 compact boxy pump-action shotgun with a short barrel and a box magazine, side view pointing right, no hands, off-white with blue and gold details; 1 big muzzle-flash burst; 5 short pellet streaks; 3 small gray smoke puffs`
 
 ### Arte
 
