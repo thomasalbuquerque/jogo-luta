@@ -239,7 +239,10 @@
       "sheet": "arma",
       "rect": [40, 223, 845, 312],
       "pivot": [130, 425],
-      "tip": [330, 425]
+      "tip": [330, 425],
+      "sockets": {
+        "muzzle": [878, 300]
+      }
     },
     "fx_flash": {
       "sheet": "efeitos",
