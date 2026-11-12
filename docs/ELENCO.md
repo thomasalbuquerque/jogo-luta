@@ -83,7 +83,10 @@ controla de longe (projétil).
   MAG-7. A arte é genérica, inspirada nela: nada de copiar o desenho da skin Justice, emblemas,
   nomes ou logos do CS. Troque as cores da arma em `<ITEMS>` abaixo se quiser lembrar a skin.
 - **Ideias guardadas:** "sexo" aleatório como fala de vitória ou ao respawnar; cápsula saltando da
-  arma no tiro; coice pequeno para trás ao atirar.
+  arma no tiro.
+- **No jogo:** jogável. A doze aparece na mão com fumacinha, o tiro sai com clarão e dá um coice
+  para trás; o chumbo voa uns 200 px. Na provocação ele toca a air guitar e só no fim solta o
+  "sexo" (`voiceAt` da ficha). Ficha em `packages/sim/src/characters/dadazinho.ts`.
 
 #### Ficha de arte
 
@@ -100,7 +103,7 @@ Special move: "Doze" — a compact pump shotgun appears in his hands, he fires o
 Taunt: plays air guitar, stops, looks at the camera and says one word with a straight face.
 Extra parts for the parts sheet: two hands playing air guitar, one fretting, one strumming.
 Props and effects for the effects sheet: the shotgun (side view, pointing right, no hands); 1 muzzle-flash burst; pellet streaks; smoke puffs for the gun appearing and vanishing.
-Avoid: text, logos or game emblems on the clothes and the gun; copying a real game skin.
+Avoid: text, logos or game emblems on the clothes and the gun;
 ```
 
 Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):

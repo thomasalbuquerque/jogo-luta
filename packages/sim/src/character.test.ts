@@ -123,6 +123,13 @@ describe('ficha de personagem', () => {
     expect(defineCharacter(sheet({ koSound: 'grito' })).koSound).toBe('grito');
   });
 
+  it('voz da provocação: no começo, ou no tick da ficha antes de acabar', () => {
+    expect(defineCharacter(sheet()).taunt.voiceAt).toBe(0);
+    const late = { text: 'Opa!', sound: 'a', animation: 'b', durationTicks: 90, voiceAt: 70 };
+    expect(defineCharacter(sheet({ taunt: late })).taunt.voiceAt).toBe(70);
+    expect(() => defineCharacter(sheet({ taunt: { ...late, voiceAt: 90 } }))).toThrow(/voiceAt/);
+  });
+
   it('o lutador usa o tamanho e os números da ficha', () => {
     registerCharacter(
       defineCharacter(

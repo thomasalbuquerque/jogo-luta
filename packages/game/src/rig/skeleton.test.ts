@@ -5,9 +5,11 @@ import {
   drawOrder,
   fitRig,
   frameFor,
+  placedPoint,
   REST_POSE,
   skinFromAtlas,
   solvePose,
+  solveProp,
   type FrameAnchors,
   type Skin,
 } from './skeleton';
@@ -107,6 +109,29 @@ describe('esqueleto', () => {
     expect(frameFor(skin, 'thighNear', REST_POSE)).toBe('thigh');
     expect(frameFor(skin, 'shinFar', REST_POSE)).toBe('shin');
     expect(frameFor(skin, 'head', { ...REST_POSE, expression: 'ko' })).toBe('head_ko');
+  });
+
+  it('a peça segurada fica no meio da mão e aponta para onde a mão aponta', () => {
+    const skin = new Map(testSkin());
+    // arma desenhada deitada: cabo no pivô, cano para a direita, boca na ponta
+    skin.set('gun', { w: 20, h: 10, pivot: [2, 8], tip: [12, 8], sockets: { muzzle: [20, 2] } });
+    expect(solveProp(skin, solvePose(skin, REST_POSE), REST_POSE)).toBeNull();
+
+    const pose = { ...REST_POSE, rot: { upperArmNear: -90 }, prop: 'gun' };
+    const placed = solvePose(skin, pose);
+    const hand = placed.find((p) => p.bone === 'handNear');
+    const gun = solveProp(skin, placed, pose);
+    if (!hand || !gun) throw new Error('sem mão ou arma');
+    // braço esticado para a frente: a mão aponta para a direita (0°), como a arma
+    expect(near(Math.cos(gun.rotation), 1)).toBe(true);
+    expect(near(gun.x, hand.x + 2.5)).toBe(true);
+    expect(near(gun.y, hand.y)).toBe(true);
+    // a boca fica à frente e acima do cabo
+    const anchors = skin.get('gun');
+    if (!anchors) throw new Error('sem arma');
+    const [mx, my] = placedPoint(anchors, gun, 'muzzle');
+    expect(near(mx, gun.x + 18)).toBe(true);
+    expect(near(my, gun.y - 6)).toBe(true);
   });
 
   it('lê os pontos do JSON do atlas', () => {

@@ -56,7 +56,7 @@ import {
 import { isDecisiveHit } from '../render/decisive';
 import { characterOfFighter, colorValue } from '../render/fighterLook';
 import { FighterView, characterTextureKey } from '../render/FighterView';
-import { CHARACTER_FX, FxLayer } from '../render/fx';
+import { CHARACTER_FX, FxLayer, type CharacterFx } from '../render/fx';
 import { FX_TEXTURE } from '../render/fxTextures';
 import {
   hitStrength,
@@ -182,7 +182,7 @@ export class FightScene extends Phaser.Scene {
   overTicks = 0;
   /** KOs, quedas e dano de cada jogador nesta luta. */
   stats: MatchStats = createStats(0);
-  setup: MatchSetup = { characters: PLAYABLE_CHARACTERS, stageId: STAGES[0]?.id ?? '' };
+  setup: MatchSetup = { characters: PLAYABLE_CHARACTERS.slice(0, 2), stageId: STAGES[0]?.id ?? '' };
   /**
    * Atraso de input por jogador, para sentir o netcode por atraso sem rede
    * (`?atraso=3` na URL, ou as teclas do modo debug). Vale entre lutas.
@@ -218,6 +218,8 @@ export class FightScene extends Phaser.Scene {
   private resumedAt = 0;
   private prev: PrevPos[] = [];
   private lastStates: FighterState[] = [];
+  /** Peça na mão de cada lutador no último tick (para a fumaça quando ela aparece). */
+  private lastProps: (string | null)[] = [];
   private views: FighterView[] = [];
   private fx!: FxLayer;
   private backFx!: FxLayer;
@@ -255,7 +257,7 @@ export class FightScene extends Phaser.Scene {
           friendlyFire: replay.rules.friendlyFire === true,
         }
       : {
-          characters: data.characters ?? PLAYABLE_CHARACTERS,
+          characters: data.characters ?? PLAYABLE_CHARACTERS.slice(0, 2),
           stageId: data.stageId ?? STAGES[0]?.id ?? '',
           teams: data.teams ?? null,
           friendlyFire: data.friendlyFire === true,
@@ -429,6 +431,7 @@ export class FightScene extends Phaser.Scene {
     this.stats = createStats(this.state.fighters.length);
     this.prev = this.state.fighters.map((f) => ({ x: f.x, y: f.y }));
     this.lastStates = this.state.fighters.map((f) => f.state);
+    this.lastProps = this.state.fighters.map(() => null);
     this.overTicks = 0;
     this.loop.reset();
     this.fx.clear();
@@ -534,6 +537,7 @@ export class FightScene extends Phaser.Scene {
     this.handleEvents();
     this.spawnTrails();
     this.spawnFx();
+    this.lateTauntVoices();
     this.fx.step();
     this.backFx.step();
   }
@@ -710,7 +714,7 @@ export class FightScene extends Phaser.Scene {
         break;
       case 'TAUNT': {
         const taunt = characterOfFighter(f).taunt;
-        playVoice(this, taunt.sound, taunt.text);
+        if (taunt.voiceAt === 0) playVoice(this, taunt.sound, taunt.text);
         break;
       }
       case 'WALL_JUMP':
@@ -870,9 +874,24 @@ export class FightScene extends Phaser.Scene {
     for (const f of this.state.fighters) {
       const view = this.views[f.id];
       const fx = CHARACTER_FX[f.character];
+      if (view && fx) this.spawnPropFx(f, view, fx);
       const move = f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
       if (!view || !fx || !move) continue;
       const frame = moveFrame(f);
+      if (fx.muzzleFlash && frame === move.startup + 1) {
+        const muzzle = view.propPoint('muzzle');
+        this.fx.spawn({
+          texture: characterTextureKey(f.character),
+          frame: fx.muzzleFlash,
+          x: muzzle?.x ?? toPx(f.x + f.w / 2) + f.facing * toPx(f.w),
+          y: muzzle?.y ?? toPx(f.y + f.h * 0.3),
+          originX: f.facing === 1 ? 0.05 : 0.95,
+          flipX: f.facing === -1,
+          life: 7,
+          scale: view.scale * 0.55,
+          scaleEnd: view.scale * 0.8,
+        });
+      }
       const feetX = toPx(f.x + f.w / 2);
       const feetY = toPx(f.y + f.h);
       const w = toPx(f.w);
@@ -977,7 +996,7 @@ export class FightScene extends Phaser.Scene {
       img.setTexture(key, frame).setVisible(true);
       img
         .setPosition(x + w / 2, y + h / 2)
-        .setScale(view.scale * 0.85)
+        .setScale(view.scale * (art.scale ?? 0.85))
         .setFlipX(side === -1);
       if (art.trail) {
         let trail = this.projectileTrails[i];
@@ -1002,7 +1021,42 @@ export class FightScene extends Phaser.Scene {
     }
   }
 
-  /** Provocação: balão com o bordão (a voz sai do evento TAUNT). */
+  /** Fumacinha na mão quando a peça segurada (a arma) aparece ou some. */
+  private spawnPropFx(f: Fighter, view: FighterView, fx: CharacterFx): void {
+    const prop = fighterPose(f).prop;
+    const before = this.lastProps[f.id] ?? null;
+    this.lastProps[f.id] = prop;
+    const puffs = fx.propPuffs ?? [];
+    if (prop === before || puffs.length === 0) return;
+    const hand = view.handPoint();
+    if (!hand) return;
+    puffs.forEach((frame, i) => {
+      this.fx.spawn({
+        texture: characterTextureKey(f.character),
+        frame,
+        x: hand.x + (Math.random() - 0.5) * 14,
+        y: hand.y + (Math.random() - 0.5) * 10,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: -0.4 - i * 0.2,
+        life: 22,
+        scale: view.scale * 0.5,
+        scaleEnd: view.scale * 0.9,
+        alpha: 0.9,
+      });
+    });
+  }
+
+  /** Voz da provocação que sai no meio dela (`taunt.voiceAt` da ficha), a cada tick. */
+  private lateTauntVoices(): void {
+    for (const f of this.state.fighters) {
+      const taunt = characterOfFighter(f).taunt;
+      if (f.state === 'taunt' && taunt.voiceAt > 0 && f.stateTicks === taunt.voiceAt) {
+        playVoice(this, taunt.sound, taunt.text);
+      }
+    }
+  }
+
+  /** Provocação: balão com o bordão (a voz sai do evento TAUNT ou no `voiceAt`). */
   private updateTaunts(alpha: number): void {
     for (const f of this.state.fighters) {
       const bubble = this.bubbles[f.id];
@@ -1013,7 +1067,7 @@ export class FightScene extends Phaser.Scene {
         bubble.setText(c.taunt.text);
       }
       this.lastStates[f.id] = f.state;
-      bubble.setVisible(taunting);
+      bubble.setVisible(taunting && f.stateTicks >= c.taunt.voiceAt);
       if (taunting) {
         const r = this.renderRect(f, alpha);
         const top = r.y + r.h - (this.views[f.id]?.height ?? r.h);

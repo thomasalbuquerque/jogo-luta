@@ -12,8 +12,20 @@ export interface CharacterFx {
   chargeMark?: string;
   /** Linhas de velocidade atrás do corpo durante o active. */
   activeStreaks?: readonly string[];
-  /** Projétil: quadros em ciclo, rastro atrás e fumacinhas soltando. */
-  projectile?: { frames: readonly string[]; trail?: string; puffs?: readonly string[] };
+  /**
+   * Projétil: quadros em ciclo, rastro atrás e fumacinhas soltando. `scale`: tamanho
+   * em relação ao personagem (padrão 0.85).
+   */
+  projectile?: {
+    frames: readonly string[];
+    trail?: string;
+    puffs?: readonly string[];
+    scale?: number;
+  };
+  /** Clarão na boca da arma (socket `muzzle` da peça na mão) no 1º frame ativo. */
+  muzzleFlash?: string;
+  /** Fumacinha na mão quando a peça segurada aparece ou some. */
+  propPuffs?: readonly string[];
 }
 
 export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
@@ -21,6 +33,11 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
     chargePuffs: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3', 'fx_smoke4'],
     chargeMark: 'fx_skid',
     activeStreaks: ['fx_streak1', 'fx_streak2'],
+  },
+  dadazinho: {
+    projectile: { frames: ['fx_pellets'], scale: 1.3 },
+    muzzleFlash: 'fx_flash',
+    propPuffs: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
   },
   'joao-frango': {
     projectile: {

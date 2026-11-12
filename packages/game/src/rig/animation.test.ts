@@ -47,6 +47,21 @@ describe('sampleClip', () => {
     expect(sampleClip(clip, 12).handFar).toBe('fist');
   });
 
+  it('a peça na mão aparece e é guardada em degrau', () => {
+    const c: Clip = {
+      timing: 'move',
+      keys: [
+        { t: 0, rot: {} },
+        { t: 0.4, rot: {}, prop: 'fx_gun' },
+        { t: 2.6, rot: {}, prop: null },
+        { t: 3, rot: {} },
+      ],
+    };
+    expect(sampleClip(c, 0.2).prop).toBeNull();
+    expect(sampleClip(c, 1).prop).toBe('fx_gun');
+    expect(sampleClip(c, 2.8).prop).toBeNull();
+  });
+
   it('clipe "once" para na última chave', () => {
     const once: Clip = { ...clip, timing: 'once' };
     expect(sampleClip(once, 50).rot.torso).toBe(10);

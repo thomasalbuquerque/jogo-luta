@@ -1,4 +1,4 @@
-import type { Clip, Rot } from './animation';
+import type { Clip, Key, Rot } from './animation';
 import { STANCE } from './clips';
 
 /*
@@ -58,6 +58,57 @@ const CUPPED: Rot = {
   forearmFar: -160,
   handFar: 36,
 };
+
+/**
+ * Dadazinho mirando a doze: braço da frente esticado na altura do ombro (a arma
+ * aponta para onde a mão aponta) e a mão de trás embaixo do cano, na bomba.
+ * Pernas abertas, firmes para o coice.
+ */
+const AIM: Rot = {
+  ...STANCE,
+  torso: 2,
+  head: 4,
+  upperArmNear: -84,
+  forearmNear: -8,
+  handNear: 0,
+  upperArmFar: -62,
+  forearmFar: -38,
+  handFar: 10,
+  thighNear: 24,
+  shinNear: 18,
+  footNear: -38,
+  thighFar: -30,
+  shinFar: 26,
+  footFar: 2,
+};
+
+/**
+ * Air guitar: a mão de trás no braço da guitarra, lá na frente e alta; a da
+ * frente palhetando na altura da cintura. `strum` sobe (−) e desce (+) a palheta.
+ */
+function guitar(strum: number, nod: number): Rot {
+  return {
+    ...STANCE,
+    torso: 10 + nod * 0.4,
+    head: 6 + nod,
+    upperArmNear: 18,
+    forearmNear: -105 + strum,
+    handNear: 25 + strum * 0.5,
+    upperArmFar: -78,
+    forearmFar: -28,
+    handFar: -10,
+  };
+}
+
+/** Palhetadas rápidas entre `from` e `to` (ticks), batendo a cabeça junto. */
+function strums(from: number, to: number): Key[] {
+  const keys: Key[] = [];
+  for (let t = from, i = 0; t <= to; t += 4, i++) {
+    const down = i % 2 === 0;
+    keys.push({ t, rot: guitar(down ? 14 : -10, down ? 6 : -2), ease: 'inOut' });
+  }
+  return keys;
+}
 
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.
@@ -215,6 +266,99 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 70, rot: { ...CUPPED, torso: -12, head: -26 }, y: -1 },
       { t: 80, rot: CUPPED, expression: 'normal' },
       { t: 90, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Doze: a arma aparece na mão, ele mira, o tiro dá um coice para trás e a arma some.
+  dadazinho_special: {
+    timing: 'move',
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      {
+        t: 0.2,
+        rot: { ...STANCE, upperArmNear: -30, forearmNear: -100, handNear: 10 },
+        prop: 'fx_gun',
+      },
+      { t: 0.7, rot: AIM, ease: 'out' },
+      // o tiro sai com a arma reta; o coice vem logo depois
+      { t: 1, rot: AIM },
+      {
+        t: 2.12,
+        rot: {
+          ...AIM,
+          torso: -9,
+          head: -2,
+          upperArmNear: -96,
+          forearmNear: -12,
+          handNear: -10,
+          upperArmFar: -72,
+        },
+        x: -2.5,
+        ease: 'out',
+      },
+      { t: 2.4, rot: { ...AIM, torso: -4, upperArmNear: -90 }, x: -2.5, ease: 'inOut' },
+      {
+        t: 2.65,
+        rot: { ...STANCE, upperArmNear: -40, forearmNear: -95 },
+        prop: null,
+        x: -1.5,
+        ease: 'inOut',
+      },
+      { t: 3, rot: STANCE, ease: 'inOut' },
+    ],
+  },
+  // Air guitar, para do nada e solta o bordão na seca (voz no `voiceAt` da ficha).
+  dadazinho_taunt: {
+    timing: 'once',
+    length: 110,
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 8, rot: guitar(0, 0), handNear: 'taunt', handFar: 'taunt', ease: 'out' },
+      ...strums(12, 64),
+      { t: 70, rot: guitar(0, 0), ease: 'out' },
+      {
+        t: 80,
+        rot: {
+          torso: 0,
+          head: -2,
+          upperArmNear: 4,
+          forearmNear: -12,
+          handNear: 10,
+          upperArmFar: -6,
+          forearmFar: -14,
+          handFar: 10,
+          thighNear: 6,
+          shinNear: 4,
+          footNear: -10,
+          thighFar: -8,
+          shinFar: 6,
+          footFar: 0,
+        },
+        handNear: 'open',
+        handFar: 'open',
+        ease: 'inOut',
+      },
+      {
+        t: 100,
+        rot: {
+          torso: -2,
+          head: -6,
+          upperArmNear: 4,
+          forearmNear: -12,
+          handNear: 10,
+          upperArmFar: -6,
+          forearmFar: -14,
+          handFar: 10,
+          thighNear: 6,
+          shinNear: 4,
+          footNear: -10,
+          thighFar: -8,
+          shinFar: 6,
+          footFar: 0,
+        },
+      },
+      { t: 110, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
     ],
   },
 };

@@ -132,6 +132,8 @@ export interface Pose {
   expression: Expression;
   handNear: HandPose;
   handFar: HandPose;
+  /** Peça segurada na mão da frente (a arma do especial), ou nada. */
+  prop: string | null;
 }
 
 export const REST_POSE: Pose = {
@@ -141,6 +143,7 @@ export const REST_POSE: Pose = {
   expression: 'normal',
   handNear: 'fist',
   handFar: 'fist',
+  prop: null,
 };
 
 /** Onde e como desenhar a peça de um osso (px da textura, origem nos pés). */
@@ -239,6 +242,45 @@ export function solvePose(skin: Skin, pose: Pose): PlacedBone[] {
     });
   }
   return out;
+}
+
+/**
+ * Onde desenhar a peça segurada (`pose.prop`): o pivô dela (o cabo) no meio da mão
+ * da frente, apontando para onde a mão aponta (do pivô para a ponta da peça).
+ * Sem peça na pose, ou sem a peça na skin: null.
+ */
+export function solveProp(
+  skin: Skin,
+  placed: readonly PlacedBone[],
+  pose: Pose,
+): PlacedBone | null {
+  if (!pose.prop) return null;
+  const prop = skin.get(pose.prop);
+  const hand = placed.find((p) => p.bone === 'handNear');
+  const handAnchors = hand && skin.get(hand.frame);
+  if (!prop || !hand || !handAnchors) return null;
+  const deg = hand.rotation / DEG;
+  const mid: Vec = [
+    (handAnchors.tip[0] - handAnchors.pivot[0]) / 2,
+    (handAnchors.tip[1] - handAnchors.pivot[1]) / 2,
+  ];
+  const [ox, oy] = rotate(mid, deg);
+  return {
+    bone: 'handNear',
+    frame: pose.prop,
+    x: hand.x + ox,
+    y: hand.y + oy,
+    rotation: (deg + artAngle(handAnchors) - artAngle(prop)) * DEG,
+    originX: prop.pivot[0] / prop.w,
+    originY: prop.pivot[1] / prop.h,
+  };
+}
+
+/** Um ponto da peça (pivô, ponta ou socket) depois de posicionada, em px da textura. */
+export function placedPoint(a: FrameAnchors, p: PlacedBone, socket: string): Vec {
+  const s = socketOf(a, socket);
+  const [x, y] = rotate([s[0] - a.pivot[0], s[1] - a.pivot[1]], p.rotation / DEG);
+  return [p.x + x, p.y + y];
 }
 
 /** Caixa (em px da textura) que contém as peças posicionadas. */

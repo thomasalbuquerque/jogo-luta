@@ -225,13 +225,20 @@ const StatsSchema = z.strictObject({
   dashSpeed: num(4, 30).optional(),
 });
 
-const TauntSchema = z.strictObject({
-  /** Bordão (aparece no balão enquanto não há áudio gravado). */
-  text: z.string().min(1).max(60),
-  sound: AssetId,
-  animation: AssetId,
-  durationTicks: int(20, 240).default(60),
-});
+const TauntSchema = z
+  .strictObject({
+    /** Bordão (aparece no balão enquanto não há áudio gravado). */
+    text: z.string().min(1).max(60),
+    sound: AssetId,
+    animation: AssetId,
+    durationTicks: int(20, 240).default(60),
+    /** Tick da provocação em que a voz sai e o balão aparece (0 = logo no começo). */
+    voiceAt: int(0, 239).default(0),
+  })
+  .refine((t) => t.voiceAt < t.durationTicks, {
+    path: ['voiceAt'],
+    message: 'a voz tem que sair antes de a provocação acabar',
+  });
 
 export const CharacterSchema = z.strictObject({
   id: z.string().regex(/^[a-z0-9-]+$/, 'id em minúsculas, números e -'),
@@ -271,6 +278,7 @@ export interface Taunt {
   sound: string;
   animation: string;
   durationTicks: number;
+  voiceAt: number;
 }
 
 export interface Character {

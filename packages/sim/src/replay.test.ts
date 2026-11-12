@@ -21,7 +21,7 @@ import { TEST_STAGE } from './stage';
 import { RandomInputs } from './testing';
 
 const SETUP = {
-  characters: PLAYABLE_CHARACTERS,
+  characters: PLAYABLE_CHARACTERS.slice(0, 2),
   stageId: TEST_STAGE.id,
   rules: MATCH_RULES,
   seed: 4242,

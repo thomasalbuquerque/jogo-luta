@@ -173,6 +173,8 @@ Objetivo: lutas em dupla, locais e online.
 Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da Etapa 4.
 
 - [ ] Lote 1 (3–4 personagens)
+  - [x] Dadazinho: jogável (ficha, arte no esqueleto, especial, provocação, efeitos, retrato). Falta o
+        OK do concept pelo amigo, a voz gravada e as 5 lutas de teste.
 - [ ] Lote 2 (3–4 personagens)
 - [ ] Lote 3 (3–4 personagens)
 - [ ] Lote 4 (restantes)
@@ -182,7 +184,7 @@ Checklist de cada personagem:
 
 1. Ficha: stats, 1 especial montado com blocos existentes, provocação.
 2. Concept art aprovado pelo próprio amigo.
-3. As 5 imagens geradas pela seção "Personagem novo" do `docs/ARTE.md` (uma folha de peças só, `3-pecas.png`) e encaixadas como skin no esqueleto base.
+3. As 5 imagens geradas pela seção "Personagem novo" do `docs/ARTE.md` e encaixadas como skin no esqueleto base.
 4. Animações do especial e da provocação.
 5. Áudio: bordão, provocação e KO.
 6. Retrato para a tela de seleção e para o HUD.

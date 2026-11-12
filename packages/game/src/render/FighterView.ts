@@ -3,9 +3,11 @@ import {
   DRAW_ORDER,
   drawOrder,
   fitRig,
+  placedPoint,
   poseBounds,
   skinFromAtlas,
   solvePose,
+  solveProp,
   type BoneId,
   type PlacedBone,
   type Pose,
@@ -61,6 +63,12 @@ export class FighterView {
   /** Altura da arte em px de mundo. */
   readonly height: number;
   private readonly images = new Map<BoneId, Phaser.GameObjects.Image>();
+  /** Peça segurada na mão da frente (a arma do especial), escondida sem peça. */
+  private readonly propImage: Phaser.GameObjects.Image;
+  /** Onde a peça segurada foi desenhada por último (px da textura, sem o lift). */
+  private placedProp: { placed: PlacedBone; lift: number } | null = null;
+  /** Mão da frente na última pose (para saber onde a peça aparece e some). */
+  private placedHand: { placed: PlacedBone; lift: number } | null = null;
   private readonly skin: Skin;
   private readonly fit: RigFit;
   private readonly textureKey: string;
@@ -80,6 +88,8 @@ export class FighterView {
       this.images.set(bone, img);
       this.container.add(img);
     }
+    this.propImage = scene.add.image(0, 0, this.textureKey).setVisible(false);
+    this.container.add(this.propImage);
     this.setTint(0xffffff);
   }
 
@@ -99,6 +109,17 @@ export class FighterView {
       img.setPosition(p.x, p.y - this.fit.groundY + lift);
       img.setRotation(p.rotation);
     }
+    const hand = placed.find((p) => p.bone === 'handNear');
+    this.placedHand = hand ? { placed: hand, lift } : null;
+    const prop = solveProp(this.skin, placed, pose);
+    this.placedProp = prop ? { placed: prop, lift } : null;
+    this.propImage.setVisible(prop !== null);
+    if (prop) {
+      if (this.propImage.frame.name !== prop.frame) this.propImage.setFrame(prop.frame);
+      this.propImage.setOrigin(prop.originX, prop.originY);
+      this.propImage.setPosition(prop.x, prop.y - this.fit.groundY + lift);
+      this.propImage.setRotation(prop.rotation);
+    }
     const order = drawOrder(pose);
     const key = order.join();
     if (key !== this.order) {
@@ -108,9 +129,38 @@ export class FighterView {
         if (img) this.container.bringToTop(img);
       }
     }
+    // a peça fica atrás da mão que segura, na frente do resto
+    const handImg = this.images.get('handNear');
+    if (handImg) this.container.moveBelow(this.propImage, handImg);
     const unit = this.height / 100;
     this.container.setPosition(x + pose.x * unit * facing, y + pose.y * unit);
     this.container.setScale(this.scale * facing, this.scale);
+  }
+
+  /**
+   * Um ponto da peça segurada (`pivot`, `tip` ou um socket, como a boca da arma) em px de
+   * mundo, na última pose desenhada. Sem peça na mão: null.
+   */
+  propPoint(socket: string): { x: number; y: number } | null {
+    const p = this.placedProp;
+    const anchors = p && this.skin.get(p.placed.frame);
+    if (!p || !anchors) return null;
+    return this.toWorld(placedPoint(anchors, p.placed, socket), p.lift);
+  }
+
+  /** O meio da mão da frente em px de mundo, na última pose desenhada. */
+  handPoint(): { x: number; y: number } | null {
+    const p = this.placedHand;
+    const anchors = p && this.skin.get(p.placed.frame);
+    if (!p || !anchors) return null;
+    const [px, py] = placedPoint(anchors, p.placed, 'pivot');
+    const [tx, ty] = placedPoint(anchors, p.placed, 'tip');
+    return this.toWorld([(px + tx) / 2, (py + ty) / 2], p.lift);
+  }
+
+  private toWorld([x, y]: readonly [number, number], lift: number): { x: number; y: number } {
+    const c = this.container;
+    return { x: c.x + x * c.scaleX, y: c.y + (y - this.fit.groundY + lift) * c.scaleY };
   }
 
   setVisible(visible: boolean): this {
@@ -128,7 +178,7 @@ export class FighterView {
    * trás ficam na cor original da arte, sem sombra extra.
    */
   setTint(color: number): this {
-    for (const img of this.images.values()) {
+    for (const img of [...this.images.values(), this.propImage]) {
       if (color === 0xffffff) img.clearTint();
       else img.setTint(color);
     }
@@ -137,7 +187,7 @@ export class FighterView {
 
   /** Clarão do impacto: pinta as peças inteiras de `color` (desfaz com `setTint`). */
   setFlash(color = 0xffffff): this {
-    for (const img of this.images.values()) img.setTintFill(color);
+    for (const img of [...this.images.values(), this.propImage]) img.setTintFill(color);
     return this;
   }
 

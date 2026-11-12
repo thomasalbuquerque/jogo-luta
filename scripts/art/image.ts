@@ -130,6 +130,26 @@ export function paintPolygon(img: Image, poly: Polygon, hex: string): void {
   }
 }
 
+/**
+ * Põe uma cor por trás do que está dentro do polígono: o pixel fica opaco, com o
+ * desenho por cima da cor na proporção do alfa. Serve para vidro que veio da cor
+ * do fundo (a lente dos óculos), sem perder o brilho desenhado.
+ */
+export function fillBehind(img: Image, poly: Polygon, hex: string): void {
+  const [r, g, b] = parseHex(hex);
+  for (let y = 0; y < img.h; y++) {
+    for (let x = 0; x < img.w; x++) {
+      if (!insidePolygon(x + 0.5, y + 0.5, poly)) continue;
+      const i = (y * img.w + x) * 4;
+      const a = (img.data[i + 3] ?? 0) / 255;
+      img.data[i] = (img.data[i] ?? 0) * a + r * (1 - a);
+      img.data[i + 1] = (img.data[i + 1] ?? 0) * a + g * (1 - a);
+      img.data[i + 2] = (img.data[i + 2] ?? 0) * a + b * (1 - a);
+      img.data[i + 3] = 255;
+    }
+  }
+}
+
 function distToSegment(px: number, py: number, a: Point, b: Point): number {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
