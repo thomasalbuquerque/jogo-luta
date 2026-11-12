@@ -134,6 +134,8 @@ export interface Pose {
   handFar: HandPose;
   /** Peça segurada na mão da frente (a arma do especial), ou nada. */
   prop: string | null;
+  /** Giro extra da peça segurada em volta do pivô dela, em graus (a chave girando na mão). */
+  propSpin: number;
 }
 
 export const REST_POSE: Pose = {
@@ -144,6 +146,7 @@ export const REST_POSE: Pose = {
   handNear: 'fist',
   handFar: 'fist',
   prop: null,
+  propSpin: 0,
 };
 
 /** Onde e como desenhar a peça de um osso (px da textura, origem nos pés). */
@@ -246,7 +249,8 @@ export function solvePose(skin: Skin, pose: Pose): PlacedBone[] {
 
 /**
  * Onde desenhar a peça segurada (`pose.prop`): o pivô dela (o cabo) no meio da mão
- * da frente, apontando para onde a mão aponta (do pivô para a ponta da peça).
+ * da frente, apontando para onde a mão aponta (do pivô para a ponta da peça), mais o
+ * giro `propSpin` da pose.
  * Sem peça na pose, ou sem a peça na skin: null.
  */
 export function solveProp(
@@ -270,7 +274,7 @@ export function solveProp(
     frame: pose.prop,
     x: hand.x + ox,
     y: hand.y + oy,
-    rotation: (deg + artAngle(handAnchors) - artAngle(prop)) * DEG,
+    rotation: (deg + artAngle(handAnchors) - artAngle(prop) + pose.propSpin) * DEG,
     originX: prop.pivot[0] / prop.w,
     originY: prop.pivot[1] / prop.h,
   };

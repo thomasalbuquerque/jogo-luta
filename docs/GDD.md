@@ -123,7 +123,7 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames) 
 
 - **Teleporte sorteado** (`target: 'random'`, o Silent quit do Tauba): no active o lutador some (parado, invisível e intangível); no fim do active reaparece em pé num chão do palco, longe das pontas e nunca dentro de bloco. Sorteia `candidates` pontos (padrão 3) com o RNG da luta (`state.rng`, então replay e online continuam determinísticos) e vai para o mais longe do adversário mais perto, ou, em `nearChance`% das vezes (padrão 25), para o mais perto. Volta virado para o adversário e sem invencibilidade no recovery. Como sempre cai num chão, do ar serve de recuperação.
 - **Opções do especial:** recarga (`cooldownTicks`, contada do começo), 1 vez por ar (`oncePerAir`, volta como a recuperação) e ficar parado no ar no startup (`hoverStartup`).
-- **Provocação** (R / U / Y): só no chão, parado pela duração da ficha; levar golpe desfaz. Sem efeito de jogo. Mostra o bordão num balão e toca o áudio do amigo (`audio/vozes/<taunt.sound>`); enquanto não há áudio gravado, toca uma voz provisória sintetizada a partir do bordão (ou um instrumento: o Tauba toca uma fanfarra de trompete sintetizada). Com `taunt.voiceAt` na ficha, a voz e o balão só saem nesse tick da provocação (o Dadazinho toca a air guitar e só depois fala).
+- **Provocação** (R / U / Y): só no chão, parado pela duração da ficha; levar golpe desfaz. Sem efeito de jogo. Mostra o bordão num balão e toca o áudio do amigo (`audio/vozes/<taunt.sound>`); enquanto não há áudio gravado, toca uma voz provisória sintetizada a partir do bordão (ou um instrumento: o Tauba toca uma fanfarra de trompete sintetizada). Com `taunt.voiceAt` na ficha, a voz e o balão só saem nesse tick da provocação (o Dadazinho toca a air guitar e só depois fala; o Tchula gira a chave de boca e só depois grita).
 
 ## Game feel e áudio
 
@@ -239,11 +239,12 @@ Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `b
 
 ### Os personagens jogáveis
 
-| Personagem  | Estilo   | Peso | Chão (px/tick) | Ar (px/tick) | Pulo | Pulos aéreos | Especial                                                                                   |
-| ----------- | -------- | ---- | -------------- | ------------ | ---- | ------------ | ------------------------------------------------------------------------------------------ |
-| Schummaki   | Rusher   | 112  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 13%, 1 vez por ar, parado no ar no startup        |
-| João Frango | Zoner    | 86   | 5,6            | 6,2          | 180  | 2            | **Frango assado voador** (projétil): 10 / 1 / 16, 5%, reto, ~570 px, recarga de 42         |
-| Dadazinho   | Punisher | 84   | 7              | 6            | 180  | 1            | **Doze** (projétil): 20 / 1 / 26, 15%, tiro curto (~200 px) e forte, recarga de 100        |
-| Tauba       | Fujão    | 92   | 6,8            | 6            | 178  | 1            | **Silent quit** (teleporte sorteado): 14 / 20 / 18, sem dano, 1 vez por ar, recarga de 240 |
+| Personagem  | Estilo   | Peso | Chão (px/tick) | Ar (px/tick) | Pulo | Pulos aéreos | Especial                                                                                                |
+| ----------- | -------- | ---- | -------------- | ------------ | ---- | ------------ | ------------------------------------------------------------------------------------------------------- |
+| Schummaki   | Rusher   | 112  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 13%, 1 vez por ar, parado no ar no startup                     |
+| João Frango | Zoner    | 86   | 5,6            | 6,2          | 180  | 2            | **Frango assado voador** (projétil): 10 / 1 / 16, 5%, reto, ~570 px, recarga de 42                      |
+| Dadazinho   | Punisher | 84   | 7              | 6            | 180  | 1            | **Doze** (projétil): 20 / 1 / 26, 15%, tiro curto (~200 px) e forte, recarga de 100                     |
+| Tauba       | Fujão    | 92   | 6,8            | 6            | 178  | 1            | **Silent quit** (teleporte sorteado): 14 / 20 / 18, sem dano, 1 vez por ar, recarga de 240              |
+| Tchula      | Sniper   | 108  | 5,8            | 5,1          | 170  | 1            | **Scout** (projétil): 28 / 1 / 30, 18%, tiro reto e fino (64×14) a 36 px/tick, ~1080 px, recarga de 150 |
 
 O elenco (apelidos, traços, especial e provocação de cada um) fica em [`docs/ELENCO.md`](ELENCO.md).

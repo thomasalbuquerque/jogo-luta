@@ -178,6 +178,9 @@ Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da 
   - [x] Tauba: jogável (ficha, arte no esqueleto, especial com teleporte sorteado, provocação com
         trompete, efeitos, retrato). Falta o OK do concept pelo amigo, o áudio gravado e as 5 lutas de
         teste.
+  - [x] Tchula: jogável (ficha, arte no esqueleto, especial Scout com linha de mira, provocação com a
+        chave de boca girando, efeitos e sons do tiro, retrato). Falta o OK do concept pelo amigo, a
+        voz gravada e as 5 lutas de teste.
 - [ ] Lote 2 (3–4 personagens)
 - [ ] Lote 3 (3–4 personagens)
 - [ ] Lote 4 (restantes)

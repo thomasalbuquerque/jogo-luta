@@ -4,6 +4,7 @@ import { DADAZINHO } from './dadazinho';
 import { JOAO_FRANGO } from './joao-frango';
 import { SCHUMMAKI } from './schummaki';
 import { TAUBA } from './tauba';
+import { TCHULA } from './tchula';
 
 const REGISTRY = new Map<string, Character>();
 
@@ -12,7 +13,7 @@ export function registerCharacter(c: Character): void {
   REGISTRY.set(c.id, c);
 }
 
-for (const c of [BASE, SCHUMMAKI, JOAO_FRANGO, DADAZINHO, TAUBA]) registerCharacter(c);
+for (const c of [BASE, SCHUMMAKI, JOAO_FRANGO, DADAZINHO, TAUBA, TCHULA]) registerCharacter(c);
 
 /** Personagem usado quando nenhum é escolhido (e nos testes). */
 export const BASE_CHARACTER_ID = BASE.id;
@@ -23,6 +24,7 @@ export const PLAYABLE_CHARACTERS: readonly string[] = [
   JOAO_FRANGO.id,
   DADAZINHO.id,
   TAUBA.id,
+  TCHULA.id,
 ];
 
 export function hasCharacter(id: string): boolean {

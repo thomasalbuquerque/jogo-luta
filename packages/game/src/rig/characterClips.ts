@@ -180,6 +180,92 @@ const TRUMPET_UP: Rot = {
   handFar: 70,
 };
 
+/**
+ * Tchula mirando a scout (peça `fx_rifle` na mão da frente, cabo no pivô): a mão da
+ * frente no cabo, perto do peito (a coronha encosta no ombro), cotovelo para baixo;
+ * a mão de trás aberta embaixo do cano, mais à frente. A arma fica reta: a soma dos
+ * ângulos do tronco ao punho dá 0 nos dois braços. Pernas abertas, firmes.
+ */
+const SCOPE: Rot = {
+  ...STANCE,
+  torso: 4,
+  head: 10,
+  upperArmNear: -34,
+  forearmNear: -80,
+  handNear: 20,
+  upperArmFar: -49,
+  forearmFar: -60,
+  handFar: 15,
+  thighNear: 24,
+  shinNear: 18,
+  footNear: -38,
+  thighFar: -30,
+  shinFar: 26,
+  footFar: 2,
+};
+
+/** O coice do tiro: tronco para trás e a arma subindo. */
+const SCOPE_KICK: Rot = {
+  ...SCOPE,
+  torso: -6,
+  head: 2,
+  upperArmNear: -40,
+  handNear: 16,
+  upperArmFar: -55,
+  forearmFar: -58,
+};
+
+/** A arma aparecendo (e sumindo) na mão, na frente da cintura. */
+const RIFLE_LOW: Rot = { ...STANCE, upperArmNear: -30, forearmNear: -100, handNear: 30 };
+
+/** A mão da frente no bolso de trás (tirando ou guardando a chave de boca). */
+const POCKET: Rot = {
+  ...STANDING,
+  torso: 4,
+  head: 4,
+  upperArmNear: 28,
+  forearmNear: -24,
+  handNear: 0,
+  upperArmFar: 8,
+  forearmFar: -40,
+  handFar: 10,
+};
+
+/**
+ * Girando a chave na mão como um revólver: antebraço da frente subindo na frente do
+ * peito, a chave girando em volta do dedo (`propSpin`); a outra mão solta do lado.
+ */
+const WRENCH_SPIN: Rot = {
+  ...STANDING,
+  torso: 2,
+  head: 6,
+  upperArmNear: -22,
+  forearmNear: -110,
+  handNear: 20,
+  upperArmFar: 4,
+  forearmFar: -14,
+  handFar: 10,
+};
+
+/** Apontando a chave para o adversário: braço esticado para a frente, um pouco para cima. */
+const WRENCH_POINT: Rot = {
+  ...STANDING,
+  torso: -4,
+  head: -12,
+  upperArmNear: -96,
+  forearmNear: -2,
+  handNear: 0,
+  upperArmFar: 4,
+  forearmFar: -14,
+  handFar: 10,
+  thighNear: 22,
+  shinNear: 10,
+  footNear: -30,
+};
+
+/** 4 voltas inteiras: a chave termina virada como começou. */
+const SPUN = 1440;
+
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.
   schummaki_special: {
@@ -468,6 +554,51 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 150, rot: TRUMPET_UP, ease: 'inOut' },
       { t: 152, rot: TRUMPET_UP, handNear: 'fist', handFar: 'fist', expression: 'taunt' },
       { t: 160, rot: STANCE, ease: 'inOut' },
+    ],
+  },
+  // Scout: a arma aparece, ele mira (startup longo: a linha de mira e o brilho da
+  // luneta avisam), o tiro sai reto no 1º frame ativo, o coice joga o corpo para
+  // trás, ele puxa o ferrolho (a cápsula salta) e a arma some.
+  tchula_special: {
+    timing: 'move',
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 0.15, rot: RIFLE_LOW, prop: 'fx_rifle' },
+      { t: 0.45, rot: SCOPE, handFar: 'open', ease: 'out' },
+      { t: 1, rot: { ...SCOPE, head: 12 } },
+      { t: 2.1, rot: SCOPE_KICK, x: -3, ease: 'out' },
+      // ferrolho: a arma sobe um pouco e volta (a cápsula sai aqui)
+      { t: 2.3, rot: { ...SCOPE, handNear: 6 }, x: -2, ease: 'inOut' },
+      { t: 2.45, rot: SCOPE, x: -1.5, ease: 'inOut' },
+      { t: 2.7, rot: RIFLE_LOW, prop: null, x: -1, ease: 'inOut' },
+      { t: 3, rot: STANCE, handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Tira a chave de boca do bolso, gira na mão como um revólver, aponta para o
+  // adversário e grita "Nooola!" (voz no `voiceAt` da ficha, 78) e guarda a chave.
+  tchula_taunt: {
+    timing: 'once',
+    length: 120,
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 10, rot: POCKET, handNear: 'open', ease: 'out' },
+      { t: 16, rot: POCKET, handNear: 'fist', handFar: 'open', prop: 'fx_wrench' },
+      { t: 26, rot: WRENCH_SPIN, propSpin: 0, ease: 'out' },
+      { t: 58, rot: { ...WRENCH_SPIN, head: -2 }, propSpin: SPUN, ease: 'inOut' },
+      { t: 64, rot: WRENCH_SPIN, propSpin: SPUN },
+      { t: 72, rot: WRENCH_POINT, propSpin: SPUN, ease: 'out' },
+      {
+        t: 76,
+        rot: { ...WRENCH_POINT, torso: -8, head: -20 },
+        propSpin: SPUN,
+        expression: 'taunt',
+      },
+      { t: 100, rot: { ...WRENCH_POINT, torso: -10, head: -22 }, propSpin: SPUN, y: -1 },
+      { t: 106, rot: POCKET, propSpin: SPUN, expression: 'normal', ease: 'inOut' },
+      { t: 110, rot: POCKET, prop: null, handFar: 'fist' },
+      { t: 120, rot: STANCE, ease: 'inOut' },
     ],
   },
 };

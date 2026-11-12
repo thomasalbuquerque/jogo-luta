@@ -132,6 +132,13 @@ describe('esqueleto', () => {
     const [mx, my] = placedPoint(anchors, gun, 'muzzle');
     expect(near(mx, gun.x + 18)).toBe(true);
     expect(near(my, gun.y - 6)).toBe(true);
+
+    // girada meia volta em volta do cabo: aponta para trás, no mesmo lugar
+    const spun = solveProp(skin, placed, { ...pose, propSpin: 180 });
+    if (!spun) throw new Error('sem arma');
+    expect(near(Math.cos(spun.rotation), -1)).toBe(true);
+    expect(near(spun.x, gun.x)).toBe(true);
+    expect(near(spun.y, gun.y)).toBe(true);
   });
 
   it('lê os pontos do JSON do atlas', () => {

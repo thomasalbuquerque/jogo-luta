@@ -12,6 +12,7 @@ fim o guia de estilo (o porquê de cada regra) e o modelo de ficha.
 | Schummaki e João Frango                         | Conceito, cabeças, peças do corpo, efeitos, figurinha                 | 5 cada  | ✅ feito |
 | Dadazinho                                       | As 5 imagens, já pelo caminho "Personagem novo"                       | 5       | ✅ feito |
 | Tauba                                           | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
+| Tchula                                          | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | [Cenário: a laje](#cenário-a-laje)              | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feito |
 | **[Personagem novo](#personagem-novo-firefly)** | **As mesmas 5 imagens, uma de cada**                                  | 5       | a fazer  |
 
@@ -526,6 +527,7 @@ art/
   <pasta>/         1-conceito.png, 2-cabecas.png, 3-pecas.png, 4-efeitos.png, 5-figurinha.png
   schummaki/       os 5 + 3-pecas-bracos.png (exceção, ver "já feitos")
   joao-frango/     os 5 + 3-pecas-tronco.png e 3-pecas-maos.png (exceção, ver "já feitos")
+  tchula/          os 5 + 1-conceito-face-correta.png (o rosto corrigido, só referência)
   cenario-laje/    1-mapa.png, 2-ceu.png, 3-longe.png, 4-meio.png, 5-pecas.png
 ```
 
@@ -567,8 +569,10 @@ mesma. Nas mãos isso importa: `hand_fist2` e `hand_open2` são as mãos vistas 
 `hand_taunt2` é a outra mão do par especial.
 
 Um efeito com `pivot` e `tip` pode ser **segurado na mão da frente** (a doze do Dadazinho): o
-`pivot` é o cabo, que fica no meio da mão, e a peça aponta para onde a mão aponta. Um socket
-`muzzle` marca a boca da arma (onde sai o clarão).
+`pivot` é o cabo, que fica no meio da mão, e a peça aponta para onde a mão aponta (do `pivot` para
+o `tip`). Um socket `muzzle` marca a boca da arma (onde sai o clarão); na scout do Tchula, `scope`
+marca a luneta (o brilho da mira) e `bolt` o ferrolho (de onde salta a cápsula). A mira sai na
+direção `pivot` → `tip`, então o `tip` fica na altura do cabo, reto para a frente.
 
 **Todas as peças viradas para a direita.** O jogo espelha tudo quando o personagem vira, e usa a
 mesma peça para o braço e a perna de trás, na cor original da arte (o lado de trás não é escurecido).
@@ -608,7 +612,9 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   frente (`hand_taunt`), com o objeto junto; da outra, só a mão (`keep`/`erase`), como mão de trás
   (`hand_taunt2`). O punho da camisa sai com `erase` nas duas. Um socket na mão marca de onde sai
   efeito (`bell`, a boca do trompete, solta as notas da provocação). Objeto que aparece e some sem mão
-  (a doze do Dadazinho) vai na folha de efeitos, com `pivot` no cabo, e entra pela chave `prop`.
+  (a doze do Dadazinho, a scout e a chave de boca do Tchula) vai na folha de efeitos, com `pivot` no
+  cabo, e entra pela chave `prop`. Objeto que gira na mão (a chave do Tchula) também vai como `prop`,
+  não como mão especial: as mãos com a chave da folha de peças dele ficaram sem uso.
 - **Óculos com lente rosa** (vidro transparente na folha): `fill` com uma cor clara de vidro.
 
 ### 2. Esqueleto e animação: `packages/game/src/rig`
@@ -625,10 +631,13 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   frame ativo, quando a hitbox liga, mesmo se a ficha mudar os frames.
 - A cabeça troca inteira conforme o estado: normal, golpe levado (`hurt`), provocação e KO.
 - Peça na mão: a chave `prop: 'fx_...'` de um clipe põe a peça na mão da frente, e `prop: null`
-  guarda (como a arma aparecendo e sumindo no especial do Dadazinho).
+  guarda (como a arma aparecendo e sumindo no especial do Dadazinho). `propSpin` gira a peça em
+  volta do pivô dela, em graus, interpolado entre as chaves (a chave de boca do Tchula girando como
+  um revólver; sem valor = 0, então repita o valor em cada chave enquanto ela estiver na mão).
 - `render/fx.ts`: quais peças `fx_*` cada especial usa (fumaça, linhas de velocidade, projétil,
   clarão na boca da arma, a fumacinha quando a peça da mão aparece ou some, os quadradinhos do
-  teleporte sorteado e as notas que saem do socket `bell` na provocação).
+  teleporte sorteado, as notas que saem do socket `bell` na provocação, a linha de mira e o brilho
+  da luneta, a cápsula saltando do ferrolho e o som do tiro).
 
 Para ver as animações, abra o jogo com `?rig` no fim do endereço (só no `pnpm dev`):
 `http://localhost:5173/?rig`. ←/→ troca o clipe, F mostra 4 quadros lado a lado com a hitbox
