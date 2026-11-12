@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { fanfareTicks } from '../audio/fanfare';
 
 /**
  * Efeitos do especial de cada personagem, com as peças da folha de efeitos
@@ -26,6 +27,18 @@ export interface CharacterFx {
   muzzleFlash?: string;
   /** Fumacinha na mão quando a peça segurada aparece ou some. */
   propPuffs?: readonly string[];
+  /**
+   * A mão `taunt` segura um objeto (o trompete do Tauba): a fumacinha de `propPuffs`
+   * sai também quando ela aparece ou some.
+   */
+  heldInTauntHand?: boolean;
+  /** Teleporte sorteado: quadradinhos quando o corpo se desfaz (some) e se junta (volta). */
+  vanishSquares?: readonly string[];
+  /**
+   * Provocação: peças que saem do socket `bell` da mão (notas do trompete), nos `ticks`
+   * contados a partir do `voiceAt` da ficha.
+   */
+  tauntNotes?: { frames: readonly string[]; ticks: readonly number[] };
 }
 
 export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
@@ -38,6 +51,16 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
     projectile: { frames: ['fx_pellets'], scale: 1.3 },
     muzzleFlash: 'fx_flash',
     propPuffs: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
+  },
+  tauba: {
+    vanishSquares: ['fx_square1', 'fx_square2', 'fx_square3'],
+    // uma nota em cada nota da fanfarra, e mais 3 durante o Sol longo
+    tauntNotes: {
+      frames: ['fx_note1', 'fx_note2', 'fx_note3'],
+      ticks: [...fanfareTicks(), 68, 82, 96],
+    },
+    propPuffs: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
+    heldInTauntHand: true,
   },
   'joao-frango': {
     projectile: {
