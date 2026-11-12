@@ -11,7 +11,7 @@
     },
     "cabecas": {
       "file": "2-cabecas.png",
-      "scale": 0.67
+      "scale": 0.72
     },
     "arma": {
       "file": "4-efeitos.png",
@@ -79,13 +79,15 @@
       "sheet": "pecas",
       "rect": [362, 98, 140, 268],
       "pivot": [432, 165],
-      "tip": [432, 315]
+      "tip": [432, 315],
+      "stretch": [1, 1.12]
     },
     "forearm": {
       "sheet": "pecas",
       "rect": [524, 183, 200, 140],
       "pivot": [580, 258],
-      "tip": [697, 268]
+      "tip": [697, 268],
+      "stretch": [1.15, 1]
     },
     "hand_fist": {
       "sheet": "pecas",
