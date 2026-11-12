@@ -127,6 +127,7 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames) 
 Só apresentação: nada disto muda a luta. O `sim` avisa o que aconteceu em cada tick (`state.events`: golpe com força e ponto do impacto, agarrão, KO, respawn e ações como pulo, dash, dodge, pouso, começo de golpe e provocação), e o jogo desenha e toca em cima disso.
 
 - **Impacto:** estrela, clarão, anel na cor de quem bateu e faíscas na direção do arremesso, tudo maior quanto mais forte o golpe. Quem leva fica branco por alguns ticks e o % no HUD pula de tamanho.
+- **Câmera:** enquadra todos os lutadores em cena (2 a 4), com zoom suave entre 1,1 e o que cabe no mapa. Fica dentro dos limites da câmera (a blast zone 150 px para dentro): nunca mostra fora da arte, e quem voa para o KO conta como se estivesse na borda, então um lutador longe não afasta demais a câmera dos outros. Os lutadores ficam enquadrados acima dos painéis do HUD (com 3 ou 4, eles ocupam a largura toda embaixo).
 - **Tremor de tela:** proporcional ao knockback (golpe fraco quase não treme); o KO treme forte.
 - **Rastro:** quem voa a mais de 14 px/tick deixa fumaça, que vira fogo nos arremessos mais fortes.
 - **KO:** explosão na borda da tela por onde o lutador saiu, apontando para dentro, na cor do jogador.

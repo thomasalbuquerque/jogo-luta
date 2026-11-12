@@ -163,7 +163,7 @@ Objetivo: lutas em dupla, locais e online.
 
 - [x] Generalizar sala e netcode para 4 jogadores: o host recebe os inputs de todos e repassa (estrela, não malha completa). Se a conexão P2P com 4 ficar instável, o relay está na Etapa 12.
 - [x] Times: cores por time, fogo amigo liga/desliga, HUD agrupado por time.
-- [ ] Câmera e mapa ajustados para 4 lutadores.
+- [x] Câmera e mapa ajustados para 4 lutadores.
 - [ ] 2x2 local com 4 gamepads no mesmo PC.
 
 **Pronto quando:** uma partida 2x2 online termina sem travar.
