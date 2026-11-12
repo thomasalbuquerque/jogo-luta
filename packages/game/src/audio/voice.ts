@@ -1,11 +1,20 @@
 import Phaser from 'phaser';
 import type { Character } from '@jogo-luta/sim';
+import { renderFanfare } from './fanfare';
 import { addGeneratedAudio, audioContext } from './sfx';
 import { renderKoYell } from './sfxSynth';
 import { voiceNotes } from './voiceNotes';
 
 /** Volume das vozes gravadas (áudio de WhatsApp costuma vir baixo). */
 const VOICE_VOLUME = 1;
+
+/**
+ * Provocações que, sem o áudio gravado, tocam um instrumento sintetizado em vez
+ * da voz provisória (o Tauba não fala: toca o trompete).
+ */
+const TAUNT_INSTRUMENTS: Readonly<
+  Record<string, (sampleRate: number) => Float32Array<ArrayBuffer>>
+> = { tauba_bordao: renderFanfare };
 
 /** Chave de uma voz gravada: `audio/vozes/<id>.*`. */
 export function voiceKey(sound: string): string {
@@ -14,13 +23,22 @@ export function voiceKey(sound: string): string {
 
 /**
  * Toca a voz de uma provocação: o áudio gravado do amigo, se existir em
- * `audio/vozes/`; senão, uma voz provisória sintetizada a partir do bordão.
+ * `audio/vozes/`; senão, o instrumento sintetizado dele (`TAUNT_INSTRUMENTS`) ou
+ * uma voz provisória sintetizada a partir do bordão.
  */
 export function playVoice(scene: Phaser.Scene, sound: string, text: string): void {
   if (scene.sound.locked) return;
   const key = voiceKey(sound);
   if (scene.cache.audio.exists(key)) {
     scene.sound.play(key, { volume: VOICE_VOLUME });
+    return;
+  }
+  const instrument = TAUNT_INSTRUMENTS[sound];
+  const ctx = audioContext(scene);
+  if (instrument && ctx) {
+    const synthKey = `synth/taunt/${sound}`;
+    addGeneratedAudio(scene, synthKey, instrument(ctx.sampleRate), ctx.sampleRate);
+    scene.sound.play(synthKey, { volume: 0.4 });
     return;
   }
   playSynthVoice(scene, text);
