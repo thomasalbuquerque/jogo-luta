@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { createGame } from '@jogo-luta/sim';
 import { countdownNumber, damageColor, formatClock, resultText } from './hud';
 
 function channels(color: number): [number, number, number] {
@@ -14,9 +15,12 @@ describe('hud', () => {
   });
 
   it('anuncia o vencedor ou o empate', () => {
-    expect(resultText({ winner: 0 })).toBe('P1 VENCEU!');
-    expect(resultText({ winner: 1 })).toBe('P2 VENCEU!');
-    expect(resultText({ winner: null })).toBe('EMPATE!');
+    const solo = createGame().fighters;
+    expect(resultText({ winner: 0, winnerTeam: 0, fighters: solo })).toBe('P1 VENCEU!');
+    expect(resultText({ winner: 1, winnerTeam: 1, fighters: solo })).toBe('P2 VENCEU!');
+    expect(resultText({ winner: null, winnerTeam: null, fighters: solo })).toBe('EMPATE!');
+    const teams = createGame({ characters: ['base', 'base', 'base'], teams: [0, 1, 1] }).fighters;
+    expect(resultText({ winner: 2, winnerTeam: 1, fighters: teams })).toBe('TIME AZUL VENCEU!');
   });
 
   it('o % esquenta: branco no 0, vermelho perto de 140, vinho depois', () => {

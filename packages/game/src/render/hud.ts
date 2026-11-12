@@ -1,4 +1,5 @@
 import { TICK_RATE, type GameState } from '@jogo-luta/sim';
+import { hasTeams, teamName } from '../match/teams';
 
 /** Tempo restante em m:ss (arredonda para cima: 0:01 até o último tick). */
 export function formatClock(ticks: number): string {
@@ -8,9 +9,12 @@ export function formatClock(ticks: number): string {
   return `${String(m)}:${String(s).padStart(2, '0')}`;
 }
 
-/** Texto do resultado da luta. */
-export function resultText(state: Pick<GameState, 'winner'>): string {
+/** Texto do resultado da luta ("P2 VENCEU!", ou "TIME AZUL VENCEU!" com times). */
+export function resultText(state: Pick<GameState, 'winner' | 'winnerTeam' | 'fighters'>): string {
   if (state.winner === null) return 'EMPATE!';
+  if (hasTeams(state.fighters) && state.winnerTeam !== null) {
+    return `${teamName(state.winnerTeam)} VENCEU!`;
+  }
   return `P${String(state.winner + 1)} VENCEU!`;
 }
 
