@@ -6,24 +6,24 @@ veja `docs/GDD.md`.
 
 **Autorização:** marque ✅ quando o amigo aceitar ter a imagem (e a voz) no jogo.
 
-| #   | Apelido     | Traço mais caricato                                                           | Bordão                       | Especial (bloco)                    | Provocação                                   | Cores                                    | Autorizou |
-| --- | ----------- | ----------------------------------------------------------------------------- | ---------------------------- | ----------------------------------- | -------------------------------------------- | ---------------------------------------- | --------- |
-| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral          | "Vem com o Schummy, mermão!" | **Arrancada** (investida)           | Gira um volante imaginário e grita o bordão  | Vermelho, branco, grafite                |           |
-| 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango          | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil) | Mãos em concha, gritando o bordão            | Branco (avental), laranja, amarelo-milho |           |
-| 3   | Dadazinho   | Óculos preto, cavanhaque, baixinho e magro, guitarrista, jogador de CS        | "sexo"                       | **Doze** (projétil)                 | Air guitar, depois solta "sexo" na seca      | Verde, verde-oliva, preto                |           |
-| 4   | Tauba       | Careca, barbudo, baixinho, dev frontend, trompetista, some do Discord do nada | "🎵🎶" (toca o trompete)     | **Silent quit** (teleporte)         | Toca um trechinho clássico no trompete       | Preto, branco, dourado                   |           |
-| 5   | Tchula      | Mecânico de macacão, olho verde, joga de scout no CS                          | "Nooola!"                    | **Scout** (projétil)                | Gira a chave de boca na mão e grita o bordão | Cinza, amarelo, preto                    |           |
-| 6   |             |                                                                               |                              |                                     |                                              |                                          |           |
-| 7   |             |                                                                               |                              |                                     |                                              |                                          |           |
-| 8   |             |                                                                               |                              |                                     |                                              |                                          |           |
-| 9   |             |                                                                               |                              |                                     |                                              |                                          |           |
-| 10  |             |                                                                               |                              |                                     |                                              |                                          |           |
-| 11  |             |                                                                               |                              |                                     |                                              |                                          |           |
-| 12  |             |                                                                               |                              |                                     |                                              |                                          |           |
-| 13  |             |                                                                               |                              |                                     |                                              |                                          |           |
-| 14  |             |                                                                               |                              |                                     |                                              |                                          |           |
-| 15  |             |                                                                               |                              |                                     |                                              |                                          |           |
-| 16  |             |                                                                               |                              |                                     |                                              |                                          |           |
+| #   | Apelido     | Traço mais caricato                                                           | Bordão                       | Especial (bloco)                      | Provocação                                   | Cores                                    | Autorizou |
+| --- | ----------- | ----------------------------------------------------------------------------- | ---------------------------- | ------------------------------------- | -------------------------------------------- | ---------------------------------------- | --------- |
+| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral          | "Vem com o Schummy, mermão!" | **Arrancada** (investida)             | Gira um volante imaginário e grita o bordão  | Vermelho, branco, grafite                |           |
+| 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango          | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil)   | Mãos em concha, gritando o bordão            | Branco (avental), laranja, amarelo-milho |           |
+| 3   | Dadazinho   | Óculos preto, cavanhaque, baixinho e magro, guitarrista, jogador de CS        | "sexo"                       | **Doze** (projétil)                   | Air guitar, depois solta "sexo" na seca      | Verde, verde-oliva, preto                |           |
+| 4   | Tauba       | Careca, barbudo, baixinho, dev frontend, trompetista, some do Discord do nada | "🎵🎶" (toca o trompete)     | **Silent quit** (teleporte)           | Toca um trechinho clássico no trompete       | Preto, branco, dourado                   |           |
+| 5   | Tchula      | Mecânico de macacão, olho verde, joga de scout no CS                          | "Nooola!"                    | **Scout** (projétil)                  | Gira a chave de boca na mão e grita o bordão | Cinza, amarelo, preto                    |           |
+| 6   | Crocko      | Alto, óculos preto, testa grande, professor de pilates e fisioterapeuta       | (a definir)                  | **Correção postural** (contra-ataque) | Ajeita os óculos, alonga e aponta a postura  | Turquesa, branco, preto                  |           |
+| 7   |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 8   |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 9   |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 10  |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 11  |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 12  |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 13  |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 14  |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 15  |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 16  |             |                                                                               |                              |                                       |                                              |                                          |           |
 
 ## Os primeiros
 
@@ -272,6 +272,72 @@ Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
   `upper arm with sleeve; forearm with sleeve, without hand`.
 - `<ITEMS>`:
   `1 long bolt-action sniper rifle with a scope, side view pointing right, no hands, matte black and dark graphite; 1 chrome wrench; 1 muzzle-flash burst; 1 long thin white bullet trail; 1 small brass shell casing; 1 small scope glint; 3 small gray smoke puffs`
+
+### 6. Crocko
+
+- **Quem é:** 35 anos, professor de pilates e fisioterapeuta. Alto (1,84 m), cabelo preto, pele
+  morena, testa levemente grande, óculos de armação preta.
+- **Bordão:** a definir. Enquanto não tiver, a provocação sai sem fala (só o gesto).
+- **Estilo de luta:** paciente (counter). Peso alto e bom alcance (é o mais alto do elenco), meio
+  lento no chão, pulo médio. O jogo dele é ficar perto, esperar o adversário apertar o botão e
+  punir. Contraste com o Schummaki: o Schummaki vai para cima, o Crocko espera vir.
+- **Especial — Correção postural (contra-ataque):** ele para numa pose de pilates (equilibrado numa
+  perna, braços abertos, olhando o adversário como quem avalia a postura do aluno). Quem bater nele
+  nessa janela leva a "correção": um tapa firme de mão aberta nas costas, de fisioterapeuta, que
+  arremessa.
+  - **Janela:** startup curto (~6 ticks), active de ~20 ticks (a janela do contra-ataque), recovery
+    longo (~28 ticks) se ninguém bater: ele perde o equilíbrio e fica exposto.
+  - **Golpe devolvido:** dano ~14, knockback alto (ângulo ~40°, para longe dele). Projétil que
+    acertar na janela volta para quem soltou (resposta natural ao João Frango e ao Tchula).
+  - **Recarga:** ~90 ticks (1,5 s), contada do começo, para não virar escudo infinito.
+  - **No ar:** funciona, sem impulso (não ajuda a voltar ao palco).
+  - **Perde do agarrão:** como todo contra-ataque, o agarrão passa por ele.
+  - **Efeitos:** na pose, um brilho leve em volta dele (aviso de que está esperando); quando pega,
+    um "ding" e um congelamento curto; no golpe, um "créc" de coluna estalando e linhas de impacto.
+  - **Sem código novo no `sim`:** cabe no bloco contra-ataque como está. O oponente só toma o golpe
+    e entra no hitstun normal: nenhuma animação nova para ele. O Crocko precisa de 2 poses (a pose
+    de pilates e o tapa da correção); o recovery reusa a pose, balançando.
+- **Provocação:** ajeita os óculos com um dedo, faz um alongamento lateral (braços para cima,
+  inclina para o lado) e aponta para o adversário com cara de "olha essa postura".
+- **Visual:** professor de estúdio de pilates. Camisa polo turquesa (`#1BA39C`) de manga curta, justa
+  e para fora da calça, com gola e debrum das mangas brancos (`#F4F6F5`); calça jogger preta
+  (`#22252A`) de tecido esportivo, com punho no tornozelo e uma listra turquesa fina na lateral;
+  tênis de treino branco e leve. Óculos de armação preta retangular, cabelo preto curto penteado
+  para trás (deixa a testa à mostra), barba feita. Corpo alto, magro e atlético, postura impecável
+  (costas retas, peito aberto). Cores: turquesa, branco e preto (o turquesa lê bem nos menus escuros
+  e não repete a cor de ninguém).
+- **Ideias guardadas:** "Contrai o abdômen!" ou "Respira!" como fala do contra-ataque, se ele não
+  tiver bordão próprio; respawn fazendo uma respiração profunda de pilates; uma bola suíça como
+  objeto no fundo de um mapa.
+
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Crocko — 35-year-old pilates instructor and physical therapist, tall, with perfect posture.
+Fighting style: patient counter-puncher — calm and balanced, waits for the opponent to attack and then corrects them.
+Body: based on the photos; tall, lean and athletic build, very upright posture.
+Outfit: turquoise (#1BA39C) short-sleeve polo shirt with a white (#F4F6F5) collar and white sleeve trim, fitted, untucked; black (#22252A) athletic jogger pants with ankle cuffs and a thin turquoise side stripe; light white training sneakers.
+Signature details: black rectangular glasses, short black hair combed back showing a slightly large forehead, clean-shaven, the turquoise polo.
+Colors: primary #1BA39C, secondary #F4F6F5, accent #22252A.
+Face/personality: calm, attentive, slightly judging look, as if checking someone's posture.
+Special move: "Correção postural" — he holds a balanced pilates pose on one leg with open arms; if someone hits him, he answers with a firm open-hand slap on their back that sends them flying.
+Taunt: pushes his glasses up with one finger, does a side stretch with his arms up, then points at the opponent as if criticizing their posture.
+Extra parts for the parts sheet: one hand pushing up glasses with the index finger; one hand pointing with the index finger; one flat open hand, palm forward, for the slap.
+Props and effects for the effects sheet: a soft ring of light around a standing body (waiting glow); 1 small star-shaped "ding" sparkle; 1 crack-shaped impact burst; 4 short impact lines.
+Avoid: text or logos on the clothes; gym brand logos; medical coat.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/crocko/`):
+
+- `<EXPRESSION>`: `calm attentive look, slightly judging`
+- `<CHARACTER>`:
+  `Crocko, 35-year-old pilates instructor, tall, lean and athletic, very upright posture, tan brown skin, short black hair combed back showing a slightly large forehead, black rectangular glasses, clean-shaven. Turquoise (#1BA39C) short-sleeve polo shirt with a white collar and sleeve trim, untucked; black (#22252A) athletic jogger pants with ankle cuffs and a thin turquoise side stripe; light white training sneakers.`
+- `<LEGWEAR>`: `jogger pants with ankle cuffs`
+- `<SHOE>`: `light training sneaker`
+- `<EXTRA>`: `one hand pushing up glasses with the index finger, one hand pointing with the index finger, one flat open hand with the palm forward`
+- `<ITEMS>`:
+  `1 soft turquoise ring of light; 1 small white star-shaped sparkle; 1 crack-shaped white impact burst; 4 short white impact lines`
 
 ### Arte
 
