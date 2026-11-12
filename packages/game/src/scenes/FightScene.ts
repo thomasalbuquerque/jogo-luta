@@ -141,6 +141,8 @@ export interface MatchSetup {
   teams?: readonly number[] | null;
   /** Fogo amigo (só vale com times). */
   friendlyFire?: boolean;
+  /** Local: o controle de cada jogador (sem isso, o de mesmo índice). */
+  pads?: readonly number[];
 }
 
 /** Dados para abrir a luta: o que foi escolhido nos menus, ou um replay para assistir. */
@@ -257,6 +259,7 @@ export class FightScene extends Phaser.Scene {
           stageId: data.stageId ?? STAGES[0]?.id ?? '',
           teams: data.teams ?? null,
           friendlyFire: data.friendlyFire === true,
+          ...(data.pads ? { pads: data.pads } : {}),
         };
   }
 
@@ -510,7 +513,8 @@ export class FightScene extends Phaser.Scene {
 
   private tick(): void {
     // lê os controles mesmo num replay: as teclas de pausa vêm daqui
-    const sampled = this.controls.sample(this.state.fighters.length);
+    const pads = this.net ? undefined : this.setup.pads;
+    const sampled = this.controls.sample(this.state.fighters.length, pads);
     const system = this.controls.system & PAUSE_KEYS;
     if (system & ~this.prevSystem) this.pauseRequested = true;
     this.prevSystem = system;

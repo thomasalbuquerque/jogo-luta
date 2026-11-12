@@ -7,7 +7,9 @@ export interface MenuFrame {
   players: MenuMask[];
   /** Das teclas fixas: setas, Enter, Esc, Start e Select do controle. */
   system: MenuMask;
-  /** Tudo junto: para menus com um cursor só. */
+  /** De cada controle conectado, na ordem (de quem for: serve para entrar na luta). */
+  pads: MenuMask[];
+  /** Tudo junto (inclusive qualquer controle): para menus com um cursor só. */
   any: MenuMask;
 }
 
@@ -15,29 +17,37 @@ export interface MenuFrame {
 export class MenuInput {
   private readonly manager = new InputManager();
   private readonly players: MenuRepeat[] = [];
+  private readonly padRepeats: MenuRepeat[] = [];
   private readonly sys = new MenuRepeat();
 
-  poll(playerCount: number, deltaMs: number): MenuFrame {
-    const masks = this.manager.sample(playerCount);
-    const players = masks.map((mask, i) => {
-      let repeat = this.players[i];
-      if (!repeat) {
-        repeat = new MenuRepeat();
-        this.players[i] = repeat;
-      }
-      return repeat.step(menuFromPlayer(mask), deltaMs);
-    });
+  /** `padOf[i]`: o controle do jogador i (ver `InputManager.sample`). */
+  poll(playerCount: number, deltaMs: number, padOf?: readonly number[]): MenuFrame {
+    const masks = this.manager.sample(playerCount, padOf);
+    const players = masks.map((mask, i) => step(this.players, i, mask, deltaMs));
+    const pads = this.manager.pads.map((mask, i) => step(this.padRepeats, i, mask, deltaMs));
     const system = this.sys.step(this.manager.system, deltaMs);
-    return { players, system, any: players.reduce((a, b) => a | b, system) };
+    const any = [...players, ...pads].reduce((a, b) => a | b, system);
+    return { players, pads, system, any };
   }
 
   /** O que estiver segurado agora não conta como aperto (ex.: ao voltar de outra tela). */
   reset(): void {
     for (const r of this.players) r.reset();
+    for (const r of this.padRepeats) r.reset();
     this.sys.reset();
   }
 
   destroy(): void {
     this.manager.destroy();
   }
+}
+
+/** Aperto de menu (com repetição) da entrada `i`, criando quem repete quando precisa. */
+function step(repeats: MenuRepeat[], i: number, mask: number, deltaMs: number): MenuMask {
+  let repeat = repeats[i];
+  if (!repeat) {
+    repeat = new MenuRepeat();
+    repeats[i] = repeat;
+  }
+  return repeat.step(menuFromPlayer(mask), deltaMs);
 }
