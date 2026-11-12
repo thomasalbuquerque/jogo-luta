@@ -172,11 +172,11 @@ No text or logos. Bold dark plum-brown outline, flat 2-tone cel shading, light f
 
 Os trechos `<HIPS>`, `<LEGS>` e `<PANTS>` mudam conforme o que ele usa na perna:
 
-| Trecho    | Calça comprida (social, jeans, cargo...)                                                                 | Short ou bermuda (perna à mostra)                     |
-| --------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `<HIPS>`  | `hips: belt and <dress pants> only down to just below the crotch`                                        | `hips (<cargo shorts> only), separate from the torso` |
-| `<LEGS>`  | `thigh; shin as wide as the thigh`                                                                       | `thigh with the knee to the right; shin`              |
-| `<PANTS>` | `Pant pieces: plain straight tubes, flat cut ends with no outline, hem or folds. ` (com o espaço no fim) | apague `<PANTS>`                                      |
+| Trecho    | Calça comprida (social, jeans, cargo...)                                                           | Short ou bermuda (perna à mostra)                     |
+| --------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `<HIPS>`  | `hips: belt and <dress pants> only down to just below the crotch`                                  | `hips (<cargo shorts> only), separate from the torso` |
+| `<LEGS>`  | `thigh; shin slightly narrower than the thigh`                                                     | `thigh with the knee to the right; shin`              |
+| `<PANTS>` | `Pant pieces: straight tubes, flat cut ends with no outline, hem or folds. ` (com o espaço no fim) | apague `<PANTS>`                                      |
 
 - `<SHOE>`: o calçado (`chunky sneaker`, `dress shoe`, `foot with flip-flop`...).
 - `<EXTRA>`: as mãos especiais da provocação ou do especial (ex.:
@@ -185,15 +185,16 @@ Os trechos `<HIPS>`, `<LEGS>` e `<PANTS>` mudam conforme o que ele usa na perna:
   frente. Sem mãos especiais, apague `Extra: <EXTRA>, cut at the wrist.`
 - Se a manga é comprida até o punho, troque `forearm without hand` por
   `forearm with sleeve, without hand`.
-- **Limite de ~1.000 caracteres:** com calça comprida, o `<EXTRA>` cabe com até uns 80
+- **Limite de ~1.000 caracteres:** com calça comprida, o `<EXTRA>` cabe com até uns 75
   caracteres. Se passar, corte as palavras do `<EXTRA>`, nunca as regras.
 
 Por que o texto é assim (problemas que já aconteceram):
 
 - **Quadril de calça comprida só até a virilha.** Pedido como "calça", o gerador desenha um short
   com barra e contorno embaixo, e a barra vira uma linha atravessada no quadril (Dadazinho e Tauba).
-- **Pontas da calça cortadas, sem contorno, e canela da largura da coxa.** Tubos fechados deixam
-  uma linha em cada joelho, e canela mais fina faz um degrau. A calça tem que parecer um pano só.
+- **Pontas da calça cortadas, sem contorno, e canela só um pouco mais fina que a coxa.** Tubos
+  fechados deixam uma linha em cada joelho, e canela muito mais fina faz um degrau. A calça tem que
+  parecer um pano só, mas pode afinar um pouco para baixo, como calça de verdade.
 - **Tronco sem a "tampa" da manga.** O gerador costuma desenhar a bola da manga no ombro da
   frente; ela fica parada no tronco quando o braço gira.
 - **Mãos especiais cortadas no pulso.** Sem isso, vêm com antebraço e manga grudados.
@@ -210,7 +211,7 @@ outra ou em pose.
 | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | Tronco **sem manga**, ombros fechados e arredondados                       | A manga vai no braço. Grudada no tronco, ela não acompanha o braço; cava aberta mostra um buraco quando o braço sobe. |
 | Short (ou calça) **separado** do tronco                                    | O tronco inclina nos golpes. Grudados, abre um buraco na cintura.                                                     |
-| Calça comprida: coxa e canela **retas e da mesma largura**                 | A calça tem que seguir lisa do quadril ao sapato, sem degrau no joelho.                                               |
+| Calça comprida: coxa e canela **retas**, canela só um pouco mais fina      | Sem degrau grande no joelho. Diferença pequena o Claude acerta no recorte.                                            |
 | Braço, antebraço e mão **separados**                                       | O cotovelo e o punho dobram, e a mão troca (punho, aberta, especial).                                                 |
 | **4 mãos:** punho e mão aberta, cada um pelas costas e pela palma          | A mão de trás usa a versão da palma. Sem ela, a mão de trás aparece de costas e parece virada ao contrário.           |
 | **Uma** peça de cada (fora as 4 mãos), joelho e ponta do pé para a direita | O braço e a perna de trás usam a mesma peça da frente. Pares espelhados (vistos de frente) não servem.                |
@@ -439,7 +440,7 @@ Draw each part once, separate, with generous empty space around it, all facing r
 - open hand seen from the back; the same open hand seen from the palm;
 - thigh with the knee to the right; shin; shoe with the toes to the right;
 - the extra hands listed in the character sheet, if any, cut at the wrist (an object they hold may come with them).
-No head. Straight limbs, not posed, not in mirrored pairs. Long pants: thigh and shin are plain straight tubes of the same width, with flat cut ends that have no outline, hem or folds, so the pants look like one continuous piece. Other joint ends plain and rounded, slightly extended so the parts overlap when rotated: no pegs, pins, rings or marks on them.
+No head. Straight limbs, not posed, not in mirrored pairs. Long pants: thigh and shin are plain straight tubes, the shin only slightly narrower than the thigh, with flat cut ends that have no outline, hem or folds, so the pants look like one continuous piece. Other joint ends plain and rounded, slightly extended so the parts overlap when rotated: no pegs, pins, rings or marks on them.
 No text or logos. Solid flat magenta (#FF00FF) background, no glow or shadow. No labels.
 ```
 
@@ -597,8 +598,9 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   - Coxa: a ponta do joelho (que fica na frente da canela) sai com `erase`, sem contorno, uns 20 px
     depois do `tip`. A ponta do quadril, escondida, fica com `paint` `auto` no contorno.
   - Canela: a ponta do joelho, atrás da coxa, fica com `paint` `auto` no contorno, para não
-    aparecer linha quando o joelho dobra. Se for mais fina que a coxa, engrosse com `stretch`
-    (na folha deitada, a grossura é a altura da imagem).
+    aparecer linha quando o joelho dobra. Se ficar um degrau no joelho, engrosse com `stretch`
+    até a canela ficar só um pouco mais fina que a coxa (na folha deitada, a grossura é a altura
+    da imagem). Sem exagerar: esticar demais deforma as dobras do desenho.
 - **Tampa da manga no tronco** (bola da manga desenhada no ombro da frente): apagada como a cava,
   com `outline` no corte.
 - **Mãos especiais segurando um objeto** (o trompete do Tauba): a mão com o objeto vira a mão da
