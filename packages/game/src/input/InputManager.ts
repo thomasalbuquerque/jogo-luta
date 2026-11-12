@@ -30,6 +30,7 @@ export class InputManager {
   private suppressed: InputMask[] = [];
   private lastRaw: InputMask[] = [];
   private systemMask: MenuMask = 0;
+  private padMasks: InputMask[] = [];
 
   constructor(
     private readonly controls: () => Controls = getControls,
@@ -40,17 +41,22 @@ export class InputManager {
     target.addEventListener('blur', this.onBlur);
   }
 
-  /** Bitmask de cada jogador para o tick atual (teclado | gamepad de mesmo índice). */
-  sample(playerCount: number): InputMask[] {
+  /**
+   * Bitmask de cada jogador para o tick atual: o teclado dele (P1 e P2) mais o
+   * controle dele. `padOf[i]` é o controle do jogador i (sem isso, o de mesmo
+   * índice: o 1º controle é do P1, o 2º do P2…).
+   */
+  sample(playerCount: number, padOf?: readonly number[]): InputMask[] {
     const down = new Set([...this.held, ...this.latched]);
     this.latched.clear();
     const { keys, pad: padBindings } = this.controls();
     const pads = readPads();
+    this.padMasks = pads.map((pad) => maskFromPad(pad, padBindings));
     const masks: InputMask[] = [];
     for (let i = 0; i < playerCount; i++) {
       const k = keys[i];
-      const pad = pads[i];
-      const raw = (k ? maskFromKeys(down, k) : 0) | (pad ? maskFromPad(pad, padBindings) : 0);
+      const padMask = this.padMasks[padOf?.[i] ?? i] ?? 0;
+      const raw = (k ? maskFromKeys(down, k) : 0) | padMask;
       const suppressed = (this.suppressed[i] ?? 0) & raw;
       this.suppressed[i] = suppressed;
       this.lastRaw[i] = raw;
@@ -65,6 +71,11 @@ export class InputManager {
     }
     this.systemMask = system;
     return masks;
+  }
+
+  /** Bitmask de cada controle conectado na última amostra (de quem for), na ordem. */
+  get pads(): readonly InputMask[] {
+    return this.padMasks;
   }
 
   /** Teclas fixas de menu (setas, Enter, Esc, Start e Select do controle) na última amostra. */
