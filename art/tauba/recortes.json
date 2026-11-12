@@ -13,7 +13,7 @@
     "cabecas": {
       "file": "2-cabecas.png",
       "key": false,
-      "scale": 0.77
+      "scale": 0.66
     },
     "efeitos": {
       "file": "4-efeitos.png",
@@ -32,7 +32,7 @@
       "pivot": [225, 450],
       "tip": [225, 300],
       "sockets": {
-        "neck": [240, 100],
+        "neck": [236, 128],
         "shoulderNear": [108, 172],
         "shoulderFar": [372, 175]
       },
