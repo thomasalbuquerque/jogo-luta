@@ -182,7 +182,7 @@ Checklist de cada personagem:
 
 1. Ficha: stats, 1 especial montado com blocos existentes, provocação.
 2. Concept art aprovado pelo próprio amigo.
-3. As 5 imagens geradas pela seção "Personagem novo" do `docs/ARTE.md` (uma folha de peças só, `3-pecas.png`) e encaixadas como skin no esqueleto base.
+3. As 5 imagens geradas pela seção "Personagem novo" do `docs/ARTE.md` e encaixadas como skin no esqueleto base.
 4. Animações do especial e da provocação.
 5. Áudio: bordão, provocação e KO.
 6. Retrato para a tela de seleção e para o HUD.

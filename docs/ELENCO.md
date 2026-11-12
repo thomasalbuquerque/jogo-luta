@@ -100,7 +100,7 @@ Special move: "Doze" — a compact pump shotgun appears in his hands, he fires o
 Taunt: plays air guitar, stops, looks at the camera and says one word with a straight face.
 Extra parts for the parts sheet: two hands playing air guitar, one fretting, one strumming.
 Props and effects for the effects sheet: the shotgun (side view, pointing right, no hands); 1 muzzle-flash burst; pellet streaks; smoke puffs for the gun appearing and vanishing.
-Avoid: text, logos or game emblems on the clothes and the gun; copying a real game skin.
+Avoid: text, logos or game emblems on the clothes and the gun;
 ```
 
 Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):
