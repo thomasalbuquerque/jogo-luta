@@ -17,7 +17,6 @@ export function registerCharacter(c: Character): void {
   REGISTRY.set(c.id, c);
 }
 
-// A Marília só tem a ficha: fica registrada, mas fora da seleção até ter o atlas.
 for (const c of [
   BASE,
   SCHUMMAKI,
@@ -45,6 +44,7 @@ export const PLAYABLE_CHARACTERS: readonly string[] = [
   CROCKO.id,
   DARLLAN.id,
   GABS.id,
+  MARILIA.id,
 ];
 
 export function hasCharacter(id: string): boolean {

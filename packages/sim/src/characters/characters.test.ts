@@ -14,7 +14,7 @@ if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA || !CROCKO || !DARLLAN)
   throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan e Gabs, cada um com especial e provocação', () => {
+  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs e Marília, cada um com especial e provocação', () => {
     expect(PLAYABLE_CHARACTERS).toEqual([
       'schummaki',
       'joao-frango',
@@ -24,8 +24,19 @@ describe('elenco', () => {
       'crocko',
       'darllan',
       'gabs',
+      'marilia',
     ]);
-    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA, CROCKO, DARLLAN, getCharacter('gabs')]) {
+    for (const c of [
+      SCHUMMAKI,
+      JOAO,
+      DADA,
+      TAUBA,
+      TCHULA,
+      CROCKO,
+      DARLLAN,
+      getCharacter('gabs'),
+      getCharacter('marilia'),
+    ]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
       expect(c.blurb.length).toBeGreaterThan(0);
@@ -228,8 +239,8 @@ describe('elenco', () => {
       return { marilia, foe };
     };
 
-    it('ainda fora da seleção (sem atlas), com especial e provocação', () => {
-      expect(PLAYABLE_CHARACTERS).not.toContain('marilia');
+    it('jogável, com especial e provocação', () => {
+      expect(PLAYABLE_CHARACTERS).toContain('marilia');
       expect(MARILIA.special?.name).toBe('Tragadinha');
       expect(MARILIA.taunt.text).toBe('Gentiii!');
       expect(MARILIA.blurb.length).toBeGreaterThan(0);
