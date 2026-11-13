@@ -527,6 +527,113 @@ const ARMS_UP: Rot = {
   handFar: -10,
 };
 
+/*
+ * Marília e o palheiro: a mão `taunt` da frente é a mão segurando o palheiro entre
+ * os dedos. Nas poses de tragada, a ponta de trás do palheiro (socket `lips` da mão)
+ * fica no `mouth` da cabeça e a brasa (`ember`) aponta para a frente. Mudou braço,
+ * mão ou cabeça: refaça as contas.
+ */
+
+/** Mão da frente no bolso de trás da calça, tirando o palheiro. */
+const BACK_POCKET: Rot = {
+  ...STANDING,
+  torso: 8,
+  head: 2,
+  upperArmNear: 34,
+  forearmNear: -24,
+  handNear: 10,
+  upperArmFar: -8,
+  forearmFar: -40,
+  handFar: 10,
+};
+
+/** Palheiro na boca, a outra mão solta do lado. */
+const DRAG: Rot = {
+  ...STANDING,
+  torso: 2,
+  head: -8,
+  upperArmNear: 4,
+  forearmNear: -163,
+  handNear: 2,
+  upperArmFar: 8,
+  forearmFar: -24,
+  handFar: 10,
+};
+
+/** Tragando: peito para fora e queixo para cima, o palheiro ainda na boca. */
+const INHALE: Rot = {
+  ...DRAG,
+  torso: -3,
+  head: -14,
+  handNear: -2,
+  upperArmFar: 10,
+  forearmFar: -20,
+};
+
+/** Soltando a fumaça: o palheiro sai da boca, cabeça para trás. */
+const EXHALE: Rot = {
+  ...INHALE,
+  torso: -6,
+  head: -18,
+  upperArmNear: 10,
+  forearmNear: -118,
+  handNear: 16,
+};
+
+/** Zen, com a aura: relaxada, o palheiro na mão à altura do peito. */
+const ZEN: Rot = {
+  ...STANDING,
+  torso: -4,
+  head: -10,
+  upperArmNear: 14,
+  forearmNear: -104,
+  handNear: 14,
+  upperArmFar: 14,
+  forearmFar: -18,
+  handFar: 10,
+};
+
+/** Jogando o palheiro fora: a mão da frente abre num peteleco para a frente e para baixo. */
+const FLICK: Rot = {
+  ...STANCE,
+  torso: 4,
+  head: -2,
+  upperArmNear: -38,
+  forearmNear: -26,
+  handNear: -20,
+};
+
+/**
+ * "Gentiii!": as duas mãos abertas nas bochechas, cotovelos para baixo. A ponta dos
+ * dedos fica em `cheekNear` e `cheekFar` da cabeça da provocação e a palma abaixo do
+ * queixo, para não esconder o rosto; a de trás aparece do outro lado do rosto.
+ */
+const HANDS_ON_CHEEKS: Rot = {
+  ...STANDING,
+  torso: -4,
+  head: -6,
+  upperArmNear: 12,
+  forearmNear: -151,
+  handNear: -48,
+  upperArmFar: 28,
+  forearmFar: -163,
+  handFar: -60,
+};
+
+/** Balançando a cabeça sem acreditar: alterna para os dois lados entre `from` e `to`. */
+function headShakes(from: number, to: number, step: number): Key[] {
+  const keys: Key[] = [];
+  for (let t = from, i = 0; t <= to; t += step, i++) {
+    const side = i % 2 === 0 ? 1 : -1;
+    keys.push({
+      t,
+      rot: { ...HANDS_ON_CHEEKS, head: -6 + side * 5, torso: -4 + side * 1.5 },
+      ease: 'inOut',
+    });
+  }
+  return keys;
+}
+
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.
   schummaki_special: {
@@ -1054,6 +1161,48 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 50, rot: ARMS_UP, handNear: 'open', handFar: 'open', expression: 'taunt', ease: 'out' },
       { t: 64, rot: { ...ARMS_UP, torso: -9, head: -16 }, y: -0.6, ease: 'inOut' },
       { t: 76, rot: ARMS_UP, expression: 'normal', ease: 'inOut' },
+      { t: 90, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Tragadinha: tira o palheiro do bolso de trás, põe na boca e traga (startup longo e
+  // vulnerável: é o preço). No 1º frame ativo solta a fumaça e fica zen, com a aura;
+  // no recovery joga o palheiro fora com um peteleco (a mão abre em t = 2.4).
+  marilia_special: {
+    timing: 'move',
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 0.15, rot: BACK_POCKET, handNear: 'open', handFar: 'open', ease: 'out' },
+      { t: 0.27, rot: { ...BACK_POCKET, upperArmNear: 30 }, handNear: 'taunt' },
+      { t: 0.42, rot: DRAG, ease: 'out' },
+      { t: 0.5, rot: DRAG, ease: 'inOut' },
+      { t: 0.75, rot: INHALE, ease: 'inOut' },
+      { t: 0.86, rot: INHALE },
+      { t: 0.96, rot: EXHALE, ease: 'out' },
+      { t: 1, rot: ZEN, y: -0.4, ease: 'out' },
+      { t: 2, rot: ZEN, y: -0.4 },
+      { t: 2.4, rot: FLICK, handNear: 'open', handFar: 'fist', ease: 'out' },
+      { t: 3, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Mãos nas bochechas, olhos arregalados, e grita "Gentiii!" (voz no `voiceAt` da
+  // ficha, 18) balançando a cabeça sem acreditar.
+  marilia_taunt: {
+    timing: 'once',
+    length: 90,
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      {
+        t: 12,
+        rot: HANDS_ON_CHEEKS,
+        handNear: 'open',
+        handFar: 'open',
+        expression: 'taunt',
+        ease: 'out',
+      },
+      ...headShakes(18, 66, 6),
+      { t: 74, rot: HANDS_ON_CHEEKS, y: -0.3, ease: 'inOut' },
+      { t: 80, rot: HANDS_ON_CHEEKS, expression: 'normal' },
       { t: 90, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
     ],
   },
