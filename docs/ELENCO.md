@@ -610,7 +610,7 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   pouco menor) e um pouco mais fracos que a média. O jogo dele é chegar colado e pegar: o especial
   tem alcance curto, então ele precisa entrar na cara do adversário. Contraste com o Dadazinho: a
   doze pune quem chega perto; o Meia é quem tem que chegar perto.
-- **Especial — Comando (agarrão):** acima da cabeça dele aparece a sequência ↓ ↘ → + botão, como a
+- **Especial — Comando (agarrão):** acima da cabeça dele aparece a sequência ↓ ← B ↘ → ↑ X, como a
   notação de um golpe de jogo de luta, sem logo de nenhum jogo. Se pegar, ele **não** faz pose de
   agarrar: o adversário fica preso na frente dele enquanto ele solta um combo rápido de socos e
   chutes, um contador de "HITS" sobe a cada golpe, e o último chute arremessa. O jogador só aperta o
@@ -618,7 +618,7 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   - **O comando:** desenhado no código (setas e um botão redondo genérico, sem letra nem cor de
     controle de nenhum console). No startup as setas acendem uma a uma, rapidinho, como se ele
     estivesse digitando o comando; o botão acende no 1º frame ativo. A sequência vira junto com ele:
-    virado para a esquerda, mostra ↓ ↙ ← + botão, como nos jogos de luta.
+    virado para a esquerda, mostra ao contrário, como nos jogos de luta.
   - **Tempo:** startup curto (~6 ticks, 2 por seta), active curto (~4 ticks, a janela do agarrão).
     Recovery longo se errar (~32 ticks): é o "fica exposto".
   - **Alcance:** curto, uns 36 px à frente do corpo, da cintura ao ombro. Precisa estar colado.
@@ -692,7 +692,7 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
 - `<ITEMS>`:
   `4 small white-yellow hit sparks in different shapes; 3 short white speed-streak arcs; 1 big white-yellow impact burst; 3 small gray smoke puffs`
 
-  O comando (↓ ↘ → + botão), o "X" vermelho e o contador "N HITS" não entram na folha: são
+  O comando (↓ ← B ↘ → ↑ X), o "X" vermelho e o contador "N HITS" não entram na folha: são
   desenhados no código, porque a sequência vira com ele e o contador muda de número.
 
 - **Estampa (passo 1):** o texto do conceito pede `No text or logos on the clothes`; a estampa
