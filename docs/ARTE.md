@@ -14,6 +14,7 @@ fim o guia de estilo (o porquê de cada regra) e o modelo de ficha.
 | Tauba                                           | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Tchula                                          | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Crocko                                          | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
+| Darllan                                         | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | [Cenário: a laje](#cenário-a-laje)              | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feito |
 | **[Personagem novo](#personagem-novo-firefly)** | **As mesmas 5 imagens, uma de cada**                                  | 5       | a fazer  |
 
@@ -629,6 +630,16 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   são pintadas iguais às do começo da canela (claro em cima, sombra embaixo). Um `fade` do `tip` até
   o corte faz a coxa sumir aos poucos por cima da canela: o joelho fica sem linha. Na canela, o
   contorno da ponta do joelho (escondida atrás da coxa) é pintado das mesmas cores.
+- **Avental até o joelho** (Darllan): o peitilho vai no `torso` e a saia do avental é o `hips`
+  inteiro, sem corte. Os `legNear`/`legFar` ficam escondidos dentro da saia, na altura do quadril,
+  e a coxa (calça comprida) fica por trás: no chute ela sai por baixo da saia. Um `stretch` na
+  altura do `hips` acerta o comprimento da saia para o joelho cair na barra (no conceito o avental
+  vai até o joelho e a canela aparece).
+- **Objeto seguro com as duas mãos** (o rolo do Darllan, que veio na folha de peças com os dois
+  punhos): vai como `prop`. O punho do lado da mão da frente sai com `erase` (a mão do esqueleto
+  fica por cima do cabo) e o `pivot` fica no meio desse punho; o outro punho fica no desenho e cobre
+  a mão de trás do esqueleto. Nas poses, os braços põem as duas mãos a um rolo de distância e o
+  `propSpin` deita o rolo; refaça as contas se mudar braço, mão ou rolo.
 
 ### 2. Esqueleto e animação: `packages/game/src/rig`
 
@@ -651,7 +662,9 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   clarão na boca da arma, a fumacinha quando a peça da mão aparece ou some, os quadradinhos do
   teleporte sorteado, as notas que saem do socket `bell` na provocação, a linha de mira e o brilho
   da luneta, a cápsula saltando do ferrolho e o som do tiro, e no contra-ataque do Crocko os anéis
-  subindo pelo corpo, o brilho quando pega, o estalo e as linhas de impacto).
+  subindo pelo corpo, o brilho quando pega, o estalo e as linhas de impacto; na pancada do Darllan o
+  brilho no rolo erguido, a farinha para os dois lados, as migalhas e o tremor da câmera, e na
+  provocação as migalhas que saem do socket `biscuit` da mão na mordida).
 - Contra-ataque que pegou alguém toca o clipe `<id do especial>_counter` (o tapa do Crocko) no
   lugar do recovery; sem esse clipe, continua o do especial.
 

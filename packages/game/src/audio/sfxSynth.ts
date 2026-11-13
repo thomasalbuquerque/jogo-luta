@@ -35,6 +35,7 @@ export const SFX_NAMES = [
   'rifle_shot',
   'rifle_bolt',
   'spine_crack',
+  'flour_thump',
   'count',
   'go',
   'ui_move',
@@ -329,6 +330,28 @@ function spineCrack(sr: number): Float32Array<ArrayBuffer> {
   );
 }
 
+/**
+ * Rolo batendo na bancada (o "póf" do Rolo na bancada do Darllan): um baque grave
+ * que afunda, o toc da madeira por cima e o sopro de farinha se espalhando depois.
+ */
+function flourThump(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(43);
+  const wood = new BandPass(sr);
+  const puff = new OnePole(sr);
+  const boom = new Osc(sr);
+  return render(
+    sr,
+    0.5,
+    (t) => {
+      const body = boom.sine(sweep(t, 120, 38, 0.07)) * decay(t, 0.13) * 1.1;
+      const knock = wood.process(r() * 2 - 1, 620, 4) * adEnv(t, 0.0006, 0.018) * 2.2;
+      const poof = puff.lowpass(r() * 2 - 1, 900) * adEnv(t - 0.01, 0.02, 0.12) * 0.9;
+      return drive(body + knock + poof, 1.4);
+    },
+    0.85,
+  );
+}
+
 /** Amostras do efeito `name`, na taxa `sampleRate`. Sempre iguais para o mesmo nome. */
 export function renderSfx(name: SfxName, sampleRate: number): Float32Array<ArrayBuffer> {
   switch (name) {
@@ -378,6 +401,8 @@ export function renderSfx(name: SfxName, sampleRate: number): Float32Array<Array
       return rifleShot(sampleRate);
     case 'spine_crack':
       return spineCrack(sampleRate);
+    case 'flour_thump':
+      return flourThump(sampleRate);
     case 'rifle_bolt':
       return rifleBolt(sampleRate);
   }

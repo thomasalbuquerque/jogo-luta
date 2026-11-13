@@ -247,5 +247,8 @@ Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `b
 | Tauba       | Fujão    | 92   | 6,8            | 6            | 178  | 1            | **Silent quit** (teleporte sorteado): 14 / 20 / 18, sem dano, 1 vez por ar, recarga de 240              |
 | Tchula      | Sniper   | 108  | 5,8            | 5,1          | 170  | 1            | **Scout** (projétil): 28 / 1 / 30, 18%, tiro reto e fino (64×14) a 36 px/tick, ~1080 px, recarga de 150 |
 | Crocko      | Paciente | 114  | 5,9            | 5,2          | 172  | 1            | **Correção postural** (contra-ataque): 6 / 20 / 28, 14% a 40°, devolve projétil, recarga de 90          |
+| Darllan     | Pesadão  | 124  | 5,4            | 5            | 162  | 1            | **Rolo na bancada** (área): 18 / 5 / 26, 15% a 50°, ~80 px de cada lado, recarga de 60                  |
+
+O Darllan, além de ser o mais pesado, bate um pouco mais forte nos golpes base: +1 de dano no soco parado e +2 no soco lateral, na rasteira e nos aéreos lateral e para baixo.
 
 O elenco (apelidos, traços, especial e provocação de cada um) fica em [`docs/ELENCO.md`](ELENCO.md).

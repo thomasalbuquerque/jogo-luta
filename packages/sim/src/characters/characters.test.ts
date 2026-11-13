@@ -5,12 +5,13 @@ import { px } from '../constants';
 import { Button } from '../input';
 import { getCharacter, PLAYABLE_CHARACTERS } from './index';
 
-const [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA, CROCKO] = PLAYABLE_CHARACTERS.map(getCharacter);
-if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA || !CROCKO)
+const [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA, CROCKO, DARLLAN] =
+  PLAYABLE_CHARACTERS.map(getCharacter);
+if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA || !CROCKO || !DARLLAN)
   throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula e Crocko, cada um com especial e provocação', () => {
+  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko e Darllan, cada um com especial e provocação', () => {
     expect(PLAYABLE_CHARACTERS).toEqual([
       'schummaki',
       'joao-frango',
@@ -18,8 +19,9 @@ describe('elenco', () => {
       'tauba',
       'tchula',
       'crocko',
+      'darllan',
     ]);
-    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA, CROCKO]) {
+    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA, CROCKO, DARLLAN]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
       expect(c.blurb.length).toBeGreaterThan(0);
@@ -121,6 +123,35 @@ describe('elenco', () => {
     expect(CROCKO.moves.sideLight.hitboxes[0]?.boxes[0]?.w).toBeGreaterThan(
       base.moves.sideLight.hitboxes[0]?.boxes[0]?.w ?? Infinity,
     );
+  });
+
+  it('Darllan bate em volta: área dos dois lados, lenta de sair e de voltar; o mais pesado', () => {
+    const special = DARLLAN.special;
+    const base = getCharacter('base');
+    if (!special) throw new Error('sem especial');
+    const { move } = special;
+    // o rolo subindo avisa; quem esquivar pune
+    expect(move.startup).toBeGreaterThanOrEqual(15);
+    expect(move.active).toBeLessThanOrEqual(8);
+    expect(move.recovery).toBeGreaterThan(move.startup);
+    expect(special.cooldownTicks).toBeGreaterThan(move.startup + move.active);
+    // a área: centrada no corpo, da cintura para baixo, ~80 px de cada lado
+    const box = move.hitboxes[0]?.boxes[0];
+    if (!box) throw new Error('sem hitbox');
+    expect(box.x).toBe(0);
+    expect(box.w - DARLLAN.stats.width).toBeGreaterThanOrEqual(px(150));
+    expect(box.y).toBeGreaterThan(0);
+    expect(move.knockbackDir).toBe('away');
+    expect(move.damage).toBeGreaterThanOrEqual(14);
+    expect(move.dash).toBeUndefined();
+    expect(move.projectile).toBeUndefined();
+    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA, CROCKO]) {
+      expect(DARLLAN.stats.weight).toBeGreaterThan(c.stats.weight);
+      expect(DARLLAN.stats.walkSpeed).toBeLessThan(c.stats.walkSpeed);
+      expect(DARLLAN.stats.jumpHeight).toBeLessThan(c.stats.jumpHeight);
+    }
+    expect(DARLLAN.stats.height).toBe(CROCKO.stats.height);
+    expect(DARLLAN.moves.sideLight.damage).toBeGreaterThan(base.moves.sideLight.damage);
   });
 
   it.each(PLAYABLE_CHARACTERS)('%s alcança a plataforma atravessável com 1 pulo', (id) => {

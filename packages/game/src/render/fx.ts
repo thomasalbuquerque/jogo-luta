@@ -60,6 +60,21 @@ export interface CharacterFx {
    * (`burst`) e linhas de impacto (`lines`) no ponto do acerto, com o som `sound`.
    */
   counter?: { glow: string; ding?: string; burst?: string; lines?: string; sound?: SfxName };
+  /**
+   * Pancada no chão (área): um brilho (`shine`) no socket `shine` da peça na mão
+   * quando ela chega lá em cima; no 1º frame ativo, nuvens de farinha (`cloud`) para
+   * os dois lados, migalhas (`crumbs`) voando, um tremor `trauma` da câmera e o som
+   * `sound`. No ar, a nuvem sai de onde a peça estiver.
+   */
+  slam?: {
+    shine?: string;
+    cloud: string;
+    crumbs: readonly string[];
+    trauma: number;
+    sound?: SfxName;
+  };
+  /** Provocação: migalhas caindo do socket `biscuit` da mão no tick `at` (a mordida). */
+  tauntCrumbs?: { frames: readonly string[]; at: number };
 }
 
 export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
@@ -100,6 +115,16 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
       lines: 'fx_lines',
       sound: 'spine_crack',
     },
+  },
+  darllan: {
+    slam: {
+      shine: 'fx_shine',
+      cloud: 'fx_flour',
+      crumbs: ['fx_crumb1', 'fx_crumb2', 'fx_crumb3', 'fx_crumb4'],
+      trauma: 0.38,
+      sound: 'flour_thump',
+    },
+    tauntCrumbs: { frames: ['fx_crumb2', 'fx_crumb3', 'fx_crumb4'], at: 28 },
   },
   'joao-frango': {
     projectile: {
