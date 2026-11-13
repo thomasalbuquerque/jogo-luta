@@ -162,6 +162,7 @@
     },
     "hand_taunt2": {
       "sheet": "pecas",
+      "flip": true,
       "rect": [1250, 413, 217, 306],
       "pivot": [1330, 688],
       "tip": [1330, 470],
