@@ -536,6 +536,8 @@ describe('bloco contra-ataque', () => {
     expect(b.kbx).toBeGreaterThan(0); // para longe de quem contra-atacou
     // a janela fecha depois de contra-atacar
     expect(moveFrame(a)).toBeGreaterThan(3 + 20);
+    // e fica marcado quem ele pegou (o render toca o golpe devolvido)
+    expect(a.moveHits).toBe(1 << b.id);
   });
 
   it('errar deixa exposto no recovery', () => {
@@ -549,6 +551,7 @@ describe('bloco contra-ataque', () => {
     run([a, b], [0, 0], 10);
     expect(a.damage).toBeGreaterThan(0);
     expect(b.damage).toBe(0);
+    expect(a.moveHits).toBe(0);
   });
 
   it('devolve projétil: vira o dono e volta', () => {
@@ -564,6 +567,7 @@ describe('bloco contra-ataque', () => {
     expect(shots).toHaveLength(1);
     expect(shot.owner).toBe(0);
     expect(shot.vx).toBe(px(10));
+    expect(a.moveHits).toBe(1 << 1);
   });
 });
 

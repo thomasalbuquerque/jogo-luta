@@ -213,12 +213,15 @@ export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): nu
 
 /**
  * Contra-ataque: quem bateu (`striker`) leva o acerto do bloco `counter`, e quem
- * contra-atacou pula para o recovery do especial. Devolve o dano causado.
+ * contra-atacou pula para o recovery do especial, com quem ele pegou marcado no
+ * `moveHits` (o render toca o golpe devolvido em vez do recovery de quem errou).
+ * Devolve o dano causado.
  */
 export function applyCounter(counterer: Fighter, striker: Fighter): number {
   const counter = moveDef(counterer, 'special').counter;
   if (!counter) return 0;
   striker.moveHits |= 1 << counterer.id;
+  counterer.moveHits |= 1 << striker.id;
   const damage = dealtDamage(counterer, counter.damage);
   const stop = launch(striker, counter, knockbackSide(counterer, striker, counter), damage);
   counterer.hitstop = Math.max(counterer.hitstop, stop);
@@ -282,6 +285,7 @@ export function resolveProjectileHits(
       continue;
     }
     if (isCountering(victim)) {
+      victim.moveHits |= 1 << p.owner;
       p.owner = victim.id;
       p.vx = 0 - p.vx;
       p.facing = p.facing === 1 ? -1 : 1;
