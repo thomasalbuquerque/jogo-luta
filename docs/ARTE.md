@@ -562,6 +562,7 @@ já veio sem fundo (tirado no Photoshop) leva `"key": false`. Campos de cada pe�
 | `paint`   | Pinta um polígono de uma cor (`auto` = a cor em volta). Esconde o anel do toco ou um texto.     |
 | `stretch` | Estica ou encolhe a peça (`[largura, altura]`), para acertar a proporção com o conceito.        |
 | `fill`    | Põe uma cor por trás do desenho: vidro dos óculos que veio rosa (misturado com o magenta).      |
+| `fade`    | Some aos poucos de `from` até `to`: a ponta da coxa de pele por cima da canela, sem linha.      |
 
 Nomes das peças: `torso`, `hips`, `upperArm`, `forearm`, `thigh`, `shin`, `foot`, `hand_fist`,
 `hand_open`, `hand_taunt`, `head_normal`, `head_hurt`, `head_taunt`, `head_ko`, `portrait` e os
@@ -622,6 +623,11 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   Na coxa, a ponta do quadril até a barra do short é pintada da cor do short (`paint`) e leva
   `outline` nas bordas e na barra. Assim a perna do short gira junto com a coxa (chute, corrida)
   em vez de ficar parada no quadril como uma saia.
+- **Joelho de pele** (coxa e canela à mostra): na coxa, a ponta do joelho sai com `erase` uns 30 px
+  depois do `tip`, a sobra do desenho (o volume de trás do joelho) também, e as cores perto da ponta
+  são pintadas iguais às do começo da canela (claro em cima, sombra embaixo). Um `fade` do `tip` até
+  o corte faz a coxa sumir aos poucos por cima da canela: o joelho fica sem linha. Na canela, o
+  contorno da ponta do joelho (escondida atrás da coxa) é pintado das mesmas cores.
 
 ### 2. Esqueleto e animação: `packages/game/src/rig`
 
