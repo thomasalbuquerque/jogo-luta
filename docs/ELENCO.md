@@ -13,7 +13,7 @@ veja `docs/GDD.md`.
 | 3   | Dadazinho   | Óculos preto, cavanhaque, baixinho e magro, guitarrista, jogador de CS        | "sexo"                       | **Doze** (projétil)                   | Air guitar, depois solta "sexo" na seca      | Verde, verde-oliva, preto                |           |
 | 4   | Tauba       | Careca, barbudo, baixinho, dev frontend, trompetista, some do Discord do nada | "🎵🎶" (toca o trompete)     | **Silent quit** (teleporte)           | Toca um trechinho clássico no trompete       | Preto, branco, dourado                   |           |
 | 5   | Tchula      | Mecânico de macacão, olho verde, joga de scout no CS                          | "Nooola!"                    | **Scout** (projétil)                  | Gira a chave de boca na mão e grita o bordão | Cinza, amarelo, preto                    |           |
-| 6   | Crocko      | Alto, óculos preto, testa grande, professor de pilates e fisioterapeuta       | (a definir)                  | **Correção postural** (contra-ataque) | Ajeita os óculos, alonga e aponta a postura  | Turquesa, branco, preto                  |           |
+| 6   | Crocko      | Alto, óculos preto, barba, professor de pilates e fisioterapeuta              | (a definir)                  | **Correção postural** (contra-ataque) | Alonga e aponta a postura                    | Turquesa, branco, preto                  |           |
 | 7   |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 8   |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 9   |             |                                                                               |                              |                                       |                                              |                                          |           |
@@ -276,7 +276,7 @@ Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
 ### 6. Crocko
 
 - **Quem é:** 35 anos, professor de pilates e fisioterapeuta. Alto (1,84 m), cabelo preto, pele
-  morena, testa levemente grande, óculos de armação preta.
+  morena, barba curta, óculos de armação preta redonda.
 - **Bordão:** a definir. Enquanto não tiver, a provocação sai sem fala (só o gesto).
 - **Estilo de luta:** paciente (counter). Peso alto e bom alcance (é o mais alto do elenco), meio
   lento no chão, pulo médio. O jogo dele é ficar perto, esperar o adversário apertar o botão e
@@ -297,13 +297,12 @@ Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
   - **Sem código novo no `sim`:** cabe no bloco contra-ataque como está. O oponente só toma o golpe
     e entra no hitstun normal: nenhuma animação nova para ele. O Crocko precisa de 2 poses (a pose
     de pilates e o tapa da correção); o recovery reusa a pose, balançando.
-- **Provocação:** ajeita os óculos com um dedo, faz um alongamento lateral (braços para cima,
-  inclina para o lado) e aponta para o adversário com cara de "olha essa postura".
-- **Visual:** professor de estúdio de pilates. Camisa polo turquesa (`#1BA39C`) de manga curta, justa
-  e para fora da calça, com gola e debrum das mangas brancos (`#F4F6F5`); calça jogger preta
-  (`#22252A`) de tecido esportivo, com punho no tornozelo e uma listra turquesa fina na lateral;
-  tênis de treino branco e leve. Óculos de armação preta retangular, cabelo preto curto penteado
-  para trás (deixa a testa à mostra), barba feita. Corpo alto, magro e atlético, postura impecável
+- **Provocação:** faz um alongamento lateral (braços para cima, inclina para o lado) e aponta para
+  o adversário com cara de "olha essa postura".
+- **Visual:** professor de estúdio de pilates, com roupa de treino. Camiseta turquesa (`#1BA39C`) lisa
+  de manga curta, justa e para fora do short; short esportivo preto (`#22252A`) acima do joelho;
+  tênis de treino branco (`#F4F6F5`) e leve. Óculos de armação preta redonda, cabelo preto curto e
+  liso penteado para trás, barba cheia e curta. Corpo alto, magro e atlético, postura impecável
   (costas retas, peito aberto). Cores: turquesa, branco e preto (o turquesa lê bem nos menus escuros
   e não repete a cor de ninguém).
 - **Ideias guardadas:** "Contrai o abdômen!" ou "Respira!" como fala do contra-ataque, se ele não
@@ -317,13 +316,13 @@ CHARACTER SHEET
 Name: Crocko — 35-year-old pilates instructor and physical therapist, tall, with perfect posture.
 Fighting style: patient counter-puncher — calm and balanced, waits for the opponent to attack and then corrects them.
 Body: based on the photos; tall, lean and athletic build, very upright posture.
-Outfit: turquoise (#1BA39C) short-sleeve polo shirt with a white (#F4F6F5) collar and white sleeve trim, fitted, untucked; black (#22252A) athletic jogger pants with ankle cuffs and a thin turquoise side stripe; light white training sneakers.
-Signature details: black rectangular glasses, short black hair combed back showing a slightly large forehead, clean-shaven, the turquoise polo.
+Outfit: plain turquoise (#1BA39C) short-sleeve shirt, fitted, untucked; black (#22252A) athletic sports shorts above the knee; light white (#F4F6F5) training sneakers.
+Signature details: black rounded glasses, short straight black hair combed back, short full beard, the turquoise shirt.
 Colors: primary #1BA39C, secondary #F4F6F5, accent #22252A.
 Face/personality: calm, attentive, slightly judging look, as if checking someone's posture.
 Special move: "Correção postural" — he holds a balanced pilates pose on one leg with open arms; if someone hits him, he answers with a firm open-hand slap on their back that sends them flying.
-Taunt: pushes his glasses up with one finger, does a side stretch with his arms up, then points at the opponent as if criticizing their posture.
-Extra parts for the parts sheet: one hand pushing up glasses with the index finger; one hand pointing with the index finger; one flat open hand, palm forward, for the slap.
+Taunt: does a side stretch with his arms up, then points at the opponent as if criticizing their posture.
+Extra parts for the parts sheet: one hand pointing with the index finger; one flat open hand, palm forward, for the slap.
 Props and effects for the effects sheet: a soft ring of light around a standing body (waiting glow); 1 small star-shaped "ding" sparkle; 1 crack-shaped impact burst; 4 short impact lines.
 Avoid: text or logos on the clothes; gym brand logos; medical coat.
 ```
@@ -332,10 +331,11 @@ Trechos prontos para os textos do Firefly (pasta `art/crocko/`):
 
 - `<EXPRESSION>`: `calm attentive look, slightly judging`
 - `<CHARACTER>`:
-  `Crocko, 35-year-old pilates instructor, tall, lean and athletic, very upright posture, tan brown skin, short black hair combed back showing a slightly large forehead, black rectangular glasses, clean-shaven. Turquoise (#1BA39C) short-sleeve polo shirt with a white collar and sleeve trim, untucked; black (#22252A) athletic jogger pants with ankle cuffs and a thin turquoise side stripe; light white training sneakers.`
-- `<LEGWEAR>`: `jogger pants with ankle cuffs`
-- `<SHOE>`: `light training sneaker`
-- `<EXTRA>`: `one hand pushing up glasses with the index finger, one hand pointing with the index finger, one flat open hand with the palm forward`
+  `Crocko, 35-year-old pilates instructor, tall, lean and athletic, very upright posture, tan brown skin, short straight black hair combed back, black rounded glasses, short full beard. Turquoise (#1BA39C) short-sleeve shirt, untucked; black (#22252A) athletic sports shorts; light white training sneakers.`
+- `<LEGWEAR>`: `black athletic shorts` (short: no passo 3 use as versões de short de `<HIPS>` e
+  `<LEGS>` e apague `<PANTS>`)
+- `<SHOE>`: `white training sneaker`
+- `<EXTRA>`: `one hand pointing with the index finger, one flat open hand with the palm forward`
 - `<ITEMS>`:
   `1 soft turquoise ring of light; 1 small white star-shaped sparkle; 1 crack-shaped white impact burst; 4 short white impact lines`
 
