@@ -22,26 +22,15 @@ import { colorValue, statBars } from '../render/fighterLook';
 import { FighterView } from '../render/FighterView';
 import { clipFor } from '../rig/library';
 import { sampleClip } from '../rig/animation';
-import { gridColumns, gridMove, selectSlots } from '../ui/grid';
+import { gridColumns, gridMove, selectLayout, selectSlots, type SelectLayout } from '../ui/grid';
 import { addPortrait, drawSilhouette } from '../ui/portrait';
 import { cssColor, fadeIn, panel, playerColor, titleText, UI, uiText } from '../ui/theme';
 import type { MatchSetup } from './FightScene';
 
-const TILE_W = 136;
-const TILE_H = 150;
-const TILE_GAP = 14;
-const GRID_Y = 92;
-const PANEL_Y = 276;
 const PANEL_W = 580;
-const PANEL_H = 368;
-/** Altura do lutador desenhado no painel (px). */
-const PANEL_FIGHTER_H = 290;
 /** Com 3 ou 4 na sala (online), os painéis ficam lado a lado, mais estreitos. */
 const COMPACT_MARGIN = 24;
 const COMPACT_GAP = 12;
-const COMPACT_FIGHTER_H = 190;
-/** Onde ficam os pés do lutador no painel estreito. */
-const COMPACT_FLOOR_Y = 238;
 /** Com os 2 prontos, espera isto antes de ir para o mapa (dá tempo de ver e de desfazer). */
 const START_DELAY_MS = 700;
 
@@ -69,6 +58,8 @@ interface PlayerPanel {
 export class SelectScene extends Phaser.Scene {
   private controls!: MenuInput;
   private slots: (string | null)[] = [];
+  /** Medidas da grade e dos painéis (uma ou duas linhas de casas). */
+  private layout: SelectLayout = selectLayout(0);
   private cursors: number[] = [];
   private ready: boolean[] = [];
   private readyMs = 0;
@@ -100,6 +91,7 @@ export class SelectScene extends Phaser.Scene {
   /** Voltando da luta ou do mapa, os cursores começam nos personagens escolhidos antes. */
   init(data: Partial<MatchSetup>): void {
     this.slots = selectSlots(PLAYABLE_CHARACTERS);
+    this.layout = selectLayout(this.slots.length);
     this.net = getOnline();
     this.extras = this.net ? [] : keepExtras(extrasFromPads(data.pads), readPads().length);
     const seats = this.net ? Math.max(2, this.net.players) : FIXED_SEATS + this.extras.length;
@@ -410,14 +402,14 @@ export class SelectScene extends Phaser.Scene {
   }
 
   private tileX(i: number): number {
-    const cols = gridColumns(this.slots.length);
-    const total = cols * TILE_W + (cols - 1) * TILE_GAP;
-    return (this.scale.width - total) / 2 + (i % cols) * (TILE_W + TILE_GAP);
+    const { cols, tileW, gap } = this.layout;
+    const total = cols * tileW + (cols - 1) * gap;
+    return (this.scale.width - total) / 2 + (i % cols) * (tileW + gap);
   }
 
   private tileY(i: number): number {
-    const cols = gridColumns(this.slots.length);
-    return GRID_Y + Math.floor(i / cols) * (TILE_H + TILE_GAP);
+    const { cols, gridY, tileH, gap } = this.layout;
+    return gridY + Math.floor(i / cols) * (tileH + gap);
   }
 
   /** Casa da grade: figurinha e nome, ou silhueta "em breve". */
@@ -425,24 +417,25 @@ export class SelectScene extends Phaser.Scene {
     const x = this.tileX(i);
     const y = this.tileY(i);
     const tile = this.add.container(x, y);
+    const L = this.layout;
     const g = this.add.graphics();
-    panel(g, 0, 0, TILE_W, TILE_H, id ? UI.panel : UI.panelDark, 1, 10);
+    panel(g, 0, 0, L.tileW, L.tileH, id ? UI.panel : UI.panelDark, 1, 10);
     tile.add(g);
     if (id) {
       const c = getCharacter(id);
       g.fillStyle(colorValue(c.colors.primary), 0.25);
-      g.fillRoundedRect(4, 4, TILE_W - 8, TILE_H - 40, 8);
-      tile.add(addPortrait(this, id, TILE_W / 2, 58, 104));
+      g.fillRoundedRect(4, 4, L.tileW - 8, L.bandH, 8);
+      tile.add(addPortrait(this, id, L.tileW / 2, L.portraitY, L.portraitSize));
       tile.add(
-        uiText(this, TILE_W / 2, TILE_H - 18, c.name, {
-          fontSize: '15px',
+        uiText(this, L.tileW / 2, L.nameY, c.name, {
+          fontSize: `${String(L.nameSize)}px`,
           fontStyle: 'bold',
         }).setOrigin(0.5),
       );
     } else {
-      drawSilhouette(g, TILE_W / 2, 62, 92, 0x05070b);
+      drawSilhouette(g, L.tileW / 2, L.silhouetteY, L.silhouetteSize, 0x05070b);
       tile.add(
-        uiText(this, TILE_W / 2, TILE_H - 18, 'EM BREVE', {
+        uiText(this, L.tileW / 2, L.nameY, 'EM BREVE', {
           fontSize: '14px',
           fontStyle: 'bold',
           color: UI.dim,
@@ -469,14 +462,14 @@ export class SelectScene extends Phaser.Scene {
     const width = this.scale.width;
     if (n <= 2) {
       const x = p === 0 ? 40 : width - 40 - PANEL_W;
-      const floorY = PANEL_H - 34;
+      const floorY = this.layout.panelH - 34;
       return {
         x,
         w: PANEL_W,
         compact: false,
         floorX: 130,
         floorY,
-        fighterH: PANEL_FIGHTER_H,
+        fighterH: this.layout.fighterH,
         facing: p === 0 ? 1 : -1,
       };
     }
@@ -486,8 +479,8 @@ export class SelectScene extends Phaser.Scene {
       w,
       compact: true,
       floorX: w / 2,
-      floorY: COMPACT_FLOOR_Y,
-      fighterH: COMPACT_FIGHTER_H,
+      floorY: this.layout.compactFloorY,
+      fighterH: this.layout.compactFighterH,
       facing: p < n / 2 ? 1 : -1,
     };
   }
@@ -501,16 +494,17 @@ export class SelectScene extends Phaser.Scene {
     const box = state.container;
     box.removeAll(true);
     const layout = this.panelLayout(p);
-    box.setPosition(layout.x, PANEL_Y);
+    box.setPosition(layout.x, this.layout.panelY);
     const w = layout.w;
     const color = playerColor(p);
     const ready = this.ready[p] === true;
     const id = this.slots[this.cursors[p] ?? 0] ?? null;
 
     const g = this.add.graphics();
-    panel(g, 0, 0, w, PANEL_H, UI.panel, 0.95);
+    const panelH = this.layout.panelH;
+    panel(g, 0, 0, w, panelH, UI.panel, 0.95);
     g.lineStyle(ready ? 6 : 3, color, 1);
-    g.strokeRoundedRect(0, 0, w, PANEL_H, 14);
+    g.strokeRoundedRect(0, 0, w, panelH, 14);
     box.add(g);
     // chão do lutador
     g.fillStyle(0x000000, 0.25);
@@ -537,33 +531,34 @@ export class SelectScene extends Phaser.Scene {
     };
 
     if (!id) {
-      drawSilhouette(g, 130, PANEL_H / 2 + 10, 230, 0x0b0e16);
+      drawSilhouette(g, 130, panelH / 2 + 10, 230, 0x0b0e16);
       text(40, '?', { fontFamily: UI.titleFont, fontSize: '40px', color: UI.dim });
       text(100, 'Em breve.', { fontSize: '22px', color: UI.muted });
       return;
     }
 
     const c = getCharacter(id);
-    const view = new FighterView(this, id, PANEL_FIGHTER_H / 1.12);
+    const view = new FighterView(this, id, this.layout.fighterH / 1.12);
     state.view = view;
     // fica dentro do painel, por cima do fundo dele
     box.add(view.container);
-    text(28, c.name, { fontFamily: UI.titleFont, fontSize: '34px' });
-    text(80, c.blurb, { fontSize: '17px', color: '#ced4da', wordWrap: { width: 300 } });
-    text(146, `Especial: ${c.special?.name ?? '—'}`, {
+    const ty = this.layout.textY;
+    text(ty.name, c.name, { fontFamily: UI.titleFont, fontSize: '34px' });
+    text(ty.blurb, c.blurb, { fontSize: '17px', color: '#ced4da', wordWrap: { width: 300 } });
+    text(ty.special, `Especial: ${c.special?.name ?? '—'}`, {
       fontSize: '19px',
       fontStyle: 'bold',
       color: c.colors.secondary,
     });
-    this.drawBars(box, g, c, textX, 190);
-    text(300, `“${c.taunt.text}”`, {
+    this.drawBars(box, g, c, textX, ty.bars);
+    text(ty.quote, `“${c.taunt.text}”`, {
       fontSize: '16px',
       fontStyle: 'italic',
       color: '#8d99ae',
       wordWrap: { width: 300 },
     });
     if (ready) {
-      const badge = uiText(this, PANEL_W - 16, PANEL_H - 16, 'PRONTO!', {
+      const badge = uiText(this, PANEL_W - 16, panelH - 16, 'PRONTO!', {
         fontFamily: UI.titleFont,
         fontSize: '26px',
         color: '#0b0e16',
@@ -600,7 +595,7 @@ export class SelectScene extends Phaser.Scene {
       return;
     }
     const c = getCharacter(id);
-    const view = new FighterView(this, id, COMPACT_FIGHTER_H / 1.12);
+    const view = new FighterView(this, id, this.layout.compactFighterH / 1.12);
     state.view = view;
     box.add(view.container);
     center(floorY + 18, c.name, { fontFamily: UI.titleFont, fontSize: '28px' });
@@ -611,7 +606,7 @@ export class SelectScene extends Phaser.Scene {
       wordWrap: { width: w - 24 },
     });
     if (this.ready[p]) {
-      const badge = center(PANEL_H - 50, 'PRONTO!', {
+      const badge = center(this.layout.panelH - 50, 'PRONTO!', {
         fontFamily: UI.titleFont,
         fontSize: '24px',
         color: '#0b0e16',
@@ -621,7 +616,7 @@ export class SelectScene extends Phaser.Scene {
       badge.setScale(1.4);
       this.tweens.add({ targets: badge, scale: 1, duration: 180, ease: 'Back.Out' });
     } else {
-      center(PANEL_H - 44, `“${c.taunt.text}”`, {
+      center(this.layout.panelH - 44, `“${c.taunt.text}”`, {
         fontSize: '14px',
         fontStyle: 'italic',
         color: '#8d99ae',
@@ -684,14 +679,15 @@ export class SelectScene extends Phaser.Scene {
       g.strokeRoundedRect(
         x - 6 + inset,
         y - 6 + inset,
-        TILE_W + 12 - inset * 2,
-        TILE_H + 12 - inset * 2,
+        this.layout.tileW + 12 - inset * 2,
+        this.layout.tileH + 12 - inset * 2,
         12,
       );
       // um canto da casa para cada um: P1 e P2 em cima, P3 e P4 embaixo
       const right = p % 2 === 1;
       const below = p >= 2;
-      this.tags[p]?.setPosition(x + (right ? TILE_W - 22 : 22), below ? y + TILE_H + 6 : y - 6);
+      const { tileW, tileH } = this.layout;
+      this.tags[p]?.setPosition(x + (right ? tileW - 22 : 22), below ? y + tileH + 6 : y - 6);
     }
   }
 
