@@ -53,6 +53,13 @@ export interface CharacterFx {
    * contados a partir do `voiceAt` da ficha.
    */
   tauntNotes?: { frames: readonly string[]; ticks: readonly number[] };
+  /**
+   * Contra-ataque: na janela, anéis (`glow`) sobem dos pés à cabeça, como quem
+   * avalia a postura (no lugar do contorno branco). Quando pega alguém (golpe ou
+   * projétil), um brilho (`ding`) perto da cabeça; no golpe devolvido, um estalo
+   * (`burst`) e linhas de impacto (`lines`) no ponto do acerto, com o som `sound`.
+   */
+  counter?: { glow: string; ding?: string; burst?: string; lines?: string; sound?: SfxName };
 }
 
 export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
@@ -84,6 +91,15 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
     },
     propPuffs: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
     heldInTauntHand: true,
+  },
+  crocko: {
+    counter: {
+      glow: 'fx_ring',
+      ding: 'fx_ding',
+      burst: 'fx_crack',
+      lines: 'fx_lines',
+      sound: 'spine_crack',
+    },
   },
   'joao-frango': {
     projectile: {

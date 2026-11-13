@@ -235,6 +235,8 @@ export class FightScene extends Phaser.Scene {
   private lastStates: FighterState[] = [];
   /** Peça na mão de cada lutador no último tick (para a fumaça quando ela aparece). */
   private lastProps: (string | null)[] = [];
+  /** O contra-ataque de cada lutador já tinha pegado alguém no tick anterior. */
+  private lastCaught: boolean[] = [];
   private views: FighterView[] = [];
   private fx!: FxLayer;
   private backFx!: FxLayer;
@@ -447,6 +449,7 @@ export class FightScene extends Phaser.Scene {
     this.prev = this.state.fighters.map((f) => ({ x: f.x, y: f.y }));
     this.lastStates = this.state.fighters.map((f) => f.state);
     this.lastProps = this.state.fighters.map(() => null);
+    this.lastCaught = this.state.fighters.map(() => false);
     this.overTicks = 0;
     this.loop.reset();
     this.fx.clear();
@@ -655,7 +658,10 @@ export class FightScene extends Phaser.Scene {
     this.shake.add(hitTrauma(kb));
     const sound = strength > 0.6 ? 'hit_heavy' : strength > 0.25 ? 'hit_medium' : 'hit_light';
     playSfx(this, sound, { volume: 0.85 + 0.25 * strength });
-    if (e.kind === 'counter') playSfx(this, 'counter');
+    if (e.kind === 'counter') {
+      playSfx(this, 'counter');
+      this.spawnCounterHitFx(e);
+    }
     this.flashUntil[e.victim] = this.state.tick + FLASH_TICKS + Math.round(3 * strength);
     if (!this.decisiveShown && isDecisiveHit(this.state, e.victim)) {
       this.decisiveShown = true;
@@ -876,7 +882,7 @@ export class FightScene extends Phaser.Scene {
    */
   private drawBlockOutlines(f: Fighter, r: Rect): void {
     const g = this.overlayGfx;
-    if (isCountering(f)) {
+    if (isCountering(f) && !CHARACTER_FX[f.character]?.counter) {
       g.lineStyle(4, 0xffffff, 0.9);
       g.strokeRect(r.x - 6, r.y - 6, r.w + 12, r.h + 12);
     }
@@ -896,8 +902,12 @@ export class FightScene extends Phaser.Scene {
       if (view && fx) this.spawnPropFx(f, view, fx);
       if (view && fx?.tauntNotes) this.spawnTauntNotes(f, view, fx.tauntNotes);
       const move = f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
+      const caught = move?.counter !== undefined && f.moveHits !== 0;
+      const justCaught = caught && !this.lastCaught[f.id];
+      this.lastCaught[f.id] = caught;
       if (!view || !fx || !move) continue;
       const frame = moveFrame(f);
+      if (fx.counter && move.counter) this.spawnCounterFx(f, view, fx.counter, move, justCaught);
       if (fx.vanishSquares && move.teleport?.random) {
         this.spawnQuitFx(f, view, fx.vanishSquares, move, frame);
       }
@@ -1229,6 +1239,90 @@ export class FightScene extends Phaser.Scene {
     g.lineBetween(muzzle.x, muzzle.y, x2, y2);
     g.lineStyle(blink ? 2.5 : 1.5, aim.color, alpha);
     g.lineBetween(muzzle.x, muzzle.y, x2, y2);
+  }
+
+  /**
+   * Contra-ataque (`counter` do personagem): anéis subindo pelo corpo enquanto a
+   * janela está aberta e, quando pega alguém, o brilho perto da cabeça.
+   */
+  private spawnCounterFx(
+    f: Fighter,
+    view: FighterView,
+    fx: NonNullable<CharacterFx['counter']>,
+    move: MoveDef,
+    justCaught: boolean,
+  ): void {
+    const texture = characterTextureKey(f.character);
+    const feetX = toPx(f.x + f.w / 2);
+    const feetY = toPx(f.y + f.h);
+    const h = toPx(f.h);
+    const s = view.scale;
+    if (isCountering(f) && (moveFrame(f) - move.startup) % 7 === 1) {
+      this.fx.spawn({
+        texture,
+        frame: fx.glow,
+        x: feetX,
+        y: feetY - 4,
+        vy: -h / 20,
+        life: 20,
+        scale: s * 1.1,
+        scaleEnd: s * 0.75,
+        alpha: 0.95,
+      });
+    }
+    if (justCaught && fx.ding) {
+      this.fx.spawn({
+        texture,
+        frame: fx.ding,
+        // acima da cabeça, para o lado de trás: não some no clarão do acerto
+        x: feetX - f.facing * toPx(f.w) * 0.25,
+        y: feetY - h - 14,
+        vy: -0.5,
+        life: 28,
+        scale: s * 0.55,
+        scaleEnd: s * 0.95,
+        spin: f.facing * 0.06,
+      });
+    }
+  }
+
+  /** Golpe devolvido pelo contra-ataque: estalo e linhas de impacto no ponto do acerto. */
+  private spawnCounterHitFx(e: HitEvent): void {
+    const counterer = this.state.fighters[e.attacker];
+    const victim = this.state.fighters[e.victim];
+    const fx = counterer ? CHARACTER_FX[counterer.character]?.counter : undefined;
+    const view = this.views[e.attacker];
+    if (!counterer || !victim || !fx || !view) return;
+    const texture = characterTextureKey(counterer.character);
+    const x = toPx(e.x);
+    const y = toPx(e.y);
+    const s = view.scale;
+    if (fx.burst) {
+      this.fx.spawn({
+        texture,
+        frame: fx.burst,
+        x,
+        y,
+        life: 14,
+        scale: s * 0.3,
+        scaleEnd: s * 0.55,
+      });
+    }
+    if (fx.lines) {
+      const away = victim.kbx < 0 ? -1 : 1;
+      this.fx.spawn({
+        texture,
+        frame: fx.lines,
+        x: x + away * 10,
+        y: y - 6,
+        vx: away * 2.5,
+        vy: -1.2,
+        life: 12,
+        scale: s * 0.45,
+        flipX: away === -1,
+      });
+    }
+    if (fx.sound) playSfx(this, fx.sound);
   }
 
   /** Fumacinha na mão quando a peça segurada (a arma, o trompete) aparece ou some. */
