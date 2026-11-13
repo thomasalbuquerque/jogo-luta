@@ -487,7 +487,7 @@ Avoid: text, letters or crest on the badge; logos; any real console or real game
 
 Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
 
-- `<EXPRESSION>`: `focused gamer squint, tongue in the corner of the mouth`
+- `<EXPRESSION>`: `focused gamer squint`
 - `<CHARACTER>`:
   `Gabs, 30-year-old city hall clerk and gamer, average height, slightly chubby with a light belly. Royal blue (#2F5DA8) short-sleeve polo, untucked; ID badge on a thick dark lanyard (white card with photo, no text); big gamer headset with purple (#9B5DE5) details resting on his neck; dark blue jeans; light gray (#B8BCC4) casual sneakers.`
 - `<LEGWEAR>`: `dark blue jeans`
