@@ -28,7 +28,7 @@ export const DARLLAN = defineCharacter({
   moves: {
     // Mão pesada: o mesmo tempo, um pouco mais de dano e de arremesso.
     neutralLight: { damage: 6 },
-    sideLight: { damage: 10, baseKnockback: 7 },
+    sideLight: { damage: 10 },
     downLight: { damage: 9 },
     sideAir: { damage: 13 },
     downAir: { damage: 11 },
