@@ -185,6 +185,9 @@ Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da 
   - [x] Crocko: jogável (ficha, arte no esqueleto, especial Correção postural com contra-ataque e o
         tapa quando pega, provocação com alongamento, efeitos e o "créc", retrato). Falta o bordão,
         o OK do concept pelo amigo, a voz gravada e as 5 lutas de teste.
+  - [x] Darllan: jogável (ficha, arte no esqueleto, especial Rolo na bancada com área dos dois
+        lados, provocação mordendo o biscoito, farinha, migalhas, tremor e o "póf", retrato). Falta o
+        OK do concept pelo amigo, a voz gravada e as 5 lutas de teste.
 - [ ] Lote 3 (3–4 personagens)
 - [ ] Lote 4 (restantes)
 - [ ] 1 ou 2 mapas novos com tema de piadas internas do grupo.

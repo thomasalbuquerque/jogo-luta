@@ -20,10 +20,11 @@ Enquanto um áudio não existe, o jogo toca uma versão gerada em código com a 
   `tauba_bordao` (o trompete: uns 2 s de fanfarra, que entram quando o trompete chega na boca; sem
   áudio, o jogo sintetiza a fanfarra), `tauba_ko`, `tchula_bordao` (o "Nooola!" gritado, que sai
   quando ele aponta a chave de boca), `tchula_ko`, `crocko_bordao` (ainda sem bordão: sai quando ele
-  aponta para o adversário depois do alongamento) e `crocko_ko`.
+  aponta para o adversário depois do alongamento), `crocko_ko`, `darllan_bordao` (o "Darllan!"
+  gritado de braços abertos, que sai depois da mordida no biscoito) e `darllan_ko`.
 - **Vozes:** curtas (provocação até ~3 s, KO até ~1,5 s), sem silêncio no começo. Áudios gravados pelos
   próprios amigos no WhatsApp funcionam melhor que IA.
 - **Música:** tem que emendar no loop (o fim encaixa no começo). Use só música que o grupo pode usar.
 - **Efeitos (`sfx/`):** `hit_light`, `hit_medium`, `hit_heavy`, `swing`, `jump`, `air_jump`, `dash`, `dodge`,
   `land`, `grab`, `counter`, `ko`, `respawn`, `vanish` e `appear` (o "plim" do Tauba sumindo e voltando), `rifle_shot` e `rifle_bolt` (o tiro
-  e o ferrolho da scout do Tchula), `spine_crack` (o "créc" de coluna da correção do Crocko) (lista em `packages/game/src/audio/sfxSynth.ts`).
+  e o ferrolho da scout do Tchula), `spine_crack` (o "créc" de coluna da correção do Crocko), `flour_thump` (o "póf" do rolo do Darllan batendo no chão) (lista em `packages/game/src/audio/sfxSynth.ts`).

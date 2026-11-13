@@ -384,6 +384,13 @@ Trechos prontos para os textos do Firefly (pasta `art/crocko/`):
   avental e na bochecha. Corpo alto e largo, barriga leve, ombros largos, braços grossos. Sem
   chapéu de chef (o avental branco já é do João Frango; o do Darllan é marrom). Cores:
   marrom-chocolate, creme e rosa-glacê (o marrom e o rosa não repetem a cor de ninguém).
+- **No jogo:** jogável. No especial ele tira o rolo de massa, ergue com as duas mãos acima da cabeça
+  (um brilho na ponta do rolo avisa) e desce com tudo no chão, gritando: a farinha estoura para os
+  dois lados, as migalhas voam, a câmera treme e sai o "póf" (`flour_thump`, sintetizado). Fica
+  agachado com o rolo no chão até levantar e guardar o rolo. No ar a pancada sai igual, e a farinha
+  sai de onde o rolo estiver. Na provocação ele tira o biscoito do bolso do avental, morde (as
+  migalhas caem), mastiga e abre os braços gritando "Darllan!". Nos golpes base bate um pouco mais
+  forte que os outros. Ficha em `packages/sim/src/characters/darllan.ts`.
 - **Ideias guardadas:** respawn caindo com uma fornada de biscoitos; KO com uma nuvem de farinha;
   um forno de padaria no fundo de um mapa.
 
