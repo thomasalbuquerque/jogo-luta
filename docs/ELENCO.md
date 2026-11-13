@@ -16,7 +16,7 @@ veja `docs/GDD.md`.
 | 6   | Crocko      | Alto, óculos preto, barba, professor de pilates e fisioterapeuta              | (a definir)                  | **Correção postural** (contra-ataque) | Alonga e aponta a postura                    | Turquesa, branco, preto                  |           |
 | 7   | Darllan     | Confeiteiro de biscoitos, alto, moreno e grandão                              | "Darllan!"                   | **Rolo na bancada** (área)            | Morde um biscoito e grita o bordão           | Marrom-chocolate, creme, rosa-glacê      |           |
 | 8   | Gabs        | Servidor público da prefeitura (crachá no pescoço), gamer                     | (a definir)                  | **Controle na mão** (área)            | Aperta o controle e comemora: "GG!"          | Azul-royal, roxo, cinza-claro            |           |
-| 9   |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 9   | Marília     | Baixinha (1,64 m), cabelo castanho, puxa um palheiro do nada                  | "Gentiii!"                   | **Tragadinha** (buff)                 | Mãos no rosto, gritando o bordão             | Rosa-framboesa, jeans claro, verde-menta |           |
 | 10  |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 11  |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 12  |             |                                                                               |                              |                                       |                                              |                                          |           |
@@ -502,6 +502,85 @@ Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
 - **Peças (passo 3):** o tronco tem que vir com o crachá e o fone no pescoço. Se faltarem, use a
   linha "Faltou uma peça" da [tabela de correções](ARTE.md#se-der-errado-no-firefly) pedindo
   `the ID badge on the lanyard and the headset around the neck, on the torso`.
+
+### 9. Marília
+
+- **Quem é:** 26 anos, baixinha (1,64 m, a mesma altura do Tauba), pele branca, cabelo castanho.
+  Corpo de mulher comum, com proporções médias e naturais: o desenho não sexualiza a personagem.
+  Rosto e jeito: seguir as fotos. É a Marília que o João Frango chama na provocação dele.
+- **Bordão:** "Gentiii!", esticando o "i", no tom de quem não acredita no que está vendo.
+- **Estilo de luta:** destemida. Leve e rápida no chão, pulo bom, golpes normais um pouco mais
+  fracos que a média. O jogo dela é achar a hora de fumar e, com a aura ligada, ir para cima sem
+  medo de apanhar. Contraste com o Crocko: o Crocko espera o golpe para devolver; a Marília
+  simplesmente não sente o golpe.
+- **Especial — Tragadinha (buff):** ela tira um cigarrinho de palha (palheiro) do bolso de trás,
+  põe na boca e dá uma tragada (a ponta acende em brasa). Ao soltar, a fumaça sai verde clarinha e
+  envolve o corpo dela: vira uma aura. Com a aura, ela não toma dano por um tempo.
+  - **Tempo:** startup longo (~40 ticks: ~12 tirando o palheiro, ~18 na tragada, ~10 soltando a
+    fumaça), vulnerável o tempo todo: é o preço do especial, e quem estiver perto pune. Se ela
+    apanhar no startup, o palheiro cai e o especial é perdido (a recarga já contou). Recovery curto
+    (~12 ticks, ela joga o palheiro fora).
+  - **A aura:** liga no 1º frame ativo e dura ~120 ticks (2 s). Golpes, projéteis e agarrões passam
+    por ela, como na esquiva: sem dano, sem knockback, sem hitstun. Ela anda, pula e ataca
+    normalmente. Não salva da blast zone: sair do mapa com a aura ainda é KO.
+  - **Recarga:** longa, ~480 ticks (8 s), contada do começo, para a aura não ficar quase sempre
+    ligada.
+  - **No ar:** funciona, sem impulso; como o startup é longo e ela vai caindo, não serve de
+    recuperação.
+  - **Efeitos:** brasa laranja na ponta do palheiro durante a tragada; fumacinha cinza quando ela
+    traga; ao soltar, uma baforada verde clarinha (`#B5F2C6`) que se espalha em volta do corpo e
+    vira a aura: um contorno de luz verde clarinho colado na silhueta, com fiapos de fumaça verde
+    subindo. Golpe que passa pela aura faz um brilho verde e um "plim" (sem dano). Nos últimos 30
+    ticks a aura pisca, avisando que vai acabar.
+  - **Precisa de código novo:** o bloco buff de hoje só mexe em dano, velocidade e peso. Falta uma
+    opção de invencibilidade no mesmo bloco (`invulnerable: true`), reaproveitando a que a esquiva
+    e o respawn já usam, em vez de um bloco novo.
+- **Provocação:** põe as duas mãos no rosto, arregala os olhos, balança a cabeça e grita "Gentiii!".
+- **Visual:** roupa do dia a dia. Camiseta rosa-framboesa (`#E2557F`) lisa, de manga curta, um
+  pouco folgada e para fora da calça; calça jeans clara (`#8DB0D8`) de cintura alta e perna reta,
+  com cinto; tênis off-white de cano baixo com detalhes verde-menta (`#8FD9A8`). Cabelo castanho
+  preso num coque alto meio bagunçado, com um elástico verde-menta (o estilo não deixa cabelo
+  abaixo do ombro). Cores: rosa-framboesa, jeans claro e verde-menta. O menta do elástico e do
+  tênis puxa o verde da aura, e o rosa não repete o rosa-glacê do Darllan (é mais forte e frio).
+- **Ideias guardadas:** se o João Frango provocar com ela na luta ("Ô Mariiiliaaa!"), ela responde
+  "Gentiii!"; respawn soltando uma baforada; "Gentiii!" ao levar KO.
+
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Marília — 26-year-old woman, cheerful and dramatic, every now and then pulls out a hand-rolled straw cigarette and gets completely zen.
+Fighting style: fearless — light and quick, small relaxed stance, walks into hits when her aura is on.
+Body: based on the photos; petite and short (one of the shortest in the cast); average natural female build with medium proportions, drawn modestly, not sexualized.
+Outfit: raspberry pink (#E2557F) plain short-sleeve T-shirt, slightly loose, untucked; light-wash (#8DB0D8) high-waist straight jeans with a belt; low off-white (#F6F0E4) sneakers with mint (#8FD9A8) details.
+Signature details: brown hair tied up in a high messy bun with a mint scrunchie, the pink T-shirt, a hand-rolled straw cigarette.
+Colors: primary #E2557F, secondary #8DB0D8, accent #8FD9A8.
+Face/personality: expressive, big wide eyes, dramatic "can you believe this?" look.
+Special move: "Tragadinha" — she pulls a hand-rolled straw cigarette from her back pocket, takes a drag, and exhales a light green smoke that wraps around her body as a glowing aura; while it lasts, hits pass through her.
+Taunt: puts both hands on her cheeks, eyes wide, shakes her head and shouts her catchphrase.
+Extra parts for the parts sheet: one hand holding a thin hand-rolled cigarette between two fingers.
+Props and effects for the effects sheet: the hand-rolled straw cigarette (side view, pointing right, no hands); 1 small orange ember glow; 3 small gray smoke puffs; 1 soft light green (#B5F2C6) glowing aura outline around an empty standing silhouette; 4 light green smoke wisps; 1 small light green sparkle.
+Avoid: text or logos on the clothes; revealing or tight clothes; exaggerated curves; hair below the shoulders.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
+
+- **É uma amiga:** no passo 1, troque `Keep his real face shape` por `Keep her real face shape`; no
+  passo 5, troque `his outfit` por `her outfit`.
+- `<EXPRESSION>`: `wide-eyed dramatic gasp`
+- `<CHARACTER>`:
+  `Marília, 26-year-old woman, petite and short, average natural build, modest, fair skin, brown hair in a high messy bun with a mint (#8FD9A8) scrunchie, expressive wide eyes. Raspberry pink (#E2557F) short-sleeve T-shirt, slightly loose, untucked; light-wash (#8DB0D8) high-waist straight jeans with a belt; off-white sneakers with mint details.`
+- `<LEGWEAR>`: `light-wash jeans`
+- `<SHOE>`: `off-white sneaker with mint details`
+- `<EXTRA>`: `one hand holding a thin hand-rolled cigarette between two fingers`
+- `<ITEMS>`:
+  `1 thin hand-rolled straw cigarette with a pale corn-husk wrap, side view pointing right, no hands; 1 small orange ember glow; 3 small gray smoke puffs; 1 soft light green (#B5F2C6) glowing aura outline shaped like a standing body, empty inside; 4 light green smoke wisps; 1 small light green sparkle`
+- **Cabeças (passo 2):** acrescente `Same high messy bun with the mint scrunchie on every head.`
+  antes de `Bold`. O coque vai na cabeça e o jogo troca a cabeça inteira; se mudar de uma cabeça
+  para outra, o cabelo "pula" quando ela apanha ou provoca.
+- **Peças (passo 3):** se o tronco vier com a camiseta justa ou com decote, anexe a folha de peças
+  e mande
+  `Edit the attached image: make the torso a slightly loose plain T-shirt with a round crew neck, modest. Keep everything else the same.`
 
 ### Arte
 
