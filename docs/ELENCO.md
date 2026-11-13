@@ -539,9 +539,10 @@ Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
 - **Visual:** roupa do dia a dia. Camiseta rosa-framboesa (`#E2557F`) lisa, de manga curta, um
   pouco folgada e para fora da calça; calça jeans clara (`#8DB0D8`) de cintura alta e perna reta,
   com cinto; tênis off-white de cano baixo com detalhes verde-menta (`#8FD9A8`). Cabelo castanho
-  preso num coque alto meio bagunçado, com um elástico verde-menta (o estilo não deixa cabelo
-  abaixo do ombro). Cores: rosa-framboesa, jeans claro e verde-menta. O menta do elástico e do
-  tênis puxa o verde da aura, e o rosa não repete o rosa-glacê do Darllan (é mais forte e frio).
+  solto, na altura do ombro, nunca abaixo dele: o cabelo é parte da cabeça, e comprido ficaria
+  duro e por cima do ombro e do braço nos golpes. Cores: rosa-framboesa, jeans claro e
+  verde-menta. O menta do tênis puxa o verde da aura, e o rosa não repete o rosa-glacê do Darllan
+  (é mais forte e frio).
 - **Ideias guardadas:** se o João Frango provocar com ela na luta ("Ô Mariiiliaaa!"), ela responde
   "Gentiii!"; respawn soltando uma baforada; "Gentiii!" ao levar KO.
 
@@ -553,7 +554,7 @@ Name: Marília — 26-year-old woman, cheerful and dramatic, every now and then 
 Fighting style: fearless — light and quick, small relaxed stance, walks into hits when her aura is on.
 Body: based on the photos; petite and short (one of the shortest in the cast); average natural female build with medium proportions, drawn modestly, not sexualized.
 Outfit: raspberry pink (#E2557F) plain short-sleeve T-shirt, slightly loose, untucked; light-wash (#8DB0D8) high-waist straight jeans with a belt; low off-white (#F6F0E4) sneakers with mint (#8FD9A8) details.
-Signature details: brown hair tied up in a high messy bun with a mint scrunchie, the pink T-shirt, a hand-rolled straw cigarette.
+Signature details: loose shoulder-length brown hair (not below the shoulders), the pink T-shirt, a hand-rolled straw cigarette.
 Colors: primary #E2557F, secondary #8DB0D8, accent #8FD9A8.
 Face/personality: expressive, big wide eyes, dramatic "can you believe this?" look.
 Special move: "Tragadinha" — she pulls a hand-rolled straw cigarette from her back pocket, takes a drag, and exhales a light green smoke that wraps around her body as a glowing aura; while it lasts, hits pass through her.
@@ -569,15 +570,16 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   passo 5, troque `his outfit` por `her outfit`.
 - `<EXPRESSION>`: `wide-eyed dramatic gasp`
 - `<CHARACTER>`:
-  `Marília, 26-year-old woman, petite and short, average natural build, modest, fair skin, brown hair in a high messy bun with a mint (#8FD9A8) scrunchie, expressive wide eyes. Raspberry pink (#E2557F) short-sleeve T-shirt, slightly loose, untucked; light-wash (#8DB0D8) high-waist straight jeans with a belt; off-white sneakers with mint details.`
+  `Marília, 26-year-old woman, petite and short, average natural build, modest, fair skin, shoulder-length loose brown hair, expressive wide eyes. Raspberry pink (#E2557F) short-sleeve T-shirt, slightly loose, untucked; light-wash (#8DB0D8) high-waist straight jeans with a belt; off-white sneakers with mint (#8FD9A8) details.`
 - `<LEGWEAR>`: `light-wash jeans`
 - `<SHOE>`: `off-white sneaker with mint details`
 - `<EXTRA>`: `one hand holding a thin hand-rolled cigarette between two fingers`
 - `<ITEMS>`:
   `1 thin hand-rolled straw cigarette with a pale corn-husk wrap, side view pointing right, no hands; 1 small orange ember glow; 3 small gray smoke puffs; 1 soft light green (#B5F2C6) glowing aura outline shaped like a standing body, empty inside; 4 light green smoke wisps; 1 small light green sparkle`
-- **Cabeças (passo 2):** acrescente `Same high messy bun with the mint scrunchie on every head.`
-  antes de `Bold`. O coque vai na cabeça e o jogo troca a cabeça inteira; se mudar de uma cabeça
-  para outra, o cabelo "pula" quando ela apanha ou provoca.
+- **Cabeças (passo 2):** acrescente
+  `Same shoulder-length loose hair on every head, not below the shoulders.` antes de `Bold`. O
+  cabelo vai na cabeça e o jogo troca a cabeça inteira; se o comprimento mudar de uma cabeça para
+  outra, o cabelo "pula" quando ela apanha ou provoca.
 - **Peças (passo 3):** se o tronco vier com a camiseta justa ou com decote, anexe a folha de peças
   e mande
   `Edit the attached image: make the torso a slightly loose plain T-shirt with a round crew neck, modest. Keep everything else the same.`
