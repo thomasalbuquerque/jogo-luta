@@ -532,6 +532,13 @@ Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
     vira a aura: um contorno de luz verde clarinho colado na silhueta, com fiapos de fumaça verde
     subindo. Golpe que passa pela aura faz um brilho verde e um "plim" (sem dano). Nos últimos 30
     ticks a aura pisca, avisando que vai acabar.
+  - **Como desenhar a aura:** no código, nunca com imagem. Ela é um brilho verde clarinho
+    (`#B5F2C6`) aplicado no boneco inteiro (o efeito Glow do Phaser no container do rig), então
+    acompanha cada pose: soco, pulo, agachada. Uma silhueta pronta ficaria parada de pé e descolada
+    do corpo nos golpes, e uma bolha redonda leria como escudo e esconderia a personagem. Se o Glow
+    não rodar no navegador, o plano B é uma cópia do boneco pintada de verde, um pouco maior, atrás
+    dela. Da folha de efeitos vêm só o palheiro, as fumacinhas cinzas, os fiapos verdes (sobem em
+    volta dela) e a estrelinha do "plim"; a brasa é um pontinho laranja piscando, também no código.
   - **Precisa de código novo:** o bloco buff de hoje só mexe em dano, velocidade e peso. Falta uma
     opção de invencibilidade no mesmo bloco (`invulnerable: true`), reaproveitando a que a esquiva
     e o respawn já usam, em vez de um bloco novo.
@@ -560,7 +567,7 @@ Face/personality: expressive, big wide eyes, dramatic "can you believe this?" lo
 Special move: "Tragadinha" — she pulls a hand-rolled straw cigarette from her back pocket, takes a drag, and exhales a light green smoke that wraps around her body as a glowing aura; while it lasts, hits pass through her.
 Taunt: puts both hands on her cheeks, eyes wide, shakes her head and shouts her catchphrase.
 Extra parts for the parts sheet: one hand holding a thin hand-rolled cigarette between two fingers.
-Props and effects for the effects sheet: the hand-rolled straw cigarette (side view, pointing right, no hands); 1 small orange ember glow; 3 small gray smoke puffs; 1 soft light green (#B5F2C6) glowing aura outline around an empty standing silhouette; 4 light green smoke wisps; 1 small light green sparkle.
+Props and effects for the effects sheet: the hand-rolled straw cigarette (side view, pointing right, no hands); 1 small orange ember glow; 3 small gray smoke puffs; 4 light green smoke wisps; 1 small light green sparkle.
 Avoid: text or logos on the clothes; revealing or tight clothes; exaggerated curves; hair below the shoulders.
 ```
 
@@ -575,7 +582,11 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
 - `<SHOE>`: `off-white sneaker with mint details`
 - `<EXTRA>`: `one hand holding a thin hand-rolled cigarette between two fingers`
 - `<ITEMS>`:
-  `1 thin hand-rolled straw cigarette with a pale corn-husk wrap, side view pointing right, no hands; 1 small orange ember glow; 3 small gray smoke puffs; 1 soft light green (#B5F2C6) glowing aura outline shaped like a standing body, empty inside; 4 light green smoke wisps; 1 small light green sparkle`
+  `1 thin hand-rolled straw cigarette with a pale corn-husk wrap, side view pointing right, no hands; 1 small orange ember glow; 3 small gray smoke puffs; 4 light green smoke wisps; 1 small light green sparkle`
+
+  A aura não entra na folha: é feita no código (ver "Como desenhar a aura"). Se a folha já veio com
+  uma silhueta verde, não precisa refazer; o recorte ignora essa peça.
+
 - **Cabeças (passo 2):** acrescente
   `Same shoulder-length loose hair on every head, not below the shoulders.` antes de `Bold`. O
   cabelo vai na cabeça e o jogo troca a cabeça inteira; se o comprimento mudar de uma cabeça para
