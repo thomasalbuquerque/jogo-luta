@@ -1,6 +1,6 @@
 import { characterOf, currentMove, moveFrame, type Fighter } from '@jogo-luta/sim';
 import { movePhaseTime, sampleClip } from './animation';
-import { clipFor } from './library';
+import { clipFor, COUNTER_KEY } from './library';
 import type { Pose } from './skeleton';
 
 /** Hitstun a partir desta duração (ticks) é arremesso forte: o corpo gira no ar. */
@@ -12,8 +12,10 @@ export function fighterClip(f: Fighter): { key: string; t: number } {
     case 'attack': {
       const move = currentMove(f);
       if (!move || !f.move) return { key: 'idle', t: f.stateTicks };
+      // contra-ataque que pegou alguém: o golpe devolvido no lugar do recovery
+      const countered = f.move === 'special' && move.counter !== undefined && f.moveHits !== 0;
       return {
-        key: f.move,
+        key: countered ? COUNTER_KEY : f.move,
         t: movePhaseTime(moveFrame(f), move.startup, move.active, move.recovery),
       };
     }
