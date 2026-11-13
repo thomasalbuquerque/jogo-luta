@@ -663,6 +663,45 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   ao levar KO; um "PERFECT" no fim do combo se ele não tomou dano na luta; um fliperama de luta no
   fundo de um mapa.
 
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Meia — 30-year-old pro fighting-game player, calm and technical, always reading the opponent.
+Fighting style: technical grappler — light and quick, compact low stance, fists up, ready to dash in close.
+Body: based on the photos; average height, slim build.
+Outfit: white (#F4F4F0) short-sleeve crew-neck T-shirt, untucked, with one big symmetrical abstract emblem in the middle of the chest (electric cyan #22C1EE with a black outline, like a streetwear print, no letters, not a real brand); medium-blue (#3E5F8A) straight jeans; black (#1C1C1F) sneakers.
+Signature details: big square black glasses, the white T-shirt with the big cyan emblem.
+Colors: primary #F4F4F0, secondary #22C1EE, accent #3E5F8A.
+Face/personality: focused competitive look behind the glasses, slight confident smirk.
+Special move: "Comando" — a fighting-game input command appears above his head; if he catches the opponent up close, he unleashes a fast combo of punches and kicks while a hit counter goes up, and the last kick launches them.
+Taunt: pushes his glasses up with the index finger, then beckons the opponent with a palm-up hand.
+Extra parts for the parts sheet: one hand with the index finger raised (pushing up the glasses); one palm-up beckoning hand.
+Props and effects for the effects sheet: 4 small white-yellow hit sparks in different shapes; 3 short white speed-streak arcs for punches and kicks; 1 big impact burst for the final kick; 3 small gray smoke puffs.
+Avoid: letters, words or real brand logos on the T-shirt; game logos or emblems; grabbing or holding poses in the combo.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/meia/`):
+
+- `<EXPRESSION>`: `focused competitive look, slight confident smirk`
+- `<CHARACTER>`:
+  `Meia, 30-year-old pro fighting-game player, average height, slim build, big square black glasses, focused look. White (#F4F4F0) short-sleeve crew-neck T-shirt with one big symmetrical abstract cyan (#22C1EE) emblem on the chest, black outline, no letters; medium-blue (#3E5F8A) straight jeans; black sneakers.`
+- `<LEGWEAR>`: `medium-blue jeans`
+- `<SHOE>`: `black sneaker`
+- `<EXTRA>`: `one hand with the index finger raised, one palm-up beckoning hand`
+- `<ITEMS>`:
+  `4 small white-yellow hit sparks in different shapes; 3 short white speed-streak arcs; 1 big white-yellow impact burst; 3 small gray smoke puffs`
+
+  O comando (↓ ↘ → + botão), o "X" vermelho e o contador "N HITS" não entram na folha: são
+  desenhados no código, porque a sequência vira com ele e o contador muda de número.
+
+- **Estampa (passo 1):** o texto do conceito pede `No text or logos on the clothes`; a estampa
+  entra mesmo assim, porque o `<CHARACTER>` diz que é um emblema sem letras. Se vier sem estampa,
+  com letras ou com cara de marca de verdade, anexe o conceito e mande
+  `Edit the attached image: put one big symmetrical abstract cyan (#22C1EE) emblem with a black outline in the middle of the T-shirt, no letters. Keep everything else the same.`
+- **Peças (passo 3):** o tronco tem que vir com a estampa inteira, no meio do peito. Se ela vier
+  cortada ou faltando, use a mesma correção acima com a folha de peças.
+
 ### Arte
 
 Fotos de cada amigo servem de referência para a concept art. O guia de estilo, a ficha de arte de
