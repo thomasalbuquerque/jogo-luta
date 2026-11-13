@@ -371,6 +371,10 @@ Trechos prontos para os textos do Firefly (pasta `art/crocko/`):
     pancada no chão, agachado). O oponente usa o hitstun e o arremesso que já existem: nenhuma
     animação nova para ele. A farinha e as migalhas são partículas, não o esqueleto. A única peça
     nova é o rolo de massa.
+- **O biscoito dele:** não é cookie. Biscoito redondo de massa amanteigada bem assada, cor
+  `#C89D6A` (lê melhor no tamanho pequeno e contra o creme da camiseta), com a borda ondulada e um
+  coraçãozinho de glacê rosa (`#E8789A`) no meio. Só isso: a borda ondulada e o glacê bastam para
+  ler como biscoito mesmo pequeno. As migalhas são pedacinhos da mesma massa, sem glacê.
 - **Provocação:** tira um biscoito do bolso do avental, dá uma mordida e grita "Darllan!" de
   braços abertos. Duas poses (mordendo e de braços abertos); o biscoito é a mesma peça das
   migalhas, inteira.
@@ -387,17 +391,17 @@ Trechos prontos para os textos do Firefly (pasta `art/crocko/`):
 
 ```text
 CHARACTER SHEET
-Name: Darllan — 35-year-old cookie baker, tall and big, warm and loud.
+Name: Darllan — 35-year-old biscuit baker, tall and big, warm and loud.
 Fighting style: heavy brawler — slow and strong, walks up close and hits hard around him.
 Body: based on the photos; tall (same height as the tallest fighters), big and slightly heavyset build, broad shoulders, thick arms, soft belly.
 Outfit: chocolate brown (#6B4226) baker's apron tied at the waist, from chest to knee, with a frosting pink (#E8789A) front pocket and neck strap; cream (#F2E3C6) short-sleeve T-shirt underneath; dark blue jeans; cream sneakers. A smear of flour on the apron and on one cheek.
 Signature details: the chocolate brown apron with the pink pocket, the flour smears, hair and beard as in the photos.
 Colors: primary #6B4226, secondary #F2E3C6, accent #E8789A.
 Face/personality: big friendly grin, loud and confident, a bit of a show-off.
-Special move: "Rolo na bancada" — he raises a wooden rolling pin with both hands above his head and slams it on the ground, like rolling dough on the counter; a cloud of flour and cookie crumbs bursts out and knocks back everyone around him.
-Taunt: takes a cookie out of the apron pocket, bites it, then opens his arms wide and shouts his own name.
-Extra parts for the parts sheet: two hands gripping (for the rolling pin); one hand holding a small round cookie.
-Props and effects for the effects sheet: 1 wooden rolling pin; 1 round chocolate chip cookie; 1 white flour cloud puff; 4 small cookie crumbs; 1 small shine sparkle.
+Special move: "Rolo na bancada" — he raises a wooden rolling pin with both hands above his head and slams it on the ground, like rolling dough on the counter; a cloud of flour and biscuit crumbs bursts out and knocks back everyone around him.
+Taunt: takes a biscuit out of the apron pocket, bites it, then opens his arms wide and shouts his own name.
+Extra parts for the parts sheet: two hands gripping (for the rolling pin); one hand holding a small round biscuit.
+Props and effects for the effects sheet: 1 wooden rolling pin; 1 round butter biscuit (#C89D6A golden-baked dough) with a wavy scalloped edge and a small pink (#E8789A) icing heart in the middle; 1 white flour cloud puff; 4 small plain biscuit crumbs (#C89D6A); 1 small shine sparkle.
 Avoid: text or logos on the clothes; chef hat; white apron.
 ```
 
@@ -405,12 +409,12 @@ Trechos prontos para os textos do Firefly (pasta `art/darllan/`):
 
 - `<EXPRESSION>`: `big friendly grin, loud and confident`
 - `<CHARACTER>`:
-  `Darllan, 35-year-old cookie baker, tall, big and slightly heavyset build, broad shoulders, thick arms, soft belly, tan brown skin. Chocolate brown (#6B4226) baker's apron from chest to knee with a frosting pink (#E8789A) front pocket and neck strap; cream (#F2E3C6) short-sleeve T-shirt underneath; dark blue jeans; cream sneakers; a smear of flour on the apron and on one cheek.`
+  `Darllan, 35-year-old biscuit baker, tall, big and slightly heavyset build, broad shoulders, thick arms, soft belly, tan brown skin. Chocolate brown (#6B4226) baker's apron from chest to knee with a frosting pink (#E8789A) front pocket and neck strap; cream (#F2E3C6) short-sleeve T-shirt underneath; dark blue jeans; cream sneakers; a smear of flour on the apron and on one cheek.`
 - `<LEGWEAR>`: `dark blue jeans`
 - `<SHOE>`: `cream sneaker`
-- `<EXTRA>`: `two gripping hands for a rolling pin, one hand holding a small round cookie`
+- `<EXTRA>`: `two gripping hands for a rolling pin, one hand holding a small round biscuit`
 - `<ITEMS>`:
-  `1 wooden rolling pin; 1 round chocolate chip cookie; 1 white flour cloud puff; 4 small cookie crumbs; 1 small shine sparkle`
+  `1 wooden rolling pin; 1 round butter biscuit (#C89D6A golden-baked dough) with a wavy scalloped edge and a small pink (#E8789A) icing heart in the middle; 1 white flour cloud puff; 4 small plain biscuit crumbs (#C89D6A); 1 small shine sparkle`
 
 ### Arte
 
