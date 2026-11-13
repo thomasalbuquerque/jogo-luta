@@ -202,7 +202,11 @@ export class FighterView {
    */
   setGlow(color: number, strength: number): this {
     if (strength <= 0) {
-      if (this.glow) this.glow.active = false;
+      // o pipeline do container ignora `active = false` do efeito: tira o Glow de vez
+      if (this.glow) {
+        this.container.postFX.remove(this.glow);
+        this.glow = null;
+      }
       return this;
     }
     if (!this.glow) {
@@ -212,7 +216,6 @@ export class FighterView {
       if (!glow) return this;
       this.glow = glow;
     }
-    this.glow.active = true;
     this.glow.color = color;
     this.glow.outerStrength = strength;
     return this;
