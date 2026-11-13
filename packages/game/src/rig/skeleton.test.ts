@@ -63,6 +63,14 @@ describe('esqueleto', () => {
     expect([...bent].sort()).toEqual([...BONE_IDS].sort());
   });
 
+  it('com forearmFront o antebraço fica na frente do braço mesmo esticado', () => {
+    const straight = drawOrder(REST_POSE, true);
+    for (const side of ['Near', 'Far'] as const) {
+      expect(straight.indexOf(`forearm${side}`)).toBe(straight.indexOf(`upperArm${side}`) + 1);
+      expect(straight.indexOf(`forearm${side}`)).toBeLessThan(straight.indexOf(`hand${side}`));
+    }
+  });
+
   it('em repouso as pernas descem retas a partir do quadril', () => {
     const placed = solvePose(testSkin(), REST_POSE);
     const thigh = placed.find((p) => p.bone === 'thighNear');
