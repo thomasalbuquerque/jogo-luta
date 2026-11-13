@@ -679,6 +679,10 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   da mão no `mouth` da cabeça com a brasa para a frente. O mesmo para as mãos nas bochechas da
   provocação (`cheekNear` e `cheekFar` na cabeça da provocação, com a ponta dos dedos lá e a palma
   abaixo do queixo, para não esconder o rosto). O palheiro solto (`fx_cig`) só cai quando a mão o solta.
+- **Braços e mãos mais delicados** (Marília): a folha veio com braços e mãos grandes demais para
+  ela. Um `stretch` (`[0.78, 0.9]` nos braços, `[0.78, 0.78]` nas mãos) afina sem mexer no
+  esqueleto: a junta segue a ponta da peça encolhida. Como o braço fica mais curto, as poses que
+  encostam a mão no rosto (tragada e bochechas) foram recalculadas.
 - **Aura no código** (Marília): a silhueta verde que veio na folha de efeitos não é recortada. O brilho
   é o Glow do Phaser no container do boneco (`FighterView.setGlow`), então acompanha cada pose.
 
