@@ -16,6 +16,7 @@ fim o guia de estilo (o porquê de cada regra) e o modelo de ficha.
 | Crocko                                          | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Darllan                                         | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Gabs                                            | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
+| Marília                                         | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | [Cenário: a laje](#cenário-a-laje)              | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feito |
 | **[Personagem novo](#personagem-novo-firefly)** | **As mesmas 5 imagens, uma de cada**                                  | 5       | a fazer  |
 
@@ -667,6 +668,19 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   o mesmo `4-efeitos.png` com escala 1, para o bonequinho não borrar ao reduzir. O `pivot` de cada
   quadro é o meio do corpo no chão: o jogo usa ele como origem, então soco e chute (mais largos) não
   escorregam em relação ao quadro em pé.
+- **Camiseta com a camisa solta e o cinto à mostra** (Marília): o tronco é desenhado por cima do
+  quadril, então o `pivot` do tronco fica quase na barra da camiseta e o do quadril na linha de cima
+  do cinto: a barra cobre só o topo do cinto, como no conceito. A bola da manga desenhada no ombro
+  da frente sai com `erase` e `outline` (tampa da manga), e a manga do braço cobre o ombro.
+- **Mão segurando um objeto pequeno pela ponta** (o palheiro da Marília, entre os dedos): a mão com
+  o palheiro é a `hand_taunt`, com sockets nas duas pontas dele: `lips` (a ponta que vai na boca) e
+  `ember` (a brasa, de onde sai a fumacinha). A cabeça marca a `mouth`. As poses de tragada são
+  achadas com o próprio `solvePose`: procura os ângulos de braço, antebraço e mão que põem o `lips`
+  da mão no `mouth` da cabeça com a brasa para a frente. O mesmo para as mãos nas bochechas da
+  provocação (`cheekNear` e `cheekFar` na cabeça da provocação, com a ponta dos dedos lá e a palma
+  abaixo do queixo, para não esconder o rosto). O palheiro solto (`fx_cig`) só cai quando a mão o solta.
+- **Aura no código** (Marília): a silhueta verde que veio na folha de efeitos não é recortada. O brilho
+  é o Glow do Phaser no container do boneco (`FighterView.setGlow`), então acompanha cada pose.
 
 ### 2. Esqueleto e animação: `packages/game/src/rig`
 
@@ -692,7 +706,11 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   subindo pelo corpo, o brilho quando pega, o estalo e as linhas de impacto; na pancada do Darllan o
   brilho no rolo erguido, a farinha para os dois lados, as migalhas e o tremor da câmera, e na
   provocação as migalhas que saem do socket `biscuit` da mão na mordida; no especial do Gabs o
-  bonequinho `summon` no ponto da área, com as linhas de varredura, o pisca, a faísca e os blips 8-bit).
+  bonequinho `summon` no ponto da área, com as linhas de varredura, o pisca, a faísca e os blips 8-bit;
+  na Tragadinha da Marília a brasa no socket `ember` da mão, a fumacinha, a baforada verde no 1º
+  frame ativo, o brilho Glow da aura colado no boneco (piscando nos últimos 30 ticks), os fiapos
+  verdes subindo, o palheiro caindo no peteleco e, quando um golpe passa pela aura, a estrelinha e o
+  "plim").
 - Contra-ataque que pegou alguém toca o clipe `<id do especial>_counter` (o tapa do Crocko) no
   lugar do recovery; sem esse clipe, continua o do especial.
 

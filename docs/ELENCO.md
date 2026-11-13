@@ -539,9 +539,8 @@ Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
     não rodar no navegador, o plano B é uma cópia do boneco pintada de verde, um pouco maior, atrás
     dela. Da folha de efeitos vêm só o palheiro, as fumacinhas cinzas, os fiapos verdes (sobem em
     volta dela) e a estrelinha do "plim"; a brasa é um pontinho laranja piscando, também no código.
-  - **Precisa de código novo:** o bloco buff de hoje só mexe em dano, velocidade e peso. Falta uma
-    opção de invencibilidade no mesmo bloco (`invulnerable: true`), reaproveitando a que a esquiva
-    e o respawn já usam, em vez de um bloco novo.
+  - **Código novo (feito):** o bloco buff ganhou a opção `invulnerable: true` (ver "Aura" no
+    `docs/GDD.md`), em vez de um bloco novo.
 - **Provocação:** põe as duas mãos no rosto, arregala os olhos, balança a cabeça e grita "Gentiii!".
 - **Visual:** roupa do dia a dia. Camiseta rosa-framboesa (`#E2557F`) lisa, de manga curta, um
   pouco folgada e para fora da calça; calça jeans clara (`#8DB0D8`) de cintura alta e perna reta,
@@ -550,6 +549,11 @@ Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
   duro e por cima do ombro e do braço nos golpes. Cores: rosa-framboesa, jeans claro e
   verde-menta. O menta do tênis puxa o verde da aura, e o rosa não repete o rosa-glacê do Darllan
   (é mais forte e frio).
+- **No jogo:** jogável. Ela tira o palheiro do bolso de trás, leva à boca e traga (a brasa acende),
+  solta a baforada verde no 1º frame ativo e fica zen, com o brilho verde colado no corpo e fiapos de
+  fumaça subindo; no recovery joga o palheiro fora com um peteleco. Golpe que passa pela aura faz a
+  estrelinha e o "plim". Na provocação, as mãos vão nas bochechas e ela balança a cabeça gritando.
+  Ficha em `packages/sim/src/characters/marilia.ts`.
 - **Ideias guardadas:** se o João Frango provocar com ela na luta ("Ô Mariiiliaaa!"), ela responde
   "Gentiii!"; respawn soltando uma baforada; "Gentiii!" ao levar KO.
 

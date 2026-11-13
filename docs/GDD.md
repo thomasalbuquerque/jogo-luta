@@ -147,7 +147,7 @@ Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 ## Seleção
 
 - **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; online; ver replay; controles) → personagem → mapa → luta → resultado → revanche.
-- **Personagem:** grade de 7 casas (os que existem e silhuetas "em breve"; cresce aos poucos). Cada jogador anda com as próprias direções, confirma com Ataque ou Pulo e desfaz com Especial; Especial com ninguém pronto (ou Esc) volta ao menu. O painel de cada um mostra o lutador, estilo, especial, barras e bordão. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
+- **Personagem:** grade de 7 casas (os que existem e silhuetas "em breve"; cresce aos poucos). Até 8, numa linha; com mais, duas linhas de 8 casas mais baixas, e os painéis dos jogadores ficam um pouco menores. Cada jogador anda com as próprias direções, confirma com Ataque ou Pulo e desfaz com Especial; Especial com ninguém pronto (ou Esc) volta ao menu. O painel de cada um mostra o lutador, estilo, especial, barras e bordão. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
 - **Mais jogadores no mesmo PC:** com 3 ou 4 controles conectados, aparece "Mais gente? Controle 3: aperte A para entrar" e cada um que entra ganha um painel (os painéis ficam lado a lado, mais estreitos). Ver [Controles](#controles).
 - **Mapa:** um cursor só, qualquer jogador mexe; por enquanto só a Laje. Com 3 ou 4 jogadores, ao lado do mapa ficam as opções de [times](#times).
 - **HUD:** painel de cada jogador com retrato, % de dano (branco → amarelo → laranja → vermelho → vinho conforme sobe) e stocks com a cabecinha do personagem; relógio no alto.
@@ -250,7 +250,10 @@ Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `b
 | Crocko      | Paciente  | 114  | 5,9            | 5,2          | 172  | 1            | **Correção postural** (contra-ataque): 6 / 20 / 28, 14% a 40°, devolve projétil, recarga de 90          |
 | Darllan     | Pesadão   | 124  | 5,4            | 5            | 162  | 1            | **Rolo na bancada** (área): 18 / 5 / 26, 15% a 50°, ~80 px de cada lado, recarga de 60                  |
 | Gabs        | Espaçador | 110  | 5,8            | 5,3          | 168  | 1            | **Controle na mão** (área): 14 / 6 / 22, 11% a 35°, de ~105 a ~195 px à frente, recarga de 60           |
+| Marília     | Destemida | 88   | 7              | 5,9          | 185  | 1            | **Tragadinha** (buff com aura): 40 / 1 / 12, sem dano, aura de 120 ticks, recarga de 480                |
 
 O Darllan, além de ser o mais pesado, bate um pouco mais forte nos golpes base: +1 de dano no soco parado e +2 no soco lateral, na rasteira e nos aéreos lateral e para baixo.
+
+A Marília bate um pouco mais fraco: −1 de dano no soco lateral, na rasteira, no aéreo parado e no aéreo lateral. O jogo dela é a aura.
 
 O elenco (apelidos, traços, especial e provocação de cada um) fica em [`docs/ELENCO.md`](ELENCO.md).

@@ -22,11 +22,12 @@ Enquanto um áudio não existe, o jogo toca uma versão gerada em código com a 
   quando ele aponta a chave de boca), `tchula_ko`, `crocko_bordao` (ainda sem bordão: sai quando ele
   aponta para o adversário depois do alongamento), `crocko_ko`, `darllan_bordao` (o "Darllan!"
   gritado de braços abertos, que sai depois da mordida no biscoito), `darllan_ko`, `gabs_bordao`
-  (ainda sem bordão: sai quando ele solta o controle e levanta os braços, com o balão "GG!") e
-  `gabs_ko`.
+  (ainda sem bordão: sai quando ele solta o controle e levanta os braços, com o balão "GG!"),
+  `gabs_ko`, `marilia_bordao` (o "Gentiii!", que sai quando as mãos chegam no rosto) e
+  `marilia_ko`.
 - **Vozes:** curtas (provocação até ~3 s, KO até ~1,5 s), sem silêncio no começo. Áudios gravados pelos
   próprios amigos no WhatsApp funcionam melhor que IA.
 - **Música:** tem que emendar no loop (o fim encaixa no começo). Use só música que o grupo pode usar.
 - **Efeitos (`sfx/`):** `hit_light`, `hit_medium`, `hit_heavy`, `swing`, `jump`, `air_jump`, `dash`, `dodge`,
   `land`, `grab`, `counter`, `ko`, `respawn`, `vanish` e `appear` (o "plim" do Tauba sumindo e voltando), `rifle_shot` e `rifle_bolt` (o tiro
-  e o ferrolho da scout do Tchula), `spine_crack` (o "créc" de coluna da correção do Crocko), `flour_thump` (o "póf" do rolo do Darllan batendo no chão), `pixel_spawn`, `pixel_hit` e `pixel_despawn` (os blips 8-bit do bonequinho do Gabs surgindo, batendo e sumindo) (lista em `packages/game/src/audio/sfxSynth.ts`).
+  e o ferrolho da scout do Tchula), `spine_crack` (o "créc" de coluna da correção do Crocko), `flour_thump` (o "póf" do rolo do Darllan batendo no chão), `pixel_spawn`, `pixel_hit` e `pixel_despawn` (os blips 8-bit do bonequinho do Gabs surgindo, batendo e sumindo), `drag_sizzle`, `exhale_puff` e `aura_pass` (a tragada, a baforada e o "plim" do golpe passando pela aura da Marília) (lista em `packages/game/src/audio/sfxSynth.ts`).
