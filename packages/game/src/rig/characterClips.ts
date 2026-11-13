@@ -272,19 +272,20 @@ const SPUN = 1440 - 90;
 
 /**
  * Crocko na pose de pilates: em pé numa perna só (a de perto, reta), o joelho da
- * outra levantado na frente, braços abertos (um para a frente, outro para trás),
- * postura impecável e a cabeça um pouco baixa, avaliando a postura do adversário.
+ * outra levantado na frente, braços abertos (o de trás para a frente, o da frente
+ * para trás), postura impecável e a cabeça um pouco baixa, avaliando a postura do
+ * adversário.
  */
 const PILATES: Rot = {
   hips: 0,
   torso: -3,
   head: 6,
-  upperArmNear: -100,
-  forearmNear: 4,
-  handNear: -4,
-  upperArmFar: 100,
-  forearmFar: -4,
-  handFar: 4,
+  upperArmNear: 100,
+  forearmNear: -4,
+  handNear: 4,
+  upperArmFar: -100,
+  forearmFar: 4,
+  handFar: -4,
   thighNear: 2,
   shinNear: 0,
   footNear: -6,
@@ -689,7 +690,7 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 0, rot: STANCE },
       {
         t: 0.4,
-        rot: { ...STANCE, upperArmNear: -60, upperArmFar: 40 },
+        rot: { ...STANCE, upperArmNear: 40, upperArmFar: -60 },
         handNear: 'open',
         handFar: 'open',
       },
@@ -702,8 +703,8 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
           ...PILATES,
           torso: -14,
           head: -6,
-          upperArmNear: -125,
-          upperArmFar: 145,
+          upperArmNear: 145,
+          upperArmFar: -125,
           thighFar: -40,
           shinFar: 50,
         },
@@ -716,9 +717,9 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
         rot: {
           ...STANDING,
           torso: 12,
-          upperArmNear: -60,
+          upperArmNear: 70,
           forearmNear: -20,
-          upperArmFar: 70,
+          upperArmFar: -60,
           forearmFar: -20,
         },
         x: -1,
@@ -738,7 +739,7 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 0, rot: STANCE },
       {
         t: 0.4,
-        rot: { ...STANCE, upperArmNear: -60, upperArmFar: 40 },
+        rot: { ...STANCE, upperArmNear: 40, upperArmFar: -60 },
         handNear: 'open',
         handFar: 'open',
       },
