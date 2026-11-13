@@ -15,7 +15,7 @@ veja `docs/GDD.md`.
 | 5   | Tchula      | Mecânico de macacão, olho verde, joga de scout no CS                          | "Nooola!"                    | **Scout** (projétil)                  | Gira a chave de boca na mão e grita o bordão | Cinza, amarelo, preto                    |           |
 | 6   | Crocko      | Alto, óculos preto, barba, professor de pilates e fisioterapeuta              | (a definir)                  | **Correção postural** (contra-ataque) | Alonga e aponta a postura                    | Turquesa, branco, preto                  |           |
 | 7   | Darllan     | Confeiteiro de biscoitos, alto, moreno e grandão                              | "Darllan!"                   | **Rolo na bancada** (área)            | Morde um biscoito e grita o bordão           | Marrom-chocolate, creme, rosa-glacê      |           |
-| 8   | Gabs        | Servidor público da prefeitura, gamer, cabeça um pouco maior                  | (a definir)                  | **Controle na mão** (área)            | Aperta o controle e comemora: "GG!"          | Azul-royal, roxo, cinza-claro            |           |
+| 8   | Gabs        | Servidor público da prefeitura (crachá no pescoço), gamer                     | (a definir)                  | **Controle na mão** (área)            | Aperta o controle e comemora: "GG!"          | Azul-royal, roxo, cinza-claro            |           |
 | 9   |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 10  |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 11  |             |                                                                               |                              |                                       |                                              |                                          |           |
@@ -426,8 +426,8 @@ Trechos prontos para os textos do Firefly (pasta `art/darllan/`):
 ### 8. Gabs
 
 - **Quem é:** 30 anos, servidor público que trabalha na prefeitura, gamer. Altura média (1,72 m),
-  corpo levemente gordo (nem magro, nem gordo). A cabeça é um pouco maior que a dos outros
-  personagens.
+  corpo levemente gordo (nem magro, nem gordo). Cabeça do mesmo tamanho da dos outros (o estilo já
+  é cabeçudo); quem marca ele é o crachá da prefeitura e o fone gamer no pescoço.
 - **Bordão:** a definir. Enquanto não tiver, o balão da provocação diz "GG!".
 - **Estilo de luta:** espaçador. Peso médio-alto, meio lento no chão, pulo médio. O jogo dele é
   ficar na distância certa e deixar o bonequinho bater; colado nele, o especial não pega. Contraste
@@ -452,15 +452,16 @@ Trechos prontos para os textos do Firefly (pasta `art/darllan/`):
     "spawn" 8-bit (linhas de varredura e um pisca), diferente dos quadradinhos do Tauba; blips 8-bit
     no spawn e no golpe (sons gerados em código).
   - **Sem código novo no `sim`:** cabe no bloco área como está, com a hitbox deslocada à frente.
-- **O bonequinho:** uma versão 8-bit do próprio Gabs, cabeçudo e de camisa polo azul. Poucos quadros
+- **O bonequinho:** uma versão 8-bit do próprio Gabs, de camisa polo azul e crachá. Poucos quadros
   em pixel art (surgir, golpe, sumir), fora do esqueleto. Nada de personagem de jogo de verdade.
 - **O controle:** genérico, sem forma, cor ou logo de nenhum console.
 - **Provocação (provisória):** pega o controle, aperta os botões rapidinho e levanta os braços
   comemorando; o balão diz "GG!" até ele ter bordão.
 - **Visual:** camisa polo azul-royal (`#2F5DA8`) de manga curta, calça jeans escura e sapatênis
-  cinza-claro (`#B8BCC4`). Um fone gamer grande com detalhe roxo (`#9B5DE5`) apoiado no pescoço
-  reforça a cabeça maior e o lado gamer. Corpo médio com barriga leve. Cores: azul-royal, roxo e
-  cinza-claro (o azul e o roxo não repetem a cor de ninguém).
+  cinza-claro (`#B8BCC4`). Crachá da prefeitura pendurado no pescoço: cordão escuro e cartão branco
+  com foto, sem texto nem brasão. Um fone gamer grande com detalhe roxo (`#9B5DE5`) apoiado no
+  pescoço marca o lado gamer. Polo, crachá e fone fazem a silhueta dele. Corpo médio com barriga
+  leve. Cores: azul-royal, roxo e cinza-claro (o azul e o roxo não repetem a cor de ninguém).
 - **No jogo:** só a ficha por enquanto (`packages/sim/src/characters/gabs.ts`): ele fica registrado
   no `sim`, mas fora da tela de seleção até ter arte, animações e retrato.
 - **Ideias guardadas:** respawn com uma tela de "carregando..."; KO com um "GAME OVER" em pixel;
