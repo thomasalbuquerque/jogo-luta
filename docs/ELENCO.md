@@ -467,6 +467,40 @@ Trechos prontos para os textos do Firefly (pasta `art/darllan/`):
 - **Ideias guardadas:** respawn com uma tela de "carregando..."; KO com um "GAME OVER" em pixel;
   bordão ligado a jogo ou à prefeitura.
 
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Gabs — 30-year-old city hall clerk and gamer, laid-back, lives for video games.
+Fighting style: spacer — keeps a set distance and lets a tiny 8-bit fighter hit for him; medium-heavy, a bit slow on the ground.
+Body: based on the photos; average height, slightly chubby build (neither slim nor fat), light belly.
+Outfit: royal blue (#2F5DA8) short-sleeve polo shirt, untucked; city hall ID badge hanging on a thick dark lanyard (white card with a photo, no text or crest); big gamer headset with purple (#9B5DE5) details resting around his neck; dark blue jeans; light gray (#B8BCC4) casual sneakers.
+Signature details: the polo, the ID badge on the lanyard, the gamer headset around the neck.
+Colors: primary #2F5DA8, secondary #9B5DE5, accent #B8BCC4.
+Face/personality: focused gamer look, relaxed half smile; hair and facial hair as in the photos.
+Special move: "Controle na mão" — a generic game controller appears in his hands; in front of him, a tiny 8-bit pixel-art version of himself pops up and punches or kicks while he presses the buttons.
+Taunt: mashes the controller buttons fast, then raises both arms celebrating.
+Extra parts for the parts sheet: two hands holding a generic game controller, thumbs on the buttons.
+Props and effects for the effects sheet: 1 generic game controller (no console shape or logo); 1 tiny 8-bit pixel-art Gabs (blue polo, white badge) facing right in 3 poses: standing, punching, kicking; 3 small smoke puffs; 4 horizontal scan-line strips; 1 small pixel hit spark.
+Avoid: text, letters or crest on the badge; logos; any real console or real game character; headset over the ears.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
+
+- `<EXPRESSION>`: `focused gamer squint, tongue in the corner of the mouth`
+- `<CHARACTER>`:
+  `Gabs, 30-year-old city hall clerk and gamer, average height, slightly chubby with a light belly. Royal blue (#2F5DA8) short-sleeve polo, untucked; ID badge on a thick dark lanyard (white card with photo, no text); big gamer headset with purple (#9B5DE5) details resting on his neck; dark blue jeans; light gray (#B8BCC4) casual sneakers.`
+- `<LEGWEAR>`: `dark blue jeans`
+- `<SHOE>`: `light gray casual sneaker`
+- `<EXTRA>`: `two hands holding a generic game controller, thumbs on the buttons`
+- `<ITEMS>`:
+  `1 generic dark gray game controller with purple (#9B5DE5) buttons, no logo; 1 tiny chunky pixel-art 8-bit version of him (blue polo, white badge) facing right, side view, in 3 poses: standing, punching, kicking; 3 small smoke puffs; 4 thin horizontal scan-line strips; 1 small pixel hit spark`
+- **Cabeças (passo 2):** acrescente `No headset or badge on the heads.` antes de `Bold`. O fone e o
+  crachá ficam no tronco; se vierem na cabeça, sobem e descem junto com ela e aparecem em dobro.
+- **Peças (passo 3):** o tronco tem que vir com o crachá e o fone no pescoço. Se faltarem, use a
+  linha "Faltou uma peça" da [tabela de correções](ARTE.md#se-der-errado-no-firefly) pedindo
+  `the ID badge on the lanyard and the headset around the neck, on the torso`.
+
 ### Arte
 
 Fotos de cada amigo servem de referência para a concept art. O guia de estilo, a ficha de arte de
