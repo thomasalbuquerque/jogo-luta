@@ -610,6 +610,10 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
     aparecer linha quando o joelho dobra. Se ficar um degrau no joelho, engrosse com `stretch`
     até a canela ficar só um pouco mais fina que a coxa (na folha deitada, a grossura é a altura
     da imagem). Sem exagerar: esticar demais deforma as dobras do desenho.
+- **Axila preenchida** (Darllan, braço que sobe bastante na provocação e no pulo): em vez de só apagar
+  a cava, o corte do ombro da frente vira a lateral do corpo. O `erase` vai até uma linha que desce
+  do ombro até o avental, o que sobra da bola da manga entre essa linha e a cava é pintado da cor da
+  camiseta (`paint`) e a linha leva `outline`. Com o braço erguido aparece a camiseta, não o fundo.
 - **Tampa da manga no tronco** (bola da manga desenhada no ombro da frente): apagada como a cava,
   com `outline` no corte.
 - **Mãos especiais segurando um objeto** (o trompete do Tauba): a mão com o objeto vira a mão da
