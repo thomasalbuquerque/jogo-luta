@@ -294,9 +294,9 @@ Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
   - **Perde do agarrão:** como todo contra-ataque, o agarrão passa por ele.
   - **Efeitos:** na pose, um brilho leve em volta dele (aviso de que está esperando); quando pega,
     um "ding" e um congelamento curto; no golpe, um "créc" de coluna estalando e linhas de impacto.
-  - **Sem código novo no `sim`:** cabe no bloco contra-ataque como está. O oponente só toma o golpe
-    e entra no hitstun normal: nenhuma animação nova para ele. O Crocko precisa de 2 poses (a pose
-    de pilates e o tapa da correção); o recovery reusa a pose, balançando.
+  - **Quase nada novo no `sim`:** cabe no bloco contra-ataque. O oponente só toma o golpe e entra
+    no hitstun normal: nenhuma animação nova para ele. O `sim` só passou a marcar quem o
+    contra-ataque pegou (no `moveHits`), para o jogo tocar o tapa em vez do recovery de quem errou.
 - **Provocação:** faz um alongamento lateral (braços para cima, inclina para o lado) e aponta para
   o adversário com cara de "olha essa postura".
 - **Visual:** professor de estúdio de pilates, com roupa de treino. Camiseta turquesa (`#1BA39C`) lisa
@@ -305,6 +305,14 @@ Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
   liso penteado para trás, barba cheia e curta. Corpo alto, magro e atlético, postura impecável
   (costas retas, peito aberto). Cores: turquesa, branco e preto (o turquesa lê bem nos menus escuros
   e não repete a cor de ninguém).
+- **No jogo:** jogável. No especial ele abre os braços e levanta o joelho (pose de pilates), e anéis
+  turquesa sobem dos pés à cabeça enquanto a janela está aberta, como quem avalia a postura. Se
+  alguém bater, um brilho aparece acima da cabeça, sai o tapa de mão aberta com um passo à frente,
+  um estalo, linhas de impacto e o "créc" de coluna (`spine_crack`, sintetizado), além do "tim" do
+  contra-ataque. Projétil que encosta na janela volta (com o brilho, sem o tapa). Se ninguém bater,
+  ele perde o equilíbrio, balança com cara de dor e volta para a guarda. Na provocação ele estica um
+  braço para cima com a outra mão na cintura, inclina para trás e aponta para o adversário; o balão
+  diz "Olha essa postura..." até ele ter bordão. Ficha em `packages/sim/src/characters/crocko.ts`.
 - **Ideias guardadas:** "Contrai o abdômen!" ou "Respira!" como fala do contra-ataque, se ele não
   tiver bordão próprio; respawn fazendo uma respiração profunda de pilates; uma bola suíça como
   objeto no fundo de um mapa.

@@ -182,6 +182,9 @@ Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da 
         chave de boca girando, efeitos e sons do tiro, retrato). Falta o OK do concept pelo amigo, a
         voz gravada e as 5 lutas de teste.
 - [ ] Lote 2 (3–4 personagens)
+  - [x] Crocko: jogável (ficha, arte no esqueleto, especial Correção postural com contra-ataque e o
+        tapa quando pega, provocação com alongamento, efeitos e o "créc", retrato). Falta o bordão,
+        o OK do concept pelo amigo, a voz gravada e as 5 lutas de teste.
 - [ ] Lote 3 (3–4 personagens)
 - [ ] Lote 4 (restantes)
 - [ ] 1 ou 2 mapas novos com tema de piadas internas do grupo.

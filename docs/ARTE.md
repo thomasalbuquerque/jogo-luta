@@ -13,6 +13,7 @@ fim o guia de estilo (o porquê de cada regra) e o modelo de ficha.
 | Dadazinho                                       | As 5 imagens, já pelo caminho "Personagem novo"                       | 5       | ✅ feito |
 | Tauba                                           | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Tchula                                          | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
+| Crocko                                          | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | [Cenário: a laje](#cenário-a-laje)              | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feito |
 | **[Personagem novo](#personagem-novo-firefly)** | **As mesmas 5 imagens, uma de cada**                                  | 5       | a fazer  |
 
@@ -616,6 +617,11 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   cabo, e entra pela chave `prop`. Objeto que gira na mão (a chave do Tchula) também vai como `prop`,
   não como mão especial: as mãos com a chave da folha de peças dele ficaram sem uso.
 - **Óculos com lente rosa** (vidro transparente na folha): `fill` com uma cor clara de vidro.
+- **Short com a coxa de fora** (Crocko: coxa só de pele na folha): o quadril sai com `erase` reto
+  logo abaixo da virilha, sem `outline`, e os `legNear`/`legFar` ficam uns 10 px acima do corte.
+  Na coxa, a ponta do quadril até a barra do short é pintada da cor do short (`paint`) e leva
+  `outline` nas bordas e na barra. Assim a perna do short gira junto com a coxa (chute, corrida)
+  em vez de ficar parada no quadril como uma saia.
 
 ### 2. Esqueleto e animação: `packages/game/src/rig`
 
@@ -637,7 +643,10 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
 - `render/fx.ts`: quais peças `fx_*` cada especial usa (fumaça, linhas de velocidade, projétil,
   clarão na boca da arma, a fumacinha quando a peça da mão aparece ou some, os quadradinhos do
   teleporte sorteado, as notas que saem do socket `bell` na provocação, a linha de mira e o brilho
-  da luneta, a cápsula saltando do ferrolho e o som do tiro).
+  da luneta, a cápsula saltando do ferrolho e o som do tiro, e no contra-ataque do Crocko os anéis
+  subindo pelo corpo, o brilho quando pega, o estalo e as linhas de impacto).
+- Contra-ataque que pegou alguém toca o clipe `<id do especial>_counter` (o tapa do Crocko) no
+  lugar do recovery; sem esse clipe, continua o do especial.
 
 Para ver as animações, abra o jogo com `?rig` no fim do endereço (só no `pnpm dev`):
 `http://localhost:5173/?rig`. ←/→ troca o clipe, F mostra 4 quadros lado a lado com a hitbox

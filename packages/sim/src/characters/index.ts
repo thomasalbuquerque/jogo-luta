@@ -1,5 +1,6 @@
 import type { Character } from '../character';
 import { BASE } from './base';
+import { CROCKO } from './crocko';
 import { DADAZINHO } from './dadazinho';
 import { JOAO_FRANGO } from './joao-frango';
 import { SCHUMMAKI } from './schummaki';
@@ -13,7 +14,8 @@ export function registerCharacter(c: Character): void {
   REGISTRY.set(c.id, c);
 }
 
-for (const c of [BASE, SCHUMMAKI, JOAO_FRANGO, DADAZINHO, TAUBA, TCHULA]) registerCharacter(c);
+for (const c of [BASE, SCHUMMAKI, JOAO_FRANGO, DADAZINHO, TAUBA, TCHULA, CROCKO])
+  registerCharacter(c);
 
 /** Personagem usado quando nenhum é escolhido (e nos testes). */
 export const BASE_CHARACTER_ID = BASE.id;
@@ -25,6 +27,7 @@ export const PLAYABLE_CHARACTERS: readonly string[] = [
   DADAZINHO.id,
   TAUBA.id,
   TCHULA.id,
+  CROCKO.id,
 ];
 
 export function hasCharacter(id: string): boolean {
