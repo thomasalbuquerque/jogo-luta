@@ -170,6 +170,21 @@ export function fadeAlong(img: Image, from: Point, to: Point): void {
   }
 }
 
+/** Espelha a imagem na horizontal (esquerda ↔ direita). */
+export function flipX(img: Image): void {
+  for (let y = 0; y < img.h; y++) {
+    for (let x = 0; x < img.w >> 1; x++) {
+      const a = (y * img.w + x) * 4;
+      const b = (y * img.w + img.w - 1 - x) * 4;
+      for (let c = 0; c < 4; c++) {
+        const t = img.data[a + c] ?? 0;
+        img.data[a + c] = img.data[b + c] ?? 0;
+        img.data[b + c] = t;
+      }
+    }
+  }
+}
+
 function distToSegment(px: number, py: number, a: Point, b: Point): number {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];

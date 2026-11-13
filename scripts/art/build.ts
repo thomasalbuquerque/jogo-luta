@@ -19,6 +19,7 @@ import {
   crop,
   fadeAlong,
   fillBehind,
+  flipX,
   opaqueBounds,
   packShelves,
   paintPolygon,
@@ -70,6 +71,11 @@ interface PartDef {
    * a junta fica sem linha.
    */
   fade?: { from: Point; to: Point };
+  /**
+   * Espelha a peça na horizontal depois dos outros ajustes (a mão que veio virada
+   * para o lado errado). Os pontos continuam em px da folha original.
+   */
+  flip?: boolean;
   /** Traço de contorno ao longo de um corte. */
   outline?: Polygon[];
   /**
@@ -157,6 +163,7 @@ async function processPart(
     const [from, to] = local([def.fade.from, def.fade.to]);
     if (from && to) fadeAlong(img, from, to);
   }
+  if (def.flip) flipX(img);
 
   removeSpecks(img, SPECK_AREA);
   const bounds = opaqueBounds(img);
@@ -169,8 +176,9 @@ async function processPart(
   const out = await resize(trimmed, w, h);
   const sx = w / trimmed.w;
   const sy = h / trimmed.h;
+  const localX = (x: number) => (def.flip ? img.w - (x - rx) : x - rx);
   const map = ([x, y]: Point): Point => [
-    round2((x - rx - bx + PAD) * sx),
+    round2((localX(x) - bx + PAD) * sx),
     round2((y - ry - by + PAD) * sy),
   ];
 
