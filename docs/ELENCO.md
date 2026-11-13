@@ -17,7 +17,7 @@ veja `docs/GDD.md`.
 | 7   | Darllan     | Confeiteiro de biscoitos, alto, moreno e grandão                              | "Darllan!"                   | **Rolo na bancada** (área)            | Morde um biscoito e grita o bordão           | Marrom-chocolate, creme, rosa-glacê      |           |
 | 8   | Gabs        | Servidor público da prefeitura (crachá no pescoço), gamer                     | (a definir)                  | **Controle na mão** (área)            | Aperta o controle e comemora: "GG!"          | Azul-royal, roxo, cinza-claro            |           |
 | 9   | Marília     | Baixinha (1,64 m), cabelo castanho, puxa um palheiro do nada                  | "Gentiii!"                   | **Tragadinha** (buff)                 | Mãos no rosto, gritando o bordão             | Rosa-framboesa, jeans claro, verde-menta |           |
-| 10  |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 10  | Meia        | Óculos grandes pretos e quadrados, magro, pro player de jogo de luta          | (a definir)                  | **Comando** (agarrão)                 | Ajeita os óculos e chama com a mão           | Branco, ciano-elétrico, jeans            |           |
 | 11  |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 12  |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 13  |             |                                                                               |                              |                                       |                                              |                                          |           |
@@ -598,6 +598,70 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
 - **Peças (passo 3):** se o tronco vier com a camiseta justa ou com decote, anexe a folha de peças
   e mande
   `Edit the attached image: make the torso a slightly loose plain T-shirt with a round crew neck, modest. Keep everything else the same.`
+
+### 10. Meia
+
+- **Quem é:** 30 anos, estatura média (1,72 m, a mesma altura do Gabs), magro. Óculos grandes de
+  armação preta e quadrada. Cabelo, pele e barba: seguir as fotos. Joga jogo de luta
+  profissionalmente (o anime fighter de duplas BlazBlue Cross Tag Battle): o especial é a piada com
+  isso, um "comando" de jogo de luta difícil que o jogador faz com um botão só.
+- **Bordão:** a definir. Enquanto não tiver, o balão da provocação diz "Vem!".
+- **Estilo de luta:** técnico. Leve e rápido no chão e no ar, golpes base rápidos (startup um
+  pouco menor) e um pouco mais fracos que a média. O jogo dele é chegar colado e pegar: o especial
+  tem alcance curto, então ele precisa entrar na cara do adversário. Contraste com o Dadazinho: a
+  doze pune quem chega perto; o Meia é quem tem que chegar perto.
+- **Especial — Comando (agarrão):** acima da cabeça dele aparece a sequência ↓ ↘ → + botão, como a
+  notação de um golpe de jogo de luta, sem logo de nenhum jogo. Se pegar, ele **não** faz pose de
+  agarrar: o adversário fica preso na frente dele enquanto ele solta um combo rápido de socos e
+  chutes, um contador de "HITS" sobe a cada golpe, e o último chute arremessa. O jogador só aperta o
+  botão do especial, como todo mundo.
+  - **O comando:** desenhado no código (setas e um botão redondo genérico, sem letra nem cor de
+    controle de nenhum console). No startup as setas acendem uma a uma, rapidinho, como se ele
+    estivesse digitando o comando; o botão acende no 1º frame ativo. A sequência vira junto com ele:
+    virado para a esquerda, mostra ↓ ↙ ← + botão, como nos jogos de luta.
+  - **Tempo:** startup curto (~6 ticks, 2 por seta), active curto (~4 ticks, a janela do agarrão).
+    Recovery longo se errar (~32 ticks): é o "fica exposto".
+  - **Alcance:** curto, uns 36 px à frente do corpo, da cintura ao ombro. Precisa estar colado.
+  - **Se pegar:** o adversário fica preso ~60 ticks (1 s). A cada ~6 ticks sai um golpe do combo (9
+    golpes) que dá 1% de dano sem knockback; o contador mostra "2 HITS", "3 HITS"... e o último
+    chute é o arremesso (dano ~7, knockback médio-alto, ângulo ~40°, para o lado em que ele está
+    virado). Fecha em "10 HITS" e ~16% no total. Como em todo agarrão, ←/→ durante o combo escolhe
+    para que lado arremessa.
+  - **Se errar:** o comando fica vermelho, com um "X" grande por cima, e treme; ele fica parado no
+    recovery longo, de guarda aberta.
+  - **Riscos:** se alguém (o companheiro do agarrado, no 2v2) bater nele no meio do combo, ele solta
+    o adversário e o contador some. A aura da Marília não deixa ele pegar (o comando fica vermelho,
+    como num erro). Ganha do contra-ataque do Crocko, como todo agarrão.
+  - **Recarga:** ~90 ticks (1,5 s), contada do começo.
+  - **No ar:** funciona, sem impulso. Se pegar no ar, os dois ficam parados no ar até o arremesso.
+  - **Efeitos:** setas acendendo no startup; a cada golpe do combo, uma faísca de impacto, linhas de
+    velocidade e um "pá" curto, com um tremor leve (sem congelar, para o combo correr); o contador
+    "N HITS" em amarelo, inclinado, crescendo um pouco a cada golpe, ao lado dele; no arremesso, uma
+    explosão de impacto maior e um "póu" forte. No erro, um "buzz" grave, de comando errado.
+  - **A animação:** 1 clipe de combo com umas 6 poses de soco e chute que se repetem (jab, direto,
+    chute baixo, gancho, chute alto, chute giratório) e 1 pose final de chute forte (o arremesso),
+    todas com os punhos fechados, nunca agarrando. O combo anda pelos golpes do agarrão, não pelo
+    frame do golpe (que fica parado enquanto segura). O adversário usa a pose de agarrado que já
+    existe, com um tranco a cada golpe: nenhuma animação nova para ele.
+  - **Precisa de código novo (pequeno):** o bloco agarrão de hoje só dá dano no arremesso. Falta
+    uma opção de golpes durante o agarrão no mesmo bloco (ex.: `combo: { hits: 9, damage: 1 }`),
+    que espalha os golpes pelo `holdTicks` e solta um evento de acerto a cada um (para a faísca, o
+    som e o contador), em vez de um bloco novo. O contador e o comando são só do `game`: o `sim` já
+    diz se o agarrão pegou (`moveHits` e `grabTicks` de quem segura).
+- **Provocação (provisória):** empurra os óculos para cima com o indicador, olha para o adversário
+  e chama com a mão, palma para cima (o "vem" clássico de jogo de luta). O balão diz "Vem!" até ele
+  ter bordão.
+- **Visual:** roupa comum do dia a dia. Camiseta branca (`#F4F4F0`) de manga curta, gola redonda,
+  para fora da calça, com uma estampa grande no meio do peito: um emblema abstrato, simétrico, em
+  ciano-elétrico (`#22C1EE`) com contorno preto, que lembra marca de roupa ou estampa de camiseta,
+  sem letras e sem ser marca de verdade (simétrico para não sair errado quando o jogo espelha o
+  personagem). Calça jeans média (`#3E5F8A`) de perna reta; tênis preto (`#1C1C1F`). Óculos
+  grandes de armação preta e quadrada. Corpo magro, de estatura média. Cores: branco,
+  ciano-elétrico e jeans (o ciano é mais azul e mais vivo que o turquesa do Crocko, e o branco da
+  camiseta lê bem nos menus escuros).
+- **Ideias guardadas:** respawn estalando os dedos e o pescoço, como antes de uma partida; "GG"
+  ao levar KO; um "PERFECT" no fim do combo se ele não tomou dano na luta; um fliperama de luta no
+  fundo de um mapa.
 
 ### Arte
 
