@@ -3,7 +3,7 @@
  * escreve: nenhuma regra do jogo lê os eventos. `stepGame` limpa a lista no
  * começo de cada tick.
  */
-export type GameEvent = HitEvent | GrabEvent | KoEvent | RespawnEvent | ActionEvent;
+export type GameEvent = HitEvent | AuraEvent | GrabEvent | KoEvent | RespawnEvent | ActionEvent;
 
 /**
  * Alguém levou um golpe. `hit`: golpe normal; `counter`: devolvido pelo
@@ -20,6 +20,18 @@ export interface HitEvent {
   /** Velocidade do arremesso, em subpx/tick. */
   knockback: number;
   /** Ponto do impacto, em subpx. */
+  x: number;
+  y: number;
+}
+
+/**
+ * Um golpe, projétil ou agarrão passou pela aura do buff (`invulnerable`) sem
+ * efeito. Sai 1 vez por golpe ou projétil. `x`/`y`: ponto do contato, em subpx.
+ */
+export interface AuraEvent {
+  type: 'aura';
+  attacker: number;
+  victim: number;
   x: number;
   y: number;
 }

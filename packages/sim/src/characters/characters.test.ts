@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { resolveHits } from '../combat';
-import { createFighter, stepFighter, type Fighter } from '../fighter';
+import { createFighter, hasAura, stepFighter, type Fighter } from '../fighter';
 import { createGame, stepGame } from '../game';
 import type { Solid } from '../physics';
 import { cloneState } from '../snapshot';
@@ -14,7 +14,7 @@ if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA || !CROCKO || !DARLLAN)
   throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan e Gabs, cada um com especial e provocação', () => {
+  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs e Marília, cada um com especial e provocação', () => {
     expect(PLAYABLE_CHARACTERS).toEqual([
       'schummaki',
       'joao-frango',
@@ -24,8 +24,19 @@ describe('elenco', () => {
       'crocko',
       'darllan',
       'gabs',
+      'marilia',
     ]);
-    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA, CROCKO, DARLLAN, getCharacter('gabs')]) {
+    for (const c of [
+      SCHUMMAKI,
+      JOAO,
+      DADA,
+      TAUBA,
+      TCHULA,
+      CROCKO,
+      DARLLAN,
+      getCharacter('gabs'),
+      getCharacter('marilia'),
+    ]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
       expect(c.blurb.length).toBeGreaterThan(0);
@@ -205,6 +216,68 @@ describe('elenco', () => {
       expect(GABS.stats.height).toBeLessThan(CROCKO.stats.height);
       expect(GABS.stats.height).toBeGreaterThan(DADA.stats.height);
       expect(GABS.special?.move.knockbackDir).toBe('away');
+    });
+  });
+
+  describe('Marília', () => {
+    const MARILIA = getCharacter('marilia');
+    const floor: Solid[] = [{ kind: 'solid', x: px(-2000), y: 0, w: px(4000), h: px(500) }];
+    const run = (fs: Fighter[], inputs: number[], ticks = 1) => {
+      for (let t = 0; t < ticks; t++) {
+        for (const f of fs) stepFighter(f, inputs[f.id] ?? 0, floor);
+        resolveHits(fs);
+      }
+    };
+    /** Marília no chão e um adversário colado olhando para ela. */
+    const setup = () => {
+      const marilia = createFighter(0, { x: 0, y: 0 }, 'marilia');
+      const foe = createFighter(1, { x: 0, y: 0 }, 'base');
+      run([marilia, foe], [0, 0], 2);
+      marilia.facing = 1;
+      foe.facing = -1;
+      foe.x = marilia.x + marilia.w / 2 + px(50) - foe.w / 2;
+      return { marilia, foe };
+    };
+
+    it('jogável, com especial e provocação', () => {
+      expect(PLAYABLE_CHARACTERS).toContain('marilia');
+      expect(MARILIA.special?.name).toBe('Tragadinha');
+      expect(MARILIA.taunt.text).toBe('Gentiii!');
+      expect(MARILIA.blurb.length).toBeGreaterThan(0);
+    });
+
+    it('com a aura, o golpe passa; quando ela acaba, volta a tomar', () => {
+      const { marilia, foe } = setup();
+      run([marilia, foe], [Button.SPECIAL, 0]);
+      run([marilia, foe], [0, 0], 40);
+      expect(hasAura(marilia)).toBe(true);
+      run([marilia, foe], [0, Button.ATTACK]);
+      run([marilia, foe], [0, 0], 30);
+      expect(marilia.damage).toBe(0);
+      run([marilia, foe], [0, 0], 90);
+      expect(hasAura(marilia)).toBe(false);
+      run([marilia, foe], [0, Button.ATTACK]);
+      run([marilia, foe], [0, 0], 20);
+      expect(marilia.damage).toBeGreaterThan(0);
+    });
+
+    it('vulnerável no startup: apanhando, a aura não liga', () => {
+      const { marilia, foe } = setup();
+      run([marilia, foe], [Button.SPECIAL, 0], 1);
+      run([marilia, foe], [0, Button.ATTACK]);
+      run([marilia, foe], [0, 0], 60);
+      expect(marilia.damage).toBeGreaterThan(0);
+      expect(hasAura(marilia)).toBe(false);
+    });
+
+    it('baixinha, leve, rápida no chão e golpes um pouco mais fracos', () => {
+      const base = getCharacter('base');
+      expect(MARILIA.stats.height).toBe(TAUBA.stats.height);
+      expect(MARILIA.stats.weight).toBeLessThan(base.stats.weight);
+      expect(MARILIA.stats.walkSpeed).toBeGreaterThan(base.stats.walkSpeed);
+      expect(MARILIA.stats.jumpHeight).toBeGreaterThan(base.stats.jumpHeight);
+      expect(MARILIA.moves.sideAir.damage).toBeLessThan(base.moves.sideAir.damage);
+      expect(MARILIA.special?.cooldownTicks).toBe(480);
     });
   });
 

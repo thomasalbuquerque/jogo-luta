@@ -145,6 +145,11 @@ const BuffBlock = z.strictObject({
   damagePercent: int(50, 300).default(100),
   speedPercent: int(50, 300).default(100),
   weightPercent: int(50, 300).default(100),
+  /**
+   * Aura: enquanto o buff dura, golpes, projéteis e agarrões passam pelo lutador
+   * (sem dano, sem knockback). Não salva da blast zone.
+   */
+  invulnerable: z.boolean().default(false),
 });
 
 const TeleportBlock = z.strictObject({
@@ -473,6 +478,7 @@ function compileSpecial(s: ParsedSpecial): Special {
           damagePercent: b.damagePercent,
           speedPercent: b.speedPercent,
           weightPercent: b.weightPercent,
+          invulnerable: b.invulnerable,
         };
         break;
       case 'teleport':

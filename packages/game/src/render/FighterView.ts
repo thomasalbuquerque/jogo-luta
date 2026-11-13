@@ -70,6 +70,10 @@ export class FighterView {
   private placedProp: { placed: PlacedBone; lift: number } | null = null;
   /** Mão da frente na última pose (para saber onde a peça aparece e some). */
   private placedHand: { placed: PlacedBone; lift: number } | null = null;
+  /** Cabeça na última pose (a boca, de onde sai a fumaça). */
+  private placedHead: { placed: PlacedBone; lift: number } | null = null;
+  /** Brilho em volta do boneco inteiro (a aura da Marília), criado no 1º uso. */
+  private glow: Phaser.FX.Glow | null = null;
   private readonly skin: Skin;
   private readonly fit: RigFit;
   private readonly textureKey: string;
@@ -115,6 +119,8 @@ export class FighterView {
     }
     const hand = placed.find((p) => p.bone === 'handNear');
     this.placedHand = hand ? { placed: hand, lift } : null;
+    const head = placed.find((p) => p.bone === 'head');
+    this.placedHead = head ? { placed: head, lift } : null;
     const prop = solveProp(this.skin, placed, pose);
     this.placedProp = prop ? { placed: prop, lift } : null;
     this.propImage.setVisible(prop !== null);
@@ -169,6 +175,47 @@ export class FighterView {
     const [px, py] = placedPoint(anchors, p.placed, 'pivot');
     const [tx, ty] = placedPoint(anchors, p.placed, 'tip');
     return this.toWorld([(px + tx) / 2, (py + ty) / 2], p.lift);
+  }
+
+  /**
+   * Um encaixe da mão da frente em px de mundo, só se a peça da mão tiver esse encaixe
+   * (a brasa do palheiro só existe na mão com o palheiro). Sem ele: null.
+   */
+  handSocket(socket: string): { x: number; y: number } | null {
+    const p = this.placedHand;
+    const anchors = p && this.skin.get(p.placed.frame);
+    if (!p || !anchors?.sockets[socket]) return null;
+    return this.toWorld(placedPoint(anchors, p.placed, socket), p.lift);
+  }
+
+  /** Um encaixe da cabeça (a `mouth`) em px de mundo; sem ele na cabeça atual: null. */
+  headPoint(socket: string): { x: number; y: number } | null {
+    const p = this.placedHead;
+    const anchors = p && this.skin.get(p.placed.frame);
+    if (!p || !anchors?.sockets[socket]) return null;
+    return this.toWorld(placedPoint(anchors, p.placed, socket), p.lift);
+  }
+
+  /**
+   * Brilho colado na silhueta, acompanhando cada pose (o efeito Glow do Phaser no
+   * container). `strength` 0 desliga. Sem WebGL (Canvas) não há Glow: não desenha nada.
+   */
+  setGlow(color: number, strength: number): this {
+    if (strength <= 0) {
+      if (this.glow) this.glow.active = false;
+      return this;
+    }
+    if (!this.glow) {
+      // no Canvas o controlador de efeitos não cria nada
+      const glow = this.container.postFX.addGlow(color, strength, 0, false, 0.12, 14) as
+        Phaser.FX.Glow | undefined;
+      if (!glow) return this;
+      this.glow = glow;
+    }
+    this.glow.active = true;
+    this.glow.color = color;
+    this.glow.outerStrength = strength;
+    return this;
   }
 
   private toWorld([x, y]: readonly [number, number], lift: number): { x: number; y: number } {

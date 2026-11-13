@@ -39,6 +39,9 @@ export const SFX_NAMES = [
   'pixel_spawn',
   'pixel_hit',
   'pixel_despawn',
+  'drag_sizzle',
+  'exhale_puff',
+  'aura_pass',
   'count',
   'go',
   'ui_move',
@@ -378,6 +381,66 @@ function pixelHit(sr: number): Float32Array<ArrayBuffer> {
   );
 }
 
+/**
+ * Tragada no palheiro (Marília): chiado baixinho da palha queimando, com estalinhos
+ * soltos, subindo um pouco enquanto ela puxa o ar.
+ */
+function dragSizzle(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(53);
+  const hiss = new OnePole(sr);
+  const pop = new BandPass(sr);
+  const seconds = 0.6;
+  return render(
+    sr,
+    seconds,
+    (t) => {
+      const k = t / seconds;
+      const swell = Math.min(t / 0.08, 1) * (0.5 + 0.5 * k) * (k > 0.85 ? (1 - k) / 0.15 : 1);
+      const crackle = r() < 0.004 ? (r() * 2 - 1) * 8 : 0;
+      return hiss.highpass(r() * 2 - 1, 3500) * swell * 0.6 + pop.process(crackle, 2600, 3);
+    },
+    0.6,
+  );
+}
+
+/** Baforada (Marília soltando a fumaça): um "fffhhh" de ar, descendo de tom. */
+function exhalePuff(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(59);
+  const bp = new BandPass(sr);
+  const air = new OnePole(sr);
+  const seconds = 0.75;
+  return render(
+    sr,
+    seconds,
+    (t) => {
+      const k = t / seconds;
+      const env = Math.min(t / 0.05, 1) * (1 - k) ** 1.6;
+      const n = r() * 2 - 1;
+      return (bp.process(n, 1500 - 900 * k, 1.1) + air.lowpass(n, 700) * 0.6) * env;
+    },
+    0.7,
+  );
+}
+
+/**
+ * "Plim" do golpe passando pela aura: sino agudo e limpo (duas parciais e uma
+ * inarmônica bem curta), sem peso nenhum de impacto.
+ */
+function auraPass(sr: number): Float32Array<ArrayBuffer> {
+  const a = new Osc(sr);
+  const b = new Osc(sr);
+  const c = new Osc(sr);
+  return render(
+    sr,
+    0.5,
+    (t) => {
+      const ring = a.sine(1760) * decay(t, 0.12) + b.sine(2640) * decay(t, 0.07) * 0.5;
+      return (ring + c.sine(4380) * decay(t, 0.02) * 0.4) * Math.min(t / 0.002, 1);
+    },
+    0.75,
+  );
+}
+
 /** Amostras do efeito `name`, na taxa `sampleRate`. Sempre iguais para o mesmo nome. */
 export function renderSfx(name: SfxName, sampleRate: number): Float32Array<ArrayBuffer> {
   switch (name) {
@@ -437,6 +500,12 @@ export function renderSfx(name: SfxName, sampleRate: number): Float32Array<Array
       return pixelHit(sampleRate);
     case 'pixel_despawn':
       return blips(sampleRate, [84, 79, 76, 67], 0.04, 0.035, 'square');
+    case 'drag_sizzle':
+      return dragSizzle(sampleRate);
+    case 'exhale_puff':
+      return exhalePuff(sampleRate);
+    case 'aura_pass':
+      return auraPass(sampleRate);
   }
 }
 

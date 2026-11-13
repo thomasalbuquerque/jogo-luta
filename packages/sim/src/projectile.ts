@@ -15,6 +15,8 @@ export interface Projectile extends Box {
   /** Lado para onde arremessa quando não tem velocidade horizontal. */
   facing: -1 | 1;
   hit: HitProps;
+  /** Bitmask dos ids com aura que ele já atravessou (o brilho sai 1 vez). */
+  passed: number;
 }
 
 /** Cria o projétil na frente do lutador, saindo no ângulo da ficha. */
@@ -33,6 +35,7 @@ export function spawnProjectile(f: Fighter, def: ProjectileDef): Projectile {
     ticksLeft: def.lifetimeTicks,
     facing: f.facing,
     hit: { ...def.hit },
+    passed: 0,
   };
 }
 

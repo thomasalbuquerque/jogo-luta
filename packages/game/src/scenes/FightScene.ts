@@ -6,6 +6,7 @@ import {
   finishReplay,
   FixedStepLoop,
   getStage,
+  hasAura,
   hashState,
   hurtbox,
   InputDelay,
@@ -25,6 +26,7 @@ import {
   SUBPX,
   toPx,
   type Box,
+  type AuraEvent,
   type CueName,
   type Fighter,
   type FighterState,
@@ -242,6 +244,10 @@ export class FightScene extends Phaser.Scene {
    * parado vários ticks, e o efeito de um frame só pode sair uma vez.
    */
   private lastSpecialFrame: number[] = [];
+  /** Cada lutador segurava o palheiro (mão com o socket `ember`) no tick anterior. */
+  private lastHeldCig: boolean[] = [];
+  /** Último frame do especial visto pela aura (o hitstop repete o frame). */
+  private auraFrame: number[] = [];
   private views: FighterView[] = [];
   private fx!: FxLayer;
   private backFx!: FxLayer;
@@ -463,6 +469,8 @@ export class FightScene extends Phaser.Scene {
     this.lastProps = this.state.fighters.map(() => null);
     this.lastCaught = this.state.fighters.map(() => false);
     this.lastSpecialFrame = this.state.fighters.map(() => 0);
+    this.lastHeldCig = this.state.fighters.map(() => false);
+    this.auraFrame = this.state.fighters.map(() => 0);
     this.summonFrame = this.state.fighters.map(() => 0);
     for (const img of this.summons) img.setVisible(false);
     this.overTicks = 0;
@@ -653,6 +661,9 @@ export class FightScene extends Phaser.Scene {
         case 'grab':
           playSfx(this, 'grab');
           break;
+        case 'aura':
+          this.onAuraPass(e);
+          break;
       }
     }
   }
@@ -683,6 +694,37 @@ export class FightScene extends Phaser.Scene {
       this.focus = e.victim;
       this.slowMo.trigger(DECISIVE_SLOWMO_MS, DECISIVE_SLOWMO_SCALE);
     }
+  }
+
+  /** Golpe que passou pela aura: estrelinha verde e o "plim", sem impacto nenhum. */
+  private onAuraPass(e: AuraEvent): void {
+    const victim = this.state.fighters[e.victim];
+    const view = this.views[e.victim];
+    const aura = victim ? CHARACTER_FX[victim.character]?.aura : undefined;
+    if (!victim || !view || !aura) return;
+    const x = toPx(e.x);
+    const y = toPx(e.y);
+    this.fx.spawn({
+      texture: FX_TEXTURE.glow,
+      x,
+      y,
+      life: 12,
+      scale: 0.5,
+      scaleEnd: 1.3,
+      tint: aura.color,
+      additive: true,
+    });
+    this.fx.spawn({
+      texture: characterTextureKey(victim.character),
+      frame: aura.sparkle,
+      x,
+      y,
+      life: 16,
+      scale: view.scale * 1.6,
+      scaleEnd: view.scale * 2.6,
+      spin: 0.08,
+    });
+    if (aura.passSound) playSfx(this, aura.passSound);
   }
 
   /** KO: explosão na borda da tela por onde saiu (desenhada no HUD, sem zoom). */
@@ -857,6 +899,7 @@ export class FightScene extends Phaser.Scene {
 
       view.setPose(fighterPose(f), r.x + r.w / 2 + shake, r.y + r.h, f.facing, f.grounded);
       this.drawAimLine(f, view);
+      this.drawAura(f, view);
       // invencível pisca; levando golpe, pisca claro
       const blink = f.invulnTicks > 0 && Math.floor(this.state.tick / 4) % 2 === 0;
       view.setAlpha(Math.min(blink ? 0.35 : 1, quitAlpha(f)));
@@ -901,7 +944,7 @@ export class FightScene extends Phaser.Scene {
       g.lineStyle(4, 0xffffff, 0.9);
       g.strokeRect(r.x - 6, r.y - 6, r.w + 12, r.h + 12);
     }
-    if (f.buffTicks > 0) {
+    if (f.buffTicks > 0 && !CHARACTER_FX[f.character]?.aura) {
       const secondary = colorValue(characterOfFighter(f).colors.secondary);
       g.lineStyle(5, secondary, 0.35 + 0.25 * Math.sin(this.state.tick * 0.3));
       g.strokeRect(r.x - 7, r.y - 7, r.w + 14, r.h + 14);
@@ -922,6 +965,7 @@ export class FightScene extends Phaser.Scene {
       const justCaught = caught && !this.lastCaught[f.id];
       this.lastCaught[f.id] = caught;
       if (view && fx?.summon) this.updateSummon(f, fx.summon, move);
+      if (view && fx?.aura) this.spawnAuraFx(f, view, fx.aura, move);
       if (!view || !fx || !move) continue;
       const frame = moveFrame(f);
       if (fx.counter && move.counter) this.spawnCounterFx(f, view, fx.counter, move, justCaught);
@@ -1560,6 +1604,171 @@ export class FightScene extends Phaser.Scene {
       });
     }
     if (fx.sound) playSfx(this, fx.sound);
+  }
+
+  /**
+   * Aura (`aura` do personagem), a cada quadro desenhado: o brilho colado na silhueta
+   * enquanto ela dura (piscando no fim) e a brasa na ponta do palheiro na mão.
+   */
+  private drawAura(f: Fighter, view: FighterView): void {
+    const aura = CHARACTER_FX[f.character]?.aura;
+    if (!aura) return;
+    const on = hasAura(f);
+    const blinkOff = f.buffTicks <= aura.blinkTicks && Math.floor(f.buffTicks / 4) % 2 === 0;
+    const pulse = 4.2 + 1.2 * Math.sin(this.state.tick * 0.22);
+    view.setGlow(aura.color, on && !blinkOff ? pulse : 0);
+    const ember = view.handSocket('ember');
+    if (!ember) return;
+    const g = this.overlayGfx;
+    const inhaling = this.isInhaling(f, aura);
+    const flicker = 0.75 + 0.25 * Math.sin(this.state.tick * 1.7);
+    const r = view.scale * 4 * (inhaling ? 1.4 : 1) * flicker;
+    g.fillStyle(aura.emberColor, inhaling ? 0.45 : 0.25);
+    g.fillCircle(ember.x, ember.y, r * 2.2);
+    g.fillStyle(aura.emberColor, 1);
+    g.fillCircle(ember.x, ember.y, r);
+    g.fillStyle(0xffe2a8, 1);
+    g.fillCircle(ember.x, ember.y, r * 0.45);
+  }
+
+  /** No meio da tragada (`aura.inhale`, fração do startup do especial). */
+  private isInhaling(f: Fighter, aura: NonNullable<CharacterFx['aura']>): boolean {
+    const move = f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
+    if (!move) return false;
+    const k = moveFrame(f) / move.startup;
+    return k >= aura.inhale.from && k <= aura.inhale.to;
+  }
+
+  /**
+   * Tragada e aura (`aura` do personagem), a cada tick: fumacinha da brasa, o som da
+   * tragada, a baforada no 1º frame ativo, os fiapos subindo com a aura ligada e o
+   * palheiro caindo quando a mão o solta.
+   */
+  private spawnAuraFx(
+    f: Fighter,
+    view: FighterView,
+    aura: NonNullable<CharacterFx['aura']>,
+    move: MoveDef | null,
+  ): void {
+    const texture = characterTextureKey(f.character);
+    const s = view.scale;
+    const t = this.state.tick;
+    const ember = view.handSocket('ember');
+    const held = this.lastHeldCig[f.id] ?? false;
+    this.lastHeldCig[f.id] = ember !== null;
+    if (held && !ember) {
+      // soltou o palheiro: cai girando para a frente
+      const hand = view.handPoint();
+      if (hand) {
+        this.fx.spawn({
+          texture,
+          frame: aura.cig,
+          x: hand.x,
+          y: hand.y,
+          vx: f.facing * (1.2 + Math.random()),
+          vy: -2.6,
+          gravity: 0.28,
+          spin: f.facing * 0.35,
+          life: 40,
+          scale: s * 0.7,
+          flipX: f.facing === -1,
+        });
+      }
+    }
+    if (ember && t % (this.isInhaling(f, aura) ? 4 : 9) === 0) {
+      this.fx.spawn({
+        texture,
+        frame: aura.smoke[0] ?? '',
+        x: ember.x,
+        y: ember.y - 2,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: -0.5 - Math.random() * 0.3,
+        life: 30,
+        scale: s * 0.6,
+        scaleEnd: s * 1.2,
+        alpha: 0.55,
+      });
+    }
+    if (hasAura(f) && t % 4 === 0) this.spawnAuraWisp(f, view, aura);
+
+    const frame = move ? moveFrame(f) : 0;
+    const fresh = frame !== this.auraFrame[f.id];
+    this.auraFrame[f.id] = frame;
+    if (!move || !fresh) return;
+    if (aura.dragSound && frame === Math.ceil(move.startup * aura.inhale.from)) {
+      playSfx(this, aura.dragSound);
+    }
+    if (frame === move.startup + 1) this.spawnExhale(f, view, aura);
+  }
+
+  /** Baforada: fumaça da boca e uma nuvem verde que se espalha em volta do corpo. */
+  private spawnExhale(f: Fighter, view: FighterView, aura: NonNullable<CharacterFx['aura']>): void {
+    const texture = characterTextureKey(f.character);
+    const s = view.scale;
+    const mouth = view.headPoint('mouth');
+    const cx = toPx(f.x + f.w / 2);
+    const cy = toPx(f.y + f.h / 2);
+    if (mouth) {
+      for (let i = 0; i < 3; i++) {
+        this.fx.spawn({
+          texture,
+          frame: aura.smoke[i % aura.smoke.length] ?? '',
+          x: mouth.x + f.facing * 4,
+          y: mouth.y,
+          vx: f.facing * (0.5 + i * 0.3),
+          vy: -1 - i * 0.3,
+          drag: 0.94,
+          life: 26,
+          scale: s * 0.6,
+          scaleEnd: s * 1.6,
+          alpha: 0.6,
+          tint: aura.color,
+        });
+      }
+    }
+    const n = 10;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      (i % 2 === 0 ? this.fx : this.backFx).spawn({
+        texture,
+        frame: aura.smoke[i % aura.smoke.length] ?? '',
+        x: cx + Math.cos(a) * toPx(f.w) * 0.3,
+        y: cy + Math.sin(a) * toPx(f.h) * 0.35,
+        vx: Math.cos(a) * 2.2,
+        vy: Math.sin(a) * 1.6 - 0.3,
+        drag: 0.9,
+        life: 36,
+        scale: s * 1.2,
+        scaleEnd: s * 2.6,
+        alpha: 0.75,
+        tint: aura.color,
+      });
+    }
+    if (aura.exhaleSound) playSfx(this, aura.exhaleSound);
+  }
+
+  /** Um fiapo de fumaça verde subindo em volta do corpo, na frente ou atrás. */
+  private spawnAuraWisp(
+    f: Fighter,
+    view: FighterView,
+    aura: NonNullable<CharacterFx['aura']>,
+  ): void {
+    const s = view.scale;
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const layer = Math.random() < 0.7 ? this.fx : this.backFx;
+    layer.spawn({
+      texture: characterTextureKey(f.character),
+      frame: aura.wisps[Math.floor(Math.random() * aura.wisps.length)] ?? '',
+      x: toPx(f.x + f.w / 2) + side * toPx(f.w) * (0.35 + Math.random() * 0.4),
+      y: toPx(f.y + f.h) - toPx(f.h) * (0.15 + Math.random() * 0.6),
+      vx: -side * 0.15,
+      vy: -0.9 - Math.random() * 0.4,
+      life: 36,
+      scale: s * 1.1,
+      scaleEnd: s * 1.4,
+      alpha: 1,
+      flipX: side === -1,
+    });
   }
 
   /** Fumacinha na mão quando a peça segurada (a arma, o trompete) aparece ou some. */
