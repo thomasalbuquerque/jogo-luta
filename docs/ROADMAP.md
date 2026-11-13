@@ -193,6 +193,9 @@ Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da 
         surgindo à frente e batendo, provocação apertando o controle e comemorando "GG!", linhas de
         varredura, faísca e blips 8-bit, retrato). Falta o bordão, o OK do concept pelo amigo, a voz
         gravada e as 5 lutas de teste.
+  - [ ] Marília: ficha pronta (especial Tragadinha, buff com aura que deixa os golpes passarem),
+        registrada no `sim` mas fora da seleção. Falta a arte no esqueleto, as animações, a aura,
+        efeitos, sons, retrato, o OK do concept pela amiga, a voz gravada e as 5 lutas de teste.
 - [ ] Lote 4 (restantes)
 - [ ] 1 ou 2 mapas novos com tema de piadas internas do grupo.
 

@@ -5,6 +5,7 @@ import { DADAZINHO } from './dadazinho';
 import { DARLLAN } from './darllan';
 import { GABS } from './gabs';
 import { JOAO_FRANGO } from './joao-frango';
+import { MARILIA } from './marilia';
 import { SCHUMMAKI } from './schummaki';
 import { TAUBA } from './tauba';
 import { TCHULA } from './tchula';
@@ -16,7 +17,19 @@ export function registerCharacter(c: Character): void {
   REGISTRY.set(c.id, c);
 }
 
-for (const c of [BASE, SCHUMMAKI, JOAO_FRANGO, DADAZINHO, TAUBA, TCHULA, CROCKO, DARLLAN, GABS])
+// A Marília só tem a ficha: fica registrada, mas fora da seleção até ter o atlas.
+for (const c of [
+  BASE,
+  SCHUMMAKI,
+  JOAO_FRANGO,
+  DADAZINHO,
+  TAUBA,
+  TCHULA,
+  CROCKO,
+  DARLLAN,
+  GABS,
+  MARILIA,
+])
   registerCharacter(c);
 
 /** Personagem usado quando nenhum é escolhido (e nos testes). */
