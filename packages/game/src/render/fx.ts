@@ -118,6 +118,24 @@ export interface CharacterFx {
     exhaleSound?: SfxName;
     passSound?: SfxName;
   };
+  /**
+   * Agarrão com combo (o Comando do Meia). O comando aparece em cima da cabeça
+   * (`render/command.ts`, desenhado pelo `CommandView`) e acende no startup; errar
+   * deixa ele vermelho, com o X, e toca `missSound`. A cada golpe do combo (evento
+   * `hit` de tipo `combo`): uma faísca (`sparks`) na altura do golpe, uma linha de
+   * velocidade (`streaks`), o som `hitSound`, um tremor leve e um tranco no agarrado,
+   * e o contador "N HITS" sobe. O arremesso fecha com a explosão `burst`, fumaça
+   * (`smoke`) e o som `finishSound`.
+   */
+  combo?: {
+    sparks: readonly string[];
+    streaks: readonly string[];
+    burst: string;
+    smoke: readonly string[];
+    hitSound?: SfxName;
+    finishSound?: SfxName;
+    missSound?: SfxName;
+  };
 }
 
 export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
@@ -197,6 +215,19 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
       dragSound: 'drag_sizzle',
       exhaleSound: 'exhale_puff',
       passSound: 'aura_pass',
+    },
+  },
+  meia: {
+    // poeirinha nos pés quando ele entra colado no startup
+    chargePuffs: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
+    combo: {
+      sparks: ['fx_spark1', 'fx_spark2', 'fx_spark3', 'fx_spark4'],
+      streaks: ['fx_streak1', 'fx_streak2', 'fx_streak3'],
+      burst: 'fx_burst',
+      smoke: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
+      hitSound: 'combo_hit',
+      finishSound: 'combo_finish',
+      missSound: 'command_miss',
     },
   },
   'joao-frango': {
