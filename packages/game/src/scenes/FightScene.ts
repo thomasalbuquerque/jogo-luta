@@ -237,6 +237,11 @@ export class FightScene extends Phaser.Scene {
   private lastProps: (string | null)[] = [];
   /** O contra-ataque de cada lutador já tinha pegado alguém no tick anterior. */
   private lastCaught: boolean[] = [];
+  /**
+   * Frame do especial de cada lutador no tick anterior: no hitstop o frame fica
+   * parado vários ticks, e o efeito de um frame só pode sair uma vez.
+   */
+  private lastSpecialFrame: number[] = [];
   private views: FighterView[] = [];
   private fx!: FxLayer;
   private backFx!: FxLayer;
@@ -450,6 +455,7 @@ export class FightScene extends Phaser.Scene {
     this.lastStates = this.state.fighters.map((f) => f.state);
     this.lastProps = this.state.fighters.map(() => null);
     this.lastCaught = this.state.fighters.map(() => false);
+    this.lastSpecialFrame = this.state.fighters.map(() => 0);
     this.overTicks = 0;
     this.loop.reset();
     this.fx.clear();
@@ -901,6 +907,7 @@ export class FightScene extends Phaser.Scene {
       const fx = CHARACTER_FX[f.character];
       if (view && fx) this.spawnPropFx(f, view, fx);
       if (view && fx?.tauntNotes) this.spawnTauntNotes(f, view, fx.tauntNotes);
+      if (view && fx?.tauntCrumbs) this.spawnTauntCrumbs(f, view, fx.tauntCrumbs);
       const move = f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
       const caught = move?.counter !== undefined && f.moveHits !== 0;
       const justCaught = caught && !this.lastCaught[f.id];
@@ -908,6 +915,7 @@ export class FightScene extends Phaser.Scene {
       if (!view || !fx || !move) continue;
       const frame = moveFrame(f);
       if (fx.counter && move.counter) this.spawnCounterFx(f, view, fx.counter, move, justCaught);
+      if (fx.slam) this.spawnSlamFx(f, view, fx.slam, move, frame);
       if (fx.vanishSquares && move.teleport?.random) {
         this.spawnQuitFx(f, view, fx.vanishSquares, move, frame);
       }
@@ -1163,6 +1171,120 @@ export class FightScene extends Phaser.Scene {
       rotation: (Math.random() - 0.5) * 0.4,
       spin: (Math.random() - 0.5) * 0.02,
     });
+  }
+
+  /** Migalhas caindo do biscoito (socket `biscuit` da mão) na mordida da provocação. */
+  private spawnTauntCrumbs(
+    f: Fighter,
+    view: FighterView,
+    crumbs: NonNullable<CharacterFx['tauntCrumbs']>,
+  ): void {
+    if (f.state !== 'taunt' || f.stateTicks !== crumbs.at) return;
+    const biscuit = view.handPoint('biscuit');
+    if (!biscuit) return;
+    crumbs.frames.forEach((frame, i) => {
+      this.fx.spawn({
+        texture: characterTextureKey(f.character),
+        frame,
+        x: biscuit.x + (Math.random() - 0.5) * 6,
+        y: biscuit.y + 2,
+        vx: f.facing * (0.4 + i * 0.35) + (Math.random() - 0.5) * 0.6,
+        vy: -0.8 - Math.random() * 0.8,
+        gravity: 0.22,
+        life: 30,
+        scale: view.scale * 0.8,
+        rotation: Math.random() * Math.PI,
+        spin: (Math.random() - 0.5) * 0.3,
+      });
+    });
+  }
+
+  /**
+   * Pancada no chão (`slam` do personagem): o brilho no rolo lá em cima e, no 1º
+   * frame ativo, a farinha para os dois lados, as migalhas, o tremor e o "póf".
+   */
+  private spawnSlamFx(
+    f: Fighter,
+    view: FighterView,
+    slam: NonNullable<CharacterFx['slam']>,
+    move: MoveDef,
+    frame: number,
+  ): void {
+    const repeated = this.lastSpecialFrame[f.id] === frame;
+    this.lastSpecialFrame[f.id] = frame;
+    if (repeated) return;
+    const texture = characterTextureKey(f.character);
+    const s = view.scale;
+    if (slam.shine && frame === move.startup - 4) {
+      const shine = view.propPoint('shine');
+      if (shine) {
+        // um pouco à frente e acima do rolo: o marcador do jogador fica em cima da cabeça
+        this.fx.spawn({
+          texture,
+          frame: slam.shine,
+          x: shine.x + f.facing * 12,
+          y: shine.y - 8,
+          life: 18,
+          scale: s * 2.6,
+          scaleEnd: s * 4.4,
+          spin: 0.14,
+        });
+      }
+    }
+    if (frame !== move.startup + 1) return;
+    const pin = view.propPoint('middle');
+    const x = pin?.x ?? toPx(f.x + f.w / 2);
+    const y = f.grounded ? toPx(f.y + f.h) - 4 : (pin?.y ?? toPx(f.y + f.h * 0.6));
+    // a nuvem grande sobe atrás dele; as menores correm pelo chão para os dois lados
+    this.backFx.spawn({
+      texture,
+      frame: slam.cloud,
+      x,
+      y: y - 14,
+      vy: -0.7,
+      drag: 0.95,
+      life: 34,
+      scale: s * 1.8,
+      scaleEnd: s * 3.4,
+      alpha: 0.85,
+    });
+    for (const side of [-1, 1] as const) {
+      for (let i = 0; i < 3; i++) {
+        this.fx.spawn({
+          texture,
+          frame: slam.cloud,
+          x: x + side * (8 + i * 22),
+          y: y - 6 - Math.random() * 8,
+          vx: side * (1.4 + i * 0.9),
+          vy: -0.25 - Math.random() * 0.4,
+          drag: 0.93,
+          life: 32 + i * 4,
+          scale: s * (2 - i * 0.3),
+          scaleEnd: s * (3.2 - i * 0.4),
+          alpha: 0.95,
+          flipX: side === -1,
+          rotation: (Math.random() - 0.5) * 0.3,
+        });
+      }
+    }
+    for (let i = 0; i < 9; i++) {
+      const side = i % 2 === 0 ? -1 : 1;
+      this.fx.spawn({
+        texture,
+        frame: slam.crumbs[i % slam.crumbs.length] ?? '',
+        x: x + (Math.random() - 0.5) * 30,
+        y: y - 8,
+        vx: side * (1 + Math.random() * 3),
+        vy: -3.2 - Math.random() * 2.6,
+        gravity: 0.32,
+        life: 40,
+        scale: s * (1.3 + Math.random() * 0.5),
+        rotation: Math.random() * Math.PI,
+        spin: (Math.random() - 0.5) * 0.4,
+      });
+    }
+    this.shake.add(slam.trauma);
+    if (slam.sound) playSfx(this, slam.sound);
   }
 
   /** Brilho na luneta (socket `scope` da arma na mão): o aviso de que a mira começou. */
