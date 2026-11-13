@@ -18,8 +18,8 @@ export const GABS = defineCharacter({
     airSpeed: 5.3,
     jumpHeight: 168,
     airJumps: 1,
-    // altura média; a cabeça maior deixa a hurtbox um pouco mais alta
-    hurtbox: { w: 54, h: 98 },
+    // altura média (a da base), um pouco mais largo pela barriga
+    hurtbox: { w: 54, h: 96 },
     gravity: 0.68,
     maxFallSpeed: 11.5,
     fastFallSpeed: 17.5,
