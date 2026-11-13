@@ -4,6 +4,7 @@ import {
   clipPolygon,
   colorAround,
   createImage,
+  fadeAlong,
   fillBehind,
   opaqueBounds,
   packShelves,
@@ -89,6 +90,20 @@ describe('fillBehind', () => {
     expect(pixel(img, 0, 0)).toEqual([200, 200, 200, 128]);
     expect(pixel(img, 1, 0)).toEqual([100, 100, 100, 255]);
     expect(pixel(img, 2, 0)).toEqual([0, 0, 0, 255]);
+  });
+});
+
+describe('fadeAlong', () => {
+  it('mantém o alfa antes de `from`, some em rampa até `to` e zera depois', () => {
+    const img = createImage(6, 1);
+    fill(img, [10, 20, 30, 200]);
+    fadeAlong(img, [2, 0], [4, 0]);
+    expect(pixel(img, 0, 0)).toEqual([10, 20, 30, 200]);
+    expect(pixel(img, 1, 0)).toEqual([10, 20, 30, 200]);
+    expect(pixel(img, 2, 0)).toEqual([10, 20, 30, 150]);
+    expect(pixel(img, 3, 0)).toEqual([10, 20, 30, 50]);
+    expect(pixel(img, 4, 0)[3]).toBe(0);
+    expect(pixel(img, 5, 0)[3]).toBe(0);
   });
 });
 

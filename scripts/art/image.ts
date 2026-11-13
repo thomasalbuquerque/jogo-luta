@@ -150,6 +150,26 @@ export function fillBehind(img: Image, poly: Polygon, hex: string): void {
   }
 }
 
+/**
+ * Apaga aos poucos na direção `from` → `to`: alfa inteiro até `from`, some de
+ * vez em `to`, numa rampa no meio. Serve para a ponta de uma peça que fica por
+ * cima de outra da mesma cor (o joelho de pele): a junta não deixa linha.
+ */
+export function fadeAlong(img: Image, from: Point, to: Point): void {
+  const dx = to[0] - from[0];
+  const dy = to[1] - from[1];
+  const len2 = dx * dx + dy * dy;
+  if (len2 === 0) return;
+  for (let y = 0; y < img.h; y++) {
+    for (let x = 0; x < img.w; x++) {
+      const u = ((x + 0.5 - from[0]) * dx + (y + 0.5 - from[1]) * dy) / len2;
+      if (u <= 0) continue;
+      const i = (y * img.w + x) * 4 + 3;
+      img.data[i] = Math.round((img.data[i] ?? 0) * Math.max(0, 1 - u));
+    }
+  }
+}
+
 function distToSegment(px: number, py: number, a: Point, b: Point): number {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
