@@ -575,7 +575,7 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
 
 - **É uma amiga:** no passo 1, troque `Keep his real face shape` por `Keep her real face shape`; no
   passo 5, troque `his outfit` por `her outfit`.
-- `<EXPRESSION>`: `wide-eyed dramatic gasp`
+- `<EXPRESSION>`: `half-closed eyes, gentle smile`
 - `<CHARACTER>`:
   `Marília, 26-year-old woman, petite and short, average natural build, modest, fair skin, shoulder-length loose brown hair, expressive wide eyes. Raspberry pink (#E2557F) short-sleeve T-shirt, slightly loose, untucked; light-wash (#8DB0D8) high-waist straight jeans with a belt; off-white sneakers with mint (#8FD9A8) details.`
 - `<LEGWEAR>`: `light-wash jeans`
