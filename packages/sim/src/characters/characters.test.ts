@@ -5,19 +5,21 @@ import { px } from '../constants';
 import { Button } from '../input';
 import { getCharacter, PLAYABLE_CHARACTERS } from './index';
 
-const [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA] = PLAYABLE_CHARACTERS.map(getCharacter);
-if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA) throw new Error('elenco incompleto');
+const [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA, CROCKO] = PLAYABLE_CHARACTERS.map(getCharacter);
+if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA || !CROCKO)
+  throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango, Dadazinho, Tauba e Tchula, cada um com especial e provocação', () => {
+  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula e Crocko, cada um com especial e provocação', () => {
     expect(PLAYABLE_CHARACTERS).toEqual([
       'schummaki',
       'joao-frango',
       'dadazinho',
       'tauba',
       'tchula',
+      'crocko',
     ]);
-    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA]) {
+    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA, CROCKO]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
       expect(c.blurb.length).toBeGreaterThan(0);
@@ -92,6 +94,32 @@ describe('elenco', () => {
     expect(TCHULA.stats.airSpeed).toBeLessThan(getCharacter('base').stats.airSpeed);
     expect(TCHULA.moves.sideLight.damage).toBeGreaterThan(
       getCharacter('base').moves.sideLight.damage,
+    );
+  });
+
+  it('Crocko espera vir: contra-ataque curto e forte com recarga; o mais alto, pesado e de braço comprido', () => {
+    const special = CROCKO.special;
+    const base = getCharacter('base');
+    if (!special?.move.counter) throw new Error('sem contra-ataque');
+    // entra rápido na pose, espera ~1/3 s e, se ninguém bater, fica exposto
+    expect(special.move.startup).toBeLessThanOrEqual(8);
+    expect(special.move.active).toBeGreaterThanOrEqual(15);
+    expect(special.move.recovery).toBeGreaterThan(special.move.active);
+    // não vira escudo infinito
+    expect(special.cooldownTicks).toBeGreaterThan(
+      special.move.startup + special.move.active + special.move.recovery,
+    );
+    // só o contra-ataque: nada de hitbox ou projétil próprio
+    expect(special.move.hitboxes).toEqual([]);
+    expect(special.move.projectile).toBeUndefined();
+    expect(special.move.counter.damage).toBeGreaterThanOrEqual(12);
+    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA]) {
+      expect(CROCKO.stats.height).toBeGreaterThan(c.stats.height);
+    }
+    expect(CROCKO.stats.weight).toBeGreaterThan(100);
+    expect(CROCKO.stats.walkSpeed).toBeLessThan(base.stats.walkSpeed);
+    expect(CROCKO.moves.sideLight.hitboxes[0]?.boxes[0]?.w).toBeGreaterThan(
+      base.moves.sideLight.hitboxes[0]?.boxes[0]?.w ?? Infinity,
     );
   });
 
