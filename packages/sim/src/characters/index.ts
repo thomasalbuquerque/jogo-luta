@@ -47,6 +47,7 @@ export const PLAYABLE_CHARACTERS: readonly string[] = [
   DARLLAN.id,
   GABS.id,
   MARILIA.id,
+  MEIA.id,
 ];
 
 export function hasCharacter(id: string): boolean {

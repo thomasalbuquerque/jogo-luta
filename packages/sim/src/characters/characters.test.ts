@@ -14,7 +14,7 @@ if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA || !CROCKO || !DARLLAN)
   throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs e Marília, cada um com especial e provocação', () => {
+  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs, Marília e Meia, cada um com especial e provocação', () => {
     expect(PLAYABLE_CHARACTERS).toEqual([
       'schummaki',
       'joao-frango',
@@ -25,6 +25,7 @@ describe('elenco', () => {
       'darllan',
       'gabs',
       'marilia',
+      'meia',
     ]);
     for (const c of [
       SCHUMMAKI,
@@ -36,6 +37,7 @@ describe('elenco', () => {
       DARLLAN,
       getCharacter('gabs'),
       getCharacter('marilia'),
+      getCharacter('meia'),
     ]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
@@ -308,7 +310,8 @@ describe('elenco', () => {
       return hits;
     };
 
-    it('registrado, com especial e provocação', () => {
+    it('jogável, com especial e provocação', () => {
+      expect(PLAYABLE_CHARACTERS).toContain('meia');
       expect(MEIA.special?.name).toBe('Comando');
       expect(MEIA.special?.move.grab?.combo).toEqual({ hits: 9, damage: 1 });
       expect(MEIA.taunt.text).toBe('Vem!');
