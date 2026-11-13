@@ -630,6 +630,11 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   são pintadas iguais às do começo da canela (claro em cima, sombra embaixo). Um `fade` do `tip` até
   o corte faz a coxa sumir aos poucos por cima da canela: o joelho fica sem linha. Na canela, o
   contorno da ponta do joelho (escondida atrás da coxa) é pintado das mesmas cores.
+- **Cotovelo de pele** (manga curta, braço e antebraço à mostra, como no Darllan): a peça da
+  frente muda com a dobra (esticado, o braço cobre o antebraço; dobrado, o contrário), então as duas
+  pontas do cotovelo levam `fade`: no braço, de um pouco antes do `tip` até a ponta de baixo; no
+  antebraço, de um pouco depois do `pivot` até a ponta de cima. Assim nenhuma das duas deixa a linha
+  do contorno atravessada no cotovelo, na guarda nem no soco.
 - **Avental até o joelho** (Darllan): o peitilho vai no `torso` e a saia do avental é o `hips`
   inteiro, sem corte. Os `legNear`/`legFar` ficam escondidos dentro da saia, na altura do quadril,
   e a coxa (calça comprida) fica por trás: no chute ela sai por baixo da saia. Um `stretch` na
