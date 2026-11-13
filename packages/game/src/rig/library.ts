@@ -17,13 +17,20 @@ import { CHARACTER_CLIPS } from './characterClips';
 export const COUNTER_KEY = 'counter';
 
 /**
+ * Agarrão com combo que pegou alguém (o combo do Meia): toca o clipe
+ * `<id do especial>_combo` em ticks, do começo do agarrão até o fim do recovery (ver
+ * `fighterClip`), em vez do frame do golpe, que fica parado enquanto ele segura.
+ */
+export const COMBO_KEY = 'combo';
+
+/**
  * Qual clipe tocar: o id da ficha (`animations`, ou `<id>_<chave>`) se existir um
  * clipe com esse nome, senão o clipe do esqueleto base. A provocação usa o id
  * `taunt.animation` da ficha.
  */
 export function clipFor(c: Character, key: string): Clip {
-  if (key === COUNTER_KEY) {
-    return CHARACTER_CLIPS[`${animationId(c, 'special')}_counter`] ?? clipFor(c, 'special');
+  if (key === COUNTER_KEY || key === COMBO_KEY) {
+    return CHARACTER_CLIPS[`${animationId(c, 'special')}_${key}`] ?? clipFor(c, 'special');
   }
   const id = key === 'taunt' ? c.taunt.animation : animationId(c, key as AnimationKey);
   return CHARACTER_CLIPS[id] ?? BASE_CLIPS[key] ?? BASE_CLIPS.idle ?? { timing: 'once', keys: [] };
@@ -44,9 +51,14 @@ export function moveForClip(c: Character, key: string): MoveDef | null {
  * frente do braço (`drawOrder`). A ponta do braço fica com o contorno do cotovelo e a do
  * antebraço some aos poucos (`fade` no `recortes.json`), sem linha atravessada.
  */
-export const FOREARM_IN_FRONT: ReadonlySet<string> = new Set(['darllan', 'gabs', 'marilia', 'meia']);
+export const FOREARM_IN_FRONT: ReadonlySet<string> = new Set([
+  'darllan',
+  'gabs',
+  'marilia',
+  'meia',
+]);
 
 /** Nomes dos clipes, na ordem do visualizador. */
 export function clipNames(): string[] {
-  return [...new Set([...Object.keys(BASE_CLIPS), 'special', COUNTER_KEY, 'taunt'])];
+  return [...new Set([...Object.keys(BASE_CLIPS), 'special', COUNTER_KEY, COMBO_KEY, 'taunt'])];
 }

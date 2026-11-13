@@ -636,6 +636,170 @@ function headShakes(from: number, to: number, step: number): Key[] {
   return keys;
 }
 
+/**
+ * Meia ajeitando os óculos: a mão da frente em pé na frente do rosto, com a ponta do
+ * indicador (socket `finger` da `hand_taunt`) na ponte dos óculos (`bridge` da cabeça).
+ * Ângulos achados com o `solvePose`; refaça se mudar braço, mão ou cabeça.
+ */
+const GLASSES: Rot = {
+  ...STANDING,
+  torso: -4,
+  head: -8,
+  upperArmNear: -62,
+  forearmNear: -129,
+  handNear: 8,
+  upperArmFar: 6,
+  forearmFar: -10,
+};
+
+/** O "vem": braço de trás esticado para a frente, palma para cima; `curl` dobra os dedos. */
+function beckon(curl: number): Rot {
+  return {
+    ...STANDING,
+    torso: -6,
+    head: -12,
+    upperArmNear: 12,
+    forearmNear: -24,
+    handNear: 10,
+    upperArmFar: -60,
+    forearmFar: -28,
+    handFar: -curl,
+  };
+}
+
+/** Guarda do combo: punhos na frente, colado no adversário, um pouco abaixado. */
+const COMBO_GUARD: Rot = { ...STANCE, torso: 12, head: -6, thighNear: 22, shinNear: 30 };
+
+/**
+ * Golpes do combo do Meia (6 que se repetem), todos de punho fechado: jab, direto,
+ * chute baixo, gancho, chute alto e chute giratório. O adversário fica colado na frente.
+ */
+const COMBO_STRIKES: readonly { rot: Rot; x?: number; y?: number }[] = [
+  // jab: braço da frente esticado
+  {
+    rot: { ...STANCE, torso: 16, head: -10, upperArmNear: -88, forearmNear: -4, handNear: 0 },
+    x: 3,
+  },
+  // direto: o braço de trás cruza, girando o tronco
+  {
+    rot: {
+      ...STANCE,
+      torso: 22,
+      head: -14,
+      upperArmNear: 10,
+      forearmNear: -132,
+      upperArmFar: -92,
+      forearmFar: -2,
+      handFar: 0,
+      thighNear: 30,
+      shinNear: 12,
+    },
+    x: 4,
+  },
+  // chute baixo com a perna da frente
+  {
+    rot: {
+      ...STANCE,
+      torso: -10,
+      head: 6,
+      thighFar: -62,
+      shinFar: 4,
+      footFar: 0,
+      thighNear: 8,
+      shinNear: 18,
+    },
+    x: 2,
+  },
+  // gancho: o punho da frente sobe por baixo
+  {
+    rot: {
+      ...STANCE,
+      torso: 10,
+      head: -16,
+      upperArmNear: -96,
+      forearmNear: -78,
+      handNear: -20,
+      thighNear: 6,
+      shinNear: 10,
+    },
+    x: 2,
+    y: -1.5,
+  },
+  // chute alto com a perna da frente
+  {
+    rot: {
+      ...STANCE,
+      torso: -26,
+      head: 12,
+      upperArmNear: 30,
+      forearmNear: -100,
+      thighFar: -118,
+      shinFar: 8,
+      footFar: 10,
+      thighNear: 12,
+      shinNear: 8,
+    },
+    x: 1,
+  },
+  // chute giratório: a perna de trás passa por cima, tronco bem para trás
+  {
+    rot: {
+      ...STANCE,
+      torso: -34,
+      head: 16,
+      upperArmNear: 40,
+      forearmNear: -90,
+      upperArmFar: 20,
+      forearmFar: -70,
+      thighNear: -112,
+      shinNear: 4,
+      footNear: 12,
+      thighFar: 16,
+      shinFar: 22,
+    },
+    x: 3,
+  },
+];
+
+/** Chute final do combo (o arremesso): a perna da frente empurra reta, com o corpo todo. */
+const COMBO_FINISH: Rot = {
+  ...STANCE,
+  torso: -22,
+  head: 10,
+  upperArmNear: 46,
+  forearmNear: -80,
+  upperArmFar: 30,
+  forearmFar: -90,
+  thighFar: -96,
+  shinFar: -4,
+  footFar: -24,
+  thighNear: 18,
+  shinNear: 14,
+  footNear: -20,
+};
+
+/**
+ * Combo do Meia, em ticks desde que o agarrão pegou: um golpe a cada `step` ticks
+ * (`hits`, os golpes do combo da ficha), cada um com 3 ticks de volta à guarda antes,
+ * e o chute final em `hits + 1` golpes. Depois, `recovery` ticks voltando à guarda.
+ */
+function comboKeys(hits: number, step: number, recovery: number): Key[] {
+  const keys: Key[] = [{ t: 0, rot: COMBO_GUARD, expression: 'normal' }];
+  for (let i = 0; i < hits; i++) {
+    const strike = COMBO_STRIKES[i % COMBO_STRIKES.length] ?? { rot: COMBO_GUARD };
+    const at = (i + 1) * step;
+    keys.push({ t: at - 3, rot: COMBO_GUARD, ease: 'inOut' });
+    keys.push({ t: at, rot: strike.rot, x: strike.x ?? 0, y: strike.y ?? 0, ease: 'out' });
+  }
+  const end = (hits + 1) * step;
+  keys.push({ t: end - 4, rot: { ...COMBO_GUARD, thighFar: -30, shinFar: 70 }, ease: 'inOut' });
+  keys.push({ t: end, rot: COMBO_FINISH, x: 6, expression: 'taunt', ease: 'out' });
+  keys.push({ t: end + 8, rot: COMBO_FINISH, x: 6 });
+  keys.push({ t: end + 20, rot: COMBO_FINISH, x: 3, expression: 'normal', ease: 'inOut' });
+  keys.push({ t: end + recovery, rot: STANCE, ease: 'inOut' });
+  return keys;
+}
+
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.
   schummaki_special: {
@@ -1206,6 +1370,104 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 74, rot: HANDS_ON_CHEEKS, y: -0.3, ease: 'inOut' },
       { t: 80, rot: HANDS_ON_CHEEKS, expression: 'normal' },
       { t: 90, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Comando: o comando aparece em cima da cabeça (desenhado no FightScene) enquanto ele
+  // entra colado; no 1º frame ativo estica as mãos (a janela do agarrão). Se não pegou
+  // ninguém, fica de guarda aberta, com cara de quem errou o input, no recovery longo.
+  // Se pegou, o jogo troca para o `meia_special_combo`.
+  meia_special: {
+    timing: 'move',
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 0.6, rot: { ...STANCE, torso: 14, head: -8, thighFar: -34, shinFar: 34 }, x: 2 },
+      {
+        t: 1,
+        rot: {
+          ...STANCE,
+          torso: 20,
+          head: -10,
+          upperArmNear: -78,
+          forearmNear: -24,
+          handNear: 0,
+          upperArmFar: -58,
+          forearmFar: -40,
+          handFar: 0,
+          thighFar: -40,
+          shinFar: 30,
+        },
+        x: 5,
+        handNear: 'open',
+        handFar: 'open',
+        ease: 'out',
+      },
+      {
+        t: 2,
+        rot: {
+          ...STANCE,
+          torso: 18,
+          head: -8,
+          upperArmNear: -74,
+          forearmNear: -28,
+          upperArmFar: -54,
+          forearmFar: -44,
+          thighFar: -40,
+          shinFar: 30,
+        },
+        x: 5,
+      },
+      {
+        t: 2.2,
+        rot: {
+          ...STANDING,
+          torso: 2,
+          head: 6,
+          upperArmNear: 16,
+          forearmNear: -22,
+          handNear: 6,
+          upperArmFar: 12,
+          forearmFar: -18,
+        },
+        x: 2,
+        expression: 'hurt',
+        ease: 'out',
+      },
+      {
+        t: 2.8,
+        rot: { ...STANDING, torso: 4, head: 10, upperArmNear: 18, forearmNear: -18 },
+        x: 2,
+      },
+      { t: 3, rot: STANCE, handNear: 'fist', handFar: 'fist', expression: 'normal', ease: 'inOut' },
+    ],
+  },
+  // O combo, quando o Comando pega (em ticks desde que pegou, ver `fighterClip`): 9
+  // golpes, um a cada 6 ticks como no sim (60 ticks de agarrão, `combo.hits` 9), o
+  // chute final no tick 60 e os 32 ticks do recovery.
+  meia_special_combo: {
+    timing: 'once',
+    length: 92,
+    keys: comboKeys(9, 6, 32),
+  },
+  // Ajeita os óculos com o indicador, olhando para o adversário, e chama com a mão de
+  // trás, palma para cima: "Vem!" (voz no `voiceAt` da ficha, 40).
+  meia_taunt: {
+    timing: 'once',
+    length: 84,
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 10, rot: { ...GLASSES, forearmNear: -124 }, handNear: 'taunt', ease: 'out' },
+      { t: 15, rot: { ...GLASSES, head: -14, forearmNear: -133 }, ease: 'inOut' },
+      { t: 22, rot: { ...GLASSES, head: -12, forearmNear: -133 } },
+      { t: 30, rot: beckon(0), handNear: 'fist', handFar: 'taunt', ease: 'inOut' },
+      { t: 40, rot: beckon(0), expression: 'taunt' },
+      { t: 46, rot: beckon(42), ease: 'inOut' },
+      { t: 52, rot: beckon(0), ease: 'inOut' },
+      { t: 58, rot: beckon(42), ease: 'inOut' },
+      { t: 64, rot: beckon(0), ease: 'inOut' },
+      { t: 70, rot: beckon(42), ease: 'inOut' },
+      { t: 76, rot: beckon(0), expression: 'normal', ease: 'inOut' },
+      { t: 84, rot: STANCE, handFar: 'fist', ease: 'inOut' },
     ],
   },
 };

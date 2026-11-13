@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createFighter, moveDef, startMove } from '@jogo-luta/sim';
 import { fighterClip, TUMBLE_TICKS } from './fighterPose';
-import { COUNTER_KEY } from './library';
+import { COMBO_KEY, COUNTER_KEY } from './library';
 
 describe('clipe do lutador', () => {
   it('fora de golpe, é o estado do sim', () => {
@@ -42,6 +42,25 @@ describe('clipe do lutador', () => {
     startMove(g, 'special', 0);
     g.moveHits = 1 << 1;
     expect(fighterClip(g).key).toBe('special');
+  });
+
+  it('agarrão com combo que pegou: o combo em ticks do agarrão e, depois, o recovery', () => {
+    const f = createFighter(0, { x: 0, y: 0 }, 'meia');
+    f.grounded = true;
+    startMove(f, 'special', 0);
+    const move = moveDef(f, 'special');
+    const hold = move.grab?.holdTicks ?? 0;
+    f.stateTicks = move.startup;
+    // ainda não pegou: o especial
+    expect(fighterClip(f).key).toBe('special');
+    // pegou e já passaram 12 ticks segurando
+    f.moveHits = 1 << 1;
+    f.grabTicks = hold - 12;
+    expect(fighterClip(f)).toEqual({ key: COMBO_KEY, t: 12 });
+    // arremessou: o sim pulou para o recovery, que segue o combo
+    f.grabTicks = 0;
+    f.stateTicks = move.startup + move.active + 4;
+    expect(fighterClip(f)).toEqual({ key: COMBO_KEY, t: hold + 5 });
   });
 
   it('hitstun comprido vira o giro de arremessado', () => {
