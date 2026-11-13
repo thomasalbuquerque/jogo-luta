@@ -17,6 +17,7 @@ fim o guia de estilo (o porquê de cada regra) e o modelo de ficha.
 | Darllan                                         | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Gabs                                            | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Marília                                         | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
+| Meia                                            | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | [Cenário: a laje](#cenário-a-laje)              | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feito |
 | **[Personagem novo](#personagem-novo-firefly)** | **As mesmas 5 imagens, uma de cada**                                  | 5       | a fazer  |
 
@@ -683,6 +684,16 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   ela. Um `stretch` (`[0.78, 0.9]` nos braços, `[0.78, 0.78]` nas mãos) afina sem mexer no
   esqueleto: a junta segue a ponta da peça encolhida. Como o braço fica mais curto, as poses que
   encostam a mão no rosto (tragada e bochechas) foram recalculadas.
+- **Lente rosa quase opaca** (Meia): o rosa da lente da direita veio forte, e o `fill` (que só pinta
+  por trás do que é transparente) não tirava. Lente assim leva `paint` com a cor de vidro, num
+  polígono só dentro da armação, em cada uma das 4 cabeças.
+- **Dedo nos óculos** (provocação do Meia): a `hand_taunt` é a mão com o indicador levantado, com o
+  socket `finger` na ponta do dedo, e a cabeça normal marca a `bridge` (a ponte dos óculos). A pose
+  `GLASSES` foi achada com o `solvePose`, como a tragada da Marília. A `hand_taunt2` é a mão de palma
+  para cima do "vem", na mão de trás.
+- **Comando e contador no código** (Meia): as setas, os botões B e X, o "X" vermelho do erro e o
+  "N HITS" não vêm da folha: são desenhados pelo `CommandView` (`render/command.ts` diz o que
+  aparece em cada frame), porque a sequência espelha com ele e o contador muda de número.
 - **Aura no código** (Marília): a silhueta verde que veio na folha de efeitos não é recortada. O brilho
   é o Glow do Phaser no container do boneco (`FighterView.setGlow`), então acompanha cada pose.
 
@@ -714,9 +725,14 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   na Tragadinha da Marília a brasa no socket `ember` da mão, a fumacinha, a baforada verde no 1º
   frame ativo, o brilho Glow da aura colado no boneco (piscando nos últimos 30 ticks), os fiapos
   verdes subindo, o palheiro caindo no peteleco e, quando um golpe passa pela aura, a estrelinha e o
-  "plim").
+  "plim"; no Comando do Meia a poeirinha nos pés, o comando acendendo em cima da cabeça, e a cada
+  golpe do combo uma faísca, uma linha de velocidade, o "pá" e um tranco no agarrado, o contador
+  "N HITS" e, no chute final, a explosão grande, a fumaça e o "póu").
 - Contra-ataque que pegou alguém toca o clipe `<id do especial>_counter` (o tapa do Crocko) no
   lugar do recovery; sem esse clipe, continua o do especial.
+- Agarrão com combo que pegou alguém toca o clipe `<id do especial>_combo` (o combo do Meia), em
+  ticks desde que pegou e, depois do arremesso, pelo recovery: o frame do golpe fica parado
+  enquanto ele segura, então o clipe anda pelo tempo do agarrão.
 
 Para ver as animações, abra o jogo com `?rig` no fim do endereço (só no `pnpm dev`):
 `http://localhost:5173/?rig`. ←/→ troca o clipe, F mostra 4 quadros lado a lado com a hitbox

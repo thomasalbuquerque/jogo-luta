@@ -252,9 +252,12 @@ Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `b
 | Darllan     | Pesadão   | 124  | 5,4            | 5            | 162  | 1            | **Rolo na bancada** (área): 18 / 5 / 26, 15% a 50°, ~80 px de cada lado, recarga de 60                  |
 | Gabs        | Espaçador | 110  | 5,8            | 5,3          | 168  | 1            | **Controle na mão** (área): 14 / 6 / 22, 11% a 35°, de ~105 a ~195 px à frente, recarga de 60           |
 | Marília     | Destemida | 88   | 7              | 5,9          | 185  | 1            | **Tragadinha** (buff com aura): 40 / 1 / 12, sem dano, aura de 120 ticks, recarga de 480                |
+| Meia        | Técnico   | 90   | 7              | 6            | 180  | 1            | **Comando** (agarrão com combo): 6 / 4 / 32, ~36 px, 9 golpes de 1% e chute de 7% a 40°, recarga de 90  |
 
 O Darllan, além de ser o mais pesado, bate um pouco mais forte nos golpes base: +1 de dano no soco parado e +2 no soco lateral, na rasteira e nos aéreos lateral e para baixo.
 
 A Marília bate um pouco mais fraco: −1 de dano no soco lateral, na rasteira, no aéreo parado e no aéreo lateral. O jogo dela é a aura.
+
+O Meia tem os golpes base 1 tick mais rápidos (startup) e 1% mais fracos: soco parado, soco lateral, rasteira e os aéreos parado, lateral e para baixo.
 
 O elenco (apelidos, traços, especial e provocação de cada um) fica em [`docs/ELENCO.md`](ELENCO.md).
