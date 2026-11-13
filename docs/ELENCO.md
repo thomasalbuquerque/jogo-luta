@@ -545,6 +545,43 @@ Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
 - **Ideias guardadas:** se o João Frango provocar com ela na luta ("Ô Mariiiliaaa!"), ela responde
   "Gentiii!"; respawn soltando uma baforada; "Gentiii!" ao levar KO.
 
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Marília — 26-year-old woman, cheerful and dramatic, every now and then pulls out a hand-rolled straw cigarette and gets completely zen.
+Fighting style: fearless — light and quick, small relaxed stance, walks into hits when her aura is on.
+Body: based on the photos; petite and short (one of the shortest in the cast); average natural female build with medium proportions, drawn modestly, not sexualized.
+Outfit: raspberry pink (#E2557F) plain short-sleeve T-shirt, slightly loose, untucked; light-wash (#8DB0D8) high-waist straight jeans with a belt; low off-white (#F6F0E4) sneakers with mint (#8FD9A8) details.
+Signature details: brown hair tied up in a high messy bun with a mint scrunchie, the pink T-shirt, a hand-rolled straw cigarette.
+Colors: primary #E2557F, secondary #8DB0D8, accent #8FD9A8.
+Face/personality: expressive, big wide eyes, dramatic "can you believe this?" look.
+Special move: "Tragadinha" — she pulls a hand-rolled straw cigarette from her back pocket, takes a drag, and exhales a light green smoke that wraps around her body as a glowing aura; while it lasts, hits pass through her.
+Taunt: puts both hands on her cheeks, eyes wide, shakes her head and shouts her catchphrase.
+Extra parts for the parts sheet: one hand holding a thin hand-rolled cigarette between two fingers.
+Props and effects for the effects sheet: the hand-rolled straw cigarette (side view, pointing right, no hands); 1 small orange ember glow; 3 small gray smoke puffs; 1 soft light green (#B5F2C6) glowing aura outline around an empty standing silhouette; 4 light green smoke wisps; 1 small light green sparkle.
+Avoid: text or logos on the clothes; revealing or tight clothes; exaggerated curves; hair below the shoulders.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
+
+- **É uma amiga:** no passo 1, troque `Keep his real face shape` por `Keep her real face shape`; no
+  passo 5, troque `his outfit` por `her outfit`.
+- `<EXPRESSION>`: `wide-eyed dramatic gasp`
+- `<CHARACTER>`:
+  `Marília, 26-year-old woman, petite and short, average natural build, modest, fair skin, brown hair in a high messy bun with a mint (#8FD9A8) scrunchie, expressive wide eyes. Raspberry pink (#E2557F) short-sleeve T-shirt, slightly loose, untucked; light-wash (#8DB0D8) high-waist straight jeans with a belt; off-white sneakers with mint details.`
+- `<LEGWEAR>`: `light-wash jeans`
+- `<SHOE>`: `off-white sneaker with mint details`
+- `<EXTRA>`: `one hand holding a thin hand-rolled cigarette between two fingers`
+- `<ITEMS>`:
+  `1 thin hand-rolled straw cigarette with a pale corn-husk wrap, side view pointing right, no hands; 1 small orange ember glow; 3 small gray smoke puffs; 1 soft light green (#B5F2C6) glowing aura outline shaped like a standing body, empty inside; 4 light green smoke wisps; 1 small light green sparkle`
+- **Cabeças (passo 2):** acrescente `Same high messy bun with the mint scrunchie on every head.`
+  antes de `Bold`. O coque vai na cabeça e o jogo troca a cabeça inteira; se mudar de uma cabeça
+  para outra, o cabelo "pula" quando ela apanha ou provoca.
+- **Peças (passo 3):** se o tronco vier com a camiseta justa ou com decote, anexe a folha de peças
+  e mande
+  `Edit the attached image: make the torso a slightly loose plain T-shirt with a round crew neck, modest. Keep everything else the same.`
+
 ### Arte
 
 Fotos de cada amigo servem de referência para a concept art. O guia de estilo, a ficha de arte de
