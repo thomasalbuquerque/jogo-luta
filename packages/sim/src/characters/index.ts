@@ -3,6 +3,7 @@ import { BASE } from './base';
 import { CROCKO } from './crocko';
 import { DADAZINHO } from './dadazinho';
 import { DARLLAN } from './darllan';
+import { GABS } from './gabs';
 import { JOAO_FRANGO } from './joao-frango';
 import { SCHUMMAKI } from './schummaki';
 import { TAUBA } from './tauba';
@@ -15,7 +16,8 @@ export function registerCharacter(c: Character): void {
   REGISTRY.set(c.id, c);
 }
 
-for (const c of [BASE, SCHUMMAKI, JOAO_FRANGO, DADAZINHO, TAUBA, TCHULA, CROCKO, DARLLAN])
+// O Gabs só tem a ficha: fica registrado, mas fora da seleção até ter o atlas.
+for (const c of [BASE, SCHUMMAKI, JOAO_FRANGO, DADAZINHO, TAUBA, TCHULA, CROCKO, DARLLAN, GABS])
   registerCharacter(c);
 
 /** Personagem usado quando nenhum é escolhido (e nos testes). */

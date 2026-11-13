@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { resolveHits } from '../combat';
+import { createFighter, stepFighter, type Fighter } from '../fighter';
 import { createGame, stepGame } from '../game';
+import type { Solid } from '../physics';
 import { cloneState } from '../snapshot';
 import { px } from '../constants';
 import { Button } from '../input';
@@ -152,6 +155,56 @@ describe('elenco', () => {
     }
     expect(DARLLAN.stats.height).toBe(CROCKO.stats.height);
     expect(DARLLAN.moves.sideLight.damage).toBeGreaterThan(base.moves.sideLight.damage);
+  });
+
+  describe('Gabs', () => {
+    const GABS = getCharacter('gabs');
+    const floor: Solid[] = [{ kind: 'solid', x: px(-2000), y: 0, w: px(4000), h: px(500) }];
+    const run = (fs: Fighter[], inputs: number[], ticks = 1) => {
+      for (let t = 0; t < ticks; t++) {
+        for (const f of fs) stepFighter(f, inputs[f.id] ?? 0, floor);
+        resolveHits(fs);
+      }
+    };
+    /** Gabs no chão olhando para a direita e um alvo com o centro a `gap` px do dele. */
+    const setup = (gap: number) => {
+      const gabs = createFighter(0, { x: 0, y: 0 }, 'gabs');
+      const target = createFighter(1, { x: 0, y: 0 }, 'base');
+      run([gabs, target], [0, 0], 2);
+      gabs.facing = 1;
+      target.x = gabs.x + gabs.w / 2 + px(gap) - target.w / 2;
+      run([gabs, target], [Button.SPECIAL, 0]);
+      run([gabs, target], [0, 0], 24);
+      return target;
+    };
+
+    it('ainda fora da seleção (sem atlas), com especial e provocação', () => {
+      expect(PLAYABLE_CHARACTERS).not.toContain('gabs');
+      expect(GABS.special?.name).toBe('Controle na mão');
+      expect(GABS.taunt.text.length).toBeGreaterThan(0);
+      expect(GABS.blurb.length).toBeGreaterThan(0);
+    });
+
+    it('o bonequinho acerta a média distância e arremessa para a frente', () => {
+      const target = setup(150);
+      expect(target.damage).toBe(11);
+      expect(target.kbx).toBeGreaterThan(0);
+    });
+
+    it('não acerta quem está colado nem quem está atrás', () => {
+      expect(setup(60).damage).toBe(0);
+      expect(setup(-150).damage).toBe(0);
+    });
+
+    it('altura média, um pouco pesado e lento no chão', () => {
+      const base = getCharacter('base');
+      expect(GABS.stats.weight).toBeGreaterThan(base.stats.weight);
+      expect(GABS.stats.weight).toBeLessThan(DARLLAN.stats.weight);
+      expect(GABS.stats.walkSpeed).toBeLessThan(base.stats.walkSpeed);
+      expect(GABS.stats.height).toBeLessThan(CROCKO.stats.height);
+      expect(GABS.stats.height).toBeGreaterThan(DADA.stats.height);
+      expect(GABS.special?.move.knockbackDir).toBe('away');
+    });
   });
 
   it.each(PLAYABLE_CHARACTERS)('%s alcança a plataforma atravessável com 1 pulo', (id) => {
