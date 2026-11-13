@@ -6,6 +6,7 @@ import {
   createImage,
   fadeAlong,
   fillBehind,
+  flipX,
   opaqueBounds,
   packShelves,
   removeSpecks,
@@ -104,6 +105,19 @@ describe('fadeAlong', () => {
     expect(pixel(img, 3, 0)).toEqual([10, 20, 30, 50]);
     expect(pixel(img, 4, 0)[3]).toBe(0);
     expect(pixel(img, 5, 0)[3]).toBe(0);
+  });
+});
+
+describe('flipX', () => {
+  it('troca a esquerda pela direita', () => {
+    const img = createImage(3, 1);
+    fill(img, [1, 1, 1, 255], 0, 0, 1, 1);
+    fill(img, [2, 2, 2, 255], 1, 0, 1, 1);
+    fill(img, [3, 3, 3, 0], 2, 0, 1, 1);
+    flipX(img);
+    expect(pixel(img, 0, 0)).toEqual([3, 3, 3, 0]);
+    expect(pixel(img, 1, 0)).toEqual([2, 2, 2, 255]);
+    expect(pixel(img, 2, 0)).toEqual([1, 1, 1, 255]);
   });
 });
 

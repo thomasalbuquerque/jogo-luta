@@ -563,6 +563,7 @@ já veio sem fundo (tirado no Photoshop) leva `"key": false`. Campos de cada pe�
 | `stretch` | Estica ou encolhe a peça (`[largura, altura]`), para acertar a proporção com o conceito.        |
 | `fill`    | Põe uma cor por trás do desenho: vidro dos óculos que veio rosa (misturado com o magenta).      |
 | `fade`    | Some aos poucos de `from` até `to`: a ponta da coxa de pele por cima da canela, sem linha.      |
+| `flip`    | `true` espelha a peça na horizontal (a mão que veio virada); os pontos ficam os da folha.       |
 
 Nomes das peças: `torso`, `hips`, `upperArm`, `forearm`, `thigh`, `shin`, `foot`, `hand_fist`,
 `hand_open`, `hand_taunt`, `head_normal`, `head_hurt`, `head_taunt`, `head_ko`, `portrait` e os
