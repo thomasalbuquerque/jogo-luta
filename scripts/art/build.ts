@@ -17,6 +17,7 @@ import {
   clipPolygon,
   createImage,
   crop,
+  fadeAlong,
   fillBehind,
   opaqueBounds,
   packShelves,
@@ -64,6 +65,11 @@ interface PartDef {
   paint?: { poly: Polygon; color: string }[];
   /** Cor posta por trás do desenho (vidro dos óculos que veio da cor do fundo). */
   fill?: { poly: Polygon; color: string }[];
+  /**
+   * Some aos poucos de `from` até `to` (a ponta da coxa de pele por cima da canela):
+   * a junta fica sem linha.
+   */
+  fade?: { from: Point; to: Point };
   /** Traço de contorno ao longo de um corte. */
   outline?: Polygon[];
   /**
@@ -146,6 +152,10 @@ async function processPart(
   for (const line of def.outline ?? []) {
     if (!outline) throw new Error(`${name}: "outline" precisa de outline no manifesto`);
     strokePolyline(img, local(line), outline.width, outline.color, before);
+  }
+  if (def.fade) {
+    const [from, to] = local([def.fade.from, def.fade.to]);
+    if (from && to) fadeAlong(img, from, to);
   }
 
   removeSpecks(img, SPECK_AREA);
