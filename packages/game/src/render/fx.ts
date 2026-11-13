@@ -93,6 +93,31 @@ export interface CharacterFx {
     hitSound?: SfxName;
     despawnSound?: SfxName;
   };
+  /**
+   * Tragada e aura (bloco buff com `invulnerable`, a Tragadinha da Marília). Enquanto a
+   * mão segura o palheiro, uma brasa (`emberColor`) pisca no socket `ember` da mão,
+   * soltando fumacinhas cinzas (`smoke`), mais na tragada (`inhale`: fração do startup
+   * em que ela começa e acaba, com o som `dragSound`). No 1º frame ativo, a baforada:
+   * fumaça pintada de `color` espalhando em volta do corpo e o som `exhaleSound`. Com a
+   * aura ligada, o boneco ganha um brilho `color` colado na silhueta (o Glow do Phaser,
+   * acompanha cada pose) e fiapos (`wisps`) sobem em volta; nos últimos `blinkTicks` o
+   * brilho pisca. Golpe que passa pela aura (evento `aura` do sim): estrelinha
+   * (`sparkle`) e o som `passSound`. Quando a mão solta o palheiro (o peteleco do
+   * recovery, ou um golpe no meio da tragada), a peça `cig` cai girando.
+   */
+  aura?: {
+    color: number;
+    emberColor: number;
+    smoke: readonly string[];
+    inhale: { from: number; to: number };
+    wisps: readonly string[];
+    sparkle: string;
+    cig: string;
+    blinkTicks: number;
+    dragSound?: SfxName;
+    exhaleSound?: SfxName;
+    passSound?: SfxName;
+  };
 }
 
 export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
@@ -156,6 +181,22 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
       spawnSound: 'pixel_spawn',
       hitSound: 'pixel_hit',
       despawnSound: 'pixel_despawn',
+    },
+  },
+  marilia: {
+    aura: {
+      color: 0xb5f2c6,
+      emberColor: 0xff8a2a,
+      smoke: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
+      // no clipe, o palheiro chega na boca em t ≈ 0.42 e sai em t ≈ 0.9
+      inhale: { from: 0.45, to: 0.88 },
+      wisps: ['fx_wisp1', 'fx_wisp2', 'fx_wisp3', 'fx_wisp4'],
+      sparkle: 'fx_sparkle',
+      cig: 'fx_cig',
+      blinkTicks: 30,
+      dragSound: 'drag_sizzle',
+      exhaleSound: 'exhale_puff',
+      passSound: 'aura_pass',
     },
   },
   'joao-frango': {
