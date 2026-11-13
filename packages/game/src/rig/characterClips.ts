@@ -270,6 +270,80 @@ const WRENCH_POINT: Rot = {
  */
 const SPUN = 1440 - 90;
 
+/**
+ * Crocko na pose de pilates: em pé numa perna só (a de perto, reta), o joelho da
+ * outra levantado na frente, braços abertos (um para a frente, outro para trás),
+ * postura impecável e a cabeça um pouco baixa, avaliando a postura do adversário.
+ */
+const PILATES: Rot = {
+  hips: 0,
+  torso: -3,
+  head: 6,
+  upperArmNear: -100,
+  forearmNear: 4,
+  handNear: -4,
+  upperArmFar: 100,
+  forearmFar: -4,
+  handFar: 4,
+  thighNear: 2,
+  shinNear: 0,
+  footNear: -6,
+  thighFar: -82,
+  shinFar: 100,
+  footFar: 30,
+};
+
+/** O tapa da correção: passo à frente, tronco inclinado e a mão aberta lá na frente. */
+const SLAP: Rot = {
+  torso: 18,
+  head: -2,
+  upperArmNear: -82,
+  forearmNear: -4,
+  handNear: -6,
+  upperArmFar: 45,
+  forearmFar: -40,
+  handFar: 10,
+  thighNear: 32,
+  shinNear: 12,
+  footNear: -24,
+  thighFar: -48,
+  shinFar: 52,
+  footFar: -6,
+};
+
+/**
+ * Alongamento: o braço de trás esticado para cima (mão aberta, palma para a
+ * frente), a mão da frente na cintura. O braço de trás passa atrás da cabeça e não
+ * tampa o rosto.
+ */
+const STRETCH: Rot = {
+  ...STANDING,
+  torso: -4,
+  head: -6,
+  upperArmNear: 28,
+  forearmNear: -118,
+  handNear: 30,
+  upperArmFar: -174,
+  forearmFar: -6,
+  handFar: 0,
+};
+
+/**
+ * "Olha essa postura...": aponta para o adversário com a mão da frente, a outra
+ * na cintura, queixo para cima.
+ */
+const POSTURE_POINT: Rot = {
+  ...STANDING,
+  torso: 0,
+  head: -8,
+  upperArmNear: -86,
+  forearmNear: -6,
+  handNear: 0,
+  upperArmFar: 28,
+  forearmFar: -118,
+  handFar: 30,
+};
+
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.
   schummaki_special: {
@@ -603,6 +677,106 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 106, rot: POCKET, propSpin: SPUN, expression: 'normal', ease: 'inOut' },
       { t: 110, rot: POCKET, prop: null, handFar: 'fist' },
       { t: 120, rot: STANCE, ease: 'inOut' },
+    ],
+  },
+  // Correção postural: entra rápido na pose de pilates (startup curto) e espera a
+  // janela inteira (active), respirando. Se ninguém bater, perde o equilíbrio no
+  // recovery: balança, a perna levantada desce para se segurar e volta à guarda.
+  crocko_special: {
+    timing: 'move',
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      {
+        t: 0.4,
+        rot: { ...STANCE, upperArmNear: -60, upperArmFar: 40 },
+        handNear: 'open',
+        handFar: 'open',
+      },
+      { t: 1, rot: PILATES, ease: 'out' },
+      { t: 1.5, rot: { ...PILATES, torso: -5, head: 4 }, y: -0.5, ease: 'inOut' },
+      { t: 2, rot: PILATES, ease: 'inOut' },
+      {
+        t: 2.25,
+        rot: {
+          ...PILATES,
+          torso: -14,
+          head: -6,
+          upperArmNear: -150,
+          upperArmFar: 145,
+          thighFar: -40,
+          shinFar: 50,
+        },
+        x: -1,
+        expression: 'hurt',
+        ease: 'out',
+      },
+      {
+        t: 2.5,
+        rot: {
+          ...STANDING,
+          torso: 12,
+          upperArmNear: -60,
+          forearmNear: -20,
+          upperArmFar: 70,
+          forearmFar: -20,
+        },
+        x: -1,
+        ease: 'inOut',
+      },
+      { t: 2.75, rot: { ...STANCE, torso: 2 }, expression: 'normal', ease: 'inOut' },
+      { t: 3, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // O contra-ataque pegou (o sim pula para o recovery): o tapa nas costas já sai no
+  // 1º quadro (é o que aparece no congelamento do acerto), segue o movimento e ele
+  // volta para a guarda, satisfeito.
+  crocko_special_counter: {
+    timing: 'move',
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      {
+        t: 0.4,
+        rot: { ...STANCE, upperArmNear: -60, upperArmFar: 40 },
+        handNear: 'open',
+        handFar: 'open',
+      },
+      { t: 1, rot: PILATES, ease: 'out' },
+      { t: 2, rot: SLAP, x: 2, expression: 'taunt' },
+      {
+        t: 2.3,
+        rot: { ...SLAP, torso: 24, upperArmNear: -55, forearmNear: -10, handNear: 10 },
+        x: 2.5,
+        ease: 'out',
+      },
+      {
+        t: 2.7,
+        rot: { ...STANDING, torso: -2, head: 6, upperArmNear: -20, forearmNear: -30 },
+        x: 1.5,
+        expression: 'normal',
+        ease: 'inOut',
+      },
+      { t: 3, rot: STANCE, x: 0, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Alongamento: braços para cima, inclina o tronco para trás e volta; depois
+  // aponta para o adversário ("Olha essa postura...", no `voiceAt` da ficha, 62).
+  crocko_taunt: {
+    timing: 'once',
+    length: 100,
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 10, rot: STRETCH, handFar: 'taunt', ease: 'out' },
+      { t: 22, rot: { ...STRETCH, torso: -14, head: -12, upperArmFar: -178 }, ease: 'inOut' },
+      { t: 34, rot: { ...STRETCH, torso: -16, head: -14, upperArmFar: -180 } },
+      { t: 44, rot: STRETCH, ease: 'inOut' },
+      { t: 54, rot: POSTURE_POINT, handNear: 'taunt', handFar: 'fist', ease: 'out' },
+      { t: 60, rot: POSTURE_POINT, expression: 'taunt' },
+      { t: 74, rot: { ...POSTURE_POINT, head: -2, torso: 2 }, ease: 'inOut' },
+      { t: 88, rot: { ...POSTURE_POINT, head: -10 }, expression: 'normal', ease: 'inOut' },
+      { t: 100, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
     ],
   },
 };
