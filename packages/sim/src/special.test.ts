@@ -8,6 +8,7 @@ import {
   createFighter,
   DEFAULT_STATS,
   effectiveWeight,
+  hasAura,
   isVanished,
   moveFrame,
   stepFighter,
@@ -15,6 +16,7 @@ import {
   teleportSpots,
   type Fighter,
 } from './fighter';
+import type { GameEvent } from './events';
 import { createGame, stepGame, type GameState } from './game';
 import { Button } from './input';
 import type { ProjectileDef } from './moves';
@@ -306,6 +308,94 @@ describe('bloco buff', () => {
     expect(f.buffTicks).toBe(0);
     expect(f.buffDamage).toBe(100);
     expect(effectiveWeight(f)).toBe(100);
+  });
+});
+
+const AURA = character('t-aura', {
+  name: 'Tragadinha',
+  startup: 5,
+  active: 1,
+  recovery: 10,
+  blocks: [{ type: 'buff', durationTicks: 120, invulnerable: true }],
+});
+
+/** Lutador com a aura ligada, parado no chão. */
+function withAura(f: Fighter): Fighter {
+  const press: number[] = [];
+  press[f.id] = SPECIAL;
+  run([f], press);
+  run([f], [0], 16);
+  expect(f.state).toBe('idle');
+  expect(hasAura(f)).toBe(true);
+  return f;
+}
+
+describe('bloco buff com aura (invulnerable)', () => {
+  it('golpe passa sem dano nem knockback, com 1 evento aura por golpe', () => {
+    const b = withAura(onGround(1, AURA, 60));
+    const a = onGround(0, BASE_CHARACTER_ID);
+    a.facing = 1;
+    const events: GameEvent[] = [];
+    stepFighter(a, Button.ATTACK, solids);
+    for (let i = 0; i < 20; i++) {
+      stepFighter(a, 0, solids);
+      stepFighter(b, 0, solids);
+      resolveHits([a, b], events);
+    }
+    expect(b.damage).toBe(0);
+    expect(b.state).toBe('idle');
+    expect(b.kbx).toBe(0);
+    expect(events.filter((e) => e.type === 'aura')).toEqual([
+      expect.objectContaining({ type: 'aura', attacker: 0, victim: 1 }),
+    ]);
+  });
+
+  it('agarrão também passa', () => {
+    const g = closeGame([GRABBER, AURA]);
+    const [a, b] = g.fighters as [Fighter, Fighter];
+    steps(g, [0, SPECIAL]);
+    steps(g, [0, 0], 16);
+    expect(hasAura(b)).toBe(true);
+    steps(g, [SPECIAL, 0]);
+    steps(g, [0, 0], 6);
+    expect(b.state).not.toBe('grabbed');
+    expect(a.grabTicks).toBe(0);
+  });
+
+  it('projétil atravessa e segue voando, com 1 evento aura', () => {
+    const b = withAura(onGround(1, AURA, 60));
+    const shooter = onGround(0, SHOOTER, -40);
+    const shots = [spawnProjectile(shooter, shotDef())];
+    const events: GameEvent[] = [];
+    for (let i = 0; i < 20; i++) {
+      stepProjectiles(shots, [], OPEN);
+      resolveProjectileHits([shooter, b], shots, events);
+    }
+    expect(b.damage).toBe(0);
+    expect(shots).toHaveLength(1);
+    expect(events.filter((e) => e.type === 'aura')).toHaveLength(1);
+  });
+
+  it('acaba no fim do tempo e volta a tomar golpe', () => {
+    const b = withAura(onGround(1, AURA, 60));
+    run([b], [0], 120);
+    expect(hasAura(b)).toBe(false);
+    expect(canBeHit(b)).toBe(true);
+    const a = onGround(0, BASE_CHARACTER_ID);
+    a.facing = 1;
+    run([a, b], [Button.ATTACK, 0]);
+    run([a, b], [0, 0], 10);
+    expect(b.damage).toBeGreaterThan(0);
+  });
+
+  it('se apanhar no startup, o especial cai e a aura não liga', () => {
+    const b = onGround(1, AURA, 60);
+    const a = onGround(0, BASE_CHARACTER_ID);
+    a.facing = 1;
+    run([a, b], [Button.ATTACK, SPECIAL]);
+    run([a, b], [0, 0], 30);
+    expect(b.damage).toBeGreaterThan(0);
+    expect(hasAura(b)).toBe(false);
   });
 });
 

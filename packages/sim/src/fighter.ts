@@ -133,6 +133,8 @@ export interface Fighter extends Body {
   buffDamage: number;
   buffSpeed: number;
   buffWeight: number;
+  /** Aura do buff (`invulnerable`): golpes passam pelo lutador enquanto `buffTicks` > 0. */
+  buffInvuln: boolean;
   /** Agarrado: id de quem segura (-1 = ninguém). */
   grabbedBy: number;
   /** Segurando alguém (bloco `grab`): ticks até arremessar. */
@@ -204,6 +206,7 @@ export function createFighter(
     buffDamage: 100,
     buffSpeed: 100,
     buffWeight: 100,
+    buffInvuln: false,
     grabbedBy: -1,
     grabTicks: 0,
     prevInput: 0,
@@ -531,6 +534,7 @@ function fireBlocks(f: Fighter, move: MoveDef, input: InputMask, world: World): 
     f.buffDamage = move.buff.damagePercent;
     f.buffSpeed = move.buff.speedPercent;
     f.buffWeight = move.buff.weightPercent;
+    f.buffInvuln = move.buff.invulnerable;
   }
   if (move.projectile) {
     const p = spawnProjectile(f, move.projectile);
@@ -680,6 +684,12 @@ function clearBuff(f: Fighter): void {
   f.buffDamage = 100;
   f.buffSpeed = 100;
   f.buffWeight = 100;
+  f.buffInvuln = false;
+}
+
+/** Com a aura do buff ligada: golpes, projéteis e agarrões passam (sem efeito). */
+export function hasAura(f: Fighter): boolean {
+  return f.buffInvuln && f.buffTicks > 0;
 }
 
 /** Dano que o lutador causa, com o buff ativo. */

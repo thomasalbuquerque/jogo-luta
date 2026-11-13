@@ -83,6 +83,7 @@ describe('times', () => {
         gravity: 0,
         facing: 1,
         ticksLeft: 30,
+        passed: 0,
         hit: {
           damage: 8,
           angle: 30,

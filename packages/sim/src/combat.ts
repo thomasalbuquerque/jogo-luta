@@ -5,6 +5,7 @@ import {
   effectiveWeight,
   enterGrabbed,
   enterHitstun,
+  hasAura,
   isVanished,
   KNOCKBACK_DECAY,
   moveDef,
@@ -13,7 +14,7 @@ import {
   skipToRecovery,
   type Fighter,
 } from './fighter';
-import type { GameEvent, HitEvent } from './events';
+import type { AuraEvent, GameEvent, HitEvent } from './events';
 import { idiv, isqrt } from './math';
 import { hitboxesAt, isActiveFrame, type HitProps, type MoveId } from './moves';
 import { moveAndCollide, overlaps, type Box, type Solid } from './physics';
@@ -54,9 +55,10 @@ export interface Hit {
   /**
    * `hit`: acerto normal. `grab`: agarrão (segura e depois arremessa).
    * `counter`: o alvo estava no contra-ataque, então quem leva é quem bateu
-   * (`attacker` é quem contra-ataca).
+   * (`attacker` é quem contra-ataca). `aura`: o alvo está com a aura do buff e o
+   * golpe passa por ele, sem efeito.
    */
-  kind: 'hit' | 'grab' | 'counter';
+  kind: 'hit' | 'grab' | 'counter' | 'aura';
   /** Centro da área em que a hitbox encostou na hurtbox (subpx). */
   x: number;
   y: number;
@@ -123,8 +125,11 @@ export function findHits(fighters: readonly Fighter[], friendlyFire = true): Hit
       const box = boxes.find((b) => overlaps(b, hurt));
       if (!box) continue;
       const { x, y } = contactPoint(box, hurt);
-      // Agarrão ganha do contra-ataque (não é golpe).
-      if (grab) {
+      // A aura deixa passar tudo, até agarrão.
+      if (hasAura(v)) {
+        hits.push({ attacker: a.id, victim: v.id, move: a.move, kind: 'aura', x, y });
+      } else if (grab) {
+        // Agarrão ganha do contra-ataque (não é golpe).
         if (v.state !== 'grabbed') {
           hits.push({ attacker: a.id, victim: v.id, move: a.move, kind: 'grab', x, y });
         }
@@ -244,6 +249,12 @@ export function resolveHits(
     const attacker = fighters.find((f) => f.id === h.attacker);
     const victim = fighters.find((f) => f.id === h.victim);
     if (!attacker || !victim) continue;
+    if (h.kind === 'aura') {
+      // passa 1 vez por golpe: marca como já "acertado" para não repetir o brilho
+      attacker.moveHits |= 1 << victim.id;
+      events?.push(auraEvent(attacker.id, victim.id, h));
+      continue;
+    }
     if (h.kind === 'grab') {
       startGrab(attacker, victim, h.move);
       if (victim.state === 'grabbed' && victim.grabbedBy === attacker.id) {
@@ -278,9 +289,17 @@ export function resolveProjectileHits(
         v.id !== p.owner &&
         (!owner || isFoe(owner, v, friendlyFire)) &&
         canBeHit(v) &&
+        (p.passed & (1 << v.id)) === 0 &&
         overlaps(p, hurtbox(v)),
     );
     if (!victim) {
+      projectiles[alive++] = p;
+      continue;
+    }
+    if (hasAura(victim)) {
+      // atravessa a aura e segue voando; o brilho sai 1 vez
+      p.passed |= 1 << victim.id;
+      events?.push(auraEvent(p.owner, victim.id, contactPoint(p, hurtbox(victim))));
       projectiles[alive++] = p;
       continue;
     }
@@ -358,4 +377,8 @@ function pinGrabbed(v: Fighter, h: Fighter, solids: readonly Solid[]): void {
   v.vx = 0;
   v.vy = 0;
   v.facing = h.facing === 1 ? -1 : 1;
+}
+
+function auraEvent(attacker: number, victim: number, at: { x: number; y: number }): AuraEvent {
+  return { type: 'aura', attacker, victim, x: at.x, y: at.y };
 }
