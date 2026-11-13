@@ -39,6 +39,13 @@ export function moveForClip(c: Character, key: string): MoveDef | null {
   return isBaseMove(key) ? c.moves[key] : null;
 }
 
+/**
+ * Personagens de manga curta com o cotovelo de pele: o antebraço é desenhado sempre na
+ * frente do braço (`drawOrder`). A ponta do braço fica com o contorno do cotovelo e a do
+ * antebraço some aos poucos (`fade` no `recortes.json`), sem linha atravessada.
+ */
+export const FOREARM_IN_FRONT: ReadonlySet<string> = new Set(['darllan']);
+
 /** Nomes dos clipes, na ordem do visualizador. */
 export function clipNames(): string[] {
   return [...new Set([...Object.keys(BASE_CLIPS), 'special', COUNTER_KEY, 'taunt'])];

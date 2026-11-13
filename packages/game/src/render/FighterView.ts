@@ -14,6 +14,7 @@ import {
   type RigFit,
   type Skin,
 } from '../rig/skeleton';
+import { FOREARM_IN_FRONT } from '../rig/library';
 
 /** Chave da textura (atlas) de um personagem. */
 export function characterTextureKey(id: string): string {
@@ -74,12 +75,15 @@ export class FighterView {
   private readonly textureKey: string;
   /** Ordem de desenho atual (muda quando o cotovelo dobra). */
   private order = DRAW_ORDER.join();
+  /** Antebraço sempre na frente do braço (cotovelo de pele, ver `FOREARM_IN_FRONT`). */
+  private readonly forearmFront: boolean;
 
   constructor(scene: Phaser.Scene, characterId: string, hurtboxHeight: number) {
     const { skin, fit } = skinOf(scene, characterId);
     this.skin = skin;
     this.fit = fit;
     this.textureKey = characterTextureKey(characterId);
+    this.forearmFront = FOREARM_IN_FRONT.has(characterId);
     this.height = hurtboxHeight * ART_HEIGHT_FACTOR;
     this.scale = this.height / fit.height;
     this.container = scene.add.container(0, 0);
@@ -120,7 +124,7 @@ export class FighterView {
       this.propImage.setPosition(prop.x, prop.y - this.fit.groundY + lift);
       this.propImage.setRotation(prop.rotation);
     }
-    const order = drawOrder(pose);
+    const order = drawOrder(pose, this.forearmFront);
     const key = order.join();
     if (key !== this.order) {
       this.order = key;

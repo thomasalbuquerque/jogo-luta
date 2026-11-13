@@ -96,11 +96,13 @@ export const FOREARM_FOLD = 85;
 /**
  * Ordem de desenho da pose: a `DRAW_ORDER`, mas com o antebraço logo depois do
  * braço (na frente dele, atrás da mão) quando o cotovelo está dobrado para a frente.
+ * `forearmFront`: o antebraço fica sempre na frente do braço (manga curta, cotovelo de
+ * pele: a ponta do braço guarda o contorno do cotovelo e a do antebraço some aos poucos).
  */
-export function drawOrder(pose: Pose): BoneId[] {
+export function drawOrder(pose: Pose, forearmFront = false): BoneId[] {
   const order = [...DRAW_ORDER];
   for (const side of ['Near', 'Far'] as const) {
-    if ((pose.rot[`forearm${side}`] ?? 0) > -FOREARM_FOLD) continue;
+    if (!forearmFront && (pose.rot[`forearm${side}`] ?? 0) > -FOREARM_FOLD) continue;
     const forearm: BoneId = `forearm${side}`;
     order.splice(order.indexOf(forearm), 1);
     order.splice(order.indexOf(`upperArm${side}`) + 1, 0, forearm);
