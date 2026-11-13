@@ -75,6 +75,24 @@ export interface CharacterFx {
   };
   /** Provocação: migalhas caindo do socket `biscuit` da mão no tick `at` (a mordida). */
   tauntCrumbs?: { frames: readonly string[]; at: number };
+  /**
+   * Bonequinho que aparece no ponto da área e bate por ele (o Gabs jogando): em pé
+   * (`stand`) no startup, num dos `strikes` (sorteado) do 1º frame ativo até o meio
+   * do recovery, e some. Surge e some piscando, com linhas de varredura (`scanlines`);
+   * faísca (`spark`) no golpe. Se o dono apanhar no meio, some na hora. `height`:
+   * altura em relação à hurtbox do dono. A origem de cada quadro é o `pivot` dele (o
+   * meio do corpo, no chão). Só visual: o sim só tem a hitbox da área.
+   */
+  summon?: {
+    stand: string;
+    strikes: readonly string[];
+    scanlines: readonly string[];
+    spark: string;
+    height: number;
+    spawnSound?: SfxName;
+    hitSound?: SfxName;
+    despawnSound?: SfxName;
+  };
 }
 
 export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
@@ -125,6 +143,20 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
       sound: 'flour_thump',
     },
     tauntCrumbs: { frames: ['fx_crumb2', 'fx_crumb3', 'fx_crumb4'], at: 28 },
+  },
+  gabs: {
+    propPuffs: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
+    heldInTauntHand: true,
+    summon: {
+      stand: 'fx_pixel_stand',
+      strikes: ['fx_pixel_punch', 'fx_pixel_kick'],
+      scanlines: ['fx_scan1', 'fx_scan2', 'fx_scan3', 'fx_scan4'],
+      spark: 'fx_spark',
+      height: 0.8,
+      spawnSound: 'pixel_spawn',
+      hitSound: 'pixel_hit',
+      despawnSound: 'pixel_despawn',
+    },
   },
   'joao-frango': {
     projectile: {

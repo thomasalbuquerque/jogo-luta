@@ -256,6 +256,12 @@ export class FightScene extends Phaser.Scene {
   /** O golpe decisivo (ou o KO final) já ganhou câmera lenta nesta luta. */
   private decisiveShown = false;
   private projectileImages: Phaser.GameObjects.Image[] = [];
+  /** Bonequinho de cada lutador (`summon` do personagem), criado no 1º uso. */
+  private summons: Phaser.GameObjects.Image[] = [];
+  /** Último frame do especial visto pelo bonequinho (o hitstop repete o frame). */
+  private summonFrame: number[] = [];
+  /** Golpe sorteado do bonequinho no especial atual. */
+  private summonStrike: string[] = [];
   private projectileTrails: Phaser.GameObjects.Image[] = [];
   private overlayGfx!: Phaser.GameObjects.Graphics;
   private debugGfx!: Phaser.GameObjects.Graphics;
@@ -295,6 +301,7 @@ export class FightScene extends Phaser.Scene {
     this.views = [];
     this.projectileImages = [];
     this.projectileTrails = [];
+    this.summons = [];
     this.fx = new FxLayer(this, DEPTH.fx);
     this.backFx = new FxLayer(this, DEPTH.backFx);
     this.newMatch();
@@ -456,6 +463,8 @@ export class FightScene extends Phaser.Scene {
     this.lastProps = this.state.fighters.map(() => null);
     this.lastCaught = this.state.fighters.map(() => false);
     this.lastSpecialFrame = this.state.fighters.map(() => 0);
+    this.summonFrame = this.state.fighters.map(() => 0);
+    for (const img of this.summons) img.setVisible(false);
     this.overTicks = 0;
     this.loop.reset();
     this.fx.clear();
@@ -912,6 +921,7 @@ export class FightScene extends Phaser.Scene {
       const caught = move?.counter !== undefined && f.moveHits !== 0;
       const justCaught = caught && !this.lastCaught[f.id];
       this.lastCaught[f.id] = caught;
+      if (view && fx?.summon) this.updateSummon(f, fx.summon, move);
       if (!view || !fx || !move) continue;
       const frame = moveFrame(f);
       if (fx.counter && move.counter) this.spawnCounterFx(f, view, fx.counter, move, justCaught);
@@ -1285,6 +1295,111 @@ export class FightScene extends Phaser.Scene {
     }
     this.shake.add(slam.trauma);
     if (slam.sound) playSfx(this, slam.sound);
+  }
+
+  /**
+   * Bonequinho do especial (`summon`), a cada tick: surge piscando no ponto da área no
+   * 1º frame, bate no 1º frame ativo e some piscando no meio do recovery. Se o dono
+   * sai do especial (apanhou), some na hora, com as linhas de varredura.
+   */
+  private updateSummon(
+    f: Fighter,
+    summon: NonNullable<CharacterFx['summon']>,
+    move: MoveDef | null,
+  ): void {
+    const texture = characterTextureKey(f.character);
+    let img = this.summons[f.id];
+    const box = move?.hitboxes[0]?.boxes[0];
+    if (!move || !box) {
+      this.summonFrame[f.id] = 0;
+      if (img?.visible) {
+        this.spawnScanlines(f, img, summon, false);
+        img.setVisible(false);
+      }
+      return;
+    }
+    if (!img) {
+      img = this.add.image(0, 0, texture, summon.stand).setDepth(DEPTH.fx - 1);
+      this.summons[f.id] = img;
+    }
+    const frame = moveFrame(f);
+    const fresh = frame !== this.summonFrame[f.id];
+    this.summonFrame[f.id] = frame;
+    const hitAt = move.startup + 1;
+    const goneAt = move.startup + move.active + Math.round(move.recovery * 0.4);
+    const end = goneAt + 6;
+    if (fresh && frame === 1) {
+      const strikes = summon.strikes;
+      this.summonStrike[f.id] = strikes[Math.floor(Math.random() * strikes.length)] ?? summon.stand;
+    }
+    const name = frame >= hitAt ? (this.summonStrike[f.id] ?? summon.stand) : summon.stand;
+    if (img.frame.name !== name) img.setFrame(name);
+    const anchors = img.frame.customData as { anchors?: { pivot?: [number, number] } };
+    const pivot = anchors.anchors?.pivot;
+    const flip = f.facing === -1;
+    const ox = pivot ? pivot[0] / img.frame.width : 0.5;
+    img.setOrigin(flip ? 1 - ox : ox, pivot ? pivot[1] / img.frame.height : 1);
+    img.setFlipX(flip);
+    const standH = this.textures.getFrame(texture, summon.stand).height;
+    img.setScale((toPx(f.h) * summon.height) / standH);
+    img.setPosition(
+      toPx(f.x + f.w / 2) + f.facing * toPx(box.x),
+      toPx(f.y + f.h / 2 + box.y + box.h / 2),
+    );
+    // pisca ao surgir e ao sumir
+    const blink = (frame <= 6 || frame > goneAt) && frame % 2 === 0;
+    img.setVisible(frame <= end && !blink);
+    if (!fresh) return;
+    if (frame === 1) {
+      this.spawnScanlines(f, img, summon, true);
+      if (summon.spawnSound) playSfx(this, summon.spawnSound);
+    }
+    if (frame === hitAt) {
+      const h = img.displayHeight;
+      this.fx.spawn({
+        texture,
+        frame: summon.spark,
+        x: img.x + f.facing * h * 0.42,
+        y: img.y - h * 0.6,
+        life: 10,
+        scale: (h * 0.45) / this.textures.getFrame(texture, summon.spark).height,
+        scaleEnd: (h * 0.7) / this.textures.getFrame(texture, summon.spark).height,
+      });
+      if (summon.hitSound) playSfx(this, summon.hitSound);
+    }
+    if (frame === goneAt + 1) {
+      this.spawnScanlines(f, img, summon, false);
+      if (summon.despawnSound) playSfx(this, summon.despawnSound);
+    }
+  }
+
+  /** Linhas de varredura sobre o bonequinho: abrindo (surgiu) ou fechando (sumiu). */
+  private spawnScanlines(
+    f: Fighter,
+    img: Phaser.GameObjects.Image,
+    summon: NonNullable<CharacterFx['summon']>,
+    opening: boolean,
+  ): void {
+    const texture = characterTextureKey(f.character);
+    const h = toPx(f.h) * summon.height;
+    const lines = summon.scanlines;
+    lines.forEach((frame, i) => {
+      const w = this.textures.getFrame(texture, frame).width;
+      const wide = (h * 0.9) / w;
+      this.fx.spawn({
+        texture,
+        frame,
+        x: img.x - f.facing * h * 0.05,
+        y: img.y - h * ((i + 0.5) / lines.length),
+        vy: opening ? -0.6 : 0.6,
+        life: 12,
+        scale: opening ? wide * 0.4 : wide,
+        scaleEnd: opening ? wide : wide * 0.2,
+        stretch: 1,
+        tint: i % 2 === 0 ? 0xffffff : colorValue(characterOfFighter(f).colors.secondary),
+        additive: true,
+      });
+    });
   }
 
   /** Brilho na luneta (socket `scope` da arma na mão): o aviso de que a mira começou. */
