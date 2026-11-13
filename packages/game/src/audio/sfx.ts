@@ -20,6 +20,7 @@ const VOLUME: Readonly<Record<SfxName, number>> = {
   appear: 0.4,
   rifle_shot: 0.75,
   rifle_bolt: 0.4,
+  spine_crack: 0.6,
   count: 0.45,
   go: 0.6,
   ui_move: 0.18,

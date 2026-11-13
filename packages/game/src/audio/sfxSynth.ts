@@ -34,6 +34,7 @@ export const SFX_NAMES = [
   'appear',
   'rifle_shot',
   'rifle_bolt',
+  'spine_crack',
   'count',
   'go',
   'ui_move',
@@ -304,6 +305,30 @@ function rifleBolt(sr: number): Float32Array<ArrayBuffer> {
   );
 }
 
+/**
+ * Coluna estalando (o "créc" da Correção postural do Crocko): três estalos secos
+ * e rápidos, cada vez mais fracos, por cima de um baque curto de tapa.
+ */
+function spineCrack(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(41);
+  const bp = new BandPass(sr);
+  const slap = new OnePole(sr);
+  const thump = new Osc(sr);
+  return render(
+    sr,
+    0.26,
+    (t) => {
+      const pop = (at: number, freq: number, gain: number) =>
+        bp.process(r() * 2 - 1, freq, 3) * adEnv(t - at, 0.0008, 0.007) * gain;
+      const crack = pop(0.01, 1900, 2.4) + pop(0.045, 2300, 1.8) + pop(0.072, 1700, 1.3);
+      const hand = slap.lowpass(r() * 2 - 1, 2400) * decay(t, 0.018) * 0.9;
+      const body = thump.sine(sweep(t, 190, 70, 0.04)) * decay(t, 0.05) * 0.5;
+      return crack + hand + body;
+    },
+    0.8,
+  );
+}
+
 /** Amostras do efeito `name`, na taxa `sampleRate`. Sempre iguais para o mesmo nome. */
 export function renderSfx(name: SfxName, sampleRate: number): Float32Array<ArrayBuffer> {
   switch (name) {
@@ -351,6 +376,8 @@ export function renderSfx(name: SfxName, sampleRate: number): Float32Array<Array
       return callChime(sampleRate, true);
     case 'rifle_shot':
       return rifleShot(sampleRate);
+    case 'spine_crack':
+      return spineCrack(sampleRate);
     case 'rifle_bolt':
       return rifleBolt(sampleRate);
   }
