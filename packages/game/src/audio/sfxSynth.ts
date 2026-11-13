@@ -36,6 +36,9 @@ export const SFX_NAMES = [
   'rifle_bolt',
   'spine_crack',
   'flour_thump',
+  'pixel_spawn',
+  'pixel_hit',
+  'pixel_despawn',
   'count',
   'go',
   'ui_move',
@@ -352,6 +355,29 @@ function flourThump(sr: number): Float32Array<ArrayBuffer> {
   );
 }
 
+/**
+ * Golpe do bonequinho 8-bit do Gabs: onda quadrada caindo de tom bem rápido e um
+ * chiado de ruído "pixelado" (o valor só muda a cada tantas amostras), como nos
+ * videogames antigos.
+ */
+function pixelHit(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(47);
+  const osc = new Osc(sr);
+  const hold = Math.max(1, Math.round(sr / 6000));
+  let noise = 0;
+  let i = 0;
+  return render(
+    sr,
+    0.22,
+    (t) => {
+      if (i++ % hold === 0) noise = r() < 0.5 ? -1 : 1;
+      const zap = osc.square(sweep(t, 980, 110, 0.05)) * adEnv(t, 0.001, 0.06) * 0.6;
+      return zap + noise * adEnv(t, 0.001, 0.035) * 0.5;
+    },
+    0.8,
+  );
+}
+
 /** Amostras do efeito `name`, na taxa `sampleRate`. Sempre iguais para o mesmo nome. */
 export function renderSfx(name: SfxName, sampleRate: number): Float32Array<ArrayBuffer> {
   switch (name) {
@@ -405,6 +431,12 @@ export function renderSfx(name: SfxName, sampleRate: number): Float32Array<Array
       return flourThump(sampleRate);
     case 'rifle_bolt':
       return rifleBolt(sampleRate);
+    case 'pixel_spawn':
+      return blips(sampleRate, [72, 76, 79, 84], 0.045, 0.04, 'square');
+    case 'pixel_hit':
+      return pixelHit(sampleRate);
+    case 'pixel_despawn':
+      return blips(sampleRate, [84, 79, 76, 67], 0.04, 0.035, 'square');
   }
 }
 
