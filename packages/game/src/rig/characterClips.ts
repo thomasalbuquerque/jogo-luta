@@ -345,6 +345,130 @@ const POSTURE_POINT: Rot = {
   handFar: 30,
 };
 
+/*
+ * Darllan e o rolo de massa (`fx_pin`): a mão da frente segura o cabo esquerdo e o
+ * punho direito, que vem desenhado no rolo, cai sobre a mão de trás. Os ângulos
+ * dos braços põem as duas mãos a um rolo de distância; o `propSpin` deixa o rolo
+ * deitado. Mudou braço, mão ou rolo: refaça as contas.
+ */
+
+/** Pernas firmes, um pouco abertas, para levantar o rolo. */
+const PLANTED: Rot = {
+  thighNear: 16,
+  shinNear: 12,
+  footNear: -22,
+  thighFar: -22,
+  shinFar: 14,
+  footFar: 0,
+};
+
+/** Rolo na altura do peito, saindo do bolso para subir. */
+const PIN_CHEST: Rot = {
+  ...STANCE,
+  torso: 4,
+  head: -2,
+  upperArmNear: -18,
+  forearmNear: -90,
+  handNear: 0,
+  upperArmFar: -78,
+  forearmFar: -2,
+  handFar: 0,
+};
+const PIN_CHEST_SPIN = 14;
+
+/** Rolo erguido com as duas mãos acima da cabeça, o corpo inclinado para trás. */
+const PIN_RAISED: Rot = {
+  ...PLANTED,
+  torso: -10,
+  head: -10,
+  upperArmNear: -176,
+  forearmNear: -8,
+  handNear: 0,
+  upperArmFar: -162,
+  forearmFar: 0,
+  handFar: 0,
+};
+const PIN_RAISED_SPIN = 100;
+
+/** A pancada: agachado fundo, tronco para a frente e o rolo deitado rente ao chão. */
+const PIN_SLAM: Rot = {
+  hips: 10,
+  torso: 50,
+  head: -32,
+  upperArmNear: -64,
+  forearmNear: -2,
+  handNear: 0,
+  upperArmFar: -78,
+  forearmFar: -54,
+  handFar: 0,
+  thighNear: -30,
+  shinNear: 115,
+  footNear: -78,
+  thighFar: -80,
+  shinFar: 120,
+  footFar: -38,
+};
+const PIN_SLAM_SPIN = -84;
+
+/** Ainda agachado, o rolo no chão, levantando o tronco aos poucos. */
+const PIN_REST: Rot = {
+  hips: 8,
+  torso: 42,
+  head: -24,
+  upperArmNear: -48,
+  forearmNear: -10,
+  handNear: 0,
+  upperArmFar: -58,
+  forearmFar: -62,
+  handFar: 0,
+  thighNear: -26,
+  shinNear: 105,
+  footNear: -72,
+  thighFar: -74,
+  shinFar: 110,
+  footFar: -34,
+};
+const PIN_REST_SPIN = -82;
+
+/** Mão da frente no bolso do avental, na frente da barriga. */
+const APRON_POCKET: Rot = {
+  ...STANDING,
+  torso: 4,
+  head: 4,
+  upperArmNear: -14,
+  forearmNear: -44,
+  handNear: 20,
+  upperArmFar: 6,
+  forearmFar: -30,
+  handFar: 10,
+};
+
+/** Mordendo o biscoito: a mão da frente leva o biscoito à boca. */
+const BITE: Rot = {
+  ...STANDING,
+  torso: 2,
+  head: -6,
+  upperArmNear: -8,
+  forearmNear: -161,
+  handNear: 25,
+  upperArmFar: 4,
+  forearmFar: -30,
+  handFar: 10,
+};
+
+/** "Darllan!": braços bem abertos, peito para fora, cabeça para trás. */
+const ARMS_WIDE: Rot = {
+  ...STANDING,
+  torso: -8,
+  head: -14,
+  upperArmNear: 145,
+  forearmNear: 0,
+  handNear: -10,
+  upperArmFar: -112,
+  forearmFar: -10,
+  handFar: -6,
+};
+
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.
   schummaki_special: {
@@ -777,6 +901,60 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 60, rot: POSTURE_POINT, expression: 'taunt' },
       { t: 74, rot: { ...POSTURE_POINT, head: -2, torso: 2 }, ease: 'inOut' },
       { t: 88, rot: { ...POSTURE_POINT, head: -10 }, expression: 'normal', ease: 'inOut' },
+      { t: 100, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Rolo na bancada: o rolo aparece, sobe acima da cabeça (startup longo: é o aviso)
+  // e desce com tudo no chão no 1º frame ativo. Ele fica agachado com o rolo no chão
+  // (recovery longo), levanta e o rolo some.
+  darllan_special: {
+    timing: 'move',
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 0.2, rot: PIN_CHEST, prop: 'fx_pin', propSpin: PIN_CHEST_SPIN, ease: 'out' },
+      { t: 0.6, rot: PIN_RAISED, propSpin: PIN_RAISED_SPIN, ease: 'out' },
+      {
+        t: 0.92,
+        rot: { ...PIN_RAISED, torso: -15, head: -14, upperArmNear: -184, upperArmFar: -170 },
+        propSpin: PIN_RAISED_SPIN,
+        y: -1,
+        expression: 'taunt',
+        ease: 'inOut',
+      },
+      { t: 1, rot: PIN_SLAM, propSpin: PIN_SLAM_SPIN, ease: 'in' },
+      { t: 2, rot: { ...PIN_SLAM, head: -32 }, propSpin: PIN_SLAM_SPIN },
+      {
+        t: 2.5,
+        rot: PIN_REST,
+        propSpin: PIN_REST_SPIN,
+        expression: 'normal',
+        ease: 'inOut',
+      },
+      { t: 2.75, rot: PIN_CHEST, propSpin: PIN_CHEST_SPIN, ease: 'inOut' },
+      { t: 2.8, rot: PIN_CHEST, prop: null },
+      { t: 3, rot: STANCE, ease: 'inOut' },
+    ],
+  },
+  // Tira um biscoito do bolso do avental, morde (as migalhas saem no tick 28),
+  // mastiga e abre os braços gritando "Darllan!" (voz no `voiceAt` da ficha, 52).
+  darllan_taunt: {
+    timing: 'once',
+    length: 100,
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 8, rot: APRON_POCKET, handNear: 'open', ease: 'out' },
+      { t: 14, rot: APRON_POCKET, handNear: 'taunt', handFar: 'open' },
+      { t: 24, rot: BITE, ease: 'out' },
+      { t: 28, rot: { ...BITE, head: 0, torso: 4 }, ease: 'in' },
+      { t: 33, rot: { ...BITE, head: -9 }, ease: 'inOut' },
+      { t: 37, rot: { ...BITE, head: -3 }, ease: 'inOut' },
+      { t: 41, rot: { ...BITE, head: -9 }, ease: 'inOut' },
+      { t: 45, rot: { ...BITE, head: -4 }, ease: 'inOut' },
+      { t: 51, rot: ARMS_WIDE, expression: 'taunt', ease: 'out' },
+      { t: 70, rot: { ...ARMS_WIDE, torso: -11, head: -18 }, y: -0.5, ease: 'inOut' },
+      { t: 86, rot: ARMS_WIDE, expression: 'normal', ease: 'inOut' },
       { t: 100, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
     ],
   },
