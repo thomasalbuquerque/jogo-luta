@@ -702,7 +702,7 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
           ...PILATES,
           torso: -14,
           head: -6,
-          upperArmNear: -150,
+          upperArmNear: -125,
           upperArmFar: 145,
           thighFar: -40,
           shinFar: 50,
