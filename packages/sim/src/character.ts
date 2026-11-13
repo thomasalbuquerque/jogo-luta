@@ -173,6 +173,11 @@ const GrabBlock = z.strictObject({
   type: z.literal('grab'),
   box: BoxSchema,
   holdTicks: int(1, 120),
+  /**
+   * Golpes durante o agarrão (o combo do Meia): `hits` golpes de `damage`% sem
+   * knockback, espalhados por igual pelo `holdTicks`, antes do arremesso.
+   */
+  combo: z.strictObject({ hits: int(1, 30), damage: int(0, 10) }).optional(),
   /** O arremesso, ao soltar. */
   hit: HitSchema,
 });
@@ -217,6 +222,15 @@ const SpecialSchema = z
         path: ['blocks'],
         message: 'no máximo 1 bloco com hitbox (dash, area ou grab)',
       });
+    }
+    for (const b of s.blocks) {
+      if (b.type === 'grab' && b.combo && b.combo.hits >= b.holdTicks) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['blocks'],
+          message: 'o combo precisa de menos golpes que ticks de agarrão',
+        });
+      }
     }
   });
 
@@ -455,6 +469,7 @@ function compileSpecial(s: ParsedSpecial): Special {
       case 'grab':
         Object.assign(move, hitProps(b.hit, 'facing'), { hitboxes: window(b.box) });
         move.grab = { holdTicks: b.holdTicks };
+        if (b.combo) move.grab.combo = { hits: b.combo.hits, damage: b.combo.damage };
         break;
       case 'projectile':
         move.projectile = {

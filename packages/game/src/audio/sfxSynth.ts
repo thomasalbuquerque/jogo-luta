@@ -42,6 +42,9 @@ export const SFX_NAMES = [
   'drag_sizzle',
   'exhale_puff',
   'aura_pass',
+  'combo_hit',
+  'combo_finish',
+  'command_miss',
   'count',
   'go',
   'ui_move',
@@ -441,6 +444,72 @@ function auraPass(sr: number): Float32Array<ArrayBuffer> {
   );
 }
 
+/**
+ * "Pá" de cada golpe do combo do Meia: estalo seco e curto, mais agudo e mais leve
+ * que o soco normal, para dar para ouvir 9 seguidos sem embolar.
+ */
+function comboHit(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(61);
+  const snap = new OnePole(sr);
+  const body = new BandPass(sr);
+  const osc = new Osc(sr);
+  return render(
+    sr,
+    0.1,
+    (t) => {
+      const n = r() * 2 - 1;
+      const crack = snap.highpass(n, 3000) * decay(t, 0.004) * 0.9;
+      const slap = body.process(n, 1400, 1.4) * decay(t, 0.014) * 1.2;
+      const knock = osc.sine(sweep(t, 320, 140, 0.02)) * adEnv(t, 0.001, 0.025) * 0.6;
+      return drive(crack + slap + knock, 1.8);
+    },
+    0.8,
+  );
+}
+
+/**
+ * "Póu" do chute final do combo (o arremesso): um soco pesado com um estrondo grave
+ * que demora a sumir e o ar rasgando por cima.
+ */
+function comboFinish(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(67);
+  const crack = new OnePole(sr);
+  const air = new BandPass(sr);
+  const boom = new Osc(sr);
+  return render(
+    sr,
+    0.55,
+    (t) => {
+      const n = r() * 2 - 1;
+      const c = crack.highpass(n, 2200) * decay(t, 0.008) * 0.9;
+      const low = boom.sine(sweep(t, 180, 42, 0.09)) * adEnv(t, 0.002, 0.2) * 1.2;
+      const rush = air.process(n, 900 + 1400 * Math.max(0, 1 - t / 0.3), 1) * adEnv(t, 0.01, 0.14);
+      return drive(c + low + rush * 0.6, 2.4);
+    },
+    0.9,
+  );
+}
+
+/**
+ * "Buzz" de comando errado (o Comando do Meia que não pegou): zumbido grave de onda
+ * quadrada, duas notas desafinadas batendo, como o erro de input dos jogos de luta.
+ */
+function commandMiss(sr: number): Float32Array<ArrayBuffer> {
+  const a = new Osc(sr);
+  const b = new Osc(sr);
+  const lp = new OnePole(sr);
+  return render(
+    sr,
+    0.38,
+    (t) => {
+      const buzz = a.square(98) + b.square(104) * 0.8;
+      const env = Math.min(t / 0.006, 1) * (t < 0.3 ? 1 : 1 - (t - 0.3) / 0.08);
+      return lp.lowpass(buzz, 1300) * env * 0.5;
+    },
+    0.7,
+  );
+}
+
 /** Amostras do efeito `name`, na taxa `sampleRate`. Sempre iguais para o mesmo nome. */
 export function renderSfx(name: SfxName, sampleRate: number): Float32Array<ArrayBuffer> {
   switch (name) {
@@ -506,6 +575,12 @@ export function renderSfx(name: SfxName, sampleRate: number): Float32Array<Array
       return exhalePuff(sampleRate);
     case 'aura_pass':
       return auraPass(sampleRate);
+    case 'combo_hit':
+      return comboHit(sampleRate);
+    case 'combo_finish':
+      return comboFinish(sampleRate);
+    case 'command_miss':
+      return commandMiss(sampleRate);
   }
 }
 

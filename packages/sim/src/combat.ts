@@ -353,11 +353,22 @@ export function stepGrabs(
     pinGrabbed(v, h, solids);
     if (h.hitstop > 0) continue;
     h.grabTicks--;
+    const grab = moveDef(h, h.move).grab;
     if (h.grabTicks === 0) {
       v.grabbedBy = -1;
       const damage = applyHit(h, v, h.move);
-      events?.push(hitEvent('throw', h.id, v, damage, center(v)));
+      const e = hitEvent('throw', h.id, v, damage, center(v));
+      if (grab?.combo) e.combo = grab.combo.hits + 1;
+      events?.push(e);
       skipToRecovery(h);
+    } else if (grab?.combo) {
+      const n = comboHitIndex(grab.holdTicks, grab.combo.hits, grab.holdTicks - h.grabTicks);
+      if (n > 0) {
+        // golpe do combo: dano sem knockback e sem congelar; o alvo continua preso
+        const damage = dealtDamage(h, grab.combo.damage);
+        v.damage = Math.min(v.damage + damage, MAX_DAMAGE);
+        events?.push({ ...hitEvent('combo', h.id, v, damage, center(v)), combo: n });
+      }
     }
   }
   for (const v of fighters) {
@@ -365,6 +376,17 @@ export function stepGrabs(
     const h = fighters.find((f) => f.id === v.grabbedBy);
     if (!h || h.grabTicks <= 0) releaseGrabbed(v);
   }
+}
+
+/**
+ * Golpe do combo que cai em `elapsed` ticks de agarrão: os `hits` golpes ficam
+ * espalhados por igual entre o começo e o arremesso (em `holdTicks / (hits + 1)`,
+ * `2 × holdTicks / (hits + 1)`...). Devolve o nº do golpe (1 a `hits`) ou 0.
+ */
+export function comboHitIndex(holdTicks: number, hits: number, elapsed: number): number {
+  const n = idiv(elapsed * (hits + 1), holdTicks);
+  if (n < 1 || n > hits) return 0;
+  return idiv(n * holdTicks, hits + 1) === elapsed ? n : 0;
 }
 
 /** Põe o agarrado colado na frente de quem segura, sem entrar em parede. */

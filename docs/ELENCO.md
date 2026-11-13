@@ -610,16 +610,16 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   pouco menor) e um pouco mais fracos que a média. O jogo dele é chegar colado e pegar: o especial
   tem alcance curto, então ele precisa entrar na cara do adversário. Contraste com o Dadazinho: a
   doze pune quem chega perto; o Meia é quem tem que chegar perto.
-- **Especial — Comando (agarrão):** acima da cabeça dele aparece a sequência ↓ ↘ → + botão, como a
+- **Especial — Comando (agarrão):** acima da cabeça dele aparece a sequência ↓ ← B ↘ → ↑ X, como a
   notação de um golpe de jogo de luta, sem logo de nenhum jogo. Se pegar, ele **não** faz pose de
   agarrar: o adversário fica preso na frente dele enquanto ele solta um combo rápido de socos e
   chutes, um contador de "HITS" sobe a cada golpe, e o último chute arremessa. O jogador só aperta o
   botão do especial, como todo mundo.
-  - **O comando:** desenhado no código (setas e um botão redondo genérico, sem letra nem cor de
-    controle de nenhum console). No startup as setas acendem uma a uma, rapidinho, como se ele
-    estivesse digitando o comando; o botão acende no 1º frame ativo. A sequência vira junto com ele:
-    virado para a esquerda, mostra ↓ ↙ ← + botão, como nos jogos de luta.
-  - **Tempo:** startup curto (~6 ticks, 2 por seta), active curto (~4 ticks, a janela do agarrão).
+  - **O comando:** desenhado no código (setas e botões redondos com as letras B e X, sem cor de
+    controle de nenhum console). No startup os símbolos acendem um a um, 1 por tick, como se ele
+    digitasse o comando rapidinho; o X acende no 1º frame ativo. A sequência vira junto com ele:
+    virado para a esquerda, as setas espelham (↓ → B ↙ ← ↑ X), como nos jogos de luta.
+  - **Tempo:** startup curto (6 ticks, 1 por símbolo), active curto (4 ticks, a janela do agarrão).
     Recovery longo se errar (~32 ticks): é o "fica exposto".
   - **Alcance:** curto, uns 36 px à frente do corpo, da cintura ao ombro. Precisa estar colado.
   - **Se pegar:** o adversário fica preso ~60 ticks (1 s). A cada ~6 ticks sai um golpe do combo (9
@@ -659,6 +659,12 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   grandes de armação preta e quadrada. Corpo magro, de estatura média. Cores: branco,
   ciano-elétrico e jeans (o ciano é mais azul e mais vivo que o turquesa do Crocko, e o branco da
   camiseta lê bem nos menus escuros).
+- **No jogo:** jogável. O comando acende em cima da cabeça enquanto ele entra colado; se pega, o
+  adversário fica preso levando 9 golpes (faísca, "pá" e o contador "N HITS" atrás dele) e o chute
+  final arremessa com uma explosão e o "póu", fechando em "10 HITS" e 16%. Se erra, o comando fica
+  vermelho com o X, toca o "buzz" e ele fica de guarda aberta. Na provocação ajeita os óculos com o
+  indicador e chama com a mão de trás; o balão "Vem!" sai no `voiceAt`. Ficha em
+  `packages/sim/src/characters/meia.ts`.
 - **Ideias guardadas:** respawn estalando os dedos e o pescoço, como antes de uma partida; "GG"
   ao levar KO; um "PERFECT" no fim do combo se ele não tomou dano na luta; um fliperama de luta no
   fundo de um mapa.
@@ -692,7 +698,7 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
 - `<ITEMS>`:
   `4 small white-yellow hit sparks in different shapes; 3 short white speed-streak arcs; 1 big white-yellow impact burst; 3 small gray smoke puffs`
 
-  O comando (↓ ↘ → + botão), o "X" vermelho e o contador "N HITS" não entram na folha: são
+  O comando (↓ ← B ↘ → ↑ X), o "X" vermelho e o contador "N HITS" não entram na folha: são
   desenhados no código, porque a sequência vira com ele e o contador muda de número.
 
 - **Estampa (passo 1):** o texto do conceito pede `No text or logos on the clothes`; a estampa

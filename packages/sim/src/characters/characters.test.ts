@@ -14,7 +14,7 @@ if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA || !CROCKO || !DARLLAN)
   throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs e Marília, cada um com especial e provocação', () => {
+  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs, Marília e Meia, cada um com especial e provocação', () => {
     expect(PLAYABLE_CHARACTERS).toEqual([
       'schummaki',
       'joao-frango',
@@ -25,6 +25,7 @@ describe('elenco', () => {
       'darllan',
       'gabs',
       'marilia',
+      'meia',
     ]);
     for (const c of [
       SCHUMMAKI,
@@ -36,6 +37,7 @@ describe('elenco', () => {
       DARLLAN,
       getCharacter('gabs'),
       getCharacter('marilia'),
+      getCharacter('meia'),
     ]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
@@ -278,6 +280,75 @@ describe('elenco', () => {
       expect(MARILIA.stats.jumpHeight).toBeGreaterThan(base.stats.jumpHeight);
       expect(MARILIA.moves.sideAir.damage).toBeLessThan(base.moves.sideAir.damage);
       expect(MARILIA.special?.cooldownTicks).toBe(480);
+    });
+  });
+
+  describe('Meia', () => {
+    const MEIA = getCharacter('meia');
+    /** Meia e um alvo no chão do mapa de teste, com os centros a `gap` px. */
+    const setup = (gap: number) => {
+      const g = createGame({
+        characters: ['meia', 'base'],
+        rules: { stocks: 3, timeLimitTicks: 0 },
+      });
+      const [meia, foe] = g.fighters as [Fighter, Fighter];
+      stepGame(g, [0, 0]);
+      for (let i = 0; i < 40; i++) stepGame(g, [0, 0]);
+      meia.x = px(-100) - meia.w / 2;
+      foe.x = meia.x + meia.w / 2 + px(gap) - foe.w / 2;
+      meia.facing = 1;
+      foe.facing = -1;
+      stepGame(g, [0, 0]);
+      return { g, meia, foe };
+    };
+    const hitsOf = (g: ReturnType<typeof createGame>, ticks: number) => {
+      const hits: { kind: string; combo?: number; knockback: number }[] = [];
+      for (let i = 0; i < ticks; i++) {
+        stepGame(g, [0, 0]);
+        for (const e of g.events) if (e.type === 'hit') hits.push(e);
+      }
+      return hits;
+    };
+
+    it('jogável, com especial e provocação', () => {
+      expect(PLAYABLE_CHARACTERS).toContain('meia');
+      expect(MEIA.special?.name).toBe('Comando');
+      expect(MEIA.special?.move.grab?.combo).toEqual({ hits: 9, damage: 1 });
+      expect(MEIA.taunt.text).toBe('Vem!');
+      expect(MEIA.blurb.length).toBeGreaterThan(0);
+    });
+
+    it('colado, pega e solta o combo: 10 golpes e 16%', () => {
+      const { g, foe } = setup(56);
+      stepGame(g, [Button.SPECIAL, 0]);
+      const hits = hitsOf(g, 90);
+      expect(hits.map((h) => h.combo)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      expect(hits.at(-1)?.kind).toBe('throw');
+      expect(foe.damage).toBe(16);
+      expect(hits.at(-1)?.knockback).toBeGreaterThan(0);
+    });
+
+    it('alcance curto: de longe erra e fica exposto no recovery', () => {
+      const { g, meia, foe } = setup(110);
+      stepGame(g, [Button.SPECIAL, 0]);
+      const hits = hitsOf(g, 30);
+      expect(hits).toEqual([]);
+      expect(foe.state).not.toBe('grabbed');
+      // ainda no recovery do especial
+      expect(meia.state).toBe('attack');
+      expect(meia.move).toBe('special');
+    });
+
+    it('leve, rápido, golpes base mais rápidos e mais fracos', () => {
+      const base = getCharacter('base');
+      expect(MEIA.stats.height).toBe(getCharacter('gabs').stats.height);
+      expect(MEIA.stats.width).toBeLessThan(base.stats.width);
+      expect(MEIA.stats.weight).toBeLessThan(base.stats.weight);
+      expect(MEIA.stats.walkSpeed).toBeGreaterThan(base.stats.walkSpeed);
+      for (const id of ['neutralLight', 'sideLight', 'sideAir'] as const) {
+        expect(MEIA.moves[id].startup).toBeLessThan(base.moves[id].startup);
+        expect(MEIA.moves[id].damage).toBeLessThan(base.moves[id].damage);
+      }
     });
   });
 

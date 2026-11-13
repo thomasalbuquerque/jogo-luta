@@ -198,6 +198,11 @@ Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da 
         bochechas, brasa, baforada, brilho da aura, fiapos, "plim", retrato). A grade de seleção
         passou a ter duas linhas. Falta o OK do concept pela amiga, a voz gravada e as 5 lutas de
         teste.
+  - [x] Meia: jogável (ficha, arte no esqueleto, especial Comando com o comando ↓ ← B ↘ → ↑ X
+        acendendo em cima da cabeça, o agarrão com combo de 9 golpes e o chute final, contador
+        "N HITS", faíscas, "pá", "póu" e o "buzz" do erro, provocação ajeitando os óculos e chamando
+        "Vem!", retrato). O bloco agarrão ganhou golpes durante o agarrão (`combo`). Falta o bordão,
+        o OK do concept pelo amigo, a voz gravada e as 5 lutas de teste.
 - [ ] Lote 4 (restantes)
 - [ ] 1 ou 2 mapas novos com tema de piadas internas do grupo.
 

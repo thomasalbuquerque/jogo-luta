@@ -57,6 +57,8 @@ import {
   type CameraOptions,
   type Rect,
 } from '../render/camera';
+import { commandLook } from '../render/command';
+import { CommandView } from '../render/CommandView';
 import { isDecisiveHit } from '../render/decisive';
 import { characterOfFighter, colorValue } from '../render/fighterLook';
 import { FighterView, characterTextureKey } from '../render/FighterView';
@@ -272,6 +274,14 @@ export class FightScene extends Phaser.Scene {
   private overlayGfx!: Phaser.GameObjects.Graphics;
   private debugGfx!: Phaser.GameObjects.Graphics;
   private bubbles: Phaser.GameObjects.Text[] = [];
+  /** Comando e contador "N HITS" de quem tem agarrão com combo (o Meia); null nos outros. */
+  private commands: (CommandView | null)[] = [];
+  /** Tick até quando o agarrado dá o tranco de um golpe do combo. */
+  private joltUntil: number[] = [];
+  /** Segurando alguém no tick anterior (para saber quando o combo caiu no meio). */
+  private lastGrabbing: boolean[] = [];
+  /** O "buzz" do comando errado já tocou neste especial. */
+  private commandMissed: boolean[] = [];
   private stageView!: StageView;
 
   constructor() {
@@ -332,6 +342,11 @@ export class FightScene extends Phaser.Scene {
     this.stageView = new StageView(this, getStage(this.state.stageId), DEPTH);
     this.views = this.state.fighters.map((f) =>
       new FighterView(this, f.character, toPx(f.stats.height)).setDepth(DEPTH.fighters + f.id),
+    );
+    this.commands = this.state.fighters.map((f) =>
+      CHARACTER_FX[f.character]?.combo
+        ? new CommandView(this, DEPTH.ui, colorValue(characterOfFighter(f).colors.secondary))
+        : null,
     );
     this.overlayGfx = this.add.graphics().setDepth(DEPTH.ui);
     this.debugGfx = this.add.graphics().setDepth(DEPTH.debug);
@@ -473,6 +488,10 @@ export class FightScene extends Phaser.Scene {
     this.auraFrame = this.state.fighters.map(() => 0);
     this.summonFrame = this.state.fighters.map(() => 0);
     for (const img of this.summons) img.setVisible(false);
+    this.joltUntil = this.state.fighters.map(() => 0);
+    this.lastGrabbing = this.state.fighters.map(() => false);
+    this.commandMissed = this.state.fighters.map(() => false);
+    for (const c of this.commands) c?.clear();
     this.overTicks = 0;
     this.loop.reset();
     this.fx.clear();
@@ -647,7 +666,12 @@ export class FightScene extends Phaser.Scene {
     for (const e of this.state.events) {
       switch (e.type) {
         case 'hit':
-          this.onHit(e);
+          if (e.kind === 'combo') {
+            this.onComboHit(e);
+          } else {
+            this.onHit(e);
+            if (e.kind === 'throw' && e.combo !== undefined) this.onComboFinish(e);
+          }
           break;
         case 'ko':
           this.onKo(e);
@@ -694,6 +718,101 @@ export class FightScene extends Phaser.Scene {
       this.focus = e.victim;
       this.slowMo.trigger(DECISIVE_SLOWMO_MS, DECISIVE_SLOWMO_SCALE);
     }
+  }
+
+  /**
+   * Golpe do combo durante o agarrão (o Meia): faísca na altura do golpe, linha de
+   * velocidade, o "pá", um tremor leve e o tranco no agarrado, sem congelar; o
+   * contador sobe.
+   */
+  private onComboHit(e: HitEvent): void {
+    const holder = this.state.fighters[e.attacker];
+    const victim = this.state.fighters[e.victim];
+    const view = holder ? this.views[holder.id] : undefined;
+    const combo = holder ? CHARACTER_FX[holder.character]?.combo : undefined;
+    if (!holder || !victim || !view || !combo) return;
+    const n = e.combo ?? 1;
+    this.commands[holder.id]?.hit(n, false);
+    const side = holder.facing;
+    // altura de cada golpe, na ordem do clipe: jab, direto, chute baixo, gancho,
+    // chute alto e giratório (fração da altura, a partir do meio do corpo)
+    const heights = [-0.24, -0.2, 0.3, -0.34, -0.3, -0.22];
+    const x = toPx(victim.x + victim.w / 2) - side * toPx(victim.w) * 0.3;
+    const y = toPx(victim.y + victim.h / 2) + toPx(victim.h) * (heights[(n - 1) % 6] ?? 0);
+    const texture = characterTextureKey(holder.character);
+    // tamanhos pela altura do corpo do agarrado
+    const h = toPx(victim.h);
+    const spark = pick(combo.sparks);
+    const streak = pick(combo.streaks);
+    this.fx.spawn({
+      texture,
+      frame: spark,
+      x,
+      y,
+      life: 8,
+      scale: this.fxScale(texture, spark, h * 0.3),
+      scaleEnd: this.fxScale(texture, spark, h * 0.45),
+      rotation: Math.random() * Math.PI,
+    });
+    this.fx.spawn({
+      texture,
+      frame: streak,
+      x: x - side * 4,
+      y: y + (Math.random() - 0.5) * 6,
+      originX: side === 1 ? 1 : 0,
+      flipX: side === -1,
+      vx: side * 1.2,
+      life: 7,
+      scale: this.fxScale(texture, streak, h * 0.14),
+      alpha: 0.9,
+    });
+    this.shake.add(0.06);
+    this.flashUntil[victim.id] = this.state.tick + 1;
+    this.joltUntil[victim.id] = this.state.tick + 3;
+    if (combo.hitSound) playSfx(this, combo.hitSound);
+  }
+
+  /** Escala para a peça `frame` do atlas ficar com `height` px de mundo de altura. */
+  private fxScale(texture: string, frame: string, height: number): number {
+    return height / Math.max(1, this.textures.getFrame(texture, frame).height);
+  }
+
+  /** Chute final do combo (o arremesso): explosão grande, fumaça, o "póu" e o contador final. */
+  private onComboFinish(e: HitEvent): void {
+    const holder = this.state.fighters[e.attacker];
+    const view = holder ? this.views[holder.id] : undefined;
+    const combo = holder ? CHARACTER_FX[holder.character]?.combo : undefined;
+    if (!holder || !view || !combo) return;
+    this.commands[holder.id]?.hit(e.combo ?? 0, true);
+    const texture = characterTextureKey(holder.character);
+    const h = toPx(holder.h);
+    const x = toPx(e.x);
+    const y = toPx(e.y);
+    this.fx.spawn({
+      texture,
+      frame: combo.burst,
+      x,
+      y,
+      life: 14,
+      scale: this.fxScale(texture, combo.burst, h * 0.9),
+      scaleEnd: this.fxScale(texture, combo.burst, h * 1.3),
+    });
+    combo.smoke.forEach((frame, i) => {
+      this.fx.spawn({
+        texture,
+        frame,
+        x: x + (Math.random() - 0.5) * 20,
+        y: y + (Math.random() - 0.5) * 16,
+        vx: holder.facing * (0.6 + i * 0.4),
+        vy: -0.3 - Math.random() * 0.4,
+        life: 26,
+        scale: this.fxScale(texture, frame, h * 0.3),
+        scaleEnd: this.fxScale(texture, frame, h * 0.55),
+        alpha: 0.85,
+      });
+    });
+    this.shake.add(0.25);
+    if (combo.finishSound) playSfx(this, combo.finishSound);
   }
 
   /** Golpe que passou pela aura: estrelinha verde e o "plim", sem impacto nenhum. */
@@ -888,7 +1007,11 @@ export class FightScene extends Phaser.Scene {
       // sumido no teleporte sorteado: nem corpo, nem marcador, nem caixas
       const hidden = f.state === 'ko' || isVanished(f);
       view.setVisible(!hidden);
-      if (hidden) continue;
+      const command = this.commands[f.id];
+      if (hidden) {
+        command?.clear();
+        continue;
+      }
       const r = this.renderRect(f, alpha);
       // Desloca as caixas do sim para a posição interpolada.
       const dx = r.x - toPx(f.x);
@@ -896,8 +1019,24 @@ export class FightScene extends Phaser.Scene {
       // Treme no congelamento do impacto.
       const shake =
         f.hitstop > 0 && f.state === 'hitstun' ? (this.state.tick % 2 === 0 ? 3 : -3) : 0;
+      // Preso no combo: um tranco para trás a cada golpe (quem segura está na frente).
+      const jolt =
+        f.state === 'grabbed' && this.state.tick < (this.joltUntil[f.id] ?? 0) ? -f.facing * 3 : 0;
 
-      view.setPose(fighterPose(f), r.x + r.w / 2 + shake, r.y + r.h, f.facing, f.grounded);
+      view.setPose(fighterPose(f), r.x + r.w / 2 + shake + jolt, r.y + r.h, f.facing, f.grounded);
+      if (command) {
+        // comando em cima da cabeça; o contador atrás dele, para não cobrir o agarrado
+        const top = r.y + r.h - view.height;
+        command.draw(
+          commandLook(f),
+          r.x + r.w / 2,
+          top - 34,
+          f.facing,
+          this.state.tick,
+          r.x + r.w / 2 - f.facing * (r.w / 2 + 40),
+          top + 18,
+        );
+      }
       this.drawAimLine(f, view);
       this.drawAura(f, view);
       // invencível pisca; levando golpe, pisca claro
@@ -966,6 +1105,7 @@ export class FightScene extends Phaser.Scene {
       this.lastCaught[f.id] = caught;
       if (view && fx?.summon) this.updateSummon(f, fx.summon, move);
       if (view && fx?.aura) this.spawnAuraFx(f, view, fx.aura, move);
+      if (fx?.combo) this.stepCommand(f, fx.combo, move);
       if (!view || !fx || !move) continue;
       const frame = moveFrame(f);
       if (fx.counter && move.counter) this.spawnCounterFx(f, view, fx.counter, move, justCaught);
@@ -1800,6 +1940,34 @@ export class FightScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Comando do agarrão com combo, a cada tick: o "buzz" quando a janela do agarrão
+   * passa sem pegar ninguém, e o contador some se o combo cair no meio (quem segurava
+   * apanhou).
+   */
+  private stepCommand(
+    f: Fighter,
+    combo: NonNullable<CharacterFx['combo']>,
+    move: MoveDef | null,
+  ): void {
+    const command = this.commands[f.id];
+    command?.step();
+    const grabbing = f.grabTicks > 0;
+    if (this.lastGrabbing[f.id] && !grabbing) command?.drop();
+    this.lastGrabbing[f.id] = grabbing;
+    if (!move?.grab) {
+      this.commandMissed[f.id] = false;
+      return;
+    }
+    const missAt = move.startup + move.active + 1;
+    if (moveFrame(f) < missAt) {
+      this.commandMissed[f.id] = false;
+    } else if (f.moveHits === 0 && !this.commandMissed[f.id]) {
+      this.commandMissed[f.id] = true;
+      if (combo.missSound) playSfx(this, combo.missSound);
+    }
+  }
+
   /** Voz da provocação que sai no meio dela (`taunt.voiceAt` da ficha), a cada tick. */
   private lateTauntVoices(): void {
     for (const f of this.state.fighters) {
@@ -1896,6 +2064,11 @@ function drawEllipseProjectile(
 /** Caixa do sim (subpx) em px de mundo, deslocada pela interpolação. */
 function toRect(b: Box, dx: number, dy: number): Rect {
   return { x: toPx(b.x) + dx, y: toPx(b.y) + dy, w: toPx(b.w), h: toPx(b.h) };
+}
+
+/** Um item sorteado da lista (efeitos: não precisa ser determinístico). */
+function pick(list: readonly string[]): string {
+  return list[Math.floor(Math.random() * list.length)] ?? '';
 }
 
 /** Contorno da linha de mira (a tinta do contorno dos personagens). */

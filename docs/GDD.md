@@ -123,6 +123,7 @@ Cada personagem só muda números destes golpes (dano, força, alcance, frames) 
 
 - **Teleporte sorteado** (`target: 'random'`, o Silent quit do Tauba): no active o lutador some (parado, invisível e intangível); no fim do active reaparece em pé num chão do palco, longe das pontas e nunca dentro de bloco. Sorteia `candidates` pontos (padrão 3) com o RNG da luta (`state.rng`, então replay e online continuam determinísticos) e vai para o mais longe do adversário mais perto, ou, em `nearChance`% das vezes (padrão 25), para o mais perto. Volta virado para o adversário e sem invencibilidade no recovery. Como sempre cai num chão, do ar serve de recuperação.
 - **Aura** (bloco buff com `invulnerable: true`, a Tragadinha da Marília): enquanto o buff dura, golpe que encosta passa sem dano, sem knockback e sem hitstun, e quem bateu não congela; o mesmo vale para projétil (atravessa e segue voando) e agarrão (não agarra). Cada golpe ou projétil gera 1 evento `aura` (o brilho e o "plim"). A aura não salva da blast zone, e a invencibilidade da esquiva e do respawn continua separada (`invulnTicks`).
+- **Agarrão com combo** (`combo: { hits, damage }` no bloco agarrão, o Comando do Meia): durante o agarrão saem `hits` golpes de `damage`% cada, sem knockback e sem congelar, espalhados por igual pelo `holdTicks` (com 60 ticks e 9 golpes, um a cada 6 ticks); o arremesso no fim é o último golpe. Cada um gera um evento `hit` de tipo `combo` com o nº do golpe (o arremesso vem como `throw` com o nº final), para o jogo mostrar o contador "N HITS". Se quem segura levar golpe, solta e o combo para.
 - **Opções do especial:** recarga (`cooldownTicks`, contada do começo), 1 vez por ar (`oncePerAir`, volta como a recuperação) e ficar parado no ar no startup (`hoverStartup`).
 - **Provocação** (R / U / Y): só no chão, parado pela duração da ficha; levar golpe desfaz. Sem efeito de jogo. Mostra o bordão num balão e toca o áudio do amigo (`audio/vozes/<taunt.sound>`); enquanto não há áudio gravado, toca uma voz provisória sintetizada a partir do bordão (ou um instrumento: o Tauba toca uma fanfarra de trompete sintetizada). Com `taunt.voiceAt` na ficha, a voz e o balão só saem nesse tick da provocação (o Dadazinho toca a air guitar e só depois fala; o Tchula gira a chave de boca e só depois grita).
 
@@ -251,9 +252,12 @@ Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `b
 | Darllan     | Pesadão   | 124  | 5,4            | 5            | 162  | 1            | **Rolo na bancada** (área): 18 / 5 / 26, 15% a 50°, ~80 px de cada lado, recarga de 60                  |
 | Gabs        | Espaçador | 110  | 5,8            | 5,3          | 168  | 1            | **Controle na mão** (área): 14 / 6 / 22, 11% a 35°, de ~105 a ~195 px à frente, recarga de 60           |
 | Marília     | Destemida | 88   | 7              | 5,9          | 185  | 1            | **Tragadinha** (buff com aura): 40 / 1 / 12, sem dano, aura de 120 ticks, recarga de 480                |
+| Meia        | Técnico   | 90   | 7              | 6            | 180  | 1            | **Comando** (agarrão com combo): 6 / 4 / 32, ~36 px, 9 golpes de 1% e chute de 7% a 40°, recarga de 90  |
 
 O Darllan, além de ser o mais pesado, bate um pouco mais forte nos golpes base: +1 de dano no soco parado e +2 no soco lateral, na rasteira e nos aéreos lateral e para baixo.
 
 A Marília bate um pouco mais fraco: −1 de dano no soco lateral, na rasteira, no aéreo parado e no aéreo lateral. O jogo dela é a aura.
+
+O Meia tem os golpes base 1 tick mais rápidos (startup) e 1% mais fracos: soco parado, soco lateral, rasteira e os aéreos parado, lateral e para baixo.
 
 O elenco (apelidos, traços, especial e provocação de cada um) fica em [`docs/ELENCO.md`](ELENCO.md).

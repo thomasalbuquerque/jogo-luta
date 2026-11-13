@@ -127,8 +127,12 @@ export interface MoveDef extends HitProps {
   };
   /** Contra-ataque: levar golpe durante o active devolve este acerto em quem bateu. */
   counter?: HitProps;
-  /** Agarrão: a hitbox segura o alvo por `holdTicks` e depois arremessa com o HitProps do golpe. */
-  grab?: { holdTicks: number };
+  /**
+   * Agarrão: a hitbox segura o alvo por `holdTicks` e depois arremessa com o
+   * HitProps do golpe. `combo`: `hits` golpes de `damage`% sem knockback durante
+   * o agarrão, espalhados por igual (`comboHitIndex`, em `combat.ts`).
+   */
+  grab?: { holdTicks: number; combo?: { hits: number; damage: number } };
 }
 
 function box(x: number, y: number, w: number, h: number): HitboxDef {

@@ -8,11 +8,17 @@ export type GameEvent = HitEvent | AuraEvent | GrabEvent | KoEvent | RespawnEven
 /**
  * Alguém levou um golpe. `hit`: golpe normal; `counter`: devolvido pelo
  * contra-ataque (`attacker` é quem contra-atacou); `throw`: arremesso do
- * agarrão; `projectile`: projétil (`attacker` é o dono).
+ * agarrão; `combo`: golpe do combo durante o agarrão (sem knockback, o alvo
+ * continua preso); `projectile`: projétil (`attacker` é o dono).
  */
 export interface HitEvent {
   type: 'hit';
-  kind: 'hit' | 'counter' | 'throw' | 'projectile';
+  kind: 'hit' | 'counter' | 'throw' | 'combo' | 'projectile';
+  /**
+   * Agarrão com combo: nº do golpe, a partir de 1, no `combo` e no `throw` (o
+   * arremesso é o último: golpes do combo + 1).
+   */
+  combo?: number;
   attacker: number;
   victim: number;
   /** Dano causado, em %. */

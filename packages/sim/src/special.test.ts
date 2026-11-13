@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defineCharacter, type CharacterSheet } from './character';
 import { BASE_CHARACTER_ID, getCharacter, registerCharacter } from './characters';
-import { canBeHit, resolveHits, resolveProjectileHits } from './combat';
+import { canBeHit, comboHitIndex, resolveHits, resolveProjectileHits } from './combat';
 import { px } from './constants';
 import {
   canUseSpecial,
@@ -753,5 +753,101 @@ describe('bloco agarrão', () => {
     steps(g, [0, 0], 4);
     expect(b.state).toBe('grabbed');
     expect(a.damage).toBe(0);
+  });
+});
+
+const COMBO_GRABBER = character('t-combo', {
+  name: 'Combo',
+  startup: 4,
+  active: 4,
+  recovery: 20,
+  blocks: [
+    {
+      type: 'grab',
+      box: { x: 40, y: 0, w: 50, h: 80 },
+      holdTicks: 30,
+      combo: { hits: 4, damage: 1 },
+      hit: { damage: 7, angle: 40, baseKnockback: 10, knockbackScale: 0.18 },
+    },
+  ],
+});
+
+describe('agarrão com combo', () => {
+  it('espalha os golpes por igual e não repete nenhum', () => {
+    const at = Array.from({ length: 31 }, (_, t) => comboHitIndex(30, 4, t));
+    expect(at.flatMap((n, t) => (n > 0 ? [[t, n]] : []))).toEqual([
+      [6, 1],
+      [12, 2],
+      [18, 3],
+      [24, 4],
+    ]);
+    expect(comboHitIndex(60, 9, 6)).toBe(1);
+    expect(comboHitIndex(60, 9, 54)).toBe(9);
+    expect(comboHitIndex(60, 9, 60)).toBe(0);
+  });
+
+  it('dá os golpes do combo sem soltar e fecha com o arremesso', () => {
+    const g = closeGame([COMBO_GRABBER, BASE_CHARACTER_ID]);
+    const [a, b] = g.fighters as [Fighter, Fighter];
+    const events: GameEvent[] = [];
+    steps(g, [SPECIAL, 0]);
+    for (let i = 0; i < 50; i++) {
+      stepGame(g, [0, 0]);
+      events.push(...g.events);
+      if (b.state === 'grabbed') {
+        // sem knockback nem congelar durante o combo
+        expect(b.kbx).toBe(0);
+        expect(a.hitstop).toBe(0);
+      }
+    }
+    const hits = events.filter((e) => e.type === 'hit');
+    expect(hits.map((e) => [e.kind, e.combo, e.damage])).toEqual([
+      ['combo', 1, 1],
+      ['combo', 2, 1],
+      ['combo', 3, 1],
+      ['combo', 4, 1],
+      ['throw', 5, 7],
+    ]);
+    expect(b.damage).toBe(11);
+    expect(b.state).toBe('hitstun');
+    expect(b.kbx).toBeGreaterThan(0);
+  });
+
+  it('quem segura leva golpe no meio do combo: solta e o combo para', () => {
+    const g = closeGame([COMBO_GRABBER, BASE_CHARACTER_ID, BASE_CHARACTER_ID], 60);
+    const [a, b, c] = g.fighters as [Fighter, Fighter, Fighter];
+    c.x = a.x - px(60);
+    c.facing = 1;
+    // c pousa antes, para bater com o golpe do chão
+    steps(g, [0, 0, 0], 30);
+    steps(g, [SPECIAL, 0, 0]);
+    steps(g, [0, 0, 0], 4 + 13);
+    expect(b.state).toBe('grabbed');
+    expect(b.damage).toBe(2);
+    steps(g, [0, 0, Button.ATTACK]);
+    steps(g, [0, 0, 0], 40);
+    expect(a.damage).toBeGreaterThan(0);
+    expect(b.grabbedBy).toBe(-1);
+    expect(b.damage).toBeLessThan(5);
+  });
+
+  it('a ficha recusa um combo com mais golpes que ticks', () => {
+    expect(() =>
+      character('t-combo-ruim', {
+        name: 'Ruim',
+        startup: 4,
+        active: 4,
+        recovery: 20,
+        blocks: [
+          {
+            type: 'grab',
+            box: { x: 40, y: 0, w: 50, h: 80 },
+            holdTicks: 5,
+            combo: { hits: 5, damage: 1 },
+            hit,
+          },
+        ],
+      }),
+    ).toThrow(/combo/);
   });
 });
