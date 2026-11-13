@@ -443,14 +443,17 @@ const APRON_POCKET: Rot = {
   handFar: 10,
 };
 
-/** Mordendo o biscoito: a mão da frente leva o biscoito à boca. */
+/**
+ * Mordendo o biscoito: a mão da frente leva o biscoito à boca, com a borda dele nos
+ * lábios (o socket `biscuit` da mão um pouco à frente e abaixo do `mouth` da cabeça).
+ */
 const BITE: Rot = {
   ...STANDING,
   torso: 2,
   head: -6,
-  upperArmNear: -8,
-  forearmNear: -161,
-  handNear: 25,
+  upperArmNear: -3,
+  forearmNear: -154,
+  handNear: 20,
   upperArmFar: 4,
   forearmFar: -30,
   handFar: 10,

@@ -11,7 +11,7 @@
     },
     "cabecas": {
       "file": "2-cabecas.png",
-      "scale": 0.75
+      "scale": 0.65
     },
     "efeitos": {
       "file": "4-efeitos.png",
@@ -212,7 +212,7 @@
       "pivot": [255, 520],
       "tip": [255, 320],
       "sockets": {
-        "mouth": [392, 402]
+        "mouth": [432, 418]
       }
     },
     "head_hurt": {
