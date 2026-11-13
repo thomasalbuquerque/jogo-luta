@@ -472,6 +472,61 @@ const ARMS_WIDE: Rot = {
   handFar: -6,
 };
 
+/*
+ * Gabs com o controle: a mão `taunt` da frente é o controle inteiro com as duas mãos
+ * (desenho de frente). O pivô dela é o pulso da mão esquerda do desenho e o controle
+ * fica deitado quando o antebraço aponta para a frente; a mão de trás (`hand_taunt2`,
+ * só a mão direita do desenho) fica escondida atrás da outra ponta do controle. Mudou
+ * braço, mão ou controle: refaça as contas.
+ */
+
+/** Controle na frente da barriga, cotovelos colados no corpo, olhando para a frente. */
+const PAD: Rot = {
+  ...STANCE,
+  torso: 8,
+  head: 6,
+  upperArmNear: -6,
+  forearmNear: -84,
+  handNear: -8,
+  upperArmFar: -30,
+  forearmFar: -62,
+  handFar: 0,
+};
+
+/** Apertando os botões: o controle sobe e desce um pouco, a cabeça vai junto. */
+function mash(down: boolean, extra: Rot = {}): Rot {
+  return {
+    ...PAD,
+    forearmNear: down ? -80 : -88,
+    forearmFar: down ? -60 : -64,
+    handNear: down ? -12 : -4,
+    head: down ? 8 : 4,
+    ...extra,
+  };
+}
+
+/** Apertos rápidos entre `from` e `to` (ticks), a cada `step`. */
+function mashes(from: number, to: number, step: number): Key[] {
+  const keys: Key[] = [];
+  for (let t = from, i = 0; t <= to; t += step, i++) {
+    keys.push({ t, rot: mash(i % 2 === 0), ease: 'inOut' });
+  }
+  return keys;
+}
+
+/** "GG!": os dois braços para cima, mãos abertas, peito para fora. */
+const ARMS_UP: Rot = {
+  ...STANDING,
+  torso: -6,
+  head: -12,
+  upperArmNear: -160,
+  forearmNear: -14,
+  handNear: -10,
+  upperArmFar: -150,
+  forearmFar: -20,
+  handFar: -10,
+};
+
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.
   schummaki_special: {
@@ -959,6 +1014,47 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 70, rot: { ...ARMS_WIDE, torso: -11, head: -18 }, y: -0.5, ease: 'inOut' },
       { t: 86, rot: ARMS_WIDE, expression: 'normal', ease: 'inOut' },
       { t: 100, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Controle na mão: o controle aparece nas mãos (startup: é quando o bonequinho surge
+  // à frente), ele aperta os botões e no 1º frame ativo crava o botão do golpe, com a
+  // cara de quem joga. O bonequinho some no recovery e o controle vai embora.
+  gabs_special: {
+    timing: 'move',
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 0.25, rot: PAD, handNear: 'taunt', handFar: 'taunt', ease: 'out' },
+      { t: 0.45, rot: mash(true), ease: 'inOut' },
+      { t: 0.6, rot: mash(false), ease: 'inOut' },
+      { t: 0.75, rot: mash(true), ease: 'inOut' },
+      { t: 0.9, rot: mash(false, { torso: 4, head: 0 }), ease: 'inOut' },
+      {
+        t: 1,
+        rot: mash(true, { torso: 14, head: 12, handNear: -18 }),
+        expression: 'taunt',
+        ease: 'in',
+      },
+      { t: 2, rot: mash(true, { torso: 12, head: 10, handNear: -16 }) },
+      { t: 2.6, rot: PAD, expression: 'normal', ease: 'inOut' },
+      { t: 2.8, rot: PAD, handNear: 'fist', handFar: 'fist' },
+      { t: 3, rot: STANCE, ease: 'inOut' },
+    ],
+  },
+  // Pega o controle, aperta os botões bem rápido e, no "GG!" (voz no `voiceAt` da
+  // ficha, 50), solta o controle e levanta os braços comemorando.
+  gabs_taunt: {
+    timing: 'once',
+    length: 90,
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 6, rot: { ...PAD, ...STANDING }, handNear: 'taunt', handFar: 'taunt', ease: 'out' },
+      ...mashes(9, 45, 3).map((k) => ({ ...k, rot: { ...k.rot, ...STANDING } })),
+      { t: 48, rot: { ...PAD, ...STANDING, head: 0 }, ease: 'inOut' },
+      { t: 50, rot: ARMS_UP, handNear: 'open', handFar: 'open', expression: 'taunt', ease: 'out' },
+      { t: 64, rot: { ...ARMS_UP, torso: -9, head: -16 }, y: -0.6, ease: 'inOut' },
+      { t: 76, rot: ARMS_UP, expression: 'normal', ease: 'inOut' },
+      { t: 90, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
     ],
   },
 };
