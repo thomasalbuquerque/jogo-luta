@@ -16,7 +16,6 @@ export function registerCharacter(c: Character): void {
   REGISTRY.set(c.id, c);
 }
 
-// O Gabs só tem a ficha: fica registrado, mas fora da seleção até ter o atlas.
 for (const c of [BASE, SCHUMMAKI, JOAO_FRANGO, DADAZINHO, TAUBA, TCHULA, CROCKO, DARLLAN, GABS])
   registerCharacter(c);
 
@@ -32,6 +31,7 @@ export const PLAYABLE_CHARACTERS: readonly string[] = [
   TCHULA.id,
   CROCKO.id,
   DARLLAN.id,
+  GABS.id,
 ];
 
 export function hasCharacter(id: string): boolean {

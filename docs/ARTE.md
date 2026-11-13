@@ -15,6 +15,7 @@ fim o guia de estilo (o porquê de cada regra) e o modelo de ficha.
 | Tchula                                          | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Crocko                                          | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Darllan                                         | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
+| Gabs                                            | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | [Cenário: a laje](#cenário-a-laje)              | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feito |
 | **[Personagem novo](#personagem-novo-firefly)** | **As mesmas 5 imagens, uma de cada**                                  | 5       | a fazer  |
 
@@ -650,6 +651,23 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   a mão de trás do esqueleto. Nas poses, os braços põem as duas mãos a um rolo de distância e o
   `propSpin` deita o rolo; refaça as contas se mudar braço, mão ou rolo.
 
+- **Acessório no pescoço** (o fone gamer do Gabs, desenhado no tronco): a cabeça é desenhada por
+  cima do tronco e o toco de pescoço dela cobriria o fone. O `pivot` das cabeças vai quase no fim do
+  toco de pescoço e o `neck` do tronco sobe até a linha de cima do fone: a cabeça fica apoiada no
+  fone e as conchas aparecem dos dois lados, como no conceito.
+- **Calça com o quadril largo** (jeans do Gabs): o corte reto do quadril deixava os cantos de fora da
+  calça sobrando como um bloco. Os dois cantos de baixo saem com `erase` em diagonal, a calça afina
+  até as coxas, e as coxas ganham um pouco de largura (`stretch`) para cobrir o resto.
+- **Controle nas duas mãos** (o Gabs, desenho de frente com as duas mãos no controle): a peça inteira
+  é a `hand_taunt`, com o `pivot` no pulso da mão esquerda do desenho e o `tip` reto para a direita
+  (o controle fica deitado com o antebraço apontando para a frente). A `hand_taunt2` é só a mão direita
+  (`keep`), escondida atrás da outra ponta do controle pelo braço de trás. Nos clipes, a mão compensa
+  o giro do antebraço para o controle não inclinar quando ele aperta os botões.
+- **Pixel art em tamanho maior** (o bonequinho 8-bit do Gabs): uma segunda folha (`pixel`) aponta para
+  o mesmo `4-efeitos.png` com escala 1, para o bonequinho não borrar ao reduzir. O `pivot` de cada
+  quadro é o meio do corpo no chão: o jogo usa ele como origem, então soco e chute (mais largos) não
+  escorregam em relação ao quadro em pé.
+
 ### 2. Esqueleto e animação: `packages/game/src/rig`
 
 - `skeleton.ts`: os 15 ossos (quadril, tronco, cabeça, braços e pernas da frente e de trás), a
@@ -673,7 +691,8 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   da luneta, a cápsula saltando do ferrolho e o som do tiro, e no contra-ataque do Crocko os anéis
   subindo pelo corpo, o brilho quando pega, o estalo e as linhas de impacto; na pancada do Darllan o
   brilho no rolo erguido, a farinha para os dois lados, as migalhas e o tremor da câmera, e na
-  provocação as migalhas que saem do socket `biscuit` da mão na mordida).
+  provocação as migalhas que saem do socket `biscuit` da mão na mordida; no especial do Gabs o
+  bonequinho `summon` no ponto da área, com as linhas de varredura, o pisca, a faísca e os blips 8-bit).
 - Contra-ataque que pegou alguém toca o clipe `<id do especial>_counter` (o tapa do Crocko) no
   lugar do recovery; sem esse clipe, continua o do especial.
 

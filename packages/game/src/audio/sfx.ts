@@ -22,6 +22,9 @@ const VOLUME: Readonly<Record<SfxName, number>> = {
   rifle_bolt: 0.4,
   spine_crack: 0.6,
   flour_thump: 0.8,
+  pixel_spawn: 0.32,
+  pixel_hit: 0.55,
+  pixel_despawn: 0.28,
   count: 0.45,
   go: 0.6,
   ui_move: 0.18,
@@ -36,6 +39,8 @@ const DETUNE_SPREAD = 160;
 const STEADY: ReadonlySet<SfxName> = new Set([
   'vanish',
   'appear',
+  'pixel_spawn',
+  'pixel_despawn',
   'count',
   'go',
   'ui_move',

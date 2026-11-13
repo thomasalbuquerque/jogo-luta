@@ -462,8 +462,10 @@ Trechos prontos para os textos do Firefly (pasta `art/darllan/`):
   com foto, sem texto nem brasão. Um fone gamer grande com detalhe roxo (`#9B5DE5`) apoiado no
   pescoço marca o lado gamer. Polo, crachá e fone fazem a silhueta dele. Corpo médio com barriga
   leve. Cores: azul-royal, roxo e cinza-claro (o azul e o roxo não repetem a cor de ninguém).
-- **No jogo:** só a ficha por enquanto (`packages/sim/src/characters/gabs.ts`): ele fica registrado
-  no `sim`, mas fora da tela de seleção até ter arte, animações e retrato.
+- **No jogo:** jogável. O controle aparece nas duas mãos (a mão de provocação dele é o controle com
+  as duas mãos, de frente) e o bonequinho 8-bit surge no ponto da área, em pé no startup, dá um soco
+  ou um chute (sorteado) no 1º frame ativo e some piscando no recovery; se o Gabs apanhar, some na
+  hora. Ficha em `packages/sim/src/characters/gabs.ts`.
 - **Ideias guardadas:** respawn com uma tela de "carregando..."; KO com um "GAME OVER" em pixel;
   bordão ligado a jogo ou à prefeitura.
 
@@ -487,7 +489,7 @@ Avoid: text, letters or crest on the badge; logos; any real console or real game
 
 Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
 
-- `<EXPRESSION>`: `focused gamer squint, tongue in the corner of the mouth`
+- `<EXPRESSION>`: `focused gamer squint`
 - `<CHARACTER>`:
   `Gabs, 30-year-old city hall clerk and gamer, average height, slightly chubby with a light belly. Royal blue (#2F5DA8) short-sleeve polo, untucked; ID badge on a thick dark lanyard (white card with photo, no text); big gamer headset with purple (#9B5DE5) details resting on his neck; dark blue jeans; light gray (#B8BCC4) casual sneakers.`
 - `<LEGWEAR>`: `dark blue jeans`
