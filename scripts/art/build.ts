@@ -47,6 +47,11 @@ interface SheetDef {
   scale?: number;
   /** false: a folha já não tem fundo magenta. */
   key?: boolean;
+  /**
+   * Faixa do chroma key: abaixo do 1º valor fica opaco, acima do 2º some (ver `chromaKey`).
+   * Roupa roxa (o Igão) fica perto do magenta e, com a faixa padrão, sairia meio transparente.
+   */
+  keyRange?: readonly [opaqueBelow: number, clearAbove: number];
 }
 
 interface PartDef {
@@ -232,7 +237,8 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
   const sheets = new Map<string, Image>();
   for (const [key, s] of Object.entries(manifest.sheets)) {
     const raw = await readImage(join(dir, s.file));
-    sheets.set(key, s.key === false ? raw : chromaKey(raw));
+    const [opaqueBelow, clearAbove] = s.keyRange ?? [undefined, undefined];
+    sheets.set(key, s.key === false ? raw : chromaKey(raw, opaqueBelow, clearAbove));
   }
 
   const names = Object.keys(manifest.parts);
