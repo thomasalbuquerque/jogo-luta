@@ -46,7 +46,11 @@ export class PauseScene extends Phaser.Scene {
       }).setOrigin(0.5);
     }
 
-    const options: MenuOption[] = online ? this.onlineOptions() : this.localOptions();
+    const options: MenuOption[] = online
+      ? this.onlineOptions()
+      : this.fight.tutorial
+        ? this.tutorialOptions()
+        : this.localOptions();
     this.menu = new MenuList(this, options, { x: 300, y: 220, width: 340 });
     drawControlsCard(this, getControls(), 520, 175);
     uiText(this, width / 2, height - 28, 'Esc, Start ou Especial: continuar', {
@@ -70,6 +74,51 @@ export class PauseScene extends Phaser.Scene {
         },
       },
     ];
+  }
+
+  private tutorialOptions(): MenuOption[] {
+    const options: MenuOption[] = [
+      {
+        label: 'Continuar',
+        onSelect: () => {
+          this.resume();
+        },
+      },
+    ];
+    const tutorial = this.fight.tutorial;
+    if (tutorial?.lesson && tutorial.phase !== 'intro') {
+      options.push(
+        {
+          label: 'Ver de novo',
+          onSelect: () => {
+            tutorial.replayDemo(this.fight.state);
+            this.resume();
+          },
+        },
+        {
+          label: 'Pular lição',
+          onSelect: () => {
+            tutorial.skip(this.fight.state);
+            this.resume();
+          },
+        },
+      );
+    }
+    options.push(
+      {
+        label: 'Recomeçar tutorial',
+        onSelect: () => {
+          this.restart();
+        },
+      },
+      {
+        label: 'Menu inicial',
+        onSelect: () => {
+          this.leave('title');
+        },
+      },
+    );
+    return options;
   }
 
   private localOptions(): MenuOption[] {

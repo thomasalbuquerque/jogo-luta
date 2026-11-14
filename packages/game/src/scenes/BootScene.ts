@@ -4,6 +4,7 @@ import { AUDIO_FILES } from '../audio/files';
 import { prepareSfx } from '../audio/sfx';
 import { characterAtlasPath, characterTextureKey } from '../render/FighterView';
 import { createFxTextures } from '../render/fxTextures';
+import { createMannequinTexture } from '../render/mannequinTexture';
 import { loadStages } from '../render/stageView';
 import { VIEW } from '../render/view';
 
@@ -37,6 +38,7 @@ export class BootScene extends Phaser.Scene {
 
   create(): void {
     createFxTextures(this);
+    createMannequinTexture(this);
     prepareSfx(this);
     // Só em dev: ?rig abre o visualizador de animações.
     const viewer = import.meta.env.DEV && new URLSearchParams(location.search).has('rig');
