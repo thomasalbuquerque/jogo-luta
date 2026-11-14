@@ -148,12 +148,22 @@ Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 
 ## Seleção
 
-- **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; online; ver replay; controles) → personagem → mapa → luta → resultado → revanche.
+- **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; como jogar; online; ver replay; controles) → personagem → mapa → luta → resultado → revanche.
 - **Personagem:** grade de 7 casas (os que existem e silhuetas "em breve"; cresce aos poucos). Até 8, numa linha; com mais, duas linhas de 8 casas mais baixas, e os painéis dos jogadores ficam um pouco menores. Cada jogador anda com as próprias direções, confirma com Ataque ou Pulo e desfaz com Especial; Especial com ninguém pronto (ou Esc) volta ao menu. O painel de cada um mostra o lutador, estilo, especial, barras e bordão. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
 - **Mais jogadores no mesmo PC:** com 3 ou 4 controles conectados, aparece "Mais gente? Controle 3: aperte A para entrar" e cada um que entra ganha um painel (os painéis ficam lado a lado, mais estreitos). Ver [Controles](#controles).
 - **Mapa:** um cursor só, qualquer jogador mexe; por enquanto só a Laje. Com 3 ou 4 jogadores, ao lado do mapa ficam as opções de [times](#times).
 - **HUD:** painel de cada jogador com retrato, % de dano (branco → amarelo → laranja → vermelho → vinho conforme sobe), stocks com a cabecinha do personagem e a barra do especial; relógio no alto.
 - **Barra do especial:** na base do painel de cada jogador, então todos veem a de todos (online também, porque o estado é o mesmo em todo mundo). Enche na cor do jogador (ou do time), mais escura, conforme a recarga (`cooldownTicks`) passa; pronta, fica na cor cheia com um contorno branco pulsando e dá um clarão ao encher. Recarregada mas gasta no ar (`oncePerAir`) fica cinza até tocar o chão. Quem está fora (KO ou sem stocks) fica apagado.
+
+## Tutorial
+
+**Como jogar**, no menu inicial, abre um tutorial interativo. É uma luta de verdade no mapa, sem contagem, sem relógio e com vidas de sobra, sem HUD (no lugar dele fica o painel da lição) e sem gravar replay.
+
+- **Quem aparece:** o jogador é sempre o **Crocko** (o único personagem revelado, porque o especial dele é o mais difícil de entender). O adversário é um **boneco de treino** cinza: o personagem `base` do `sim` (números padrão, sem especial) com peças desenhadas em código no esqueleto padrão (`render/mannequin.ts`), sem arte de nenhum amigo. Os outros personagens a pessoa descobre jogando.
+- **Cada lição:** primeiro o Crocko faz o movimento sozinho ("Veja como faz"), depois passa o controle ("Sua vez!"); quando o jogo percebe que deu certo, mostra "Boa!" e segue. Qualquer teclado ou controle mexe o Crocko, e o painel mostra as teclas de cada botão (as que estão configuradas). Se alguém sai da tela no meio da tentativa, o palco é arrumado de novo.
+- **Lições:** andar; pulo e pulo duplo; queda rápida; descer da plataforma; ataque comum; ataque para o lado; rasteira; ataque para cima; ataques no ar; esquiva; pisão (ground pound); deslizar e pular na parede; agarrar a borda; nocaute (o boneco com 150%); o especial do Crocko (o boneco ataca com um "!" antes, e é preciso contra-atacar); provocação. No fim, treino livre com o boneco.
+- **Pausa** (Esc): continuar, ver a demonstração de novo, pular a lição, recomeçar o tutorial ou voltar ao menu.
+- **Código:** `packages/game/src/tutorial`. As lições (`lessons.ts`) são dados: arrumar o palco, os inputs da demonstração, o comportamento do boneco e a condição de "conseguiu", que lê o estado e os eventos do `sim`. O roteiro (`director.ts`) escolhe os inputs de cada tick e muda de fase. Roda em teste sem Phaser: cada demonstração precisa cumprir a própria lição.
 
 ## Determinismo e replays
 
