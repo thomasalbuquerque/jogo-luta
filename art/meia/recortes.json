@@ -1,6 +1,7 @@
 {
   "out": "characters/meia",
-  "scale": 0.15,
+  "scale": 0.45,
+  "atlasWidth": 2048,
   "outline": {
     "color": "#1a0a0b",
     "width": 9

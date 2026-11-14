@@ -1,6 +1,7 @@
 {
   "out": "characters/marilia",
-  "scale": 0.15,
+  "scale": 0.45,
+  "atlasWidth": 2048,
   "outline": {
     "color": "#220706",
     "width": 9

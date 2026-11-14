@@ -1,6 +1,7 @@
 {
   "out": "characters/joao-frango",
-  "scale": 0.17,
+  "scale": 0.51,
+  "atlasWidth": 2048,
   "outline": {
     "color": "#2b1a22",
     "width": 8
