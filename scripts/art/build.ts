@@ -253,10 +253,11 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
   }
 
   // o retrato sai em vários tamanhos, cada um um frame
-  const entries = Object.keys(manifest.parts).flatMap((name) =>
-    name === 'portrait'
-      ? Object.entries(PORTRAIT_SIZES).map(([frame, height]) => ({ name, frame, height }))
-      : [{ name, frame: name, height: undefined }],
+  const entries = Object.keys(manifest.parts).flatMap(
+    (name): { name: string; frame: string; height?: number }[] =>
+      name === 'portrait'
+        ? Object.entries(PORTRAIT_SIZES).map(([frame, height]) => ({ name, frame, height }))
+        : [{ name, frame: name }],
   );
   const names = entries.map((e) => e.frame);
   const parts: { img: Image; anchors: Anchors }[] = [];
