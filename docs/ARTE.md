@@ -702,6 +702,10 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
 - **Camisa roxa** (Igão): o roxo da camisa e da bola tem pouca diferença do magenta do fundo e,
   com a faixa padrão do chroma key, ficava 10 a 25% transparente. As folhas de peças e de efeitos
   levam `keyRange` (ver acima).
+- **Costas retas** (Igão): o torso veio com a bola do ombro de trás e a cintura bem fina. Cortar só
+  a bola deixava dois buracos nas costas, que apareciam quando o braço subia (Saque, provocação). O
+  `erase` corta as costas numa linha quase reta do colarinho até a barra, o `paint` cobre com o roxo
+  da camisa o que sobrou da manga e o vão da cintura, e o `outline` contorna a linha nova.
 - **Joelheira** (Igão: a canela vem com a joelheira preta no topo): a canela é desenhada na frente
   da coxa (o id entra em `SHIN_IN_FRONT`, em `rig/library.ts`), e o `pivot` dela fica no meio da
   joelheira. Assim a joelheira cobre a ponta do joelho da coxa, dobrada ou esticada. A coxa (só pele
