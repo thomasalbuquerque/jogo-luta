@@ -180,7 +180,7 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
     stepFighter(f, input, stage.solids, state.projectiles, state);
     for (const action of cueNames(f.cues)) events.push({ type: 'action', fighter: f.id, action });
   }
-  stepProjectiles(state.projectiles, stage.solids, stage.blastZone);
+  stepProjectiles(state.projectiles, stage.solids, stage.blastZone, events);
   const friendlyFire = state.rules.friendlyFire === true;
   resolveHits(state.fighters, events, friendlyFire);
   resolveProjectileHits(state.fighters, state.projectiles, events, friendlyFire);

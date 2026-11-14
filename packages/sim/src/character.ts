@@ -114,6 +114,14 @@ const ProjectileBlock = z.strictObject({
   size: z.strictObject({ w: num(4, 200), h: num(4, 200) }),
   /** Onde nasce, em relação ao centro do corpo. */
   offset: z.strictObject({ x: num(-100, 100), y: num(-100, 100) }).default({ x: 30, y: 0 }),
+  /**
+   * Quiques (a bola do Igão): caindo, quica no topo do chão e das plataformas
+   * atravessáveis em vez de sumir, `bounces` vezes. Depois do último, o próximo toque
+   * no chão faz sumir (numa plataforma, passa direto). Parede continua fazendo sumir.
+   */
+  bounces: int(0, 10).default(0),
+  /** Quanto da velocidade vertical sobra a cada quique, em %. */
+  bounceKeep: int(0, 100).default(65),
   hit: HitSchema,
 });
 
@@ -481,6 +489,8 @@ function compileSpecial(s: ParsedSpecial): Special {
           h: px(b.size.h),
           offsetX: px(b.offset.x),
           offsetY: px(b.offset.y),
+          bounces: b.bounces,
+          bounceKeep: b.bounceKeep,
           hit: hitProps(b.hit, 'facing'),
         };
         break;

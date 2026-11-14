@@ -69,6 +69,10 @@ export interface ProjectileDef {
   /** Onde nasce, em relação ao centro do corpo (x para a frente). */
   offsetX: number;
   offsetY: number;
+  /** Quiques no topo do chão e das plataformas (0 = some no chão, como sempre). */
+  bounces: number;
+  /** Quanto da velocidade vertical sobra a cada quique, em %. */
+  bounceKeep: number;
   hit: HitProps;
 }
 
