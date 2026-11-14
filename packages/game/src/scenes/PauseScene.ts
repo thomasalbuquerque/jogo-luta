@@ -86,7 +86,7 @@ export class PauseScene extends Phaser.Scene {
       },
     ];
     const tutorial = this.fight.tutorial;
-    if (tutorial?.lesson) {
+    if (tutorial?.lesson && tutorial.phase !== 'intro') {
       options.push(
         {
           label: 'Ver de novo',

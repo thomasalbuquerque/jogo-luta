@@ -37,7 +37,10 @@ export interface LessonCtx {
 export interface Lesson {
   id: string;
   title: string;
-  /** O que fazer, em uma ou duas frases. Botões entre colchetes: [Ataque]. */
+  /**
+   * O que fazer, em uma ou duas frases. Botões como `{ATTACK}`: viram a tecla ou o
+   * botão do controle que a pessoa escolheu (`formatPrompt`).
+   */
   text: string;
   /** Botões usados (a dica com as teclas de cada um aparece embaixo do texto). */
   buttons: readonly ButtonName[];
@@ -165,7 +168,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'andar',
     title: 'Andar',
-    text: 'Ande para os lados com [Esquerda] e [Direita].',
+    text: 'Ande para os lados com {LEFT} e {RIGHT}.',
     buttons: ['LEFT', 'RIGHT'],
     setup: setupAlone(-40, 0),
     demo: ({ t }) => (during(t, 10, 60) ? RIGHT : during(t, 70, 100) ? LEFT : 0),
@@ -178,7 +181,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'pulo',
     title: 'Pulo e pulo duplo',
-    text: '[Pular] pula. No ar, aperte [Pular] de novo para o pulo duplo. Tocar de leve faz um pulo mais baixo.',
+    text: 'Aperte {JUMP} para pular. No ar, aperte {JUMP} de novo para o pulo duplo. Tocar de leve faz um pulo mais baixo.',
     buttons: ['JUMP'],
     setup: setupAlone(-40, 0),
     demo: ({ t }) => (during(t, 10, 26) || during(t, 34, 46) ? JUMP : 0),
@@ -187,7 +190,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'queda-rapida',
     title: 'Queda rápida',
-    text: 'No ar, depois do ponto mais alto do pulo, segure [Baixo] para cair mais rápido.',
+    text: 'No ar, depois do ponto mais alto do pulo, segure {DOWN} para cair mais rápido.',
     buttons: ['JUMP', 'DOWN'],
     setup: setupAlone(-40, 0),
     demo: ({ t }) => (during(t, 10, 30) ? JUMP : during(t, 40, 80) ? DOWN : 0),
@@ -196,7 +199,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'plataforma',
     title: 'Descer da plataforma',
-    text: 'As plataformas finas dá para atravessar pulando por baixo. Em cima de uma, aperte [Baixo] para descer por ela.',
+    text: 'As plataformas finas dá para atravessar pulando por baixo. Em cima de uma, aperte {DOWN} para descer por ela.',
     buttons: ['DOWN'],
     setup: setupAlone(-265, -150),
     demo: ({ t }) => (during(t, 20, 26) ? DOWN : 0),
@@ -208,7 +211,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'soco',
     title: 'Ataque comum',
-    text: '[Ataque] parado dá um soco rápido. Acerte o boneco!',
+    text: 'Ataque parado ({ATTACK}) dá um soco rápido. Acerte o boneco!',
     buttons: ['ATTACK'],
     setup: setupPair(-40, 40),
     demo: ({ t }) => (during(t, 15, 19) ? ATTACK : 0),
@@ -217,7 +220,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'lado',
     title: 'Ataque para o lado',
-    text: '[Ataque] + [Direita] (ou [Esquerda]) avança e arremessa na horizontal.',
+    text: 'Ataque para o lado ({ATTACK} + {RIGHT} ou {LEFT}) avança e arremessa na horizontal.',
     buttons: ['ATTACK', 'RIGHT'],
     setup: setupPair(-90, 40),
     demo: ({ t }) => (during(t, 15, 21) ? RIGHT | ATTACK : 0),
@@ -226,7 +229,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'rasteira',
     title: 'Rasteira',
-    text: '[Ataque] + [Baixo] no chão é uma rasteira, que joga o adversário para cima.',
+    text: 'Ataque para baixo ({ATTACK} + {DOWN}) no chão é uma rasteira, que joga o adversário para cima.',
     buttons: ['ATTACK', 'DOWN'],
     setup: setupPair(-40, 40),
     demo: ({ t }) => (during(t, 15, 21) ? DOWN | ATTACK : 0),
@@ -235,7 +238,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'cima',
     title: 'Ataque para cima',
-    text: '[Ataque] + [Cima] acerta para cima e dá um impulso. No ar, é a recuperação para voltar ao palco (1 vez por pulo).',
+    text: 'Ataque para cima ({ATTACK} + {UP}) acerta para cima e dá um impulso. No ar, é a recuperação para voltar ao palco (1 vez por pulo).',
     buttons: ['ATTACK', 'UP'],
     setup: setupPair(-40, 40),
     demo: ({ t }) => (during(t, 15, 21) ? UP | ATTACK : 0),
@@ -244,7 +247,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'aereo',
     title: 'Ataques no ar',
-    text: 'No ar, [Ataque] faz golpes aéreos: parado, + [Direita]/[Esquerda] (o mais forte, bom para nocautear) ou + [Baixo].',
+    text: 'No ar, Ataque ({ATTACK}) faz golpes aéreos: parado, + {RIGHT}/{LEFT} (o mais forte, bom para nocautear) ou + {DOWN}.',
     buttons: ['JUMP', 'ATTACK'],
     setup: setupPair(-120, 60),
     demo: ({ t }) =>
@@ -263,7 +266,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'esquiva',
     title: 'Esquiva',
-    text: '[Esquiva] no chão é um dash rápido. No ar, é uma esquiva em qualquer direção que te deixa invencível por um instante (1 por pulo). Faça uma no ar.',
+    text: 'Esquiva ({DODGE}) no chão é um dash rápido. No ar, é uma esquiva em qualquer direção que te deixa invencível por um instante (1 por pulo). Faça uma no ar.',
     buttons: ['DODGE', 'JUMP'],
     setup: setupAlone(-40, 0),
     demo: ({ t }) => (during(t, 10, 24) ? JUMP : during(t, 30, 34) ? DODGE | RIGHT : 0),
@@ -272,7 +275,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'pisao',
     title: 'Pisão (ground pound)',
-    text: 'No ar, [Especial] + [Baixo] despenca e acerta quem estiver perto ao tocar o chão. Todo personagem tem.',
+    text: 'No ar, Especial para baixo ({SPECIAL} + {DOWN}) despenca e acerta quem estiver perto ao tocar o chão. Todo personagem tem.',
     buttons: ['JUMP', 'SPECIAL', 'DOWN'],
     setup: setupPair(-60, 80),
     demo: ({ t }) => (during(t, 10, 28) ? JUMP : during(t, 34, 40) ? DOWN | SPECIAL : 0),
@@ -281,7 +284,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'parede',
     title: 'Deslizar e pular na parede',
-    text: 'No ar, encostado na lateral do palco, segure a direção da parede para deslizar devagar. Aí aperte [Pular]: é o wall jump (até 3 seguidos).',
+    text: 'No ar, encostado na lateral do palco, segure a direção da parede ({RIGHT}) para deslizar devagar. Aí aperte {JUMP}: é o wall jump (até 3 seguidos).',
     buttons: ['RIGHT', 'JUMP'],
     // fora do palco, à esquerda, encostado na parede e já abaixo do topo
     setup: setupAlone(-475, 200),
@@ -295,7 +298,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'borda',
     title: 'Agarrar a borda',
-    text: 'Caindo perto da quina do palco, o lutador agarra a borda sozinho. Pendurado: [Cima] ou a direção do palco sobe, [Pular] pula e [Baixo] solta.',
+    text: 'Caindo perto da quina do palco, o lutador agarra a borda sozinho. Pendurado: {UP} ou a direção do palco sobe, {JUMP} pula e {DOWN} solta.',
     buttons: ['UP', 'JUMP', 'DOWN'],
     // fora do palco, à esquerda, um pouco acima da quina: cai e agarra
     setup: setupAlone(-480, -20),
@@ -320,7 +323,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'contra-ataque',
     title: 'Especial do Crocko: Correção postural',
-    text: 'Esse especial do Crocko é de contra-ataque: ele trava numa pose de pilates e quem bater nele nessa hora leva um tapa que arremessa (devolve até projétil). Se ninguém bater, ele perde o equilíbrio e fica exposto. Quando aparecer o "!", aperte [Especial] logo antes do golpe chegar.',
+    text: 'Esse especial do Crocko é de contra-ataque: ele trava numa pose de pilates e quem bater nele nessa hora leva um tapa que arremessa (devolve até projétil). Se ninguém bater, ele perde o equilíbrio e fica exposto. Quando aparecer o "!", aperte Especial ({SPECIAL}) logo antes do golpe chegar.',
     buttons: ['SPECIAL'],
     setup: setupPair(-60, 60),
     demo: (ctx) => ((ctx.memo.timer ?? 0) === DUMMY_STRIKE - 6 ? SPECIAL : 0),
@@ -331,7 +334,7 @@ export const LESSONS: readonly Lesson[] = [
   {
     id: 'provocacao',
     title: 'Provocação',
-    text: '[Provocação] serve só para zoar (no chão, parado). Cuidado: dá para apanhar no meio dela!',
+    text: 'Provocação ({TAUNT}) serve só para zoar (no chão, parado). Cuidado: dá para apanhar no meio dela!',
     buttons: ['TAUNT'],
     setup: setupPair(-120, 120),
     demo: ({ t }) => (during(t, 15, 19) ? TAUNT : 0),

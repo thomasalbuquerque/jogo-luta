@@ -78,3 +78,29 @@ describe('tutorial', () => {
     expect(director.t).toBe(0);
   });
 });
+
+describe('escolha de teclado ou controle', () => {
+  it('começa esperando a escolha, com ninguém se mexendo', () => {
+    const state = createTutorialGame();
+    const director = new TutorialDirector();
+    director.begin(state);
+    expect(director.phase).toBe('intro');
+    expect(director.inputs(state, 0x1ff)).toEqual([0, 0]);
+    tick(state, director);
+    expect(director.phase).toBe('intro');
+  });
+
+  it('escolher começa a 1ª lição, e recomeçar não pergunta de novo', () => {
+    const state = createTutorialGame();
+    const director = new TutorialDirector();
+    director.begin(state);
+    director.choose(state, 'pad');
+    expect(director.phase).toBe('demo');
+    expect(director.index).toBe(0);
+    director.skip(state);
+    director.begin(state);
+    expect(director.phase).toBe('demo');
+    expect(director.index).toBe(0);
+    expect(director.device).toBe('pad');
+  });
+});

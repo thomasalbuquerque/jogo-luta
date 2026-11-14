@@ -227,6 +227,8 @@ export class FightScene extends Phaser.Scene {
   tutorial: TutorialDirector | null = null;
   /** Tutorial: o "!" em cima do boneco quando ele vai atacar. */
   private tutorialMark: Phaser.GameObjects.Text | null = null;
+  /** Tutorial: o último tick ainda foi na escolha de teclado ou controle. */
+  private tutorialChoosing = false;
 
   /** Gravação da luta em andamento (seed + inputs de cada tick). */
   private recording: Replay | null = null;
@@ -505,7 +507,7 @@ export class FightScene extends Phaser.Scene {
       // o tutorial não é gravado: o roteiro mexe no palco entre os ticks
       this.recording = null;
       this.state = createTutorialGame(newSeed());
-      this.tutorial.start(this.state, 0);
+      this.tutorial.begin(this.state);
     } else if (this.playback) {
       this.recording = null;
       this.state = replayGame(this.playback);
@@ -630,7 +632,13 @@ export class FightScene extends Phaser.Scene {
     const pads = this.net ? undefined : this.setup.pads;
     const sampled = this.controls.sample(this.state.fighters.length, pads);
     const system = this.controls.system & PAUSE_KEYS;
-    if (system & ~this.prevSystem) this.pauseRequested = true;
+    // tutorial: na escolha de teclado ou controle, Enter e Esc são da escolha (e o Enter
+    // que escolheu pode chegar aqui só no tick seguinte, já fora dela)
+    const choosing = this.tutorial?.phase === 'intro';
+    if (system & ~this.prevSystem && !choosing && !this.tutorialChoosing) {
+      this.pauseRequested = true;
+    }
+    this.tutorialChoosing = choosing;
     this.prevSystem = system;
 
     const inputs = this.nextInputs(sampled);

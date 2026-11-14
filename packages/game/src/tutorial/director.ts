@@ -16,6 +16,7 @@ import {
   type LessonCtx,
   type Memo,
 } from './lessons';
+import type { TutorialDevice } from './prompts';
 
 /** O jogador é o Crocko; o adversário é o boneco de treino (o `base` do sim). */
 export const TUTORIAL_CHARACTERS = ['crocko', 'base'] as const;
@@ -24,11 +25,12 @@ export const TUTORIAL_CHARACTERS = ['crocko', 'base'] as const;
 export const TUTORIAL_RULES: MatchRules = { stocks: TUTORIAL_STOCKS, timeLimitTicks: 0 };
 
 /**
+ * `intro`: escolhendo teclado ou controle (ninguém se mexe).
  * `demo`: o Crocko joga sozinho mostrando o movimento. `try`: vez do jogador.
  * `done`: conseguiu (o jogador continua mexendo um pouco antes da próxima lição).
  * `finished`: acabou o tutorial; treino livre com o boneco.
  */
-export type TutorialPhase = 'demo' | 'try' | 'done' | 'finished';
+export type TutorialPhase = 'intro' | 'demo' | 'try' | 'done' | 'finished';
 
 /** Depois que a demonstração consegue, ainda mostra isto antes de passar a vez. */
 export const DEMO_TAIL_TICKS = 45;
@@ -56,7 +58,9 @@ export function createTutorialGame(seed = 1): GameState {
  */
 export class TutorialDirector {
   index = 0;
-  phase: TutorialPhase = 'demo';
+  phase: TutorialPhase = 'intro';
+  /** Teclado ou controle, escolhido no começo (null = ainda não escolheu). */
+  device: TutorialDevice | null = null;
   /** Ticks na fase atual. */
   t = 0;
   private memo: Memo = {};
@@ -82,9 +86,30 @@ export class TutorialDirector {
   /** O boneco vai atacar (mostra o "!" em cima dele). */
   warning(state: GameState): boolean {
     const lesson = this.lesson;
-    if (!lesson?.warning || this.phase === 'finished') return false;
+    if (!lesson?.warning || this.phase === 'finished' || this.phase === 'intro') return false;
     const ctx = this.ctx(state);
     return ctx ? lesson.warning(ctx) : false;
+  }
+
+  /**
+   * Começo do tutorial (e "Recomeçar tutorial"): sem aparelho escolhido, espera a
+   * escolha com os dois parados no palco; com ele, já vai para a 1ª lição.
+   */
+  begin(state: GameState): void {
+    if (this.device) {
+      this.start(state, 0);
+      return;
+    }
+    this.enter('intro');
+    this.index = 0;
+    state.projectiles.length = 0;
+    setupPair(-150, 150)(state);
+  }
+
+  /** Escolheu teclado ou controle: começa a 1ª lição. */
+  choose(state: GameState, device: TutorialDevice): void {
+    this.device = device;
+    this.start(state, 0);
   }
 
   /** Começa a lição `index` pela demonstração (fora da lista: tutorial concluído). */
@@ -117,6 +142,7 @@ export class TutorialDirector {
     const lesson = this.lesson;
     const ctx = this.ctx(state);
     const out: InputMask[] = state.fighters.map(() => NO_INPUT);
+    if (this.phase === 'intro') return out;
     if (!lesson || !ctx || this.phase === 'finished') {
       out[PLAYER] = player;
       return out;
@@ -132,7 +158,7 @@ export class TutorialDirector {
     const lesson = this.lesson;
     const ctx = this.ctx(state);
     this.t++;
-    if (!lesson || !ctx || this.phase === 'finished') return;
+    if (!lesson || !ctx || this.phase === 'finished' || this.phase === 'intro') return;
     const ko = state.events.some((e) => e.type === 'ko');
 
     switch (this.phase) {

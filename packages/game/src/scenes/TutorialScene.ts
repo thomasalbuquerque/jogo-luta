@@ -1,20 +1,31 @@
 import Phaser from 'phaser';
-import type { ButtonName } from '@jogo-luta/sim';
 import { playSfx } from '../audio/sfx';
-import { PAD_ACTIONS, type PadAction } from '../input/bindings';
-import { getControls, type Controls } from '../input/controls';
+import { getControls } from '../input/controls';
+import { readPads } from '../input/InputManager';
+import { Menu } from '../input/menu';
+import { MenuInput } from '../input/menuInput';
 import { VIEW } from '../render/view';
 import type { TutorialPhase } from '../tutorial/director';
 import type { Lesson } from '../tutorial/lessons';
-import { BUTTON_LABELS, keysText, padText } from '../ui/controlsCard';
-import { panel, UI, uiText } from '../ui/theme';
+import {
+  buttonHint,
+  finishedPrompt,
+  footerPrompt,
+  formatPrompt,
+  type TutorialDevice,
+} from '../tutorial/prompts';
+import { MenuList } from '../ui/MenuList';
+import { panel, titleText, UI, uiText } from '../ui/theme';
 import type { FightScene } from './FightScene';
 
 const PANEL_W = 1080;
 const PANEL_X = (VIEW.width - PANEL_W) / 2;
 const PANEL_Y = 14;
+/** Jogadores que podem mexer na escolha (teclado e controle de cada um). */
+const PLAYERS = 2;
 
 const PHASE_LOOK: Record<TutorialPhase, { label: string; color: number }> = {
+  intro: { label: '', color: 0x4cc9f0 },
   demo: { label: '▶  VEJA COMO FAZ', color: 0x4cc9f0 },
   try: { label: 'SUA VEZ!', color: 0xffd166 },
   done: { label: '✓  BOA!', color: 0x80ed99 },
@@ -23,24 +34,13 @@ const PHASE_LOOK: Record<TutorialPhase, { label: string; color: number }> = {
 
 /** Tecla de ver a demonstração de novo (Tab é reservada: nenhum botão do jogo usa). */
 const REPLAY_KEY = 'TAB';
-const REPLAY_KEY_LABEL = 'Tab';
 const REPLAY_BG = '#4cc9f0';
 const REPLAY_BG_HOVER = '#8ddcf6';
 
-function isPadAction(name: ButtonName): name is PadAction {
-  return (PAD_ACTIONS as readonly string[]).includes(name);
-}
-
-/** Teclas de um botão: P1, P2 e o controle. */
-export function buttonHint(controls: Controls, name: ButtonName): string {
-  const keys = controls.keys.map((k) => keysText(k[name])).join(' ou ');
-  const pad = isPadAction(name) ? padText(controls.pad[name]) : 'analógico / D-pad';
-  return `${BUTTON_LABELS[name]}: ${keys} · controle ${pad}`;
-}
-
 /**
- * Painel do tutorial por cima da luta (no lugar do HUD): a lição, o que fazer,
- * as teclas de cada botão e em que fase está (demonstração, sua vez, boa!).
+ * Painel do tutorial por cima da luta (no lugar do HUD). No começo pergunta se a
+ * pessoa vai jogar no teclado ou no controle; depois mostra a lição, o que fazer
+ * (com as teclas ou os botões do que ela escolheu) e em que fase está.
  */
 export class TutorialScene extends Phaser.Scene {
   private gfx!: Phaser.GameObjects.Graphics;
@@ -49,8 +49,13 @@ export class TutorialScene extends Phaser.Scene {
   private body!: Phaser.GameObjects.Text;
   private hint!: Phaser.GameObjects.Text;
   private badge!: Phaser.GameObjects.Text;
+  private footer!: Phaser.GameObjects.Text;
   /** "Ver de novo": repete a demonstração da lição (clique ou Tab), na vez do jogador. */
   private replay!: Phaser.GameObjects.Text;
+  /** Escolha de teclado ou controle (só no começo). */
+  private choice: Phaser.GameObjects.GameObject[] = [];
+  private choiceMenu: MenuList | null = null;
+  private controls: MenuInput | null = null;
   private shown = '';
   private shownPhase: TutorialPhase | null = null;
 
@@ -61,6 +66,9 @@ export class TutorialScene extends Phaser.Scene {
   create(): void {
     this.shown = '';
     this.shownPhase = null;
+    this.choice = [];
+    this.choiceMenu = null;
+    this.controls = null;
     this.gfx = this.add.graphics();
     this.progress = uiText(this, PANEL_X + 22, PANEL_Y + 14, '', {
       fontSize: '15px',
@@ -89,7 +97,7 @@ export class TutorialScene extends Phaser.Scene {
       color: '#0b0e16',
       padding: { x: 12, y: 6 },
     }).setOrigin(1, 0);
-    this.replay = uiText(this, PANEL_X + PANEL_W, 0, `↺  Ver de novo (${REPLAY_KEY_LABEL})`, {
+    this.replay = uiText(this, PANEL_X + PANEL_W, 0, '', {
       fontSize: '18px',
       fontStyle: 'bold',
       color: '#0b0e16',
@@ -113,28 +121,30 @@ export class TutorialScene extends Phaser.Scene {
     this.input.keyboard?.on(`keydown-${REPLAY_KEY}`, (e: KeyboardEvent) => {
       if (!e.repeat) this.replayDemo();
     });
-    uiText(
-      this,
-      VIEW.width / 2,
-      VIEW.height - 22,
-      `${REPLAY_KEY_LABEL}: ver de novo · Esc: pausa (pular lição ou sair)`,
-      {
-        fontSize: '16px',
-        color: UI.muted,
-        stroke: '#0b0e16',
-        strokeThickness: 4,
-      },
-    ).setOrigin(0.5);
+    this.footer = uiText(this, VIEW.width / 2, VIEW.height - 22, '', {
+      fontSize: '16px',
+      color: UI.muted,
+      stroke: '#0b0e16',
+      strokeThickness: 4,
+    }).setOrigin(0.5);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.controls?.destroy();
+    });
   }
 
-  override update(): void {
+  override update(_time: number, delta: number): void {
     const tutorial = this.fight.tutorial;
     if (!tutorial) return;
-    const lesson = tutorial.lesson;
-    const key = String(tutorial.index);
+    if (tutorial.phase === 'intro') {
+      this.updateChoice(delta);
+      return;
+    }
+    if (this.choiceMenu) this.closeChoice();
+    const device = tutorial.device ?? 'keyboard';
+    const key = `${String(tutorial.index)}|${device}`;
     if (key !== this.shown) {
       this.shown = key;
-      this.showLesson(lesson, tutorial.index, tutorial.lessons.length);
+      this.showLesson(tutorial.lesson, tutorial.index, tutorial.lessons.length, device);
     }
     if (tutorial.phase !== this.shownPhase) {
       if (tutorial.phase === 'done') playSfx(this, 'ui_confirm');
@@ -150,6 +160,74 @@ export class TutorialScene extends Phaser.Scene {
     }
   }
 
+  /** Teclado ou controle: abre a escolha no 1º quadro e trata o input dela. */
+  private updateChoice(delta: number): void {
+    if (!this.choiceMenu) this.openChoice();
+    this.setLessonVisible(false);
+    // a pausa (janela perdeu o foco) fica por cima e usa as mesmas teclas
+    if (this.scene.isActive('pause') || !this.controls || !this.choiceMenu) return;
+    const frame = this.controls.poll(PLAYERS, delta);
+    if (frame.any & Menu.BACK) {
+      playSfx(this, 'ui_back');
+      this.fight.leave('title');
+      return;
+    }
+    this.choiceMenu.handle(frame.any);
+  }
+
+  private openChoice(): void {
+    const { width, height } = VIEW;
+    this.controls = new MenuInput();
+    const shade = this.add.rectangle(0, 0, width, height, 0x05070b, 0.55).setOrigin(0);
+    const title = titleText(this, width / 2, 170, 'COMO VOCÊ VAI JOGAR?', 52, '#ffd166');
+    const sub = uiText(
+      this,
+      width / 2,
+      232,
+      'O tutorial vai mostrar os botões do que você escolher.',
+      { fontSize: '20px', stroke: '#0b0e16', strokeThickness: 4 },
+    ).setOrigin(0.5);
+    const back = uiText(this, width / 2, height - 22, 'Esc: voltar ao menu', {
+      fontSize: '16px',
+      color: UI.muted,
+      stroke: '#0b0e16',
+      strokeThickness: 4,
+    }).setOrigin(0.5);
+    this.choice = [shade, title, sub, back];
+    const pick = (device: TutorialDevice) => () => {
+      const fight = this.fight;
+      fight.tutorial?.choose(fight.state, device);
+    };
+    this.choiceMenu = new MenuList(
+      this,
+      [
+        { label: 'Teclado', onSelect: pick('keyboard') },
+        { label: 'Controle (joystick)', onSelect: pick('pad') },
+      ],
+      { x: width / 2, y: 320, width: 420, height: 60, fontSize: 28 },
+    );
+    // com controle conectado, já sugere o controle
+    if (readPads().length > 0) this.choiceMenu.setIndex(1);
+  }
+
+  private closeChoice(): void {
+    for (const o of this.choice) o.destroy();
+    this.choice = [];
+    this.choiceMenu?.setVisible(false);
+    this.choiceMenu = null;
+    this.controls?.destroy();
+    this.controls = null;
+    this.setLessonVisible(true);
+  }
+
+  private setLessonVisible(visible: boolean): void {
+    for (const o of [this.gfx, this.progress, this.title, this.body, this.hint, this.badge]) {
+      o.setVisible(visible);
+    }
+    this.footer.setVisible(visible);
+    if (!visible) this.replay.setVisible(false);
+  }
+
   /** Mostra de novo a demonstração da lição atual (só na vez do jogador, fora da pausa). */
   private replayDemo(): void {
     const fight = this.fight;
@@ -159,20 +237,25 @@ export class TutorialScene extends Phaser.Scene {
     tutorial.replayDemo(fight.state);
   }
 
-  private showLesson(lesson: Lesson | null, index: number, total: number): void {
+  private showLesson(
+    lesson: Lesson | null,
+    index: number,
+    total: number,
+    device: TutorialDevice,
+  ): void {
+    const controls = getControls();
+    this.footer.setText(footerPrompt(device));
+    this.replay.setText(device === 'pad' ? '↺  Ver de novo' : '↺  Ver de novo (Tab)');
     if (!lesson) {
       this.progress.setText('Tutorial');
       this.title.setText('Pronto para lutar!');
-      this.body.setText(
-        'Agora é treino livre com o boneco. Os outros personagens você descobre jogando: cada um tem o seu especial. Esc abre a pausa para voltar ao menu.',
-      );
+      this.body.setText(finishedPrompt(device));
       this.hint.setText('');
     } else {
-      const controls = getControls();
       this.progress.setText(`Lição ${String(index + 1)} de ${String(total)}`);
       this.title.setText(lesson.title);
-      this.body.setText(lesson.text);
-      this.hint.setText(lesson.buttons.map((b) => buttonHint(controls, b)).join('\n'));
+      this.body.setText(formatPrompt(lesson.text, controls, device));
+      this.hint.setText(lesson.buttons.map((b) => buttonHint(controls, device, b)).join('\n'));
     }
     const hintY = this.body.y + this.body.height + 10;
     this.hint.setY(hintY);
