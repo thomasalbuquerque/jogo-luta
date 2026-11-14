@@ -650,14 +650,14 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   o contorno ainda aparece como um arco fraco no soco. Vale também para manga comprida inteiriça
   (camisa do Dadazinho, terno do Tauba), em que a ponta do braço, com contorno, aparecia por cima
   do antebraço no soco.
-- **Manga com punho no cotovelo** (Tchula: o braço da folha termina num punho amarelo, que sai
-  com um corte arredondado e `outline`): aqui a ponta do braço é curta (uns 25 px depois do `tip`)
-  e não cobre a ponta do antebraço, então a solução acima deixa um "fantasma" meio transparente no
-  cotovelo dobrado. Fica ao contrário: o personagem **não** entra em `FOREARM_IN_FRONT`, o antebraço
-  fica inteiro (no cotovelo dobrado ele vai para a frente e a ponta dele, com contorno, desenha a
-  quina) e o `fade` vai no braço, de uns 7 px antes do `tip` até uns 5 px antes do fim do corte. No
-  soco o braço fica por cima e a ponta dele some aos poucos: o contorno do corte não atravessa o
-  antebraço.
+- **Manga com punho no cotovelo** (Tchula: o braço da folha termina num punho amarelo): a solução
+  acima só funciona se a ponta do braço passar do `tip` tanto quanto a ponta do antebraço passa do
+  `pivot` (uns 45 px). Cortada antes do punho, a ponta ficava curta: o antebraço sobrava como um
+  "fantasma" no cotovelo dobrado e, sem o `fade`, a ponta dele desenhava um arco por cima do braço
+  na guarda. A manga é alongada para dentro do punho: o corte arredondado (`erase` + `outline`)
+  desce uns 48 px depois do `tip`, e o amarelo e a linha do punho que ficam acima do corte são
+  pintados (`paint`) com o cinza da sombra das dobras. Depois é igual ao Darllan: o id entra em
+  `FOREARM_IN_FRONT` e o antebraço leva `fade`.
 - **Avental até o joelho** (Darllan): o peitilho vai no `torso` e a saia do avental é o `hips`
   inteiro, sem corte. Os `legNear`/`legFar` ficam escondidos dentro da saia, na altura do quadril,
   e a coxa (calça comprida) fica por trás: no chute ela sai por baixo da saia. Um `stretch` na
