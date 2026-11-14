@@ -20,7 +20,7 @@ describe('cola de comandos', () => {
   it('controle: analógico para andar e os botões do mapa do controle', () => {
     const rows = quickRows(DEFAULT_CONTROLS, 'pad', [0, 1]);
     expect(quickHeaders('pad', [0, 1])).toEqual(['Controle']);
-    expect(rows[0]?.values).toEqual(['Analógico / D-pad']);
+    expect(rows[0]?.values).toEqual(['Analógico/D-pad']);
     expect(rows.find((r) => r.label.startsWith('Pular'))?.values).toEqual(['A']);
     expect(rows.find((r) => r.label === 'Esquiva')?.values).toEqual(['RB / RT']);
   });

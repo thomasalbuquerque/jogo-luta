@@ -15,12 +15,14 @@ const ICON_X = 14;
 const ICON_Y = 12;
 const ICON_H = 30;
 const ICON_ALPHA = 0.7;
-const CARD_Y = ICON_Y + ICON_H + 8;
-const CARD_W = 440;
-const PAD = 16;
-const LABEL_W = 156;
-const ROW_H = 23;
-const NOTE_LABEL_W = 62;
+const CARD_Y = ICON_Y + ICON_H + 6;
+/** Cartão: margem interna, espaço entre colunas, altura da 1ª linha e das outras. */
+const PAD = 10;
+const COL_GAP = 14;
+const TITLE_H = 19;
+const ROW_H = 17;
+/** Largura mínima (para a dica da parede não quebrar em muitas linhas). */
+const MIN_CARD_W = 262;
 const FADE_IN_MS = 120;
 const FADE_OUT_MS = 300;
 const DARK = 0x0b0e16;
@@ -163,68 +165,85 @@ export class QuickControlsView {
     return icon;
   }
 
+  /**
+   * Cartão compacto: na 1ª linha o aparelho (e P1/P2 no teclado), depois uma
+   * linha por comando, a dica da parede e o rodapé. As colunas têm a largura do
+   * texto mais largo, então o cartão fica do tamanho do conteúdo.
+   */
   private drawCard(device: QuickDevice): Phaser.GameObjects.Container {
     const s = this.scene;
     const parts: Phaser.GameObjects.GameObject[] = [];
     const add = (
-      x: number,
-      y: number,
       value: string,
       color: string = UI.text,
       style: Phaser.Types.GameObjects.Text.TextStyle = {},
     ) => {
-      const t = uiText(s, x, y, value, { fontSize: '15px', color, ...style });
+      const t = uiText(s, 0, 0, value, { fontSize: '12px', color, ...style });
       parts.push(t);
       return t;
     };
-    let y = PAD - 2;
-    add(PAD, y, 'COMANDOS', UI.muted, { fontStyle: 'bold' });
-    add(PAD + 96, y, device === 'pad' ? '· Controle' : '· Teclado', cssColor(UI.accent), {
+    const rows = quickRows(this.controls(), device, this.players);
+    const title = add(device === 'pad' ? 'CONTROLE' : 'TECLADO', cssColor(UI.accent), {
       fontStyle: 'bold',
     });
-    add(CARD_W - PAD, y, `${quickButtonLabel(device)}: fechar`, UI.dim, {
-      fontSize: '13px',
-    }).setOrigin(1, 0);
-    y += 28;
+    // no controle, o título já diz de quem é a coluna
+    const headers =
+      device === 'pad'
+        ? []
+        : quickHeaders(device, this.players).map((h, i) =>
+            add(h, cssColor(playerColor(this.players[i] ?? i)), { fontStyle: 'bold' }),
+          );
+    const labels = rows.map((r) => add(r.label, UI.muted));
+    const values = rows.map((r) =>
+      r.values.map((v) => add(v, UI.text, { fontSize: '13px', fontStyle: 'bold' })),
+    );
 
-    const headers = quickHeaders(device, this.players);
-    const colW = (CARD_W - PAD * 2 - LABEL_W) / headers.length;
-    headers.forEach((h, i) => {
-      const color = device === 'pad' ? UI.muted : cssColor(playerColor(this.players[i] ?? i));
-      add(PAD + LABEL_W + i * colW, y, h, color, { fontStyle: 'bold', fontSize: '14px' });
-    });
-    y += 22;
-    for (const row of quickRows(this.controls(), device, this.players)) {
-      add(PAD, y, row.label, UI.muted);
-      row.values.forEach((v, i) => {
-        add(PAD + LABEL_W + i * colW, y, v, UI.text, { fontStyle: 'bold' });
-      });
+    // larguras das colunas: a do texto mais largo de cada uma
+    const labelW = Math.max(title.width, ...labels.map((t) => t.width));
+    const cols = rows[0]?.values.length ?? 0;
+    const colW = Array.from({ length: cols }, (_, c) =>
+      Math.max(headers[c]?.width ?? 0, ...values.map((v) => v[c]?.width ?? 0)),
+    );
+    const colX: number[] = [];
+    let x = PAD + labelW + COL_GAP;
+    for (const w of colW) {
+      colX.push(x);
+      x += w + COL_GAP;
+    }
+    const w = Math.max(MIN_CARD_W, x - COL_GAP + PAD);
+
+    let y = PAD;
+    title.setPosition(PAD, y);
+    headers.forEach((t, c) => t.setPosition(colX[c] ?? 0, y));
+    y += TITLE_H;
+    rows.forEach((_, r) => {
+      labels[r]?.setPosition(PAD, y + 1);
+      values[r]?.forEach((t, c) => t.setPosition(colX[c] ?? 0, y));
       y += ROW_H;
-    }
-    y += 6;
-    const line = s.add.graphics();
-    line.lineStyle(1, LIGHT, 0.25).lineBetween(PAD, y, CARD_W - PAD, y);
-    parts.push(line);
-    y += 10;
+    });
+    y += 4;
+    const inner = w - PAD * 2;
     for (const [label, text] of QUICK_NOTES) {
-      add(PAD, y, label, cssColor(UI.accent), { fontStyle: 'bold', fontSize: '14px' });
-      const t = add(PAD + NOTE_LABEL_W, y, text, UI.text, {
-        fontSize: '14px',
-        wordWrap: { width: CARD_W - PAD * 2 - NOTE_LABEL_W },
-      });
-      y += t.height + 6;
+      const head = add(label, cssColor(UI.accent), { fontStyle: 'bold' }).setPosition(PAD, y);
+      const indent = head.width + 5;
+      const body = add(text, UI.text, { wordWrap: { width: inner - indent } });
+      body.setPosition(PAD + indent, y);
+      y += body.height + 2;
     }
-    y += 2;
-    add(PAD, y, QUICK_FOOTER, UI.dim, { fontSize: '13px', fontStyle: 'italic' });
-    y += 22;
+    const footer = add(QUICK_FOOTER, UI.dim, {
+      fontSize: '11px',
+      fontStyle: 'italic',
+      wordWrap: { width: inner },
+    }).setPosition(PAD, y);
+    y += footer.height;
 
-    const h = y + 6;
+    const h = y + PAD;
     const bg = s.add.graphics();
-    bg.fillStyle(DARK, 0.86).fillRoundedRect(0, 0, CARD_W, h, 14);
-    bg.lineStyle(2, LIGHT, 0.3).strokeRoundedRect(0, 0, CARD_W, h, 14);
+    bg.fillStyle(DARK, 0.8).fillRoundedRect(0, 0, w, h, 10);
+    bg.lineStyle(1, LIGHT, 0.3).strokeRoundedRect(0, 0, w, h, 10);
     parts.unshift(bg);
-    this.barW = CARD_W - 28;
-    this.bar = s.add.graphics().setPosition(14, h - 6);
+    this.barW = w - 20;
+    this.bar = s.add.graphics().setPosition(10, h - 4);
     parts.push(this.bar);
     return s.add.container(ICON_X, CARD_Y, parts).setDepth(20);
   }

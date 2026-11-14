@@ -26,11 +26,11 @@ export interface QuickRow {
 }
 
 const ROWS: readonly (readonly [string, ButtonName])[] = [
-  ['Pular (2× no ar)', 'JUMP'],
-  ['Ataque (+ direção)', 'ATTACK'],
+  ['Pular', 'JUMP'],
+  ['Ataque', 'ATTACK'],
   ['Especial', 'SPECIAL'],
   ['Esquiva', 'DODGE'],
-  ['Provocação', 'TAUNT'],
+  ['Provocar', 'TAUNT'],
 ];
 
 function keysOf(controls: Controls, player: number, name: ButtonName): string {
@@ -57,10 +57,10 @@ export function quickRows(
   players: readonly number[],
 ): QuickRow[] {
   const walk: QuickRow = {
-    label: 'Andar e mirar',
+    label: 'Andar',
     values:
       device === 'pad'
-        ? ['Analógico / D-pad']
+        ? ['Analógico/D-pad']
         : players.map((p) =>
             (['UP', 'LEFT', 'DOWN', 'RIGHT'] as const).map((n) => keysOf(controls, p, n)).join(' '),
           ),
@@ -73,13 +73,12 @@ export function quickRows(
   return [walk, ...buttons];
 }
 
-/** Dicas de movimento que valem em qualquer aparelho: parede e borda. */
+/** Dica de movimento que vale em qualquer aparelho: a parede. */
 export const QUICK_NOTES: readonly (readonly [string, string])[] = [
-  ['Parede', 'no ar, segure na direção dela para deslizar; Pular salta para longe (até 3×).'],
-  ['Borda', 'caindo perto da quina, agarra sozinho; Cima sobe, Pular pula, Baixo solta.'],
+  ['Parede', 'no ar, segure nela; Pular salta (3×)'],
 ];
 
-export const QUICK_FOOTER = 'Rasteira, golpes para cima e o resto: Como jogar, no menu.';
+export const QUICK_FOOTER = 'Ataque + direção muda o golpe · Como jogar';
 
 /** Rótulo do botão de abrir a cola em cada aparelho. */
 export function quickButtonLabel(device: QuickDevice): string {
