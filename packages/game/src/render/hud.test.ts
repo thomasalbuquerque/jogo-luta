@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createGame } from '@jogo-luta/sim';
-import { countdownNumber, damageColor, formatClock, resultText } from './hud';
+import { createFighter, createGame, getCharacter } from '@jogo-luta/sim';
+import { countdownNumber, damageColor, formatClock, resultText, specialBar } from './hud';
 
 function channels(color: number): [number, number, number] {
   return [(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff];
@@ -44,5 +44,32 @@ describe('hud', () => {
     expect(countdownNumber(50, 150)).toBe(1);
     expect(countdownNumber(1, 150)).toBe(1);
     expect(countdownNumber(0, 150)).toBe(0);
+  });
+
+  describe('barra do especial', () => {
+    const spawn = { x: 0, y: 0 };
+
+    it('não tem barra sem especial', () => {
+      expect(specialBar(createFighter(0, spawn))).toBeNull();
+    });
+
+    it('enche conforme a recarga passa e fica pronta no fim', () => {
+      const f = createFighter(0, spawn, 'marilia');
+      const total = getCharacter('marilia').special?.cooldownTicks ?? 0;
+      expect(specialBar(f)).toEqual({ fill: 1, status: 'ready' });
+      f.specialCooldown = total;
+      expect(specialBar(f)).toEqual({ fill: 0, status: 'charging' });
+      f.specialCooldown = total / 4;
+      expect(specialBar(f)).toEqual({ fill: 0.75, status: 'charging' });
+    });
+
+    it('recarregado mas gasto no ar espera tocar o chão', () => {
+      const f = createFighter(0, spawn, 'tauba');
+      f.grounded = false;
+      f.specialUsed = true;
+      expect(specialBar(f)).toEqual({ fill: 1, status: 'spent' });
+      f.grounded = true;
+      expect(specialBar(f)).toEqual({ fill: 1, status: 'ready' });
+    });
   });
 });

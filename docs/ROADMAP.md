@@ -126,6 +126,7 @@ Objetivo: o jogo local fica completo de ponta a ponta. **Este é o marco princip
 - [x] Fluxo: tela inicial → modo (local / online) → seleção de personagem → seleção de mapa → luta → resultado → revanche.
 - [x] Tela de seleção com grade de 7 retratos. Quem ainda não existe aparece como silhueta com "em breve". O total é 16, mas por enquanto manter só 7 retratos (incluindo os dois personagens iniciais), para não dar expectativa para o grupo que vai ter 16 personagens. Estou pensando se realmente vai ter tudo isso, porque são muitos. Futuramente a silhueta com "em breve" pode ir aumentando gradualmente.
 - [x] HUD: retrato, % de dano com cor que esquenta conforme sobe, stocks restantes.
+- [x] Barra de recarga do especial no painel de cada jogador (todos veem a de todos).
 - [x] Contagem "3, 2, 1, LUTA", pausa e tela de resultado.
 - [x] Remapear controles e salvar no localStorage.
 

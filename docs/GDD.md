@@ -152,7 +152,8 @@ Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 - **Personagem:** grade de 7 casas (os que existem e silhuetas "em breve"; cresce aos poucos). Até 8, numa linha; com mais, duas linhas de 8 casas mais baixas, e os painéis dos jogadores ficam um pouco menores. Cada jogador anda com as próprias direções, confirma com Ataque ou Pulo e desfaz com Especial; Especial com ninguém pronto (ou Esc) volta ao menu. O painel de cada um mostra o lutador, estilo, especial, barras e bordão. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
 - **Mais jogadores no mesmo PC:** com 3 ou 4 controles conectados, aparece "Mais gente? Controle 3: aperte A para entrar" e cada um que entra ganha um painel (os painéis ficam lado a lado, mais estreitos). Ver [Controles](#controles).
 - **Mapa:** um cursor só, qualquer jogador mexe; por enquanto só a Laje. Com 3 ou 4 jogadores, ao lado do mapa ficam as opções de [times](#times).
-- **HUD:** painel de cada jogador com retrato, % de dano (branco → amarelo → laranja → vermelho → vinho conforme sobe) e stocks com a cabecinha do personagem; relógio no alto.
+- **HUD:** painel de cada jogador com retrato, % de dano (branco → amarelo → laranja → vermelho → vinho conforme sobe), stocks com a cabecinha do personagem e a barra do especial; relógio no alto.
+- **Barra do especial:** na base do painel de cada jogador, então todos veem a de todos (online também, porque o estado é o mesmo em todo mundo). Enche na cor do jogador (ou do time), mais escura, conforme a recarga (`cooldownTicks`) passa; pronta, fica na cor cheia com um contorno branco pulsando e dá um clarão ao encher. Recarregada mas gasta no ar (`oncePerAir`) fica cinza até tocar o chão. Quem está fora (KO ou sem stocks) fica apagado.
 
 ## Determinismo e replays
 

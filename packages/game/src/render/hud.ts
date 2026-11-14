@@ -1,4 +1,10 @@
-import { TICK_RATE, type GameState } from '@jogo-luta/sim';
+import {
+  canUseSpecial,
+  getCharacter,
+  TICK_RATE,
+  type Fighter,
+  type GameState,
+} from '@jogo-luta/sim';
 import { hasTeams, teamName } from '../match/teams';
 
 /** Tempo restante em m:ss (arredonda para cima: 0:01 até o último tick). */
@@ -29,7 +35,8 @@ const HEAT: readonly (readonly [number, number])[] = [
   [250, 0x7a0a1f],
 ];
 
-function mix(a: number, b: number, k: number): number {
+/** Mistura duas cores 0xrrggbb (k = 0: só a, k = 1: só b). */
+export function mix(a: number, b: number, k: number): number {
   let out = 0;
   for (const shift of [16, 8, 0]) {
     const ca = (a >> shift) & 0xff;
@@ -58,4 +65,28 @@ export function damageColor(damage: number): number {
 export function countdownNumber(ticksLeft: number, totalTicks: number): number {
   if (ticksLeft <= 0 || totalTicks <= 0) return 0;
   return Math.min(3, Math.ceil((ticksLeft / totalTicks) * 3));
+}
+
+/** Situação da barra do especial no HUD. */
+export type SpecialStatus = 'charging' | 'ready' | 'spent';
+
+export interface SpecialBar {
+  /** Quanto já recarregou, de 0 a 1. */
+  fill: number;
+  /** Recarregando, pronto, ou recarregado mas gasto neste ar (1 vez por ar). */
+  status: SpecialStatus;
+}
+
+/**
+ * Barra do especial de um lutador: quanto da recarga já passou e se dá para
+ * usar agora. Recarregado mas gasto no ar (`oncePerAir`) fica "spent" até
+ * voltar ao chão. Sem especial na ficha, null (sem barra).
+ */
+export function specialBar(f: Fighter): SpecialBar | null {
+  const special = getCharacter(f.character).special;
+  if (!special) return null;
+  if (canUseSpecial(f)) return { fill: 1, status: 'ready' };
+  const total = special.cooldownTicks;
+  const fill = total > 0 ? Math.min(1, Math.max(0, 1 - f.specialCooldown / total)) : 1;
+  return { fill, status: fill >= 1 ? 'spent' : 'charging' };
 }

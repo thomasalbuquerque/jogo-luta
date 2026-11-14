@@ -2,7 +2,14 @@ import Phaser from 'phaser';
 import { getCharacter, type Fighter } from '@jogo-luta/sim';
 import { playSfx } from '../audio/sfx';
 import { addAudioHint } from '../audio/unlock';
-import { countdownNumber, damageColor, formatClock } from '../render/hud';
+import {
+  countdownNumber,
+  damageColor,
+  formatClock,
+  mix,
+  specialBar,
+  type SpecialStatus,
+} from '../render/hud';
 import { KoBurstLayer } from '../render/koBurst';
 import { pingLabel, pingQuality } from '../net/ping';
 import { waitingLabel } from '../net/route';
@@ -31,11 +38,31 @@ const WAITING_NOTICE_MS = 400;
 const PING_COLORS = { good: '#80ed99', ok: '#ffd166', bad: '#ff5a3c' } as const;
 /** Quanto tempo o "LUTA!" fica na tela depois da contagem (ms). */
 const GO_MS = 900;
+/** Barra do especial: altura e o clarão quando fica pronta (ms). */
+const SPECIAL_H = 8;
+const SPECIAL_FLASH_MS = 350;
+/** Período do brilho pulsando com o especial pronto (ms). */
+const SPECIAL_PULSE_MS = 700;
+/** Gasto no ar (1 vez por ar): cinza até tocar o chão. */
+const SPECIAL_SPENT = 0x6c757d;
+
+/** Barra de recarga do especial no painel, na cor do jogador. */
+interface SpecialGauge {
+  g: Phaser.GameObjects.Graphics;
+  x: number;
+  y: number;
+  w: number;
+  color: number;
+  /** Situação no frame anterior (para o clarão quando fica pronta). */
+  status: SpecialStatus;
+  flashMs: number;
+}
 
 interface Panel {
   damage: Phaser.GameObjects.Text;
   portrait: Phaser.GameObjects.Image;
   stocks: Phaser.GameObjects.Image[];
+  special: SpecialGauge | null;
 }
 
 /**
@@ -62,6 +89,8 @@ export class HudScene extends Phaser.Scene {
   /** Último número da contagem mostrado (0 = nenhum). */
   private shownCount = 0;
   private goMs = 0;
+  /** Relógio do brilho das barras de especial prontas (ms). */
+  private pulseMs = 0;
 
   constructor() {
     super('hud');
@@ -219,7 +248,18 @@ export class HudScene extends Phaser.Scene {
       fontStyle: 'bold',
       color: cssColor(color),
     });
-    const damage = uiText(this, x + PANEL_W - 14, y + 50, '0%', {
+    // na base do painel, embaixo dos stocks e do % (que fica por cima quando pula)
+    const bar = specialBar(f);
+    const special: SpecialGauge | null = bar && {
+      g: this.add.graphics(),
+      x: x + PORTRAIT + 22,
+      y: y + PANEL_H - SPECIAL_H - 8,
+      w: PANEL_W - PORTRAIT - 42,
+      color,
+      status: bar.status,
+      flashMs: 0,
+    };
+    const damage = uiText(this, x + PANEL_W - 14, y + 46, '0%', {
       fontFamily: UI.titleFont,
       fontSize: '42px',
       stroke: '#0b0e16',
@@ -231,11 +271,53 @@ export class HudScene extends Phaser.Scene {
         this,
         f.character,
         x + PORTRAIT + 22 + STOCK_ICON / 2 + s * (STOCK_ICON + 4),
-        y + PANEL_H - 20,
+        y + PANEL_H - 32,
         STOCK_ICON,
       ),
     );
-    return { damage, portrait, stocks };
+    return { damage, portrait, stocks, special };
+  }
+
+  /**
+   * Barra do especial: enche na cor do jogador (mais escura) enquanto recarrega;
+   * pronta, fica na cor cheia com um contorno branco pulsando e dá um clarão ao
+   * encher. Gasto no ar (1 vez por ar), fica cinza até tocar o chão.
+   */
+  private drawSpecial(s: SpecialGauge, f: Fighter, out: boolean, delta: number): void {
+    const bar = specialBar(f);
+    if (!bar) return;
+    if (bar.status === 'ready' && s.status !== 'ready') s.flashMs = SPECIAL_FLASH_MS;
+    s.status = bar.status;
+    s.flashMs = Math.max(0, s.flashMs - delta);
+    const { g, x, y, w } = s;
+    const h = SPECIAL_H;
+    g.clear().setAlpha(out ? 0.35 : 1);
+    // trilho
+    g.fillStyle(0x000000, 0.6);
+    g.fillRoundedRect(x - 2, y - 2, w + 4, h + 4, (h + 4) / 2);
+    const ready = bar.status === 'ready';
+    const pulse = 0.5 + 0.5 * Math.sin((this.pulseMs / SPECIAL_PULSE_MS) * Math.PI * 2);
+    let fillColor = mix(s.color, 0x0b0e16, 0.35);
+    if (ready) fillColor = mix(s.color, 0xffffff, 0.2 * pulse);
+    else if (bar.status === 'spent') fillColor = SPECIAL_SPENT;
+    const fw = w * bar.fill;
+    if (fw >= 1) {
+      const r = Math.min(h / 2, fw / 2);
+      g.fillStyle(fillColor, 1);
+      g.fillRoundedRect(x, y, fw, h, r);
+      // reflexo em cima
+      g.fillStyle(0xffffff, ready ? 0.35 : 0.18);
+      g.fillRoundedRect(x + r / 2, y + 1, Math.max(0, fw - r), h / 3, Math.min(h / 6, fw / 2));
+    }
+    if (ready) {
+      g.lineStyle(2, 0xffffff, 0.25 + 0.4 * pulse);
+      g.strokeRoundedRect(x - 3, y - 3, w + 6, h + 6, (h + 6) / 2);
+    }
+    if (s.flashMs > 0) {
+      const k = s.flashMs / SPECIAL_FLASH_MS;
+      g.fillStyle(0xffffff, 0.9 * k);
+      g.fillRoundedRect(x - 4 * k, y - 4 * k, w + 8 * k, h + 8 * k, (h + 8 * k) / 2);
+    }
   }
 
   /** Explosão do KO na borda da tela (px de tela), na cor do jogador. */
@@ -246,6 +328,7 @@ export class HudScene extends Phaser.Scene {
   override update(_time: number, delta: number): void {
     const state = this.fight.state;
     this.koBursts.update(delta);
+    this.pulseMs = (this.pulseMs + delta) % SPECIAL_PULSE_MS;
     for (const [i, panel] of this.panels.entries()) {
       const f = state.fighters[i];
       if (!f) continue;
@@ -263,6 +346,7 @@ export class HudScene extends Phaser.Scene {
         .setColor(cssColor(damageColor(f.damage)))
         .setAlpha(out ? 0.35 : 1);
       panel.portrait.setAlpha(f.stocks > 0 ? 1 : 0.35);
+      if (panel.special) this.drawSpecial(panel.special, f, out || f.stocks === 0, delta);
       panel.stocks.forEach((icon, s) => {
         const alive = s < f.stocks;
         icon.setTint(alive ? 0xffffff : 0x000000).setAlpha(alive ? 1 : 0.3);
