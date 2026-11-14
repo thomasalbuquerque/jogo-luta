@@ -27,6 +27,7 @@ import {
   toPx,
   type Box,
   type AuraEvent,
+  type BounceEvent,
   type CueName,
   type Fighter,
   type FighterState,
@@ -271,6 +272,8 @@ export class FightScene extends Phaser.Scene {
   /** Golpe sorteado do bonequinho no especial atual. */
   private summonStrike: string[] = [];
   private projectileTrails: Phaser.GameObjects.Image[] = [];
+  /** Bola solta de cada lutador (o saque e a provocação do Igão), criada no 1º uso. */
+  private looseBalls: Phaser.GameObjects.Image[] = [];
   private overlayGfx!: Phaser.GameObjects.Graphics;
   private debugGfx!: Phaser.GameObjects.Graphics;
   private bubbles: Phaser.GameObjects.Text[] = [];
@@ -317,6 +320,7 @@ export class FightScene extends Phaser.Scene {
     this.views = [];
     this.projectileImages = [];
     this.projectileTrails = [];
+    this.looseBalls = [];
     this.summons = [];
     this.fx = new FxLayer(this, DEPTH.fx);
     this.backFx = new FxLayer(this, DEPTH.backFx);
@@ -688,6 +692,9 @@ export class FightScene extends Phaser.Scene {
         case 'aura':
           this.onAuraPass(e);
           break;
+        case 'bounce':
+          this.onBounce(e);
+          break;
       }
     }
   }
@@ -844,6 +851,47 @@ export class FightScene extends Phaser.Scene {
       spin: 0.08,
     });
     if (aura.passSound) playSfx(this, aura.passSound);
+  }
+
+  /** Quique do projétil (a bola do Igão): poeirinha e o "tum", cada vez mais baixo. */
+  private onBounce(e: BounceEvent): void {
+    const owner = this.state.fighters[e.owner];
+    const view = this.views[e.owner];
+    const bounce = owner ? CHARACTER_FX[owner.character]?.bounce : undefined;
+    if (!owner || !view || !bounce) return;
+    const total = characterOfFighter(owner).special?.move.projectile?.bounces ?? 1;
+    // 1º quique = 1; o último fica com uns 40%
+    const level = total > 1 ? 0.4 + (0.6 * e.bouncesLeft) / (total - 1) : 1;
+    this.spawnDust(owner.character, view, bounce.dust, toPx(e.x), toPx(e.y), level);
+    if (bounce.sound) playSfx(this, bounce.sound, { volume: level, detune: (level - 1) * 300 });
+  }
+
+  /** Poeirinha no chão em (x, y), para os dois lados, menor com `level` baixo. */
+  private spawnDust(
+    character: string,
+    view: FighterView,
+    frames: readonly string[],
+    x: number,
+    y: number,
+    level: number,
+  ): void {
+    for (const side of [-1, 1] as const) {
+      this.fx.spawn({
+        texture: characterTextureKey(character),
+        frame: frames[Math.floor(Math.random() * frames.length)] ?? '',
+        x: x + side * 6,
+        y: y + 1,
+        vx: side * (0.5 + Math.random() * 0.6) * level,
+        vy: -0.25,
+        drag: 0.94,
+        life: 22,
+        scale: view.scale * 0.8 * level,
+        scaleEnd: view.scale * 1.3 * level,
+        originY: 0.85,
+        alpha: 0.9,
+        flipX: side === -1,
+      });
+    }
   }
 
   /** KO: explosão na borda da tela por onde saiu (desenhada no HUD, sem zoom). */
@@ -1010,6 +1058,7 @@ export class FightScene extends Phaser.Scene {
       const command = this.commands[f.id];
       if (hidden) {
         command?.clear();
+        this.looseBalls[f.id]?.setVisible(false);
         continue;
       }
       const r = this.renderRect(f, alpha);
@@ -1039,6 +1088,7 @@ export class FightScene extends Phaser.Scene {
       }
       this.drawAimLine(f, view);
       this.drawAura(f, view);
+      this.drawLooseBall(f, view, r, alpha);
       // invencível pisca; levando golpe, pisca claro
       const blink = f.invulnTicks > 0 && Math.floor(this.state.tick / 4) % 2 === 0;
       view.setAlpha(Math.min(blink ? 0.35 : 1, quitAlpha(f)));
@@ -1099,6 +1149,7 @@ export class FightScene extends Phaser.Scene {
       if (view && fx) this.spawnPropFx(f, view, fx);
       if (view && fx?.tauntNotes) this.spawnTauntNotes(f, view, fx.tauntNotes);
       if (view && fx?.tauntCrumbs) this.spawnTauntCrumbs(f, view, fx.tauntCrumbs);
+      if (view && fx?.dribble) this.spawnDribbleFx(f, view, fx.dribble);
       const move = f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
       const caught = move?.counter !== undefined && f.moveHits !== 0;
       const justCaught = caught && !this.lastCaught[f.id];
@@ -1128,6 +1179,9 @@ export class FightScene extends Phaser.Scene {
         });
       }
       if (fx.shotSound && frame === move.startup + 1) playSfx(this, fx.shotSound);
+      if (fx.serve && move.projectile && frame === move.startup + 1) {
+        this.spawnServeBurst(f, view, fx.serve, move.projectile);
+      }
       if (fx.aim?.glint && (frame === aimStart(move, fx.aim) || frame === move.startup - 6)) {
         this.spawnScopeGlint(f, view, fx.aim.glint);
       }
@@ -1212,6 +1266,118 @@ export class FightScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Bola solta (o Igão): no especial, aparece na mão de trás e é jogada em arco até o
+   * ponto onde o sim solta o projétil, no 1º frame ativo; na provocação, quica da mão
+   * da frente até o chão e volta. Fora disso, escondida.
+   */
+  private drawLooseBall(f: Fighter, view: FighterView, r: Rect, alpha: number): void {
+    const fx = CHARACTER_FX[f.character];
+    const pos = fx ? this.looseBallAt(f, view, fx, r, alpha) : null;
+    let img = this.looseBalls[f.id];
+    if (!pos) {
+      img?.setVisible(false);
+      return;
+    }
+    const key = characterTextureKey(f.character);
+    if (!img) {
+      img = this.add.image(0, 0, key, pos.frame).setDepth(DEPTH.projectiles);
+      this.looseBalls[f.id] = img;
+    }
+    img
+      .setTexture(key, pos.frame)
+      .setVisible(true)
+      .setPosition(pos.x, pos.y)
+      .setScale(view.scale)
+      .setRotation(pos.rotation);
+  }
+
+  /** Onde a bola solta está agora (px de mundo), ou null se ela não está solta. */
+  private looseBallAt(
+    f: Fighter,
+    view: FighterView,
+    fx: CharacterFx,
+    r: Rect,
+    alpha: number,
+  ): { frame: string; x: number; y: number; rotation: number } | null {
+    const serve = fx.serve;
+    const move = f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
+    if (serve && move?.projectile) {
+      const hit = move.startup + 1;
+      const frame = moveFrame(f);
+      if (frame >= hit) return null;
+      const from = view.farHandPoint();
+      if (!from) return null;
+      const t = Math.min(frame - 1 + alpha, hit - 1);
+      const u = Math.max(0, (t - serve.from) / (hit - 1 - serve.from));
+      if (u <= 0) return { frame: serve.ball, x: from.x, y: from.y, rotation: 0 };
+      const to = serveSpawn(f, move.projectile, r);
+      return {
+        frame: serve.ball,
+        x: from.x + (to.x - from.x) * u,
+        y: from.y + (to.y - from.y) * u - serve.peak * 4 * u * (1 - u),
+        rotation: f.facing * u * 2.5,
+      };
+    }
+    const dribble = fx.dribble;
+    if (dribble && f.state === 'taunt') {
+      const t = f.stateTicks + alpha;
+      const span = dribble.bounces.find(([a, b]) => t >= a && t <= b);
+      const hand = span ? view.handPoint() : null;
+      if (!span || !hand) return null;
+      const [a, b] = span;
+      const u = (t - a) / (b - a);
+      // cai acelerando até o chão e sobe freando de volta para a mão
+      const k = u < 0.5 ? (u / 0.5) ** 2 : ((1 - u) / 0.5) ** 2;
+      const ball = this.textures.getFrame(characterTextureKey(f.character), dribble.ball);
+      const ground = r.y + r.h - (view.scale * ball.height) / 2;
+      return {
+        frame: dribble.ball,
+        x: hand.x,
+        y: hand.y + (ground - hand.y) * k,
+        rotation: f.facing * u * 3,
+      };
+    }
+    return null;
+  }
+
+  /** A batida do saque: estouro no ponto onde a bola sai e o "pá!". */
+  private spawnServeBurst(
+    f: Fighter,
+    view: FighterView,
+    serve: NonNullable<CharacterFx['serve']>,
+    shot: NonNullable<MoveDef['projectile']>,
+  ): void {
+    const at = serveSpawn(f, shot, this.renderRect(f, 1));
+    this.fx.spawn({
+      texture: characterTextureKey(f.character),
+      frame: serve.burst,
+      x: at.x,
+      y: at.y,
+      life: 9,
+      scale: view.scale * 0.35,
+      scaleEnd: view.scale * 0.6,
+      rotation: Math.random() * 0.6,
+    });
+    if (serve.sound) playSfx(this, serve.sound);
+  }
+
+  /** Provocação: o "tum" e a poeirinha quando a bola bate no chão, no meio de cada trecho. */
+  private spawnDribbleFx(
+    f: Fighter,
+    view: FighterView,
+    dribble: NonNullable<CharacterFx['dribble']>,
+  ): void {
+    if (f.state !== 'taunt') return;
+    const span = dribble.bounces.find(([a, b]) => f.stateTicks === Math.round((a + b) / 2));
+    const hand = span ? view.handPoint() : null;
+    if (!hand) return;
+    if (dribble.dust) {
+      this.spawnDust(f.character, view, dribble.dust, hand.x, toPx(f.y + f.h), 0.6);
+    }
+    if (dribble.sound) playSfx(this, dribble.sound, { volume: 0.7 });
+  }
+
   /** Projétil com a arte de quem soltou (o frango), girando; elipse se não tiver arte. */
   private drawProjectiles(alpha: number): void {
     const g = this.overlayGfx;
@@ -1240,8 +1406,14 @@ export class FightScene extends Phaser.Scene {
       img
         .setPosition(x + w / 2, y + h / 2)
         .setScale(view.scale * (art.scale ?? 0.85))
-        .setFlipX(side === -1);
-      if (art.trail) {
+        .setFlipX(side === -1)
+        // rolando: gira pela distância andada (o raio é metade da caixa)
+        .setRotation(art.spin ? (x + w / 2) / (w / 2) : 0);
+      const firstFlight =
+        p.bounces >= (characterOfFighter(owner).special?.move.projectile?.bounces ?? 0);
+      if (art.trailUntilBounce && !firstFlight) {
+        this.projectileTrails[i]?.setVisible(false);
+      } else if (art.trail) {
         let trail = this.projectileTrails[i];
         if (!trail) {
           trail = this.add.image(0, 0, key, art.trail).setDepth(DEPTH.projectiles - 1);
@@ -1254,6 +1426,7 @@ export class FightScene extends Phaser.Scene {
           .setPosition(x + w / 2 - side * w * 0.45, y + h / 2)
           .setScale(view.scale * 0.6)
           .setFlipX(side === -1)
+          .setRotation(art.trailUntilBounce ? Math.atan2(p.vy, Math.abs(p.vx)) * side : 0)
           .setAlpha(0.8);
       }
     });
@@ -2077,4 +2250,19 @@ const AIM_INK = 0x2b1a22;
 /** Frame do especial em que a mira começa (fração `from` do startup). */
 function aimStart(move: MoveDef, aim: NonNullable<CharacterFx['aim']>): number {
   return Math.max(1, Math.round(move.startup * aim.from));
+}
+
+/**
+ * Onde o projétil do saque nasce (px de mundo), com o lutador desenhado em `r`: a
+ * mesma conta do `spawnProjectile` do sim, a partir do centro do corpo.
+ */
+function serveSpawn(
+  f: Fighter,
+  shot: NonNullable<MoveDef['projectile']>,
+  r: Rect,
+): { x: number; y: number } {
+  return {
+    x: r.x + r.w / 2 + f.facing * toPx(shot.offsetX),
+    y: r.y + r.h / 2 + toPx(shot.offsetY),
+  };
 }

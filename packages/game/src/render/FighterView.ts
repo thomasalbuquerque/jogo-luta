@@ -70,6 +70,8 @@ export class FighterView {
   private placedProp: { placed: PlacedBone; lift: number } | null = null;
   /** Mão da frente na última pose (para saber onde a peça aparece e some). */
   private placedHand: { placed: PlacedBone; lift: number } | null = null;
+  /** Mão de trás na última pose (de onde a bola sai no saque do Igão). */
+  private placedHandFar: { placed: PlacedBone; lift: number } | null = null;
   /** Cabeça na última pose (a boca, de onde sai a fumaça). */
   private placedHead: { placed: PlacedBone; lift: number } | null = null;
   /** Brilho em volta do boneco inteiro (a aura da Marília), criado no 1º uso. */
@@ -122,6 +124,8 @@ export class FighterView {
     }
     const hand = placed.find((p) => p.bone === 'handNear');
     this.placedHand = hand ? { placed: hand, lift } : null;
+    const handFar = placed.find((p) => p.bone === 'handFar');
+    this.placedHandFar = handFar ? { placed: handFar, lift } : null;
     const head = placed.find((p) => p.bone === 'head');
     this.placedHead = head ? { placed: head, lift } : null;
     const prop = solveProp(this.skin, placed, pose);
@@ -175,6 +179,16 @@ export class FighterView {
     if (socket && anchors.sockets[socket]) {
       return this.toWorld(placedPoint(anchors, p.placed, socket), p.lift);
     }
+    const [px, py] = placedPoint(anchors, p.placed, 'pivot');
+    const [tx, ty] = placedPoint(anchors, p.placed, 'tip');
+    return this.toWorld([(px + tx) / 2, (py + ty) / 2], p.lift);
+  }
+
+  /** O meio da mão de trás em px de mundo, na última pose desenhada. */
+  farHandPoint(): { x: number; y: number } | null {
+    const p = this.placedHandFar;
+    const anchors = p && this.skin.get(p.placed.frame);
+    if (!p || !anchors) return null;
     const [px, py] = placedPoint(anchors, p.placed, 'pivot');
     const [tx, ty] = placedPoint(anchors, p.placed, 'tip');
     return this.toWorld([(px + tx) / 2, (py + ty) / 2], p.lift);
