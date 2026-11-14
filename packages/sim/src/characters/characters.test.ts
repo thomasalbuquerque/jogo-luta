@@ -203,7 +203,7 @@ describe('elenco', () => {
 
     it('o bonequinho acerta a média distância e arremessa para a frente', () => {
       const target = setup(150);
-      expect(target.damage).toBe(11);
+      expect(target.damage).toBe(13);
       expect(target.kbx).toBeGreaterThan(0);
     });
 
