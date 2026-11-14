@@ -1,8 +1,9 @@
 import { defineCharacter } from '../character';
 
 /**
- * João Frango — zoner (docs/ELENCO.md). Leve, bom no ar (2 pulos aéreos), lento
- * no chão. Especial: Frango assado voador, um projétil reto de recarga curta.
+ * João Frango — zoner (docs/ELENCO.md). Leve, bom no ar (2 pulos aéreos, a melhor
+ * recuperação do elenco), lento no chão. O preço de flutuar: é o que desce mais
+ * devagar. Especial: Frango assado voador, um projétil reto de recarga curta.
  */
 export const JOAO_FRANGO = defineCharacter({
   id: 'joao-frango',
@@ -14,11 +15,12 @@ export const JOAO_FRANGO = defineCharacter({
     walkSpeed: 5.6,
     airSpeed: 6.2,
     jumpHeight: 180,
-    airJumpHeight: 120,
+    airJumpHeight: 105,
     airJumps: 2,
-    hurtbox: { w: 46, h: 92 },
-    gravity: 0.56,
-    maxFallSpeed: 9.5,
+    hurtbox: { w: 46, h: 96 },
+    // o mais flutuante: queda lenta (10 ticks para descer da plataforma)
+    gravity: 0.6,
+    maxFallSpeed: 10,
     fastFallSpeed: 15,
   },
   moves: {
