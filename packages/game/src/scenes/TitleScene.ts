@@ -29,7 +29,7 @@ let roomLinkUsed = false;
 
 /**
  * Tela inicial: nome do jogo e "aperte para começar" (o 1º aperto também libera
- * o som); depois o menu de modo: mesmo PC, online, ver um replay
+ * o som); depois o menu de modo: mesmo PC, como jogar (tutorial), online, ver um replay
  * salvo (escolhendo o arquivo ou arrastando para a janela) e controles.
  */
 export class TitleScene extends Phaser.Scene {
@@ -114,6 +114,12 @@ export class TitleScene extends Phaser.Scene {
           },
         },
         {
+          label: 'Como jogar',
+          onSelect: () => {
+            this.scene.start('fight', { tutorial: true } satisfies FightData);
+          },
+        },
+        {
           label: 'Jogar online',
           onSelect: () => {
             this.go('online');
@@ -135,9 +141,9 @@ export class TitleScene extends Phaser.Scene {
           },
         },
       ],
-      { x: width / 2, y: 392, width: 420, height: 54, fontSize: 26 },
+      { x: width / 2, y: 372, width: 420, height: 52, fontSize: 26 },
     );
-    this.note = uiText(this, width / 2, 336, '', {
+    this.note = uiText(this, width / 2, 318, '', {
       fontSize: '17px',
       fontStyle: 'bold',
       color: '#ffd166',
