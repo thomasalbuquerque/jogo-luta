@@ -595,8 +595,9 @@ tronco. A exceção é o cotovelo dobrado para a frente (mais de 85°, como na g
 desenha o antebraço na frente da manga, senão a barra da manga cobre o antebraço.
 
 - **Peça da frente:** o toco é apagado junto com a linha do anel. Ela termina num corte limpo, sem
-  contorno, e a junta (`tip` dela, `pivot` do filho) fica uns 1,5 px do jogo antes do corte (uns
-  12 px numa folha que o jogo reduz a 0,15; proporcionalmente mais numa folha desenhada maior).
+  contorno, e a junta (`tip` dela, `pivot` do filho) fica uns 12 px da folha antes do corte
+  (numa folha no tamanho padrão, que o jogo reduz a 0,45; proporcionalmente mais numa folha
+  desenhada maior).
   Assim ela cobre o começo da peça de trás. Roupa é exceção: barra de manga, de short e punho de
   luva levam `outline` no corte.
 - **Peça de trás:** o `pivot` fica a mesma distância depois do anel, para o anel ficar escondido. O
@@ -805,8 +806,8 @@ realesrgan-ncnn-vulkan.exe -i 4-meio.png -o 4-meio-2x.png -n realesr-animevideov
 ```
 
 O modelo `realesr-animevideov3` é o que mais respeita o desenho. O `realesrgan-x4plus-anime` achata
-a textura da pintura. Nos personagens não precisa: as peças aparecem na tela mais ou menos do
-tamanho em que estão no atlas.
+a textura da pintura. Nos personagens não precisa ampliar: as folhas deles já são bem maiores
+que o atlas.
 
 ### 5. Qualidade da imagem no jogo
 
@@ -821,6 +822,11 @@ tamanho em que estão no atlas.
 - **Retrato em dois tamanhos:** a peça `portrait` sai como `portrait` (400 px de altura, para a
   seleção e o resultado) e `portrait_small` (96 px, para os ícones de vida do HUD), seja qual for a
   escala da folha. O `addPortrait` escolhe o pequeno quando ele basta.
+- **Personagens em 3×:** o `scale` dos personagens é 0,45 (0,51 no João Frango), 3× o de antes,
+  com `"atlasWidth": 2048`. A prévia da seleção desenha o boneco grande (1,5× com a resolução 2
+  dava 3× de ampliação, embaçado); agora as peças aparecem quase do tamanho do atlas. O jogo não
+  depende do tamanho das peças em px: o boneco, os efeitos e as armas se medem pela altura do
+  personagem ou da peça. Personagem novo: `"scale": 0.45` e `"atlasWidth": 2048`.
 
 ---
 
