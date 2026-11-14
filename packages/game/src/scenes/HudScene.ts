@@ -20,6 +20,10 @@ import { hasTeams, teamName } from '../match/teams';
 import { cssColor, fighterColor, teamColor, UI, uiText } from '../ui/theme';
 import type { FightScene } from './FightScene';
 import { VIEW } from '../render/view';
+import { getControls } from '../input/controls';
+import { readPads } from '../input/InputManager';
+import { QuickControlsView } from '../ui/QuickControlsView';
+import type { QuickDevice } from '../ui/quickControls';
 
 /** O % cresce ao levar golpe e volta sozinho (até este tamanho). */
 const DAMAGE_POP_MAX = 1.6;
@@ -91,6 +95,8 @@ export class HudScene extends Phaser.Scene {
   private goMs = 0;
   /** Relógio do brilho das barras de especial prontas (ms). */
   private pulseMs = 0;
+  /** Cola de comandos no canto (Tab ou Select abre). */
+  private quick!: QuickControlsView;
 
   constructor() {
     super('hud');
@@ -179,6 +185,20 @@ export class HudScene extends Phaser.Scene {
     })
       .setOrigin(0.5)
       .setVisible(false);
+    // online, este PC é um jogador só (qualquer teclado vale): mostra só as teclas do P1
+    this.quick = new QuickControlsView(this, getControls, this.fight.net ? [0] : [0, 1], () =>
+      readPads().length > 0 ? 'pad' : 'keyboard',
+    );
+    // Tab é reservada (nenhum botão do jogo usa); sem o capture, o navegador troca o foco
+    this.input.keyboard?.addCapture('TAB');
+    this.input.keyboard?.on('keydown-TAB', (e: KeyboardEvent) => {
+      if (!e.repeat) this.quick.toggle('keyboard');
+    });
+  }
+
+  /** Abre (ou fecha) a cola de comandos, com os botões do aparelho que apertou. */
+  toggleQuickControls(device: QuickDevice): void {
+    this.quick.toggle(device);
   }
 
   private get fight(): FightScene {
@@ -328,6 +348,7 @@ export class HudScene extends Phaser.Scene {
   override update(_time: number, delta: number): void {
     const state = this.fight.state;
     this.koBursts.update(delta);
+    this.quick.update(delta);
     this.pulseMs = (this.pulseMs + delta) % SPECIAL_PULSE_MS;
     for (const [i, panel] of this.panels.entries()) {
       const f = state.fighters[i];

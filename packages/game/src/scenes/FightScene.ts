@@ -113,7 +113,7 @@ const FINAL_KO_SLOWMO_SCALE = 0.35;
 const RESULT_DELAY_TICKS = 60;
 /** Depois de voltar da pausa, ignora pedir pausa de novo por este tempo (a tecla que voltou). */
 const PAUSE_COOLDOWN_MS = 250;
-/** Teclas que pausam: Enter, Esc, Start e Select do controle. */
+/** Teclas que pausam: Enter, Esc e Start (o Select do controle abre a cola de comandos). */
 const PAUSE_KEYS = Menu.CONFIRM | Menu.BACK | Menu.START;
 /** Online: os dois lados trocam o hash do estado a cada tantos ticks (0,5 s). */
 const HASH_EVERY_TICKS = 30;
@@ -229,7 +229,7 @@ export class FightScene extends Phaser.Scene {
   private tutorialMark: Phaser.GameObjects.Text | null = null;
   /** Tutorial: o último tick ainda foi na escolha de teclado ou controle. */
   private tutorialChoosing = false;
-  /** Select de algum controle apertado no tick anterior (tutorial: ver de novo). */
+  /** Select de algum controle apertado no tick anterior (cola de comandos; tutorial: ver de novo). */
   private prevPadSelect = true;
 
   /** Gravação da luta em andamento (seed + inputs de cada tick). */
@@ -638,18 +638,24 @@ export class FightScene extends Phaser.Scene {
     this.tutorial.replayDemo(this.state);
   }
 
+  private onPadSelect(): void {
+    if (this.tutorial) this.replayTutorialDemo();
+    else if (this.scene.isActive('hud')) {
+      (this.scene.get('hud') as HudScene).toggleQuickControls('pad');
+    }
+  }
+
   private tick(): void {
     // lê os controles mesmo num replay: as teclas de pausa vêm daqui
     const pads = this.net ? undefined : this.setup.pads;
     const sampled = this.controls.sample(this.state.fighters.length, pads);
     let system = this.controls.system & PAUSE_KEYS;
-    if (this.tutorial) {
-      // tutorial: Select do controle é "ver de novo" (a pausa fica no Start)
-      const select = this.controls.padSelect;
-      if (select) system &= ~Menu.BACK;
-      if (select && !this.prevPadSelect) this.replayTutorialDemo();
-      this.prevPadSelect = select;
-    }
+    // Select do controle: na luta abre a cola de comandos; no tutorial, "ver de novo"
+    // (a pausa fica no Start)
+    const select = this.controls.padSelect;
+    if (select) system &= ~Menu.BACK;
+    if (select && !this.prevPadSelect) this.onPadSelect();
+    this.prevPadSelect = select;
     // tutorial: na escolha de teclado ou controle, Enter e Esc são da escolha (e o Enter
     // que escolheu pode chegar aqui só no tick seguinte, já fora dela)
     const choosing = this.tutorial?.phase === 'intro';
