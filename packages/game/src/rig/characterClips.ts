@@ -45,18 +45,20 @@ function burnout(phase: 0 | 1): Rot {
 /**
  * João com as mãos em concha na boca: cotovelos na frente do peito, antebraços
  * subindo e as mãos em pé dos dois lados da boca, dedos para cima e para a frente
- * (megafone). O rosto continua à mostra entre as mãos.
+ * (megafone). O rosto continua à mostra entre as mãos: a da frente na bochecha, atrás
+ * da boca, e a de trás na frente dela. Ângulos achados com o `solvePose`; refaça se
+ * mudar braço, mão ou cabeça.
  */
 const CUPPED: Rot = {
   ...STANCE,
   torso: -4,
   head: -18,
-  upperArmNear: -55,
-  forearmNear: -146,
-  handNear: 50,
-  upperArmFar: -27,
-  forearmFar: -160,
-  handFar: 36,
+  upperArmNear: -58.5,
+  forearmNear: -166.5,
+  handNear: 60,
+  upperArmFar: -75.5,
+  forearmFar: -150,
+  handFar: 24.5,
 };
 
 /**

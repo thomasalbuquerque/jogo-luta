@@ -298,13 +298,16 @@ aceita folha sem magenta).
 ### Schummaki e João Frango (já feitos)
 
 Foram os dois primeiros, feitos com textos mais antigos. Os problemas que apareceram neles viraram
-as regras do passo 3. Por isso as pastas deles têm folhas a mais, que **não** devem ser repetidas:
+as regras do passo 3. Por isso a pasta do Schummaki tem uma folha a mais, que **não** deve ser
+repetida:
 
 - `schummaki/3-pecas-bracos.png`: tronco, braços e mãos refeitos, porque o `3-pecas.png` veio com
   pinos nas juntas, manga grudada no tronco e mão grudada no antebraço. Quadril, pernas e tênis
   ainda saem do `3-pecas.png`.
-- `joao-frango/3-pecas-tronco.png`: tronco e short, que vieram numa peça só.
-- `joao-frango/3-pecas-maos.png`: as mãos pela palma, que faltaram na folha.
+
+O `3-pecas.png` do João Frango foi gerado de novo com o texto atual do passo 3 (avental no tronco,
+short separado, 4 mãos e as mãos em concha), e as folhas extras dele saíram. Só a parte visual
+mudou: a ficha (dano, velocidade, tamanho) é a mesma.
 
 ## Cenário: a laje
 
@@ -532,7 +535,6 @@ art/
   style/           style.png, shape.png
   <pasta>/         1-conceito.png, 2-cabecas.png, 3-pecas.png, 4-efeitos.png, 5-figurinha.png
   schummaki/       os 5 + 3-pecas-bracos.png (exceção, ver "já feitos")
-  joao-frango/     os 5 + 3-pecas-tronco.png e 3-pecas-maos.png (exceção, ver "já feitos")
   tchula/          os 5 + 1-conceito-face-correta.png (o rosto corrigido, só referência)
   cenario-laje/    1-mapa.png, 2-ceu.png, 3-longe.png, 4-meio.png, 5-pecas.png
 ```
@@ -669,6 +671,13 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   e a coxa (calça comprida) fica por trás: no chute ela sai por baixo da saia. Um `stretch` na
   altura do `hips` acerta o comprimento da saia para o joelho cair na barra (no conceito o avental
   vai até o joelho e a canela aparece).
+- **Avental curto por cima do short** (João Frango: avental até o meio da coxa, short aparecendo
+  embaixo): o avental inteiro vai no `torso`, e o `pivot` do tronco fica bem acima da barra (uns
+  155 px da folha), para a barra cair logo abaixo da virilha, como no conceito. O cós do short fica
+  escondido debaixo do avental. O `hips` é o short cortado reto na virilha (o próprio `rect` corta,
+  sem `outline`), e a coxa (só pele na folha) leva a perna do short pintada, com `outline` em volta
+  e na barra, como no Crocko. O ombro da frente segue a "axila preenchida" do Darllan: corte do
+  ombro até o avental, com a sobra da manga pintada da cor da camiseta.
 - **Objeto seguro com as duas mãos** (o rolo do Darllan, que veio na folha de peças com os dois
   punhos): vai como `prop`. O punho do lado da mão da frente sai com `erase` (a mão do esqueleto
   fica por cima do cabo) e o `pivot` fica no meio desse punho; o outro punho fica no desenho e cobre
