@@ -108,15 +108,15 @@ export class TitleScene extends Phaser.Scene {
       this,
       [
         {
-          label: 'Jogar no mesmo PC',
-          onSelect: () => {
-            this.go('select');
-          },
-        },
-        {
           label: 'Como jogar',
           onSelect: () => {
             this.scene.start('fight', { tutorial: true } satisfies FightData);
+          },
+        },
+        {
+          label: 'Jogar no mesmo PC',
+          onSelect: () => {
+            this.go('select');
           },
         },
         {
