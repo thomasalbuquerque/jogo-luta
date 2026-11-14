@@ -782,6 +782,43 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
   "bloqueio" de braços erguidos como provocação alternativa; uma rede de vôlei de praia no fundo de
   um mapa.
 
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Igão — 35-year-old volleyball player, the tallest of the group, cocky and playful, loves to tease whoever just missed.
+Fighting style: aerial fighter — medium weight, the highest jumper of the cast, long reach in the air, spikes opponents down.
+Body: based on the photos; very tall, lean and athletic build, long arms and legs.
+Outfit: violet purple (#6A3FB8) short-sleeve fitted volleyball jersey, untucked, with a lime green (#C4E53A) crew collar and one lime green stripe down each side, no number and no name; short dark purple (#2E1F57) volleyball shorts above the knee with a thin lime green side stripe; black (#1C1C1F) knee pads on both knees; short white socks; white (#F4F5F7) volleyball shoes with lime green details.
+Signature details: the violet jersey with lime green collar and side stripes, the black knee pads, short brown hair.
+Colors: primary #6A3FB8, secondary #C4E53A, accent #2E1F57.
+Face/personality: cocky teasing grin, one eyebrow slightly raised.
+Special move: "Saque" — standing on the ground, without jumping, he tosses a volleyball up with one hand and spikes it with the other open hand, sending it diagonally down and forward; it bounces three times along the ground, each bounce lower.
+Taunt: bounces the volleyball on the ground twice with one hand, like before a serve, catches it, then points at the opponent and teases them.
+Extra parts for the parts sheet: one hand pointing with the index finger.
+Props and effects for the effects sheet: 1 volleyball (white with curved violet and lime green panels, no logo); 1 white-yellow impact burst for the hand hitting the ball; 3 short white speed streaks; 3 small light-brown dust puffs for the bounces.
+Avoid: numbers, letters or names on the jersey; real brand logos on the clothes or on the ball; national team kits; jumping poses in the serve.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/igao/`):
+
+- `<EXPRESSION>`: `cocky teasing grin, one eyebrow slightly raised`
+- `<CHARACTER>`:
+  `Igão, 35-year-old volleyball player, very tall, lean and athletic, long arms and legs, fair skin, short brown hair. Violet purple (#6A3FB8) short-sleeve fitted volleyball jersey, untucked, lime green (#C4E53A) collar and side stripes, no number; short dark purple (#2E1F57) volleyball shorts; black knee pads; short white socks; white volleyball shoes with lime green details.`
+- `<LEGWEAR>`: `short dark purple volleyball shorts` (short: no passo 3 use as versões de short de `<HIPS>` e
+  `<LEGS>` e apague `<PANTS>`)
+- `<SHOE>`: `white volleyball shoe with a short white sock`
+- `<EXTRA>`: `one hand pointing with the index finger`
+- `<ITEMS>`:
+  `1 volleyball, white with curved violet (#6A3FB8) and lime green (#C4E53A) panels, no logo; 1 big white-yellow impact burst; 3 short white speed streaks; 3 small light-brown dust puffs`
+- **Joelheiras (passo 3):** a joelheira fica na canela, no topo dela, cobrindo o joelho: no
+  `<LEGS>` de short, troque `shin` por `shin with a black knee pad at the top, covering the knee`.
+  Se ela vier na coxa ou nas duas peças, a dobra do joelho mostra a joelheira em dobro; anexe a
+  folha de peças e mande
+  `Edit the attached parts sheet: draw the black knee pad only at the top of the shin, not on the thigh. Keep every other part exactly the same.`
+- **Camisa (passo 1):** se vier com número ou nome nas costas ou no peito, anexe o conceito e mande
+  `Edit the attached image: remove any number, letter or name from the jersey. Keep everything else the same.`
+
 ### Arte
 
 Fotos de cada amigo servem de referência para a concept art. O guia de estilo, a ficha de arte de
