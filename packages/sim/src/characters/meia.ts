@@ -1,8 +1,8 @@
 import { defineCharacter } from '../character';
 
 /**
- * Meia — técnico (docs/ELENCO.md). Pro player de jogo de luta: magro, leve e rápido
- * no chão e no ar, golpes base um pouco mais rápidos e mais fracos. Especial:
+ * Meia — técnico (docs/ELENCO.md). Pro player de jogo de luta: magro, leve, rápido
+ * no chão e bom no ar, golpes base um pouco mais rápidos e mais fracos. Especial:
  * Comando, um agarrão de alcance curto. Se pegar, solta um combo de 9 golpes de 1%
  * com o adversário preso e fecha com um chute que arremessa ("10 HITS"). Se errar,
  * fica parado num recovery longo.
@@ -14,9 +14,9 @@ export const MEIA = defineCharacter({
   // secundária: o ciano-elétrico da estampa da camiseta
   colors: { primary: '#f4f4f0', secondary: '#22c1ee' },
   stats: {
-    weight: 90,
+    weight: 88,
     walkSpeed: 7,
-    airSpeed: 6,
+    airSpeed: 5.8,
     jumpHeight: 180,
     airJumps: 1,
     // estatura média (a do Gabs), magro
@@ -39,7 +39,7 @@ export const MEIA = defineCharacter({
     // sem impulso: se pegar, os dois ficam parados no ar até o arremesso.
     startup: 6,
     active: 4,
-    recovery: 32,
+    recovery: 36,
     cooldownTicks: 90,
     blocks: [
       {
