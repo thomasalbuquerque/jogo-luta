@@ -71,6 +71,15 @@ describe('esqueleto', () => {
     }
   });
 
+  it('com shinFront a canela fica na frente da coxa e atrás do pé', () => {
+    const order = drawOrder(REST_POSE, false, true);
+    for (const side of ['Near', 'Far'] as const) {
+      expect(order.indexOf(`shin${side}`)).toBe(order.indexOf(`thigh${side}`) + 1);
+      expect(order.indexOf(`shin${side}`)).toBeLessThan(order.indexOf(`foot${side}`));
+    }
+    expect([...order].sort()).toEqual([...BONE_IDS].sort());
+  });
+
   it('em repouso as pernas descem retas a partir do quadril', () => {
     const placed = solvePose(testSkin(), REST_POSE);
     const thigh = placed.find((p) => p.bone === 'thighNear');

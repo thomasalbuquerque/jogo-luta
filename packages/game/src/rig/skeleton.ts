@@ -98,10 +98,17 @@ export const FOREARM_FOLD = 85;
  * braço (na frente dele, atrás da mão) quando o cotovelo está dobrado para a frente.
  * `forearmFront`: o antebraço fica sempre na frente do braço (manga curta, cotovelo de
  * pele: a ponta do braço guarda o contorno do cotovelo e a do antebraço some aos poucos).
+ * `shinFront`: a canela fica na frente da coxa (e atrás do pé): a joelheira do Igão,
+ * no topo da canela, cobre a ponta do joelho da coxa.
  */
-export function drawOrder(pose: Pose, forearmFront = false): BoneId[] {
+export function drawOrder(pose: Pose, forearmFront = false, shinFront = false): BoneId[] {
   const order = [...DRAW_ORDER];
   for (const side of ['Near', 'Far'] as const) {
+    if (shinFront) {
+      const shin: BoneId = `shin${side}`;
+      order.splice(order.indexOf(shin), 1);
+      order.splice(order.indexOf(`thigh${side}`) + 1, 0, shin);
+    }
     if (!forearmFront && (pose.rot[`forearm${side}`] ?? 0) > -FOREARM_FOLD) continue;
     const forearm: BoneId = `forearm${side}`;
     order.splice(order.indexOf(forearm), 1);
