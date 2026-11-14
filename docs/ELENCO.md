@@ -10,7 +10,7 @@ veja `docs/GDD.md`.
 | --- | ----------- | ----------------------------------------------------------------------------- | ---------------------------- | ------------------------------------- | -------------------------------------------- | ---------------------------------------- | --------- |
 | 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral          | "Vem com o Schummy, mermão!" | **Arrancada** (investida)             | Gira um volante imaginário e grita o bordão  | Vermelho, branco, grafite                |           |
 | 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango          | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil)   | Mãos em concha, gritando o bordão            | Branco (avental), laranja, amarelo-milho |           |
-| 3   | Dadazinho   | Óculos preto, cavanhaque, baixinho e magro, guitarrista, jogador de CS        | "sexo"                       | **Doze** (projétil)                   | Air guitar, depois solta "sexo" na seca      | Verde, verde-oliva, preto                |           |
+| 3   | Dadazinho   | Óculos preto, cavanhaque, estatura média e magro, guitarrista, jogador de CS  | "sexo"                       | **Doze** (projétil)                   | Air guitar, depois solta "sexo" na seca      | Verde, verde-oliva, preto                |           |
 | 4   | Tauba       | Careca, barbudo, baixinho, dev frontend, trompetista, some do Discord do nada | "🎵🎶" (toca o trompete)     | **Silent quit** (teleporte)           | Toca um trechinho clássico no trompete       | Preto, branco, dourado                   |           |
 | 5   | Tchula      | Mecânico de macacão, olho verde, joga de scout no CS                          | "Nooola!"                    | **Scout** (projétil)                  | Gira a chave de boca na mão e grita o bordão | Cinza, amarelo, preto                    |           |
 | 6   | Crocko      | Alto, óculos preto, barba, professor de pilates e fisioterapeuta              | (a definir)                  | **Correção postural** (contra-ataque) | Alonga e aponta a postura                    | Turquesa, branco, preto                  |           |
@@ -18,7 +18,7 @@ veja `docs/GDD.md`.
 | 8   | Gabs        | Servidor público da prefeitura (crachá no pescoço), gamer                     | (a definir)                  | **Controle na mão** (área)            | Aperta o controle e comemora: "GG!"          | Azul-royal, roxo, cinza-claro            |           |
 | 9   | Marília     | Baixinha (1,64 m), cabelo castanho, puxa um palheiro do nada                  | "Gentiii!"                   | **Tragadinha** (buff)                 | Mãos no rosto, gritando o bordão             | Rosa-framboesa, jeans claro, verde-menta |           |
 | 10  | Meia        | Óculos grandes pretos e quadrados, magro, pro player de jogo de luta          | (a definir)                  | **Comando** (agarrão)                 | Ajeita os óculos e chama com a mão           | Branco, ciano-elétrico, jeans            |           |
-| 11  | Igão        | Jogador de vôlei, o mais alto do elenco (1,90 m), cabelo castanho curto       | "Cê tá miolo né nê?"         | **Saque** (projétil)                  | Quica a bola, aponta e solta o bordão        | Roxo-violeta, verde-limão, roxo-escuro   |           |
+| 11  | Igão        | Jogador de vôlei, alto (1,90 m), cabelo castanho curto                        | "Cê tá miolo né nê?"         | **Saque** (projétil)                  | Quica a bola, aponta e solta o bordão        | Roxo-violeta, verde-limão, roxo-escuro   |           |
 | 12  |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 13  |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 14  |             |                                                                               |                              |                                       |                                              |                                          |           |
@@ -32,8 +32,8 @@ controla de longe (projétil).
 
 ### 1. Schummaki
 
-- **Quem é:** 30 anos, natural de São Sebastião (litoral de SP), gosta de carros. O apelido vem da
-  semelhança física com um piloto de Fórmula 1.
+- **Quem é:** 30 anos, natural de São Sebastião (litoral de SP), gosta de carros. Alto (1,90 m, a
+  mesma altura do Igão). O apelido vem da semelhança física com um piloto de Fórmula 1.
 - **Estilo de luta:** rusher. Rápido no chão, peso médio-alto, pulo um pouco mais baixo.
 - **Especial — Arrancada (investida):** "queima pneu" por alguns ticks (fumaça de pneu) e dispara
   na horizontal, acertando quem estiver no caminho. Startup mais longo, alcance e knockback altos;
@@ -49,7 +49,8 @@ controla de longe (projétil).
 
 ### 2. João Frango
 
-- **Quem é:** 24 anos, carioca, dono de restaurante, acorda tarde, vive postando foto de comida. O
+- **Quem é:** 24 anos, carioca, estatura média (1,70 m), dono de restaurante, acorda tarde, vive
+  postando foto de comida. O
   grupo diz que ele tem clones pelo mundo (parece com várias pessoas). O apelido não tem motivo, mas
   as montagens com traço de frango viraram piada.
 - **Estilo de luta:** zoner. Mais leve, bom no ar, mais lento no chão.
@@ -64,11 +65,11 @@ controla de longe (projétil).
 
 ### 3. Dadazinho
 
-- **Quem é:** 30 anos, também chamado de Broder. Baixinho (1,68 m) e magro, pele branca, óculos de
+- **Quem é:** 30 anos, também chamado de Broder. Estatura média (1,70 m) e magro, pele branca, óculos de
   armação preta e cavanhaque clássico. Guitarrista. No CS do grupo, gosta de jogar de doze (a
   MAG-7). Solta "sexo" do nada, sem motivo nenhum: é só uma brincadeira dele, sem teor sexual.
 - **Bordão:** "sexo", assim mesmo, tudo minúsculo: falado seco, sem emoção.
-- **Estilo de luta:** punisher de curta distância. Leve e rápido (é baixinho e magro), mas o
+- **Estilo de luta:** punisher de curta distância. Leve e rápido (é magro), mas o
   especial é lento para sair e pune quem chega perto.
 - **Especial — Doze (projétil):** a doze aparece nas mãos dele, ele dá um tiro para a frente e a
   arma some. O tiro é um projétil curto e forte: alcance de uns 200 px (bem menor que o frango do
@@ -199,7 +200,7 @@ Trechos prontos para os textos do Firefly (pasta `art/tauba/`):
 
 ### 5. Tchula
 
-- **Quem é:** 35 anos, mecânico. Estatura média (1,74 m), cabelo castanho, olhos verdes, pele
+- **Quem é:** 35 anos, mecânico. Estatura média (1,70 m), cabelo castanho, olhos verdes, pele
   branca. No CS do grupo, joga de scout (a SSG 08).
 - **Bordão:** "Nooola!", gritado, puxando o "o".
 - **Estilo de luta:** sniper. Peso médio-alto (braço de mecânico), meio lento no chão e no ar,
@@ -275,10 +276,10 @@ Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
 
 ### 6. Crocko
 
-- **Quem é:** 35 anos, professor de pilates e fisioterapeuta. Alto (1,84 m), cabelo preto, pele
+- **Quem é:** 35 anos, professor de pilates e fisioterapeuta. Alto (1,80 m), cabelo preto, pele
   morena, barba curta, óculos de armação preta redonda.
 - **Bordão:** a definir. Enquanto não tiver, a provocação sai sem fala (só o gesto).
-- **Estilo de luta:** paciente (counter). Peso alto e bom alcance (é alto, só o Igão é maior), meio
+- **Estilo de luta:** paciente (counter). Peso alto e bom alcance (é alto, só o Igão e o Schummaki são maiores), meio
   lento no chão, pulo médio. O jogo dele é ficar perto, esperar o adversário apertar o botão e
   punir. Contraste com o Schummaki: o Schummaki vai para cima, o Crocko espera vir.
 - **Especial — Correção postural (contra-ataque):** ele para numa pose de pilates (equilibrado numa
@@ -349,7 +350,7 @@ Trechos prontos para os textos do Firefly (pasta `art/crocko/`):
 
 ### 7. Darllan
 
-- **Quem é:** 35 anos, confeiteiro que faz biscoitos. Alto (1,84 m, a mesma altura do Crocko),
+- **Quem é:** 35 anos, confeiteiro que faz biscoitos. Alto (1,80 m, a mesma altura do Crocko),
   moreno, corpo grande e um pouco acima do peso. Cabelo e barba: seguir as fotos.
 - **Bordão:** "Darllan!"
 - **Estilo de luta:** pesadão. O mais pesado do elenco (voa menos), lento no chão e de pulo baixo,
@@ -425,7 +426,7 @@ Trechos prontos para os textos do Firefly (pasta `art/darllan/`):
 
 ### 8. Gabs
 
-- **Quem é:** 30 anos, servidor público que trabalha na prefeitura, gamer. Altura média (1,72 m),
+- **Quem é:** 30 anos, servidor público que trabalha na prefeitura, gamer. Altura média (1,70 m),
   corpo levemente gordo (nem magro, nem gordo). Cabeça do mesmo tamanho da dos outros (o estilo já
   é cabeçudo); quem marca ele é o crachá da prefeitura e o fone gamer no pescoço.
 - **Bordão:** a definir. Enquanto não tiver, o balão da provocação diz "GG!".
@@ -601,7 +602,7 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
 
 ### 10. Meia
 
-- **Quem é:** 30 anos, estatura média (1,72 m, a mesma altura do Gabs), magro. Óculos grandes de
+- **Quem é:** 30 anos, estatura média (1,70 m, a mesma altura do Gabs), magro. Óculos grandes de
   armação preta e quadrada. Cabelo, pele e barba: seguir as fotos. Joga jogo de luta
   profissionalmente (o anime fighter de duplas BlazBlue Cross Tag Battle): o especial é a piada com
   isso, um "comando" de jogo de luta difícil que o jogador faz com um botão só.
@@ -710,13 +711,13 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
 
 ### 11. Igão
 
-- **Quem é:** 35 anos, jogador de vôlei. Alto (1,90 m): é o mais alto do elenco, mais que o Crocko
-  e o Darllan (1,84 m). Pele branca, cabelo castanho e curto. Rosto e barba: seguir as fotos.
+- **Quem é:** 35 anos, jogador de vôlei. Alto (1,90 m, a mesma altura do Schummaki), mais que o
+  Crocko e o Darllan (1,80 m). Pele branca, cabelo castanho e curto. Rosto e barba: seguir as fotos.
 - **Bordão:** "Cê tá miolo né nê?", no tom de quem zoa o adversário que acabou de errar.
 - **Estilo de luta:** aéreo. Peso médio, um pouco abaixo da média no chão, e o **pulo mais alto do
   elenco** (do chão e no ar), por causa do vôlei. Os aéreos têm um pouco mais de alcance (braço
-  comprido) e o aéreo para baixo é uma cortada, mais forte que a média. O preço de ser alto: a
-  hurtbox é a maior do elenco, ele é fácil de acertar. O jogo dele é soltar o saque para obrigar o
+  comprido) e o aéreo para baixo é uma cortada, mais forte que a média. O preço de ser alto: o
+  corpo comprido é fácil de acertar. O jogo dele é soltar o saque para obrigar o
   adversário a pular e pegá-lo no ar, onde ele é melhor. Contraste com o João Frango: os dois são
   bons no ar, mas o João é leve, flutua e controla de longe com 2 pulos aéreos; o Igão sobe mais
   alto num pulo só e briga lá em cima. Contraste com o Crocko: os dois são altos, mas o Crocko
