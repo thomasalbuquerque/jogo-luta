@@ -1,8 +1,13 @@
 # Balanceamento do elenco — proposta para revisão
 
 Proposta de ajuste das 11 fichas jogáveis (`packages/sim/src/characters/*.ts`), com os valores de
-antes e depois e o motivo de cada um. **Nada foi alterado no código.** Depois de revisado, este
-arquivo serve de base para o prompt de execução (seção [Instruções para executar](#instruções-para-executar)).
+antes e depois e o motivo de cada um. Depois de revisado, este arquivo serviu de base para o prompt
+de execução (seção [Instruções para executar](#instruções-para-executar)).
+
+> **Aplicada em novembro de 2026**, exatamente com os números deste documento (um commit por
+> personagem). Fora do previsto: o teste de determinismo "a luta do teste tem de tudo" trocou a
+> seed 2024 pela 7, porque a luta aleatória é caótica e, com a 2024, um lutador deixava de morrer
+> em alguns dos estados intermediários.
 
 Resumo do que muda:
 
