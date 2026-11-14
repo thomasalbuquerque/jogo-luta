@@ -2,173 +2,173 @@
  "frames": {
   "building": {
    "frame": {
-    "x": 2,
-    "y": 2,
-    "w": 1374,
-    "h": 344
+    "x": 4,
+    "y": 4,
+    "w": 2738,
+    "h": 682
    },
    "rotated": false,
    "trimmed": false,
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 1374,
-    "h": 344
+    "w": 2738,
+    "h": 682
    },
    "sourceSize": {
-    "w": 1374,
-    "h": 344
+    "w": 2738,
+    "h": 682
    },
    "anchors": {
     "pivot": [
-     687,
-     51
+     1369,
+     99
     ],
     "sockets": {
      "wallLeft": [
-      22,
-      216
+      39,
+      429
      ],
      "wallRight": [
-      1351,
-      216
+      2697,
+      429
      ]
     }
    }
   },
   "plank": {
    "frame": {
-    "x": 145,
-    "y": 348,
-    "w": 526,
-    "h": 94
+    "x": 281,
+    "y": 690,
+    "w": 1044,
+    "h": 180
    },
    "rotated": false,
    "trimmed": false,
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 526,
-    "h": 94
+    "w": 1044,
+    "h": 180
    },
    "sourceSize": {
-    "w": 526,
-    "h": 94
+    "w": 1044,
+    "h": 180
    },
    "anchors": {
     "pivot": [
-     7,
-     11
+     10,
+     18
     ],
     "sockets": {
      "right": [
-      527,
-      11
+      1050,
+      18
      ]
     }
    }
   },
   "grill": {
    "frame": {
-    "x": 1736,
-    "y": 2,
-    "w": 210,
-    "h": 182
+    "x": 3166,
+    "y": 4,
+    "w": 413,
+    "h": 358
    },
    "rotated": false,
    "trimmed": false,
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 210,
-    "h": 182
+    "w": 413,
+    "h": 358
    },
    "sourceSize": {
-    "w": 210,
-    "h": 182
+    "w": 413,
+    "h": 358
    },
    "anchors": {
     "pivot": [
-     105,
-     176
+     206,
+     349
     ]
    }
   },
   "tank": {
    "frame": {
-    "x": 1378,
-    "y": 2,
-    "w": 212,
-    "h": 185
+    "x": 2746,
+    "y": 4,
+    "w": 416,
+    "h": 363
    },
    "rotated": false,
    "trimmed": false,
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 212,
-    "h": 185
+    "w": 416,
+    "h": 363
    },
    "sourceSize": {
-    "w": 212,
-    "h": 185
+    "w": 416,
+    "h": 363
    },
    "anchors": {
     "pivot": [
-     105,
-     176
+     207,
+     349
     ]
    }
   },
   "chair": {
    "frame": {
-    "x": 1592,
-    "y": 2,
-    "w": 142,
-    "h": 183
+    "x": 3583,
+    "y": 4,
+    "w": 276,
+    "h": 357
    },
    "rotated": false,
    "trimmed": false,
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 142,
-    "h": 183
+    "w": 276,
+    "h": 357
    },
    "sourceSize": {
-    "w": 142,
-    "h": 183
+    "w": 276,
+    "h": 357
    },
    "anchors": {
     "pivot": [
-     70,
-     176
+     137,
+     347
     ]
    }
   },
   "cooler": {
    "frame": {
-    "x": 2,
-    "y": 348,
-    "w": 141,
-    "h": 117
+    "x": 4,
+    "y": 690,
+    "w": 273,
+    "h": 227
    },
    "rotated": false,
    "trimmed": false,
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 141,
-    "h": 117
+    "w": 273,
+    "h": 227
    },
    "sourceSize": {
-    "w": 141,
-    "h": 117
+    "w": 273,
+    "h": 227
    },
    "anchors": {
     "pivot": [
-     70,
-     112
+     135,
+     220
     ]
    }
   }
@@ -178,8 +178,8 @@
   "image": "laje.webp",
   "format": "RGBA8888",
   "size": {
-   "w": 1948,
-   "h": 467
+   "w": 4096,
+   "h": 1024
   },
   "scale": "1"
  }
