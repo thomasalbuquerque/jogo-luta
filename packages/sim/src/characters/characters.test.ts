@@ -62,7 +62,7 @@ describe('elenco', () => {
     expect(JOAO.stats.airSpeed).toBeGreaterThan(SCHUMMAKI.stats.airSpeed);
   });
 
-  it('Dadazinho pune de perto: tiro curto, forte e lento; leve, rápido e baixinho', () => {
+  it('Dadazinho pune de perto: tiro curto, forte e lento; leve e rápido', () => {
     const shot = DADA.special?.move.projectile;
     const chicken = JOAO.special?.move.projectile;
     if (!shot || !chicken) throw new Error('sem projétil');
@@ -75,7 +75,7 @@ describe('elenco', () => {
     expect(DADA.special?.cooldownTicks).toBeGreaterThan(JOAO.special?.cooldownTicks ?? 0);
     expect(DADA.stats.weight).toBeLessThan(100);
     expect(DADA.stats.walkSpeed).toBeGreaterThan(JOAO.stats.walkSpeed);
-    expect(DADA.stats.height).toBeLessThan(JOAO.stats.height);
+    expect(DADA.stats.height).toBe(JOAO.stats.height);
   });
 
   it('Tauba foge: some e reaparece num lugar sorteado, sem bater; recarga longa', () => {
@@ -218,7 +218,8 @@ describe('elenco', () => {
       expect(GABS.stats.weight).toBeLessThan(DARLLAN.stats.weight);
       expect(GABS.stats.walkSpeed).toBeLessThan(base.stats.walkSpeed);
       expect(GABS.stats.height).toBeLessThan(CROCKO.stats.height);
-      expect(GABS.stats.height).toBeGreaterThan(DADA.stats.height);
+      expect(GABS.stats.height).toBe(DADA.stats.height);
+      expect(GABS.stats.height).toBeGreaterThan(TAUBA.stats.height);
       expect(GABS.special?.move.knockbackDir).toBe('away');
     });
   });
