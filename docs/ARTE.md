@@ -706,6 +706,10 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   a bola deixava dois buracos nas costas, que apareciam quando o braço subia (Saque, provocação). O
   `erase` corta as costas numa linha quase reta do colarinho até a barra, o `paint` cobre com o roxo
   da camisa o que sobrou da manga e o vão da cintura, e o `outline` contorna a linha nova.
+- **Nuca** (Igão): nas 4 cabeças o pescoço entra bem abaixo da orelha e deixava um vão atrás da
+  cabeça. Cada cabeça leva um `paint` cor de pele entre a orelha e o canto de baixo do pescoço, com
+  `outline` na linha nova. A folha de cabeças usa `scale` 0.78: a cabeça (com o pescoço comprido)
+  fica uns 6% mais alta que o torso, como no resto do elenco (0.95 a 1.17).
 - **Joelheira** (Igão: a canela vem com a joelheira preta no topo): a canela é desenhada na frente
   da coxa (o id entra em `SHIN_IN_FRONT`, em `rig/library.ts`), e o `pivot` dela fica no meio da
   joelheira. Assim a joelheira cobre a ponta do joelho da coxa, dobrada ou esticada. A coxa (só pele
