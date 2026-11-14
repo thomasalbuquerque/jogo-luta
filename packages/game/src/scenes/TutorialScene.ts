@@ -21,6 +21,12 @@ const PHASE_LOOK: Record<TutorialPhase, { label: string; color: number }> = {
   finished: { label: '✓  TUTORIAL CONCLUÍDO', color: 0x80ed99 },
 };
 
+/** Tecla de ver a demonstração de novo (Tab é reservada: nenhum botão do jogo usa). */
+const REPLAY_KEY = 'TAB';
+const REPLAY_KEY_LABEL = 'Tab';
+const REPLAY_BG = '#4cc9f0';
+const REPLAY_BG_HOVER = '#8ddcf6';
+
 function isPadAction(name: ButtonName): name is PadAction {
   return (PAD_ACTIONS as readonly string[]).includes(name);
 }
@@ -43,6 +49,8 @@ export class TutorialScene extends Phaser.Scene {
   private body!: Phaser.GameObjects.Text;
   private hint!: Phaser.GameObjects.Text;
   private badge!: Phaser.GameObjects.Text;
+  /** "Ver de novo": repete a demonstração da lição (clique ou Tab), na vez do jogador. */
+  private replay!: Phaser.GameObjects.Text;
   private shown = '';
   private shownPhase: TutorialPhase | null = null;
 
@@ -81,11 +89,35 @@ export class TutorialScene extends Phaser.Scene {
       color: '#0b0e16',
       padding: { x: 12, y: 6 },
     }).setOrigin(1, 0);
+    this.replay = uiText(this, PANEL_X + PANEL_W, 0, `↺  Ver de novo (${REPLAY_KEY_LABEL})`, {
+      fontSize: '18px',
+      fontStyle: 'bold',
+      color: '#0b0e16',
+      backgroundColor: REPLAY_BG,
+      padding: { x: 14, y: 8 },
+    })
+      .setOrigin(1, 0)
+      .setVisible(false)
+      .setInteractive({ useHandCursor: true });
+    this.replay.on(Phaser.Input.Events.POINTER_OVER, () => {
+      this.replay.setBackgroundColor(REPLAY_BG_HOVER);
+    });
+    this.replay.on(Phaser.Input.Events.POINTER_OUT, () => {
+      this.replay.setBackgroundColor(REPLAY_BG);
+    });
+    this.replay.on(Phaser.Input.Events.POINTER_DOWN, () => {
+      this.replayDemo();
+    });
+    // Tab é reservada (nenhum botão do jogo usa); sem o capture, o navegador troca o foco
+    this.input.keyboard?.addCapture(REPLAY_KEY);
+    this.input.keyboard?.on(`keydown-${REPLAY_KEY}`, (e: KeyboardEvent) => {
+      if (!e.repeat) this.replayDemo();
+    });
     uiText(
       this,
       VIEW.width / 2,
       VIEW.height - 22,
-      'Esc: pausa (ver de novo, pular lição ou sair)',
+      `${REPLAY_KEY_LABEL}: ver de novo · Esc: pausa (pular lição ou sair)`,
       {
         fontSize: '16px',
         color: UI.muted,
@@ -113,7 +145,18 @@ export class TutorialScene extends Phaser.Scene {
       if (tutorial.phase === 'try' || tutorial.phase === 'done') {
         this.tweens.add({ targets: this.badge, scale: { from: 1.25, to: 1 }, duration: 220 });
       }
+      this.replay.setVisible(tutorial.phase === 'try');
+      this.replay.setBackgroundColor(REPLAY_BG);
     }
+  }
+
+  /** Mostra de novo a demonstração da lição atual (só na vez do jogador, fora da pausa). */
+  private replayDemo(): void {
+    const fight = this.fight;
+    const tutorial = fight.tutorial;
+    if (tutorial?.phase !== 'try' || this.scene.isActive('pause')) return;
+    playSfx(this, 'ui_confirm');
+    tutorial.replayDemo(fight.state);
   }
 
   private showLesson(lesson: Lesson | null, index: number, total: number): void {
@@ -135,6 +178,7 @@ export class TutorialScene extends Phaser.Scene {
     this.hint.setY(hintY);
     const bottom =
       (this.hint.text ? hintY + this.hint.height : this.body.y + this.body.height) + 16;
+    this.replay.setPosition(PANEL_X + PANEL_W, bottom + 10);
     this.gfx.clear();
     panel(this.gfx, PANEL_X, PANEL_Y, PANEL_W, bottom - PANEL_Y, UI.panelDark, 0.86);
   }
