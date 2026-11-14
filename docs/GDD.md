@@ -37,6 +37,7 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 - **Pulo curto:** soltar o pulo enquanto sobe corta a subida pela metade.
 - **Wall jump:** encostado na lateral de um bloco sólido, no ar, segurando na direção dele o lutador desliza devagar; pulo arremessa para longe da parede. Até 3 por vez no ar.
 - **Fast fall:** ↓ no ar, depois do ápice, acelera a queda.
+- **Velocidade de descida por personagem:** descer mais rápido é vantagem, e cada personagem está numa de 3 faixas (`fastFallSpeed` 19 / 17 / 15, com gravidade e queda máxima acompanhando). Descer da plataforma até o chão leva 8, 9 ou 10 ticks. Rápida: Schummaki, Dadazinho, Tchula, Crocko, Darllan, Gabs, Marília e Igão; média: Tauba e Meia; lenta: João Frango.
 - **Plataformas atravessáveis:** passa por baixo pulando; ↓ em cima delas para descer.
 - **Esquiva:** no chão é um dash curto (9 ticks, recarga de 18; pulo cancela o dash). No ar é um dodge em qualquer das 8 direções (ou parado), sem gravidade, com 12 ticks de invencibilidade, 1 por vez no ar.
 - **Tolerâncias:** pulo até 5 ticks depois de sair da borda (coyote time) e pulo apertado até 6 ticks antes de poder pular fica guardado (buffer).
@@ -243,16 +244,16 @@ Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `b
 
 | Personagem  | Estilo    | Peso | Chão (px/tick) | Ar (px/tick) | Pulo | Pulos aéreos | Especial                                                                                                                                      |
 | ----------- | --------- | ---- | -------------- | ------------ | ---- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Schummaki   | Rusher    | 112  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 13%, 1 vez por ar, parado no ar no startup                                                           |
+| Schummaki   | Rusher    | 106  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 13%, 1 vez por ar, parado no ar no startup, recarga de 75                                            |
 | João Frango | Zoner     | 86   | 5,6            | 6,2          | 180  | 2            | **Frango assado voador** (projétil): 10 / 1 / 16, 5%, reto, ~570 px, recarga de 42                                                            |
 | Dadazinho   | Punisher  | 84   | 7              | 6            | 180  | 1            | **Doze** (projétil): 20 / 1 / 26, 15%, tiro curto (~200 px) e forte, recarga de 100                                                           |
 | Tauba       | Fujão     | 92   | 6,8            | 6            | 178  | 1            | **Silent quit** (teleporte sorteado): 14 / 20 / 18, sem dano, 1 vez por ar, recarga de 240                                                    |
-| Tchula      | Sniper    | 108  | 5,8            | 5,1          | 170  | 1            | **Scout** (projétil): 28 / 1 / 30, 18%, tiro reto e fino (64×14) a 36 px/tick, ~1080 px, recarga de 150                                       |
+| Tchula      | Sniper    | 108  | 6              | 5,1          | 170  | 1            | **Scout** (projétil): 28 / 1 / 30, 18%, tiro reto e fino (64×14) a 36 px/tick, ~1080 px, recarga de 150                                       |
 | Crocko      | Paciente  | 114  | 5,9            | 5,2          | 172  | 1            | **Correção postural** (contra-ataque): 6 / 20 / 28, 14% a 40°, devolve projétil, recarga de 90                                                |
 | Darllan     | Pesadão   | 124  | 5,4            | 5            | 162  | 1            | **Rolo na bancada** (área): 18 / 5 / 26, 15% a 50°, ~80 px de cada lado, recarga de 60                                                        |
-| Gabs        | Espaçador | 110  | 5,8            | 5,3          | 168  | 1            | **Controle na mão** (área): 14 / 6 / 22, 11% a 35°, de ~105 a ~195 px à frente, recarga de 60                                                 |
+| Gabs        | Espaçador | 110  | 6,1            | 5,5          | 168  | 1            | **Controle na mão** (área): 12 / 6 / 22, 13% a 35°, de ~105 a ~195 px à frente, recarga de 60                                                 |
 | Marília     | Destemida | 88   | 7              | 5,9          | 185  | 1            | **Tragadinha** (buff com aura): 40 / 1 / 12, sem dano, aura de 120 ticks, recarga de 480                                                      |
-| Meia        | Técnico   | 90   | 7              | 6            | 180  | 1            | **Comando** (agarrão com combo): 6 / 4 / 32, ~36 px, 9 golpes de 1% e chute de 7% a 40°, recarga de 90                                        |
+| Meia        | Técnico   | 88   | 7              | 5,8          | 180  | 1            | **Comando** (agarrão com combo): 6 / 4 / 36, ~36 px, 9 golpes de 1% e chute de 7% a 40°, recarga de 90                                        |
 | Igão        | Aéreo     | 100  | 6,2            | 5,7          | 200  | 1            | **Saque** (projétil que quica): 18 / 1 / 18, 8% a 50°, sai 40° para baixo e quica 3 vezes (~66, 32 e 14 px de altura), ~600 px, recarga de 90 |
 
 O Darllan, além de ser o mais pesado, bate um pouco mais forte nos golpes base: +1 de dano no soco parado e +2 no soco lateral, na rasteira e nos aéreos lateral e para baixo.
@@ -261,6 +262,6 @@ A Marília bate um pouco mais fraco: −1 de dano no soco lateral, na rasteira, 
 
 O Meia tem os golpes base 1 tick mais rápidos (startup) e 1% mais fracos: soco parado, soco lateral, rasteira e os aéreos parado, lateral e para baixo.
 
-O Igão tem o pulo mais alto do elenco (200, e 160 no pulo aéreo) e a maior hurtbox (50 × 112): é fácil de acertar. Os aéreos alcançam mais (parado 112%, lateral 115%, para baixo 110%), e o aéreo para baixo é uma cortada: 11% de dano (+2) e knockback base 8,5.
+O Igão tem o pulo mais alto do elenco (200, e 160 no pulo aéreo) e o corpo mais alto, empatado com o Schummaki (50 × 112): é fácil de acertar. Os aéreos alcançam mais (parado 112%, lateral 115%, para baixo 110%), e o aéreo para baixo é uma cortada: 11% de dano (+2) e knockback base 8,5.
 
 O elenco (apelidos, traços, especial e provocação de cada um) fica em [`docs/ELENCO.md`](ELENCO.md).
