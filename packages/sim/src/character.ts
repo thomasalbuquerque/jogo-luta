@@ -271,6 +271,8 @@ const TauntSchema = z
     durationTicks: int(20, 240).default(60),
     /** Tick da provocação em que a voz sai e o balão aparece (0 = logo no começo). */
     voiceAt: int(0, 239).default(0),
+    /** Mostra o balão com o bordão na luta (false: só o texto na seleção). */
+    bubble: z.boolean().default(true),
   })
   .refine((t) => t.voiceAt < t.durationTicks, {
     path: ['voiceAt'],
@@ -316,6 +318,7 @@ export interface Taunt {
   animation: string;
   durationTicks: number;
   voiceAt: number;
+  bubble: boolean;
 }
 
 export interface Character {

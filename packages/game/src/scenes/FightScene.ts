@@ -2243,7 +2243,7 @@ export class FightScene extends Phaser.Scene {
         bubble.setText(c.taunt.text);
       }
       this.lastStates[f.id] = f.state;
-      bubble.setVisible(taunting && f.stateTicks >= c.taunt.voiceAt);
+      bubble.setVisible(taunting && c.taunt.bubble && f.stateTicks >= c.taunt.voiceAt);
       if (taunting) {
         const r = this.renderRect(f, alpha);
         const top = r.y + r.h - (this.views[f.id]?.height ?? r.h);

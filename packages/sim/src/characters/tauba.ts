@@ -36,6 +36,7 @@ export const TAUBA = defineCharacter({
   },
   taunt: {
     text: '🎵🎶',
+    bubble: false,
     sound: 'tauba_bordao',
     animation: 'tauba_taunt',
     durationTicks: 160,
