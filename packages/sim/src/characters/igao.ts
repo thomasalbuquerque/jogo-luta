@@ -1,11 +1,12 @@
 import { defineCharacter } from '../character';
 
 /**
- * Igão — aéreo (docs/ELENCO.md). Jogador de vôlei, o mais alto do elenco: peso
- * médio, um pouco lento no chão e o pulo mais alto de todos. Os aéreos alcançam
- * mais (braço comprido) e o aéreo para baixo é uma cortada. O preço: a hurtbox é a
- * maior do elenco. Especial: Saque, a bola sai em diagonal para baixo e quica 3
- * vezes no chão, cada vez mais baixo, para obrigar o adversário a pular.
+ * Igão — aéreo (docs/ELENCO.md). Jogador de vôlei, alto (1,90 m, como o Schummaki):
+ * peso médio, um pouco lento no chão, o pulo mais alto de todos e queda rápida para
+ * descer batendo. Os aéreos alcançam mais (braço comprido) e o aéreo para baixo é
+ * uma cortada. O preço: o corpo comprido é fácil de acertar. Especial: Saque, a bola
+ * sai em diagonal para baixo e quica 3 vezes no chão, cada vez mais baixo, para
+ * obrigar o adversário a pular.
  */
 export const IGAO = defineCharacter({
   id: 'igao',
@@ -20,9 +21,11 @@ export const IGAO = defineCharacter({
     jumpHeight: 200,
     airJumpHeight: 160,
     airJumps: 1,
-    // o mais alto do elenco: fácil de acertar
+    // alto (empata com o Schummaki): fácil de acertar
     hurtbox: { w: 50, h: 112 },
-    gravity: 0.66,
+    gravity: 0.7,
+    maxFallSpeed: 12,
+    fastFallSpeed: 19,
   },
   moves: {
     // Braço comprido no ar...

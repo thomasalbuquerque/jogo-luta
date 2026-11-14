@@ -1,14 +1,14 @@
 import { defineCharacter } from '../character';
 
 /**
- * Dadazinho — punisher de curta distância (docs/ELENCO.md). Baixinho e magro:
- * leve, rápido e com o corpo menor. Especial: Doze, um tiro curto e forte que
- * demora para sair e pune quem chega perto.
+ * Dadazinho — punisher de curta distância (docs/ELENCO.md). Estatura média e magro:
+ * leve, rápido no chão e de queda rápida, para cair em cima na hora certa.
+ * Especial: Doze, um tiro curto e forte que demora para sair e pune quem chega perto.
  */
 export const DADAZINHO = defineCharacter({
   id: 'dadazinho',
   name: 'Dadazinho',
-  blurb: 'Punisher: leve, rápido e baixinho. A doze pune quem chega perto.',
+  blurb: 'Punisher: leve, rápido e magro. A doze pune quem chega perto.',
   // secundária: destaque na interface (texto e barras sobre o fundo escuro)
   colors: { primary: '#3f9a4e', secondary: '#8fd16a' },
   stats: {
@@ -18,17 +18,15 @@ export const DADAZINHO = defineCharacter({
     jumpHeight: 180,
     airJumpHeight: 130,
     airJumps: 1,
-    hurtbox: { w: 44, h: 88 },
-    gravity: 0.66,
-    maxFallSpeed: 11,
-    fastFallSpeed: 17.5,
+    hurtbox: { w: 44, h: 96 },
+    gravity: 0.7,
+    maxFallSpeed: 12,
+    fastFallSpeed: 19,
     dashSpeed: 14,
   },
   moves: {
-    // Golpes rápidos e fracos: o dano dele vem da doze.
-    neutralLight: { startup: 4, damage: 5 },
+    // Soco lateral mais fraco e com menos recovery: o dano dele vem da doze.
     sideLight: { damage: 7, recovery: 10 },
-    neutralAir: { damage: 7 },
   },
   special: {
     name: 'Doze',
@@ -44,7 +42,8 @@ export const DADAZINHO = defineCharacter({
         speed: 18,
         lifetimeTicks: 11,
         size: { w: 56, h: 44 },
-        offset: { x: 52, y: -22 },
+        // sai do cano da arma
+        offset: { x: 56, y: -24 },
         hit: { damage: 15, angle: 30, baseKnockback: 10, knockbackScale: 0.2 },
       },
     ],

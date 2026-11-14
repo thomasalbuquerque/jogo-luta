@@ -2,9 +2,10 @@ import { defineCharacter } from '../character';
 
 /**
  * Marília — destemida (docs/ELENCO.md). Baixinha, leve e rápida no chão, pulo
- * bom, golpes normais um pouco mais fracos. Especial: Tragadinha, um buff com
- * aura. Ela fuma o palheiro (startup longo, vulnerável) e a fumaça verde vira uma
- * aura: por 2 s golpes, projéteis e agarrões passam por ela.
+ * bom, queda rápida (vai para cima), golpes normais um pouco mais fracos.
+ * Especial: Tragadinha, um buff com aura. Ela fuma o palheiro (startup longo,
+ * vulnerável) e a fumaça verde vira uma aura: por 2 s golpes, projéteis e agarrões
+ * passam por ela.
  */
 export const MARILIA = defineCharacter({
   id: 'marilia',
@@ -21,6 +22,9 @@ export const MARILIA = defineCharacter({
     airJumps: 1,
     // baixinha (a altura do Tauba) e estreita
     hurtbox: { w: 44, h: 90 },
+    gravity: 0.7,
+    maxFallSpeed: 12,
+    fastFallSpeed: 19,
     dashSpeed: 13.8,
   },
   moves: {

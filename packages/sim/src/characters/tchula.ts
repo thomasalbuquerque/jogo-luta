@@ -2,9 +2,9 @@ import { defineCharacter } from '../character';
 
 /**
  * Tchula — sniper (docs/ELENCO.md). Mecânico: peso médio-alto, meio lento no chão
- * e no ar, golpes normais fortes e um pouco lentos. Especial: Scout, um tiro muito
- * rápido e fino que atravessa o palco, bem telegrafado (mira longa) e com recarga
- * longa: errar custa caro.
+ * (mas consegue abrir distância) e no ar, queda rápida, golpes normais fortes e um
+ * pouco lentos. Especial: Scout, um tiro muito rápido e fino que atravessa o palco,
+ * bem telegrafado (mira longa) e com recarga longa: errar custa caro.
  */
 export const TCHULA = defineCharacter({
   id: 'tchula',
@@ -14,15 +14,15 @@ export const TCHULA = defineCharacter({
   colors: { primary: '#6e737b', secondary: '#f2c230' },
   stats: {
     weight: 108,
-    walkSpeed: 5.8,
+    walkSpeed: 6,
     airSpeed: 5.1,
     jumpHeight: 170,
     airJumpHeight: 125,
     airJumps: 1,
-    hurtbox: { w: 50, h: 98 },
+    hurtbox: { w: 50, h: 96 },
     gravity: 0.7,
-    maxFallSpeed: 11.5,
-    fastFallSpeed: 17.5,
+    maxFallSpeed: 12,
+    fastFallSpeed: 19,
     dashSpeed: 12.5,
   },
   moves: {
