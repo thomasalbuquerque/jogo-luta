@@ -1,6 +1,7 @@
 {
   "out": "characters/igao",
-  "scale": 0.15,
+  "scale": 0.45,
+  "atlasWidth": 2048,
   "outline": {
     "color": "#2a0610",
     "width": 9

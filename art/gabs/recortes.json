@@ -1,6 +1,7 @@
 {
   "out": "characters/gabs",
-  "scale": 0.15,
+  "scale": 0.45,
+  "atlasWidth": 2048,
   "outline": {
     "color": "#1d1820",
     "width": 9
