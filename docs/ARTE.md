@@ -646,6 +646,10 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   `rig/library.ts`), dobrado ou esticado. A ponta de baixo do braço fica inteira, com o contorno: é
   ela que desenha a quina do cotovelo. A ponta de cima do antebraço leva `fade`, do `pivot` até a
   ponta, e some aos poucos por cima do braço: sem linha atravessada no cotovelo, na guarda nem no soco.
+  O `to` do `fade` fica uns 10 px antes da ponta (dentro do contorno dela): se ele for até a ponta,
+  o contorno ainda aparece como um arco fraco no soco. Vale também para manga comprida inteiriça
+  (camisa do Dadazinho, terno do Tauba), em que a ponta do braço, com contorno, aparecia por cima
+  do antebraço no soco.
 - **Avental até o joelho** (Darllan): o peitilho vai no `torso` e a saia do avental é o `hips`
   inteiro, sem corte. Os `legNear`/`legFar` ficam escondidos dentro da saia, na altura do quadril,
   e a coxa (calça comprida) fica por trás: no chute ela sai por baixo da saia. Um `stretch` na
