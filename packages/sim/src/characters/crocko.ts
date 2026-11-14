@@ -1,10 +1,11 @@
 import { defineCharacter } from '../character';
 
 /**
- * Crocko — paciente (docs/ELENCO.md). Professor de pilates e fisioterapeuta: o
- * mais alto do elenco, pesado e com bom alcance, meio lento no chão. Especial:
- * Correção postural, um contra-ataque. Ele para numa pose de pilates e quem bater
- * nele nessa janela leva um tapa de fisioterapeuta nas costas que arremessa.
+ * Crocko — paciente (docs/ELENCO.md). Professor de pilates e fisioterapeuta: alto
+ * (1,80 m, como o Darllan), pesado, de bom alcance e queda rápida, meio lento no
+ * chão. Especial: Correção postural, um contra-ataque. Ele para numa pose de
+ * pilates e quem bater nele nessa janela leva um tapa de fisioterapeuta nas costas
+ * que arremessa.
  */
 export const CROCKO = defineCharacter({
   id: 'crocko',
@@ -19,10 +20,10 @@ export const CROCKO = defineCharacter({
     jumpHeight: 172,
     airJumpHeight: 128,
     airJumps: 1,
-    hurtbox: { w: 50, h: 106 },
+    hurtbox: { w: 50, h: 104 },
     gravity: 0.7,
-    maxFallSpeed: 11.8,
-    fastFallSpeed: 18,
+    maxFallSpeed: 12,
+    fastFallSpeed: 19,
     dashSpeed: 12.5,
   },
   moves: {

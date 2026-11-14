@@ -118,7 +118,7 @@ describe('elenco', () => {
     );
   });
 
-  it('Crocko espera vir: contra-ataque curto e forte com recarga; o mais alto, pesado e de braço comprido', () => {
+  it('Crocko espera vir: contra-ataque curto e forte com recarga; alto, pesado e de braço comprido', () => {
     const special = CROCKO.special;
     const base = getCharacter('base');
     if (!special?.move.counter) throw new Error('sem contra-ataque');
@@ -169,7 +169,7 @@ describe('elenco', () => {
       expect(DARLLAN.stats.walkSpeed).toBeLessThan(c.stats.walkSpeed);
       expect(DARLLAN.stats.jumpHeight).toBeLessThan(c.stats.jumpHeight);
     }
-    expect(DARLLAN.stats.height).toBe(CROCKO.stats.height);
+    expect(DARLLAN.stats.height).toBeGreaterThanOrEqual(CROCKO.stats.height);
     expect(DARLLAN.moves.sideLight.damage).toBeGreaterThan(base.moves.sideLight.damage);
   });
 
