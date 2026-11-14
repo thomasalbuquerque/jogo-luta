@@ -11,6 +11,7 @@ import {
 import { FighterView } from '../render/FighterView';
 import { movePhaseTime, sampleClip, type Clip } from '../rig/animation';
 import { clipFor, clipNames, moveForClip } from '../rig/library';
+import { fitCamera, RENDER_SCALE, VIEW } from '../render/resolution';
 
 const FONT = { fontFamily: 'monospace', fontSize: '16px', color: '#ffffff' };
 const LIVE_ZOOM = 2.6;
@@ -54,7 +55,7 @@ export class RigViewerScene extends Phaser.Scene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     this.cameras.main.setBackgroundColor('#5b6274');
     this.characters = PLAYABLE_CHARACTERS.map((id) => getCharacter(id));
     this.gfx = this.add.graphics().setDepth(10);
@@ -76,7 +77,8 @@ export class RigViewerScene extends Phaser.Scene {
       FONT,
     );
     // textos numa câmera sem zoom; o resto na câmera principal, ampliada
-    const ui = this.cameras.add(0, 0, width, height);
+    const ui = this.cameras.add(0, 0, width * RENDER_SCALE, height * RENDER_SCALE);
+    fitCamera(ui);
     ui.ignore([
       this.gfx,
       ...this.stripLabels,
@@ -122,10 +124,10 @@ export class RigViewerScene extends Phaser.Scene {
     g.clear();
     const cam = this.cameras.main;
     if (this.strip) {
-      cam.setZoom(1280 / (STRIP * STRIP_GAP + 40));
+      cam.setZoom((VIEW.width / (STRIP * STRIP_GAP + 40)) * RENDER_SCALE);
       cam.centerOn(0, -55);
     } else {
-      cam.setZoom(this.zoom);
+      cam.setZoom(this.zoom * RENDER_SCALE);
       cam.centerOn(this.focus.x, this.focus.y);
     }
     g.lineStyle(1, 0xffffff, 0.4);

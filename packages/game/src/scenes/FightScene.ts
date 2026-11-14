@@ -80,6 +80,7 @@ import { StageView } from '../render/stageView';
 import { fighterPose } from '../rig/fighterPose';
 import { fighterColor } from '../ui/theme';
 import type { HudScene } from './HudScene';
+import { RENDER_SCALE, VIEW } from '../render/resolution';
 
 const STAGE_DEBUG_COLOR = 0x80ed99;
 const HITBOX_COLOR = 0xff3b30;
@@ -372,7 +373,7 @@ export class FightScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const target = this.cameraTarget(0);
     this.camPos = { ...target };
-    cam.setZoom(target.zoom);
+    cam.setZoom(target.zoom * RENDER_SCALE);
     cam.centerOn(target.x, target.y);
 
     this.scene.launch('hud');
@@ -903,8 +904,8 @@ export class FightScene extends Phaser.Scene {
     const view = this.cameras.main.worldView;
     const at = koEdgePoint(
       { x: view.x, y: view.y, w: view.width, h: view.height },
-      this.scale.width,
-      this.scale.height,
+      VIEW.width,
+      VIEW.height,
       x,
       y,
       exitDirection(blast, x, y),
@@ -2178,8 +2179,8 @@ export class FightScene extends Phaser.Scene {
     if (focused && focused.state !== 'ko') {
       return frameTargets(
         [this.renderRect(focused, alpha)],
-        this.scale.width,
-        this.scale.height,
+        VIEW.width,
+        VIEW.height,
         FOCUS_CAMERA,
         bounds,
       );
@@ -2189,8 +2190,8 @@ export class FightScene extends Phaser.Scene {
       .map((f) => this.renderRect(f, alpha));
     return frameTargets(
       rects.length > 0 ? rects : [STAGE_VIEW],
-      this.scale.width,
-      this.scale.height,
+      VIEW.width,
+      VIEW.height,
       FIGHT_CAMERA,
       bounds,
     );
@@ -2208,14 +2209,14 @@ export class FightScene extends Phaser.Scene {
     const offset = this.shake.update(delta);
     const x = c.x + offset.x / c.zoom;
     const y = c.y + offset.y / c.zoom;
-    cam.setZoom(c.zoom);
+    cam.setZoom(c.zoom * RENDER_SCALE);
     cam.centerOn(x, y);
     this.stageView.update({
       x,
       y,
       zoom: c.zoom,
-      width: this.scale.width,
-      height: this.scale.height,
+      width: VIEW.width,
+      height: VIEW.height,
     });
   }
 }

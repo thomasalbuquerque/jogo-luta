@@ -5,6 +5,7 @@ import { prepareSfx } from '../audio/sfx';
 import { characterAtlasPath, characterTextureKey } from '../render/FighterView';
 import { createFxTextures } from '../render/fxTextures';
 import { loadStages } from '../render/stageView';
+import { VIEW } from '../render/view';
 
 /** Carrega a arte (atlas dos personagens e o cenário) e abre a primeira tela. */
 export class BootScene extends Phaser.Scene {
@@ -13,7 +14,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     const bar = this.add.graphics();
     this.load.on(Phaser.Loader.Events.PROGRESS, (value: number) => {
       bar.clear();

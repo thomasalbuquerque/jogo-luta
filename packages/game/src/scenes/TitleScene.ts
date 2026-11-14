@@ -14,6 +14,7 @@ import { fadeIn, titleText, UI, uiText } from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
 import type { FightData } from './FightScene';
 import type { OnlineData } from './OnlineScene';
+import { VIEW } from '../render/view';
 
 export interface TitleData {
   /** Voltando de outra tela: já abre no menu (sem o "aperte para começar"). */
@@ -47,7 +48,7 @@ export class TitleScene extends Phaser.Scene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     // voltar ao menu inicial é sair da sala online
     closeOnline();
     this.controls = new MenuInput();

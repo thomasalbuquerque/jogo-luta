@@ -26,6 +26,7 @@ import { gridColumns, gridMove, selectLayout, selectSlots, type SelectLayout } f
 import { addPortrait, drawSilhouette } from '../ui/portrait';
 import { cssColor, fadeIn, panel, playerColor, titleText, UI, uiText } from '../ui/theme';
 import type { MatchSetup } from './FightScene';
+import { VIEW } from '../render/view';
 
 const PANEL_W = 580;
 /** Com 3 ou 4 na sala (online), os painéis ficam lado a lado, mais estreitos. */
@@ -121,7 +122,7 @@ export class SelectScene extends Phaser.Scene {
     this.time.delayedCall(1500, () => {
       music.warm(this, 'luta');
     });
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     titleText(this, width / 2, 46, 'ESCOLHA O LUTADOR', 38);
 
     this.tiles = this.slots.map((id, i) => this.drawTile(id, i));
@@ -404,7 +405,7 @@ export class SelectScene extends Phaser.Scene {
   private tileX(i: number): number {
     const { cols, tileW, gap } = this.layout;
     const total = cols * tileW + (cols - 1) * gap;
-    return (this.scale.width - total) / 2 + (i % cols) * (tileW + gap);
+    return (VIEW.width - total) / 2 + (i % cols) * (tileW + gap);
   }
 
   private tileY(i: number): number {
@@ -459,7 +460,7 @@ export class SelectScene extends Phaser.Scene {
     facing: -1 | 1;
   } {
     const n = this.cursors.length;
-    const width = this.scale.width;
+    const width = VIEW.width;
     if (n <= 2) {
       const x = p === 0 ? 40 : width - 40 - PANEL_W;
       const floorY = this.layout.panelH - 34;

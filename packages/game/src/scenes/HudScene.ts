@@ -12,6 +12,7 @@ import { addPortrait } from '../ui/portrait';
 import { hasTeams, teamName } from '../match/teams';
 import { cssColor, fighterColor, teamColor, UI, uiText } from '../ui/theme';
 import type { FightScene } from './FightScene';
+import { VIEW } from '../render/view';
 
 /** O % cresce ao levar golpe e volta sozinho (até este tamanho). */
 const DAMAGE_POP_MAX = 1.6;
@@ -67,7 +68,7 @@ export class HudScene extends Phaser.Scene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     const fighters = this.fight.state.fighters;
     // por baixo do resto do HUD
     this.koBursts = new KoBurstLayer(this);
@@ -165,7 +166,7 @@ export class HudScene extends Phaser.Scene {
     const groups = new Set(order.map((f) => f.team)).size;
     const row = order.length * PANEL_W + (order.length - 1) * PANEL_GAP + (groups - 1) * TEAM_GAP;
     const panels: Panel[] = [];
-    let x = (this.scale.width - row) / 2;
+    let x = (VIEW.width - row) / 2;
     let groupX = x;
     for (const [i, f] of order.entries()) {
       panels[f.id] = this.drawPanel(f, x, y);

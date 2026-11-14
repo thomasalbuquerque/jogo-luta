@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { getStage } from '@jogo-luta/sim';
 import { frameTargets, type Rect } from '../render/camera';
 import { StageView } from '../render/stageView';
+import { RENDER_SCALE, VIEW } from '../render/resolution';
 
 /** Enquadramento do mapa vazio (o mesmo da luta quando ninguém está em cena). */
 const STAGE_VIEW: Rect = { x: -450, y: -200, w: 900, h: 200 };
@@ -31,11 +32,12 @@ export class BackdropScene extends Phaser.Scene {
   }
 
   create(data: BackdropData): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     const vp = data.viewport ?? { x: 0, y: 0, w: width, h: height };
     this.drift = data.drift ?? false;
     this.viewportScale = vp.w / width;
-    this.cameras.main.setViewport(vp.x, vp.y, vp.w, vp.h);
+    const r = RENDER_SCALE;
+    this.cameras.main.setViewport(vp.x * r, vp.y * r, vp.w * r, vp.h * r);
     this.view = new StageView(this, getStage(data.stageId), {
       background: -10,
       stage: 0,
@@ -49,12 +51,12 @@ export class BackdropScene extends Phaser.Scene {
   }
 
   private place(time: number): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     const target = frameTargets([STAGE_VIEW], width, height);
     const x =
       target.x + (this.drift ? Math.sin((time / DRIFT_PERIOD_MS) * Math.PI * 2) * DRIFT_PX : 0);
     const cam = this.cameras.main;
-    cam.setZoom(target.zoom * this.viewportScale);
+    cam.setZoom(target.zoom * this.viewportScale * RENDER_SCALE);
     cam.centerOn(x, target.y);
     this.view.update({ x, y: target.y, zoom: target.zoom, width, height });
   }

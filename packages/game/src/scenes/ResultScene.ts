@@ -12,6 +12,7 @@ import { MenuList, type MenuOption } from '../ui/MenuList';
 import { addPortrait } from '../ui/portrait';
 import { cssColor, fadeIn, fighterColor, panel, titleText, UI, uiText } from '../ui/theme';
 import type { FightScene, LeaveTarget } from './FightScene';
+import { VIEW } from '../render/view';
 
 /** Jogadores no mesmo PC (controles lidos no menu). */
 const LOCAL_PLAYERS = 2;
@@ -47,7 +48,7 @@ export class ResultScene extends Phaser.Scene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     const fight = this.fight;
     const state = fight.state;
     // por cima do HUD e do debug

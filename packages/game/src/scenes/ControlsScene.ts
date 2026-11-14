@@ -19,6 +19,7 @@ import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
 import { BUTTON_LABELS, keysText, padText } from '../ui/controlsCard';
 import { cssColor, fadeIn, playerColor, titleText, UI, uiText } from '../ui/theme';
+import { VIEW } from '../render/view';
 
 const PLAYERS = 2;
 /** Colunas: teclado do P1, teclado do P2, controle. */
@@ -61,7 +62,7 @@ export class ControlsScene extends Phaser.Scene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     this.row = 0;
     this.col = 0;
     this.capturing = false;
@@ -284,7 +285,7 @@ export class ControlsScene extends Phaser.Scene {
       const selected = this.row === RESET_ROW + i;
       const y = this.rowY(RESET_ROW + i);
       g.fillStyle(selected ? UI.accent : UI.panel, 1);
-      g.fillRoundedRect(this.scale.width / 2 - BUTTON_W / 2, y - CELL_H / 2, BUTTON_W, CELL_H, 8);
+      g.fillRoundedRect(VIEW.width / 2 - BUTTON_W / 2, y - CELL_H / 2, BUTTON_W, CELL_H, 8);
       label.setColor(selected ? '#1d2333' : UI.text);
     });
   }

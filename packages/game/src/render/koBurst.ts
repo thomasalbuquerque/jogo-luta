@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { EdgePoint } from './koEdge';
+import { VIEW } from './view';
 
 /** Duração da explosão do KO (tempo real). */
 const KO_BURST_MS = 900;
@@ -26,7 +27,7 @@ export class KoBurstLayer {
   private readonly bursts: Burst[] = [];
 
   constructor(private readonly scene: Phaser.Scene) {
-    const { width, height } = scene.scale;
+    const { width, height } = VIEW;
     this.flash = scene.add.rectangle(0, 0, width, height, 0xffffff, 0).setOrigin(0, 0).setDepth(-1);
     this.gfx = scene.add.graphics().setDepth(-1);
     this.glow = scene.add.graphics().setBlendMode(Phaser.BlendModes.ADD).setDepth(-1);
@@ -64,7 +65,7 @@ export class KoBurstLayer {
     const { x, y, angle } = b.at;
     const grow = 1 - (1 - Math.min(t * 2.5, 1)) ** 3;
     const fade = (1 - t) ** 1.5;
-    const reach = Math.hypot(this.scene.scale.width, this.scene.scale.height) * 0.55;
+    const reach = Math.hypot(VIEW.width, VIEW.height) * 0.55;
 
     // feixe largo e raios na cor do jogador
     // camadas: borda transparente, centro forte (parece um degradê)
