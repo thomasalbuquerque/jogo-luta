@@ -47,9 +47,10 @@ export function moveForClip(c: Character, key: string): MoveDef | null {
 }
 
 /**
- * Personagens de manga curta com o cotovelo de pele: o antebraço é desenhado sempre na
- * frente do braço (`drawOrder`). A ponta do braço fica com o contorno do cotovelo e a do
- * antebraço some aos poucos (`fade` no `recortes.json`), sem linha atravessada.
+ * Personagens com o cotovelo sem linha (pele ou manga comprida inteiriça): o antebraço é
+ * desenhado sempre na frente do braço (`drawOrder`). A ponta do braço fica com o contorno
+ * do cotovelo e a do antebraço some aos poucos (`fade` no `recortes.json`), sem linha
+ * atravessada.
  */
 export const FOREARM_IN_FRONT: ReadonlySet<string> = new Set([
   'darllan',
@@ -57,6 +58,9 @@ export const FOREARM_IN_FRONT: ReadonlySet<string> = new Set([
   'marilia',
   'meia',
   'igao',
+  'crocko',
+  'dadazinho',
+  'tauba',
 ]);
 
 /**
