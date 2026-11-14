@@ -18,7 +18,7 @@ veja `docs/GDD.md`.
 | 8   | Gabs        | Servidor público da prefeitura (crachá no pescoço), gamer                     | (a definir)                  | **Controle na mão** (área)            | Aperta o controle e comemora: "GG!"          | Azul-royal, roxo, cinza-claro            |           |
 | 9   | Marília     | Baixinha (1,64 m), cabelo castanho, puxa um palheiro do nada                  | "Gentiii!"                   | **Tragadinha** (buff)                 | Mãos no rosto, gritando o bordão             | Rosa-framboesa, jeans claro, verde-menta |           |
 | 10  | Meia        | Óculos grandes pretos e quadrados, magro, pro player de jogo de luta          | (a definir)                  | **Comando** (agarrão)                 | Ajeita os óculos e chama com a mão           | Branco, ciano-elétrico, jeans            |           |
-| 11  |             |                                                                               |                              |                                       |                                              |                                          |           |
+| 11  | Igão        | Jogador de vôlei, o mais alto do elenco (1,90 m), cabelo castanho curto       | "Cê tá miolo né nê?"         | **Saque** (projétil)                  | Quica a bola, aponta e solta o bordão        | Roxo-violeta, verde-limão, roxo-escuro   |           |
 | 12  |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 13  |             |                                                                               |                              |                                       |                                              |                                          |           |
 | 14  |             |                                                                               |                              |                                       |                                              |                                          |           |
@@ -278,7 +278,7 @@ Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
 - **Quem é:** 35 anos, professor de pilates e fisioterapeuta. Alto (1,84 m), cabelo preto, pele
   morena, barba curta, óculos de armação preta redonda.
 - **Bordão:** a definir. Enquanto não tiver, a provocação sai sem fala (só o gesto).
-- **Estilo de luta:** paciente (counter). Peso alto e bom alcance (é o mais alto do elenco), meio
+- **Estilo de luta:** paciente (counter). Peso alto e bom alcance (é alto, só o Igão é maior), meio
   lento no chão, pulo médio. O jogo dele é ficar perto, esperar o adversário apertar o botão e
   punir. Contraste com o Schummaki: o Schummaki vai para cima, o Crocko espera vir.
 - **Especial — Correção postural (contra-ataque):** ele para numa pose de pilates (equilibrado numa
@@ -707,6 +707,80 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
   `Edit the attached image: put one big symmetrical abstract cyan (#22C1EE) emblem with a black outline in the middle of the T-shirt, no letters. Keep everything else the same.`
 - **Peças (passo 3):** o tronco tem que vir com a estampa inteira, no meio do peito. Se ela vier
   cortada ou faltando, use a mesma correção acima com a folha de peças.
+
+### 11. Igão
+
+- **Quem é:** 35 anos, jogador de vôlei. Alto (1,90 m): é o mais alto do elenco, mais que o Crocko
+  e o Darllan (1,84 m). Pele branca, cabelo castanho e curto. Rosto e barba: seguir as fotos.
+- **Bordão:** "Cê tá miolo né nê?", no tom de quem zoa o adversário que acabou de errar.
+- **Estilo de luta:** aéreo. Peso médio, um pouco abaixo da média no chão, e o **pulo mais alto do
+  elenco** (do chão e no ar), por causa do vôlei. Os aéreos têm um pouco mais de alcance (braço
+  comprido) e o aéreo para baixo é uma cortada, mais forte que a média. O preço de ser alto: a
+  hurtbox é a maior do elenco, ele é fácil de acertar. O jogo dele é soltar o saque para obrigar o
+  adversário a pular e pegá-lo no ar, onde ele é melhor. Contraste com o João Frango: os dois são
+  bons no ar, mas o João é leve, flutua e controla de longe com 2 pulos aéreos; o Igão sobe mais
+  alto num pulo só e briga lá em cima. Contraste com o Crocko: os dois são altos, mas o Crocko
+  fica no chão esperando; o Igão vive no ar.
+- **Especial — Saque (projétil):** ele joga a bola de vôlei para cima com uma mão, sem saltar, e
+  bate nela de cima para baixo com a mão aberta. A bola sai em diagonal, para baixo e para a
+  frente, bate no chão e quica 3 vezes, cada quique mais baixo, até acertar alguém ou acabar o
+  tempo.
+  - **Tempo:** startup médio (~18 ticks: a bola subindo e o braço armando são o aviso), active de
+    1 tick (a batida), recovery médio (~18 ticks, o braço descendo).
+  - **A bola:** nasce acima da cabeça, um pouco à frente (~34 px à frente, ~70 px acima do centro
+    do corpo), e sai a ~9 px/tick num ângulo de ~40° para baixo, com gravidade ~0,45. Caixa
+    redonda de ~28 × 28 px.
+  - **Os quiques:** guarda ~65% da velocidade vertical a cada quique (a horizontal não muda). Com
+    esses números, o 1º quique sobe uns 70 px (ainda pega quem está em pé), o 2º uns 30 px e o 3º
+    uns 12 px, rente ao chão. Vida de ~85 ticks (1,4 s): ela anda uns 550 a
+    600 px no total, um pouco mais que meio palco. Quem pular por cima escapa; o 1º quique é o mais
+    difícil de pular.
+  - **Onde quica e onde some:** quica no topo do chão e no topo das plataformas atravessáveis
+    (vindo de cima, como um lutador pousando). Na lateral ou embaixo de um bloco sólido (parede),
+    some, como todo projétil hoje. Depois do último quique, o próximo toque no chão faz ela sumir;
+    numa plataforma atravessável sem quiques sobrando, ela passa direto, como hoje. Saiu do palco,
+    cai até a blast zone ou até o tempo acabar.
+  - **Golpe:** dano ~8, knockback médio (ângulo ~50°, para o lado em que a bola anda). O mesmo em
+    qualquer quique. Some ao acertar alguém.
+  - **Recarga:** ~90 ticks (1,5 s), contada do começo: uma bola em quadra por vez.
+  - **No ar:** funciona igual (vira um saque viagem), sem impulso: não ajuda a voltar ao palco. A
+    bola sai de mais alto, então o 1º quique fica mais longe.
+  - **Interações:** a correção do Crocko devolve a bola para quem sacou, com os quiques que
+    sobraram; a aura da Marília deixa a bola passar.
+  - **Efeitos:** a bola gira no ar no sentido em que anda (rotação no código, não precisa de
+    quadros); na batida, um estouro de impacto na mão e um "pá!" de tapa forte; atrás da bola, um
+    rastro curto até o 1º quique; a cada quique, uma poeirinha no chão e um "tum" que vai ficando
+    mais baixo; ao acertar alguém, a faísca de impacto normal.
+  - **A animação:** 1 clipe de especial com 3 poses (bola subindo com o braço armado atrás da
+    cabeça, a batida com o braço esticado lá em cima e a mão aberta, o braço descendo no
+    recovery). A bola fica na mão (como peça do esqueleto) até a batida; daí em diante é o
+    projétil. Sem pulo: os pés não saem do chão. O adversário usa o hitstun normal: nenhuma
+    animação nova para ele.
+  - **Precisa de código novo (pequeno):** hoje o projétil some ao bater num bloco sólido. Falta
+    uma opção de quique no mesmo bloco projétil, em vez de um bloco novo: `bounces` (quantos
+    quiques, padrão 0 = como hoje) e `bounceKeep` (quanto da velocidade vertical sobra a cada
+    quique, em %, ~65). No `stepProjectiles`, quando a bola está caindo e a base dela cruzou o topo
+    de um chão ou plataforma neste tick, com quiques sobrando: ela fica em cima da superfície,
+    `vy = -idiv(vy * bounceKeep, 100)` e gasta 1 quique. Fora isso, igual a hoje (parede some,
+    plataforma sem quique passa). O projétil em voo guarda os quiques que sobram (entra no
+    snapshot e no hash). É conta com inteiros: replay e online continuam iguais. Um evento de
+    quique (com a posição) deixa o jogo tocar o "tum" e a poeirinha.
+- **Provocação:** quica a bola no chão duas vezes com uma mão, como quem se prepara para sacar,
+  segura a bola, aponta para o adversário e solta "Cê tá miolo né nê?". A bola é a mesma peça do
+  especial.
+- **Visual:** uniforme de jogador de vôlei. Camisa roxo-violeta (`#6A3FB8`) de manga curta, justa,
+  para fora do short, com a gola e uma faixa em cada lateral em verde-limão (`#C4E53A`), **sem
+  número e sem nome** (número vira espelhado quando o jogo vira o personagem); short de vôlei curto
+  roxo-escuro (`#2E1F57`), acima do joelho, com um filete verde-limão na lateral; joelheiras pretas
+  (`#1C1C1F`) nos dois joelhos; meias brancas curtas e tênis de vôlei branco (`#F4F5F7`) com
+  detalhe verde-limão. Corpo alto, magro e atlético, braços e pernas compridos. A bola: branca, com
+  os gomos curvos de bola de vôlei em roxo e verde-limão, sem logo nem marca. Cores: roxo-violeta,
+  verde-limão e roxo-escuro (ninguém tem roxo como cor principal: o roxo do Gabs é só o detalhe do
+  fone, e o violeta do Igão é mais escuro e mais fechado; o verde-limão é bem mais amarelado e vivo
+  que o verde do Dadazinho e a menta da Marília).
+- **Ideias guardadas:** respawn caindo com a bola debaixo do braço; apito de juiz no KO dele; um
+  "bloqueio" de braços erguidos como provocação alternativa; uma rede de vôlei de praia no fundo de
+  um mapa.
 
 ### Arte
 
