@@ -37,17 +37,31 @@ interface StageArt {
   decorations: readonly Decoration[];
 }
 
+/**
+ * Px da arte por px de mundo nas peças e camadas da laje: a arte foi ampliada 2×
+ * (Real-ESRGAN, ver docs/ARTE.md), então as escalas abaixo dividem por isso.
+ */
+const LAJE_ART_RES = 2;
+
 const LAJE: StageArt = {
   atlas: 'stages/laje',
   ref: { x: 0, y: -88 },
   layers: [
-    { key: 'sky', depth: 0, anchorX: 640, anchorY: 360, scale: 0.9, originX: 0.5, originY: 0.5 },
+    {
+      key: 'sky',
+      depth: 0,
+      anchorX: 640,
+      anchorY: 360,
+      scale: 0.9 / LAJE_ART_RES,
+      originX: 0.5,
+      originY: 0.5,
+    },
     {
       key: 'far',
       depth: 0.12,
       anchorX: 640,
       anchorY: 620,
-      scale: 1.1,
+      scale: 1.1 / LAJE_ART_RES,
       originX: 0.5,
       originY: 1,
       fillBelow: 0x8d6a86,
@@ -57,7 +71,7 @@ const LAJE: StageArt = {
       depth: 0.32,
       anchorX: 640,
       anchorY: -215,
-      scale: 1,
+      scale: 1 / LAJE_ART_RES,
       originX: 0.5,
       originY: 0,
       fillBelow: 0x424b26,
@@ -66,10 +80,10 @@ const LAJE: StageArt = {
   ],
   wall: { color: 0x8a6a64, shadow: 0x2b2230, outline: 0x2b1a22 },
   decorations: [
-    { frame: 'tank', x: -250, y: -16, scale: 0.36 },
-    { frame: 'grill', x: -360, y: -6, scale: 0.34 },
-    { frame: 'chair', x: 300, y: -10, scale: 0.34, flipX: true },
-    { frame: 'cooler', x: 365, y: -6, scale: 0.34 },
+    { frame: 'tank', x: -250, y: -16, scale: 0.36 / LAJE_ART_RES },
+    { frame: 'grill', x: -360, y: -6, scale: 0.34 / LAJE_ART_RES },
+    { frame: 'chair', x: 300, y: -10, scale: 0.34 / LAJE_ART_RES, flipX: true },
+    { frame: 'cooler', x: 365, y: -6, scale: 0.34 / LAJE_ART_RES },
   ],
 };
 
