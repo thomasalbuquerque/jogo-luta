@@ -18,6 +18,7 @@ fim o guia de estilo (o porquê de cada regra) e o modelo de ficha.
 | Gabs                                            | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Marília                                         | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Meia                                            | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
+| Igão                                            | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | [Cenário: a laje](#cenário-a-laje)              | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feito |
 | **[Personagem novo](#personagem-novo-firefly)** | **As mesmas 5 imagens, uma de cada**                                  | 5       | a fazer  |
 
@@ -552,7 +553,9 @@ jogo direto. `pnpm art fulano --debug <pasta>` grava também o atlas com as junt
 Cada folha (`sheets`) tem uma escala própria: a folha de peças, a de cabeças e a de efeitos podem
 vir desenhadas em tamanhos diferentes. A mesma imagem pode entrar em duas folhas com escalas
 diferentes (no Dadazinho, a arma sai do `4-efeitos.png` menor que o clarão e o chumbo). Folha que
-já veio sem fundo (tirado no Photoshop) leva `"key": false`. Campos de cada peça:
+já veio sem fundo (tirado no Photoshop) leva `"key": false`. Roupa roxa ou rosa fica perto do
+magenta e sairia meio transparente: a folha leva `"keyRange": [120, 225]` (abaixo do 1º valor
+fica opaco, acima do 2º some; o padrão é `[50, 215]`), como as peças e os efeitos do Igão. Campos de cada peça:
 
 | Campo     | O que é                                                                                         |
 | --------- | ----------------------------------------------------------------------------------------------- |
@@ -696,6 +699,21 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   aparece em cada frame), porque a sequência espelha com ele e o contador muda de número.
 - **Aura no código** (Marília): a silhueta verde que veio na folha de efeitos não é recortada. O brilho
   é o Glow do Phaser no container do boneco (`FighterView.setGlow`), então acompanha cada pose.
+- **Camisa roxa** (Igão): o roxo da camisa e da bola tem pouca diferença do magenta do fundo e,
+  com a faixa padrão do chroma key, ficava 10 a 25% transparente. As folhas de peças e de efeitos
+  levam `keyRange` (ver acima).
+- **Joelheira** (Igão: a canela vem com a joelheira preta no topo): a canela é desenhada na frente
+  da coxa (o id entra em `SHIN_IN_FRONT`, em `rig/library.ts`), e o `pivot` dela fica no meio da
+  joelheira. Assim a joelheira cobre a ponta do joelho da coxa, dobrada ou esticada. A coxa (só pele
+  na folha) leva a perna do short pintada (`paint` com a cor do short e `outline` na barra), como
+  no Crocko, e um `stretch` comprido: a coxa veio curta para um personagem alto.
+- **Bola solta no código** (Igão): a bola do Saque e a da provocação não são peça do esqueleto
+  enquanto estão no ar. O `FightScene` desenha a peça `fx_ball` saindo da mão de trás
+  (`FighterView.farHandPoint`) até o ponto onde o sim solta o projétil, e na provocação quicando da
+  mão da frente até o chão (os trechos do `dribble` em `render/fx.ts`); no clipe, a mão fica vazia
+  nesses trechos (`prop: null`). A bola na mão (segurando antes de quicar e ao apontar) é a mesma
+  peça como `prop`, com o `pivot` no meio. A pose da batida (`SPIKE_HIT`) foi achada com o
+  `solvePose`: a mão logo atrás e acima do ponto onde a bola nasce.
 
 ### 2. Esqueleto e animação: `packages/game/src/rig`
 
@@ -727,7 +745,10 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   verdes subindo, o palheiro caindo no peteleco e, quando um golpe passa pela aura, a estrelinha e o
   "plim"; no Comando do Meia a poeirinha nos pés, o comando acendendo em cima da cabeça, e a cada
   golpe do combo uma faísca, uma linha de velocidade, o "pá" e um tranco no agarrado, o contador
-  "N HITS" e, no chute final, a explosão grande, a fumaça e o "póu").
+  "N HITS" e, no chute final, a explosão grande, a fumaça e o "póu"; no Saque do Igão a bola
+  jogada da mão de trás, o estouro e o "pá!" na batida, a bola girando com o rastro até o 1º quique
+  e, a cada quique, a poeirinha e o "tum" cada vez mais baixo, e na provocação a bola quicando da
+  mão até o chão).
 - Contra-ataque que pegou alguém toca o clipe `<id do especial>_counter` (o tapa do Crocko) no
   lugar do recovery; sem esse clipe, continua o do especial.
 - Agarrão com combo que pegou alguém toca o clipe `<id do especial>_combo` (o combo do Meia), em
