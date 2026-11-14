@@ -14,6 +14,7 @@ import { RigViewerScene } from './scenes/RigViewerScene';
 import { SelectScene } from './scenes/SelectScene';
 import { StageSelectScene } from './scenes/StageSelectScene';
 import { TitleScene } from './scenes/TitleScene';
+import { TutorialScene } from './scenes/TutorialScene';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -45,6 +46,7 @@ const game = new Phaser.Game({
     ControlsScene,
     FightScene,
     HudScene,
+    TutorialScene,
     PauseScene,
     ResultScene,
     DebugScene,

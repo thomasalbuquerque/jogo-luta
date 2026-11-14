@@ -79,6 +79,8 @@ import { SlowMo } from '../render/slowmo';
 import { StageView } from '../render/stageView';
 import { fighterPose } from '../rig/fighterPose';
 import { fighterColor } from '../ui/theme';
+import { createTutorialGame, TUTORIAL_CHARACTERS, TutorialDirector } from '../tutorial/director';
+import { DUMMY } from '../tutorial/lessons';
 import type { HudScene } from './HudScene';
 import { RENDER_SCALE, VIEW } from '../render/resolution';
 
@@ -156,6 +158,8 @@ export interface MatchSetup {
 /** Dados para abrir a luta: o que foi escolhido nos menus, ou um replay para assistir. */
 export interface FightData extends Partial<MatchSetup> {
   replay?: Replay;
+  /** Abre o tutorial (Crocko contra o boneco de treino) em vez de uma luta. */
+  tutorial?: boolean;
 }
 
 /** O setup da partida online (o que a sala mandou). */
@@ -219,6 +223,10 @@ export class FightScene extends Phaser.Scene {
   stalled = false;
   /** Online: há quanto tempo está parado esperando o input do outro (ms). */
   stalledMs = 0;
+  /** Tutorial em andamento (null = luta de verdade ou replay). */
+  tutorial: TutorialDirector | null = null;
+  /** Tutorial: o "!" em cima do boneco quando ele vai atacar. */
+  private tutorialMark: Phaser.GameObjects.Text | null = null;
 
   /** Gravação da luta em andamento (seed + inputs de cada tick). */
   private recording: Replay | null = null;
@@ -294,7 +302,8 @@ export class FightScene extends Phaser.Scene {
 
   init(data: FightData): void {
     this.playback = data.replay ?? null;
-    this.net = getOnline();
+    this.tutorial = data.tutorial ? new TutorialDirector() : null;
+    this.net = this.tutorial ? null : getOnline();
     this.leaving = false;
     const replay = data.replay;
     this.setup = replay
@@ -305,7 +314,9 @@ export class FightScene extends Phaser.Scene {
           friendlyFire: replay.rules.friendlyFire === true,
         }
       : {
-          characters: data.characters ?? PLAYABLE_CHARACTERS.slice(0, 2),
+          characters: this.tutorial
+            ? TUTORIAL_CHARACTERS
+            : (data.characters ?? PLAYABLE_CHARACTERS.slice(0, 2)),
           stageId: data.stageId ?? STAGES[0]?.id ?? '',
           teams: data.teams ?? null,
           friendlyFire: data.friendlyFire === true,
@@ -376,7 +387,22 @@ export class FightScene extends Phaser.Scene {
     cam.setZoom(target.zoom * RENDER_SCALE);
     cam.centerOn(target.x, target.y);
 
-    this.scene.launch('hud');
+    this.tutorialMark = this.tutorial
+      ? this.add
+          .text(0, 0, '!', {
+            fontFamily: '"Arial Black", sans-serif',
+            fontSize: '54px',
+            color: '#ffd166',
+            stroke: '#0b0e16',
+            strokeThickness: 8,
+          })
+          .setOrigin(0.5, 1)
+          .setDepth(DEPTH.ui)
+          .setVisible(false)
+      : null;
+
+    // no tutorial, o painel das lições fica no lugar do HUD
+    this.scene.launch(this.tutorial ? 'tutorial' : 'hud');
     this.scene.launch('debug');
     music.play(this, 'luta');
   }
@@ -404,7 +430,22 @@ export class FightScene extends Phaser.Scene {
     this.drawFighters(alpha);
     this.drawProjectiles(alpha);
     this.updateTaunts(alpha);
+    this.updateTutorialMark(alpha);
     this.updateCamera(alpha, delta);
+  }
+
+  /** Tutorial: "!" pulando em cima do boneco antes de ele atacar. */
+  private updateTutorialMark(alpha: number): void {
+    const mark = this.tutorialMark;
+    const dummy = this.state.fighters[DUMMY];
+    if (!mark || !this.tutorial || !dummy) return;
+    const show = this.tutorial.warning(this.state) && dummy.state !== 'ko';
+    mark.setVisible(show);
+    if (!show) return;
+    const r = this.renderRect(dummy, alpha);
+    const top = r.y + r.h - (this.views[DUMMY]?.height ?? r.h);
+    const bounce = Math.abs(Math.sin(this.game.loop.time / 90)) * 8;
+    mark.setPosition(r.x + r.w / 2, top - 30 - bounce);
   }
 
   /** Partida online em andamento (null = jogo local, ou assistindo a um replay). */
@@ -460,7 +501,12 @@ export class FightScene extends Phaser.Scene {
    * Assistindo a um replay, começa o replay do tick 0.
    */
   newMatch(): void {
-    if (this.playback) {
+    if (this.tutorial) {
+      // o tutorial não é gravado: o roteiro mexe no palco entre os ticks
+      this.recording = null;
+      this.state = createTutorialGame(newSeed());
+      this.tutorial.start(this.state, 0);
+    } else if (this.playback) {
       this.recording = null;
       this.state = replayGame(this.playback);
     } else {
@@ -552,7 +598,7 @@ export class FightScene extends Phaser.Scene {
     if (this.leaving) return;
     this.leaving = true;
     if (scene === 'title' || scene === 'online') closeOnline();
-    for (const key of ['hud', 'debug', 'pause', 'result']) this.scene.stop(key);
+    for (const key of ['hud', 'tutorial', 'debug', 'pause', 'result']) this.scene.stop(key);
     this.scene.start(scene, data);
   }
 
@@ -597,6 +643,7 @@ export class FightScene extends Phaser.Scene {
     }
     this.lastInputs = inputs;
     this.stepRecorded(inputs);
+    this.tutorial?.afterStep(this.state);
     this.checkHash();
     recordEvents(this.stats, this.state.events);
     this.handleEvents();
@@ -613,6 +660,13 @@ export class FightScene extends Phaser.Scene {
    */
   private nextInputs(sampled: readonly InputMask[]): InputMask[] | null {
     if (this.playback) return replayInputs(this.playback, this.state.tick);
+    // tutorial: qualquer controle mexe o Crocko (na demonstração, o roteiro joga)
+    if (this.tutorial) {
+      return this.tutorial.inputs(
+        this.state,
+        sampled.reduce((a, b) => a | b, NO_INPUT),
+      );
+    }
     const net = this.net;
     const match = net?.match;
     if (!net || !match) return this.inputDelay.push(sampled);
