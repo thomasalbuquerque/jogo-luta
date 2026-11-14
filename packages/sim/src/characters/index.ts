@@ -4,6 +4,7 @@ import { CROCKO } from './crocko';
 import { DADAZINHO } from './dadazinho';
 import { DARLLAN } from './darllan';
 import { GABS } from './gabs';
+import { IGAO } from './igao';
 import { JOAO_FRANGO } from './joao-frango';
 import { MARILIA } from './marilia';
 import { MEIA } from './meia';
@@ -30,6 +31,7 @@ for (const c of [
   GABS,
   MARILIA,
   MEIA,
+  IGAO,
 ])
   registerCharacter(c);
 
@@ -48,6 +50,7 @@ export const PLAYABLE_CHARACTERS: readonly string[] = [
   GABS.id,
   MARILIA.id,
   MEIA.id,
+  IGAO.id,
 ];
 
 export function hasCharacter(id: string): boolean {
