@@ -229,8 +229,7 @@ Só crie um bloco de especial novo quando a ideia do amigo realmente pedir.
 
 Objetivo: nenhum personagem domina, e o jogo roda bem em qualquer PC do grupo.
 
-- [ ] Estatísticas por partida (personagem, vitória, golpe que causou cada KO) salvas num backend leve: NestJS + Postgres ou Supabase.
-- [ ] Ajustar os números nas fichas a partir dos dados e do feedback.
+- [x] Balanceamento do elenco: alturas reais, 3 faixas de queda, Schummaki, Meia e João Frango contidos, Gabs e Tchula reforçados (proposta e números em `docs/BALANCEAMENTO.md`).
 - [ ] Testar em Chrome, Firefox, Edge e Safari, inclusive num notebook fraco.
 - [ ] Otimizar carregamento: texture atlas, imagens em WebP, carregar só os personagens escolhidos.
 - [ ] Página inicial com controles e "como jogar"; domínio próprio é opcional.
