@@ -26,6 +26,9 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+  // mipmaps nas texturas de lado potência de 2 (os atlas do pnpm art): imagem
+  // reduzida na tela (retrato, objeto, câmera afastada) fica lisa, sem serrilhado
+  render: { mipmapFilter: 'LINEAR_MIPMAP_LINEAR' },
   plugins: {
     scene: [{ key: 'renderScale', plugin: RenderScalePlugin, mapping: 'renderScale' }],
   },
