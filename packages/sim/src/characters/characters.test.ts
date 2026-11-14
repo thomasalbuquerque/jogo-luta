@@ -169,7 +169,7 @@ describe('elenco', () => {
       expect(DARLLAN.stats.walkSpeed).toBeLessThan(c.stats.walkSpeed);
       expect(DARLLAN.stats.jumpHeight).toBeLessThan(c.stats.jumpHeight);
     }
-    expect(DARLLAN.stats.height).toBeGreaterThanOrEqual(CROCKO.stats.height);
+    expect(DARLLAN.stats.height).toBe(CROCKO.stats.height);
     expect(DARLLAN.moves.sideLight.damage).toBeGreaterThan(base.moves.sideLight.damage);
   });
 

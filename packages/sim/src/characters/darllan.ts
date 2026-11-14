@@ -2,9 +2,10 @@ import { defineCharacter } from '../character';
 
 /**
  * Darllan — pesadão (docs/ELENCO.md). Confeiteiro de biscoitos: alto como o
- * Crocko e o mais pesado do elenco (voa menos), lento no chão e de pulo baixo, com
- * golpes um pouco mais fortes. Especial: Rolo na bancada, uma área. Ergue o rolo de
- * massa e bate no chão: arremessa quem estiver em volta, dos dois lados.
+ * Crocko (1,80 m) e o mais pesado do elenco (voa menos), lento no chão e de pulo
+ * baixo, de queda rápida, com golpes um pouco mais fortes. Especial: Rolo na
+ * bancada, uma área. Ergue o rolo de massa e bate no chão: arremessa quem estiver
+ * em volta, dos dois lados.
  */
 export const DARLLAN = defineCharacter({
   id: 'darllan',
@@ -19,10 +20,10 @@ export const DARLLAN = defineCharacter({
     jumpHeight: 162,
     airJumpHeight: 122,
     airJumps: 1,
-    hurtbox: { w: 56, h: 106 },
+    hurtbox: { w: 56, h: 104 },
     gravity: 0.72,
     maxFallSpeed: 12,
-    fastFallSpeed: 18.5,
+    fastFallSpeed: 19,
     dashSpeed: 12,
   },
   moves: {
