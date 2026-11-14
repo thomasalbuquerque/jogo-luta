@@ -30,6 +30,7 @@ export class InputManager {
   private suppressed: InputMask[] = [];
   private lastRaw: InputMask[] = [];
   private systemMask: MenuMask = 0;
+  private selectHeld = false;
   private padMasks: InputMask[] = [];
 
   constructor(
@@ -65,9 +66,13 @@ export class InputManager {
 
     let system = 0;
     for (const [code, bit] of SYSTEM_KEYS) if (down.has(code)) system |= bit;
+    this.selectHeld = false;
     for (const pad of pads) {
       if (pad.buttons[PAD_START]) system |= Menu.START;
-      if (pad.buttons[PAD_SELECT]) system |= Menu.BACK;
+      if (pad.buttons[PAD_SELECT]) {
+        system |= Menu.BACK;
+        this.selectHeld = true;
+      }
     }
     this.systemMask = system;
     return masks;
@@ -76,6 +81,11 @@ export class InputManager {
   /** Bitmask de cada controle conectado na última amostra (de quem for), na ordem. */
   get pads(): readonly InputMask[] {
     return this.padMasks;
+  }
+
+  /** Select de algum controle apertado na última amostra (também conta como `Menu.BACK`). */
+  get padSelect(): boolean {
+    return this.selectHeld;
   }
 
   /** Teclas fixas de menu (setas, Enter, Esc, Start e Select do controle) na última amostra. */

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CONTROLS } from '../input/controls';
 import { LESSONS } from './lessons';
-import { buttonHint, finishedPrompt, footerPrompt, formatPrompt } from './prompts';
+import { buttonHint, finishedPrompt, footerPrompt, formatPrompt, replayButton } from './prompts';
 
 describe('textos do tutorial', () => {
   it('no teclado, mostra as teclas do jogador 1', () => {
@@ -24,8 +24,10 @@ describe('textos do tutorial', () => {
 
   it('pausa e fim do tutorial falam do botão certo', () => {
     expect(footerPrompt('keyboard')).toContain('Esc');
-    expect(footerPrompt('pad')).toContain('Start');
-    expect(footerPrompt('pad')).not.toContain('Esc');
+    expect(footerPrompt('keyboard')).toContain('Tab: ver de novo');
+    expect(footerPrompt('pad')).toBe('Select: ver de novo · Start: pausa (pular lição ou sair)');
+    expect(replayButton('keyboard')).toBe('Tab');
+    expect(replayButton('pad')).toBe('Select');
     expect(finishedPrompt('pad')).toContain('Start');
     expect(finishedPrompt('keyboard')).toContain('Esc');
   });

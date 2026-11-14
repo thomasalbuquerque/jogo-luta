@@ -1,5 +1,5 @@
 import type { ButtonName } from '@jogo-luta/sim';
-import { PAD_ACTIONS, type PadAction } from '../input/bindings';
+import { PAD_ACTIONS, PAD_SELECT, PAD_START, type PadAction } from '../input/bindings';
 import { keyLabel, padButtonLabel, type Controls } from '../input/controls';
 
 /** Com o que a pessoa vai jogar o tutorial: os textos mostram os botões dele. */
@@ -58,11 +58,18 @@ export function buttonHint(controls: Controls, device: TutorialDevice, name: But
   return `${NAMES[name]}: ${keysOf(controls, 0, name)}  (jogador 2: ${keysOf(controls, 1, name)})`;
 }
 
-/** Como abrir a pausa e rever a demonstração, no aparelho escolhido. */
+/**
+ * Botão de ver a demonstração de novo: Tab no teclado, Select no controle. Os dois
+ * são reservados (nenhum botão do jogo usa); no tutorial, a pausa do controle é o Start.
+ */
+export function replayButton(device: TutorialDevice): string {
+  return device === 'pad' ? padButtonLabel(PAD_SELECT) : 'Tab';
+}
+
+/** Como rever a demonstração e abrir a pausa, no aparelho escolhido. */
 export function footerPrompt(device: TutorialDevice): string {
-  return device === 'pad'
-    ? 'Start: pausa (ver de novo, pular lição ou sair)'
-    : 'Tab: ver de novo · Esc: pausa (pular lição ou sair)';
+  const pause = device === 'pad' ? padButtonLabel(PAD_START) : 'Esc';
+  return `${replayButton(device)}: ver de novo · ${pause}: pausa (pular lição ou sair)`;
 }
 
 export function finishedPrompt(device: TutorialDevice): string {

@@ -12,6 +12,7 @@ import {
   finishedPrompt,
   footerPrompt,
   formatPrompt,
+  replayButton,
   type TutorialDevice,
 } from '../tutorial/prompts';
 import { MenuList } from '../ui/MenuList';
@@ -230,11 +231,8 @@ export class TutorialScene extends Phaser.Scene {
 
   /** Mostra de novo a demonstração da lição atual (só na vez do jogador, fora da pausa). */
   private replayDemo(): void {
-    const fight = this.fight;
-    const tutorial = fight.tutorial;
-    if (tutorial?.phase !== 'try' || this.scene.isActive('pause')) return;
-    playSfx(this, 'ui_confirm');
-    tutorial.replayDemo(fight.state);
+    if (this.scene.isActive('pause')) return;
+    this.fight.replayTutorialDemo();
   }
 
   private showLesson(
@@ -245,7 +243,7 @@ export class TutorialScene extends Phaser.Scene {
   ): void {
     const controls = getControls();
     this.footer.setText(footerPrompt(device));
-    this.replay.setText(device === 'pad' ? '↺  Ver de novo' : '↺  Ver de novo (Tab)');
+    this.replay.setText(`↺  Ver de novo (${replayButton(device)})`);
     if (!lesson) {
       this.progress.setText('Tutorial');
       this.title.setText('Pronto para lutar!');

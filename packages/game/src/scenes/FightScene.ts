@@ -229,6 +229,8 @@ export class FightScene extends Phaser.Scene {
   private tutorialMark: Phaser.GameObjects.Text | null = null;
   /** Tutorial: o último tick ainda foi na escolha de teclado ou controle. */
   private tutorialChoosing = false;
+  /** Select de algum controle apertado no tick anterior (tutorial: ver de novo). */
+  private prevPadSelect = true;
 
   /** Gravação da luta em andamento (seed + inputs de cada tick). */
   private recording: Replay | null = null;
@@ -624,14 +626,30 @@ export class FightScene extends Phaser.Scene {
     this.inputDelay.reset();
     this.pauseRequested = false;
     this.prevSystem = PAUSE_KEYS;
+    // o Select que fechou a pausa não é um "ver de novo"
+    this.prevPadSelect = true;
     this.resumedAt = this.game.loop.time;
   };
+
+  /** Tutorial, na vez do jogador: mostra de novo a demonstração (Tab, Select ou o botão). */
+  replayTutorialDemo(): void {
+    if (this.tutorial?.phase !== 'try') return;
+    playSfx(this, 'ui_confirm');
+    this.tutorial.replayDemo(this.state);
+  }
 
   private tick(): void {
     // lê os controles mesmo num replay: as teclas de pausa vêm daqui
     const pads = this.net ? undefined : this.setup.pads;
     const sampled = this.controls.sample(this.state.fighters.length, pads);
-    const system = this.controls.system & PAUSE_KEYS;
+    let system = this.controls.system & PAUSE_KEYS;
+    if (this.tutorial) {
+      // tutorial: Select do controle é "ver de novo" (a pausa fica no Start)
+      const select = this.controls.padSelect;
+      if (select) system &= ~Menu.BACK;
+      if (select && !this.prevPadSelect) this.replayTutorialDemo();
+      this.prevPadSelect = select;
+    }
     // tutorial: na escolha de teclado ou controle, Enter e Esc são da escolha (e o Enter
     // que escolheu pode chegar aqui só no tick seguinte, já fora dela)
     const choosing = this.tutorial?.phase === 'intro';
