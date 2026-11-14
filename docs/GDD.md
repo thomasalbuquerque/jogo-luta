@@ -63,7 +63,7 @@ Nos menus, além dos controles de cada jogador, sempre valem as setas, Enter (co
 
 **M** liga e desliga o som (vale para todos; o navegador lembra).
 
-**Cola de comandos na luta:** no canto de cima, à esquerda, um ícone discreto mostra **Tab** (teclado) e **Select** (controle). Apertar um deles (ou clicar no ícone) abre por 7 s um cartão com os comandos básicos: andar, pular, ataque, especial, esquiva e provocação, mais as dicas de parede (deslizar e wall jump) e de borda. O cartão mostra as teclas ou os botões de quem apertou: Tab mostra as teclas de P1 e P2 (online, só as do P1), Select mostra o mapa do controle; clicando, vale o controle se houver um conectado. Apertar de novo fecha; os outros golpes (rasteira, para cima…) ficam no tutorial. Por isso o Select não pausa a luta (a pausa é Esc, Enter ou Start).
+**Cola de comandos na luta:** no canto de cima, à esquerda, um ícone discreto mostra **Tab** (teclado) e **Select** (controle). Apertar um deles (ou clicar no ícone) abre por 7 s um cartão com os comandos básicos: andar, pular, ataque, especial, esquiva e provocação, mais a dica da parede (deslizar e wall jump), num cartão compacto do tamanho do conteúdo. O cartão mostra as teclas ou os botões de quem apertou: Tab mostra as teclas de P1 e P2 (online, só as do P1), Select mostra o mapa do controle; clicando, vale o controle se houver um conectado. Apertar de novo fecha; os outros golpes (rasteira, para cima…) ficam no tutorial. Por isso o Select não pausa a luta (a pausa é Esc, Enter ou Start).
 
 **Input como dado:** a cada tick, cada jogador vira uma bitmask. O `sim` só enxerga isso.
 
