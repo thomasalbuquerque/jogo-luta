@@ -45,7 +45,9 @@ function burnout(phase: 0 | 1): Rot {
 /**
  * João com as mãos em concha na boca: cotovelos na frente do peito, antebraços
  * subindo e as mãos em pé dos dois lados da boca, dedos para cima e para a frente
- * (megafone). O rosto continua à mostra entre as mãos.
+ * (megafone). O rosto continua à mostra entre as mãos: a da frente na bochecha, atrás
+ * da boca, e a de trás na frente dela. Ângulos achados com o `solvePose`; refaça se
+ * mudar braço, mão ou cabeça.
  */
 const CUPPED: Rot = {
   ...STANCE,
