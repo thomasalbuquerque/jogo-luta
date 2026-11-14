@@ -134,7 +134,7 @@ describe('elenco', () => {
     expect(special.move.hitboxes).toEqual([]);
     expect(special.move.projectile).toBeUndefined();
     expect(special.move.counter.damage).toBeGreaterThanOrEqual(12);
-    for (const c of [SCHUMMAKI, JOAO, DADA, TAUBA, TCHULA]) {
+    for (const c of [JOAO, DADA, TAUBA, TCHULA]) {
       expect(CROCKO.stats.height).toBeGreaterThan(c.stats.height);
     }
     expect(CROCKO.stats.weight).toBeGreaterThan(100);
@@ -441,15 +441,16 @@ describe('elenco', () => {
       expect(IGAO.special?.cooldownTicks).toBeGreaterThanOrEqual(shot?.lifetimeTicks ?? 0);
     });
 
-    it('o pulo mais alto e a maior hurtbox do elenco; aéreos com mais alcance', () => {
+    it('o pulo mais alto e o mais alto do elenco, junto com o Schummaki; aéreos com mais alcance', () => {
       const base = getCharacter('base');
       for (const id of PLAYABLE_CHARACTERS) {
         if (id === 'igao') continue;
         const c = getCharacter(id);
         expect(IGAO.stats.jumpHeight).toBeGreaterThan(c.stats.jumpHeight);
         expect(IGAO.stats.airJumpHeight).toBeGreaterThan(c.stats.airJumpHeight);
-        expect(IGAO.stats.height).toBeGreaterThan(c.stats.height);
+        expect(IGAO.stats.height).toBeGreaterThanOrEqual(c.stats.height);
       }
+      expect(IGAO.stats.height).toBe(SCHUMMAKI.stats.height);
       expect(IGAO.stats.weight).toBe(base.stats.weight);
       expect(IGAO.stats.walkSpeed).toBeLessThan(base.stats.walkSpeed);
       expect(IGAO.moves.downAir.damage).toBeGreaterThan(base.moves.downAir.damage);
