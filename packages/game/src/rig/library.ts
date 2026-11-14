@@ -62,6 +62,7 @@ export const FOREARM_IN_FRONT: ReadonlySet<string> = new Set([
   'dadazinho',
   'tauba',
   'tchula',
+  'joao-frango',
 ]);
 
 /**
