@@ -650,6 +650,12 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   o contorno ainda aparece como um arco fraco no soco. Vale também para manga comprida inteiriça
   (camisa do Dadazinho, terno do Tauba), em que a ponta do braço, com contorno, aparecia por cima
   do antebraço no soco.
+  Se ainda sobrar um "rabo" de contorno na guarda (Darllan: a lateral do antebraço que fica do lado
+  de dentro do cotovelo dobrado passa por cima do braço), o `fade` começa uns 20 px antes do `pivot`
+  (no lado da mão), para os cantos arredondados da ponta sumirem, e o contorno dessa lateral, perto
+  da ponta, é pintado da cor da pele (`paint`). O polígono termina num corte inclinado, para a linha
+  acabar afinando como um traço. No soco essa lateral vira a borda de cima do braço e fica dentro do
+  braço (mais largo), então o contorno de fora continua inteiro.
 - **Manga com punho no cotovelo** (Tchula: o braço da folha termina num punho amarelo): a solução
   acima só funciona se a ponta do braço passar do `tip` tanto quanto a ponta do antebraço passa do
   `pivot` (uns 45 px). Cortada antes do punho, a ponta ficava curta: o antebraço sobrava como um
