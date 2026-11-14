@@ -8,6 +8,7 @@ import {
   fillBehind,
   flipX,
   opaqueBounds,
+  nextPowerOfTwo,
   packShelves,
   removeSpecks,
   type Image,
@@ -167,5 +168,14 @@ describe('packShelves', () => {
         expect(overlap).toBe(false);
       }
     }
+  });
+});
+
+describe('nextPowerOfTwo', () => {
+  it('arredonda para cima até a potência de 2', () => {
+    expect(nextPowerOfTwo(1)).toBe(1);
+    expect(nextPowerOfTwo(269)).toBe(512);
+    expect(nextPowerOfTwo(1024)).toBe(1024);
+    expect(nextPowerOfTwo(1948)).toBe(2048);
   });
 });
