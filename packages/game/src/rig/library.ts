@@ -56,7 +56,14 @@ export const FOREARM_IN_FRONT: ReadonlySet<string> = new Set([
   'gabs',
   'marilia',
   'meia',
+  'igao',
 ]);
+
+/**
+ * Personagens com joelheira (o Igão): a canela é desenhada na frente da coxa
+ * (`drawOrder`), e a joelheira no topo dela cobre a ponta do joelho da coxa.
+ */
+export const SHIN_IN_FRONT: ReadonlySet<string> = new Set(['igao']);
 
 /** Nomes dos clipes, na ordem do visualizador. */
 export function clipNames(): string[] {

@@ -14,7 +14,7 @@ import {
   type RigFit,
   type Skin,
 } from '../rig/skeleton';
-import { FOREARM_IN_FRONT } from '../rig/library';
+import { FOREARM_IN_FRONT, SHIN_IN_FRONT } from '../rig/library';
 
 /** Chave da textura (atlas) de um personagem. */
 export function characterTextureKey(id: string): string {
@@ -70,6 +70,8 @@ export class FighterView {
   private placedProp: { placed: PlacedBone; lift: number } | null = null;
   /** Mão da frente na última pose (para saber onde a peça aparece e some). */
   private placedHand: { placed: PlacedBone; lift: number } | null = null;
+  /** Mão de trás na última pose (de onde a bola sai no saque do Igão). */
+  private placedHandFar: { placed: PlacedBone; lift: number } | null = null;
   /** Cabeça na última pose (a boca, de onde sai a fumaça). */
   private placedHead: { placed: PlacedBone; lift: number } | null = null;
   /** Brilho em volta do boneco inteiro (a aura da Marília), criado no 1º uso. */
@@ -81,6 +83,8 @@ export class FighterView {
   private order = DRAW_ORDER.join();
   /** Antebraço sempre na frente do braço (cotovelo de pele, ver `FOREARM_IN_FRONT`). */
   private readonly forearmFront: boolean;
+  /** Canela sempre na frente da coxa (joelheira, ver `SHIN_IN_FRONT`). */
+  private readonly shinFront: boolean;
 
   constructor(scene: Phaser.Scene, characterId: string, hurtboxHeight: number) {
     const { skin, fit } = skinOf(scene, characterId);
@@ -88,6 +92,7 @@ export class FighterView {
     this.fit = fit;
     this.textureKey = characterTextureKey(characterId);
     this.forearmFront = FOREARM_IN_FRONT.has(characterId);
+    this.shinFront = SHIN_IN_FRONT.has(characterId);
     this.height = hurtboxHeight * ART_HEIGHT_FACTOR;
     this.scale = this.height / fit.height;
     this.container = scene.add.container(0, 0);
@@ -119,6 +124,8 @@ export class FighterView {
     }
     const hand = placed.find((p) => p.bone === 'handNear');
     this.placedHand = hand ? { placed: hand, lift } : null;
+    const handFar = placed.find((p) => p.bone === 'handFar');
+    this.placedHandFar = handFar ? { placed: handFar, lift } : null;
     const head = placed.find((p) => p.bone === 'head');
     this.placedHead = head ? { placed: head, lift } : null;
     const prop = solveProp(this.skin, placed, pose);
@@ -130,7 +137,7 @@ export class FighterView {
       this.propImage.setPosition(prop.x, prop.y - this.fit.groundY + lift);
       this.propImage.setRotation(prop.rotation);
     }
-    const order = drawOrder(pose, this.forearmFront);
+    const order = drawOrder(pose, this.forearmFront, this.shinFront);
     const key = order.join();
     if (key !== this.order) {
       this.order = key;
@@ -172,6 +179,16 @@ export class FighterView {
     if (socket && anchors.sockets[socket]) {
       return this.toWorld(placedPoint(anchors, p.placed, socket), p.lift);
     }
+    const [px, py] = placedPoint(anchors, p.placed, 'pivot');
+    const [tx, ty] = placedPoint(anchors, p.placed, 'tip');
+    return this.toWorld([(px + tx) / 2, (py + ty) / 2], p.lift);
+  }
+
+  /** O meio da mão de trás em px de mundo, na última pose desenhada. */
+  farHandPoint(): { x: number; y: number } | null {
+    const p = this.placedHandFar;
+    const anchors = p && this.skin.get(p.placed.frame);
+    if (!p || !anchors) return null;
     const [px, py] = placedPoint(anchors, p.placed, 'pivot');
     const [tx, ty] = placedPoint(anchors, p.placed, 'tip');
     return this.toWorld([(px + tx) / 2, (py + ty) / 2], p.lift);

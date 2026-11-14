@@ -14,7 +14,7 @@ if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA || !CROCKO || !DARLLAN)
   throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs, Marília e Meia, cada um com especial e provocação', () => {
+  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs, Marília, Meia e Igão, cada um com especial e provocação', () => {
     expect(PLAYABLE_CHARACTERS).toEqual([
       'schummaki',
       'joao-frango',
@@ -26,6 +26,7 @@ describe('elenco', () => {
       'gabs',
       'marilia',
       'meia',
+      'igao',
     ]);
     for (const c of [
       SCHUMMAKI,
@@ -38,6 +39,7 @@ describe('elenco', () => {
       getCharacter('gabs'),
       getCharacter('marilia'),
       getCharacter('meia'),
+      getCharacter('igao'),
     ]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
@@ -348,6 +350,113 @@ describe('elenco', () => {
       for (const id of ['neutralLight', 'sideLight', 'sideAir'] as const) {
         expect(MEIA.moves[id].startup).toBeLessThan(base.moves[id].startup);
         expect(MEIA.moves[id].damage).toBeLessThan(base.moves[id].damage);
+      }
+    });
+  });
+
+  describe('Igão', () => {
+    const IGAO = getCharacter('igao');
+    /**
+     * Igão saca da ponta esquerda do chão do mapa de teste, com o outro lutador fora do
+     * caminho (na plataforma da direita); devolve os quiques e quanto a bola andou.
+     */
+    const serve = () => {
+      const g = createGame({
+        characters: ['igao', 'base'],
+        rules: { stocks: 3, timeLimitTicks: 0 },
+      });
+      const [igao, other] = g.fighters as [Fighter, Fighter];
+      for (let i = 0; i < 41; i++) stepGame(g, [0, 0]);
+      other.x = px(265) - other.w / 2;
+      other.y = px(-150) - other.h;
+      igao.x = px(-400) - igao.w / 2;
+      igao.facing = 1;
+      stepGame(g, [Button.SPECIAL, 0]);
+      const bounces: { x: number; peak: number }[] = [];
+      let startX: number | null = null;
+      let endX = 0;
+      let peak = 0;
+      for (let i = 0; i < 140; i++) {
+        stepGame(g, [0, 0]);
+        const p = g.projectiles[0];
+        if (p) {
+          startX ??= p.x;
+          endX = p.x;
+          if (bounces.length > 0) peak = Math.max(peak, -(p.y + p.h));
+        }
+        for (const e of g.events) {
+          if (e.type !== 'bounce') continue;
+          const last = bounces.at(-1);
+          if (last) last.peak = peak;
+          bounces.push({ x: e.x, peak: 0 });
+          peak = 0;
+        }
+      }
+      const last = bounces.at(-1);
+      if (last) last.peak = peak;
+      return { g, igao, bounces, travel: endX - (startX ?? 0) };
+    };
+
+    it('jogável, com especial e provocação', () => {
+      expect(PLAYABLE_CHARACTERS).toContain('igao');
+      expect(IGAO.special?.name).toBe('Saque');
+      expect(IGAO.special?.move.projectile?.bounces).toBe(3);
+      expect(IGAO.taunt.text).toBe('Cê tá miolo né nê?');
+      expect(IGAO.blurb.length).toBeGreaterThan(0);
+    });
+
+    it('a bola sai para baixo e para a frente e quica 3 vezes, cada vez mais baixo', () => {
+      const { bounces, travel } = serve();
+      expect(bounces).toHaveLength(3);
+      const [first, second, third] = bounces.map((b) => b.peak) as [number, number, number];
+      // 1º pega quem está em pé; o 3º passa rente ao chão
+      expect(first).toBeGreaterThan(px(55));
+      expect(first).toBeLessThan(px(85));
+      expect(second).toBeLessThan(first);
+      expect(third).toBeLessThan(second);
+      expect(third).toBeLessThan(px(20));
+      // anda um pouco mais que meio palco
+      expect(travel).toBeGreaterThan(px(500));
+      expect(travel).toBeLessThan(px(700));
+    });
+
+    it('acerta quem está em pé no caminho', () => {
+      const g = createGame({
+        characters: ['igao', 'base'],
+        rules: { stocks: 3, timeLimitTicks: 0 },
+      });
+      const [igao, foe] = g.fighters as [Fighter, Fighter];
+      for (let i = 0; i < 41; i++) stepGame(g, [0, 0]);
+      igao.x = px(-300) - igao.w / 2;
+      foe.x = px(0) - foe.w / 2;
+      igao.facing = 1;
+      stepGame(g, [Button.SPECIAL, 0]);
+      for (let i = 0; i < 90 && foe.damage === 0; i++) stepGame(g, [0, 0]);
+      expect(foe.damage).toBe(8);
+      expect(foe.kbx).toBeGreaterThan(0);
+    });
+
+    it('uma bola em quadra por vez: a recarga cobre a vida da bola', () => {
+      const shot = IGAO.special?.move.projectile;
+      expect(IGAO.special?.cooldownTicks).toBeGreaterThanOrEqual(shot?.lifetimeTicks ?? 0);
+    });
+
+    it('o pulo mais alto e a maior hurtbox do elenco; aéreos com mais alcance', () => {
+      const base = getCharacter('base');
+      for (const id of PLAYABLE_CHARACTERS) {
+        if (id === 'igao') continue;
+        const c = getCharacter(id);
+        expect(IGAO.stats.jumpHeight).toBeGreaterThan(c.stats.jumpHeight);
+        expect(IGAO.stats.airJumpHeight).toBeGreaterThan(c.stats.airJumpHeight);
+        expect(IGAO.stats.height).toBeGreaterThan(c.stats.height);
+      }
+      expect(IGAO.stats.weight).toBe(base.stats.weight);
+      expect(IGAO.stats.walkSpeed).toBeLessThan(base.stats.walkSpeed);
+      expect(IGAO.moves.downAir.damage).toBeGreaterThan(base.moves.downAir.damage);
+      for (const id of ['neutralAir', 'sideAir', 'downAir'] as const) {
+        const reach = (m: typeof base.moves.sideAir) =>
+          Math.max(...m.hitboxes.flatMap((w) => w.boxes.map((b) => b.x + b.w)));
+        expect(reach(IGAO.moves[id])).toBeGreaterThan(reach(base.moves[id]));
       }
     });
   });

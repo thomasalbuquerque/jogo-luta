@@ -258,6 +258,85 @@ describe('bloco projétil', () => {
     for (let i = 0; i < 40; i++) stepProjectiles(shots, [], OPEN);
     expect(shots[0]?.vy).toBeGreaterThan(0);
   });
+
+  /** Bola caindo de 100 px de altura, com 2 quiques guardando metade da velocidade. */
+  const ball = (floor: Solid) => {
+    const f = onGround(0, SHOOTER);
+    const p = spawnProjectile(f, {
+      ...shotDef(),
+      speed: px(2),
+      gravity: px(0.5),
+      bounces: 2,
+      bounceKeep: 50,
+    });
+    p.y = floor.y - px(100);
+    return p;
+  };
+  const fall = (shots: Projectile[], solids: Solid[], ticks: number) => {
+    const events: GameEvent[] = [];
+    for (let i = 0; i < ticks && shots.length > 0; i++) {
+      stepProjectiles(shots, solids, OPEN, events);
+    }
+    return events.filter((e) => e.type === 'bounce');
+  };
+
+  it('com quiques, quica no chão perdendo altura e some no toque seguinte', () => {
+    const floor: Solid = { kind: 'solid', x: px(-2000), y: px(200), w: px(4000), h: px(300) };
+    const shots = [ball(floor)];
+    const p = shots[0];
+    if (!p) throw new Error('sem bola');
+    const bounces = fall(shots, [floor], 200);
+    expect(bounces.map((e) => e.bouncesLeft)).toEqual([1, 0]);
+    expect(bounces.every((e) => e.y === floor.y && e.owner === 0)).toBe(true);
+    // a 2ª subida é mais baixa: some no 3º toque, bem antes do tempo acabar
+    expect(shots).toHaveLength(0);
+    expect(p.ticksLeft).toBeGreaterThan(0);
+    expect(p.bounces).toBe(0);
+  });
+
+  it('cada quique sobe menos que o anterior', () => {
+    const floor: Solid = { kind: 'solid', x: px(-2000), y: px(200), w: px(4000), h: px(300) };
+    const shots = [ball(floor)];
+    const p = shots[0];
+    if (!p) throw new Error('sem bola');
+    const peaks: number[] = [];
+    let rising = false;
+    let peak = Infinity;
+    for (let i = 0; i < 200 && shots.length > 0; i++) {
+      stepProjectiles(shots, [floor], OPEN);
+      if (p.vy < 0) rising = true;
+      if (rising) peak = Math.min(peak, p.y);
+      if (rising && p.vy > 0) {
+        peaks.push(floor.y - (peak + p.h));
+        rising = false;
+        peak = Infinity;
+      }
+    }
+    expect(peaks).toHaveLength(2);
+    const [first, second] = peaks as [number, number];
+    expect(first).toBeLessThan(px(100));
+    expect(second).toBeLessThan(first);
+  });
+
+  it('quica em plataforma vindo de cima; sem quiques, atravessa', () => {
+    const plat: Solid = { kind: 'platform', x: px(-2000), y: px(200), w: px(4000), h: px(16) };
+    const shots = [ball(plat)];
+    expect(fall(shots, [plat], 70)).toHaveLength(2);
+    // depois do último quique, passa direto pela plataforma e segue caindo
+    expect(shots).toHaveLength(1);
+    expect(shots[0]?.y).toBeGreaterThan(plat.y);
+  });
+
+  it('na parede some, mesmo com quiques sobrando', () => {
+    const floor: Solid = { kind: 'solid', x: px(-2000), y: px(200), w: px(4000), h: px(300) };
+    const shots = [ball(floor)];
+    const p = shots[0];
+    if (!p) throw new Error('sem bola');
+    const wall: Solid = { kind: 'solid', x: p.x + p.w + px(4), y: px(-300), w: px(20), h: px(600) };
+    fall(shots, [floor, wall], 10);
+    expect(shots).toHaveLength(0);
+    expect(p.bounces).toBe(2);
+  });
 });
 
 const OPEN = { x: px(-5000), y: px(-5000), w: px(10000), h: px(10000) };

@@ -3,7 +3,8 @@
  * escreve: nenhuma regra do jogo lê os eventos. `stepGame` limpa a lista no
  * começo de cada tick.
  */
-export type GameEvent = HitEvent | AuraEvent | GrabEvent | KoEvent | RespawnEvent | ActionEvent;
+export type GameEvent =
+  HitEvent | AuraEvent | GrabEvent | KoEvent | RespawnEvent | ActionEvent | BounceEvent;
 
 /**
  * Alguém levou um golpe. `hit`: golpe normal; `counter`: devolvido pelo
@@ -55,6 +56,19 @@ export interface KoEvent {
   x: number;
   y: number;
   stocksLeft: number;
+}
+
+/**
+ * Um projétil com quiques (a bola do Igão) quicou no topo de um chão ou plataforma.
+ * `x`/`y`: ponto do quique (meio da bola, no topo da superfície), em subpx;
+ * `bouncesLeft`: quiques que ainda sobram.
+ */
+export interface BounceEvent {
+  type: 'bounce';
+  owner: number;
+  x: number;
+  y: number;
+  bouncesLeft: number;
 }
 
 export interface RespawnEvent {

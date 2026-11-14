@@ -31,6 +31,8 @@ const VOLUME: Readonly<Record<SfxName, number>> = {
   combo_hit: 0.5,
   combo_finish: 0.85,
   command_miss: 0.4,
+  serve_spike: 0.7,
+  ball_bounce: 0.6,
   count: 0.45,
   go: 0.6,
   ui_move: 0.18,

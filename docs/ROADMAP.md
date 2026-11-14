@@ -204,6 +204,11 @@ Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da 
         "Vem!", retrato). O bloco agarrão ganhou golpes durante o agarrão (`combo`). Falta o bordão,
         o OK do concept pelo amigo, a voz gravada e as 5 lutas de teste.
 - [ ] Lote 4 (restantes)
+  - [x] Igão: jogável (ficha, arte no esqueleto com a joelheira na frente da coxa, especial Saque
+        com a bola jogada pela mão de trás, a batida lá em cima e os 3 quiques, rastro, estouro,
+        poeirinha, "pá!" e "tum", provocação quicando a bola e apontando, retrato). O bloco projétil
+        ganhou quiques (`bounces`, `bounceKeep`). Falta o OK do concept pelo amigo, a voz gravada
+        e as 5 lutas de teste.
 - [ ] 1 ou 2 mapas novos com tema de piadas internas do grupo.
 
 Checklist de cada personagem:

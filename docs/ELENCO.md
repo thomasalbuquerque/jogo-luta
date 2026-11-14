@@ -727,14 +727,13 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
   tempo.
   - **Tempo:** startup médio (~18 ticks: a bola subindo e o braço armando são o aviso), active de
     1 tick (a batida), recovery médio (~18 ticks, o braço descendo).
-  - **A bola:** nasce acima da cabeça, um pouco à frente (~34 px à frente, ~70 px acima do centro
-    do corpo), e sai a ~9 px/tick num ângulo de ~40° para baixo, com gravidade ~0,45. Caixa
-    redonda de ~28 × 28 px.
-  - **Os quiques:** guarda ~65% da velocidade vertical a cada quique (a horizontal não muda). Com
-    esses números, o 1º quique sobe uns 70 px (ainda pega quem está em pé), o 2º uns 30 px e o 3º
-    uns 12 px, rente ao chão. Vida de ~85 ticks (1,4 s): ela anda uns 550 a
-    600 px no total, um pouco mais que meio palco. Quem pular por cima escapa; o 1º quique é o mais
-    difícil de pular.
+  - **A bola:** nasce na mão esticada lá em cima, um pouco à frente da cabeça (32 px à frente e
+    54 px acima do centro do corpo: o braço dele não alcança mais alto que isso), e sai a 9,5
+    px/tick num ângulo de 40° para baixo, com gravidade 0,45. Caixa redonda de 28 × 28 px.
+  - **Os quiques:** guarda 72% da velocidade vertical a cada quique (a horizontal não muda). Com
+    esses números, o 1º quique sobe uns 66 px (ainda pega quem está em pé), o 2º uns 32 px e o 3º
+    uns 14 px, rente ao chão. Vida de 85 ticks (1,4 s): ela anda uns 600 px no total, um pouco mais
+    que meio palco. Quem pular por cima escapa; o 1º quique é o mais difícil de pular.
   - **Onde quica e onde some:** quica no topo do chão e no topo das plataformas atravessáveis
     (vindo de cima, como um lutador pousando). Na lateral ou embaixo de um bloco sólido (parede),
     some, como todo projétil hoje. Depois do último quique, o próximo toque no chão faz ela sumir;
@@ -751,15 +750,15 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
     quadros); na batida, um estouro de impacto na mão e um "pá!" de tapa forte; atrás da bola, um
     rastro curto até o 1º quique; a cada quique, uma poeirinha no chão e um "tum" que vai ficando
     mais baixo; ao acertar alguém, a faísca de impacto normal.
-  - **A animação:** 1 clipe de especial com 3 poses (bola subindo com o braço armado atrás da
-    cabeça, a batida com o braço esticado lá em cima e a mão aberta, o braço descendo no
-    recovery). A bola fica na mão (como peça do esqueleto) até a batida; daí em diante é o
-    projétil. Sem pulo: os pés não saem do chão. O adversário usa o hitstun normal: nenhuma
-    animação nova para ele.
-  - **Precisa de código novo (pequeno):** hoje o projétil some ao bater num bloco sólido. Falta
-    uma opção de quique no mesmo bloco projétil, em vez de um bloco novo: `bounces` (quantos
-    quiques, padrão 0 = como hoje) e `bounceKeep` (quanto da velocidade vertical sobra a cada
-    quique, em %, ~65). No `stepProjectiles`, quando a bola está caindo e a base dela cruzou o topo
+  - **A animação:** 1 clipe de especial: a mão de trás joga a bola para cima, o braço da frente
+    arma lá no alto, atrás da cabeça, bate lá em cima com a mão aberta e desce na frente do corpo
+    no recovery. A bola do startup é desenhada solta pelo jogo, da mão de trás até o ponto da
+    batida, onde vira o projétil. Sem pulo: os pés não saem do chão. O adversário usa o hitstun
+    normal: nenhuma animação nova para ele.
+  - **Código novo (feito):** o projétil sumia ao bater num bloco sólido. Ganhou uma opção de
+    quique no mesmo bloco projétil, em vez de um bloco novo: `bounces` (quantos quiques, padrão
+    0 = como antes) e `bounceKeep` (quanto da velocidade vertical sobra a cada quique, em %,
+    padrão 65; o Igão usa 72). No `stepProjectiles`, quando a bola está caindo e a base dela cruzou o topo
     de um chão ou plataforma neste tick, com quiques sobrando: ela fica em cima da superfície,
     `vy = -idiv(vy * bounceKeep, 100)` e gasta 1 quique. Fora isso, igual a hoje (parede some,
     plataforma sem quique passa). O projétil em voo guarda os quiques que sobram (entra no
@@ -778,6 +777,11 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
   verde-limão e roxo-escuro (ninguém tem roxo como cor principal: o roxo do Gabs é só o detalhe do
   fone, e o violeta do Igão é mais escuro e mais fechado; o verde-limão é bem mais amarelado e vivo
   que o verde do Dadazinho e a menta da Marília).
+- **No jogo:** jogável. No Saque a bola sai da mão de trás, sobe girando, ele bate lá em cima
+  com um estouro e o "pá!", e ela desce em diagonal com um rastro curto, quica 3 vezes com uma
+  poeirinha e um "tum" cada vez mais baixo, girando no sentido em que anda. Na provocação quica a
+  bola no chão duas vezes, segura na cintura, aponta com a outra mão e o balão "Cê tá miolo né
+  nê?" sai no `voiceAt`. Ficha em `packages/sim/src/characters/igao.ts`.
 - **Ideias guardadas:** respawn caindo com a bola debaixo do braço; apito de juiz no KO dele; um
   "bloqueio" de braços erguidos como provocação alternativa; uma rede de vôlei de praia no fundo de
   um mapa.

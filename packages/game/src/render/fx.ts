@@ -23,6 +23,35 @@ export interface CharacterFx {
     trail?: string;
     puffs?: readonly string[];
     scale?: number;
+    /** Gira no sentido em que anda, como uma bola rolando (a bola do Igão). */
+    spin?: boolean;
+    /** O rastro some no 1º quique e segue a direção da velocidade (a bola do Igão). */
+    trailUntilBounce?: boolean;
+  };
+  /**
+   * Quique do projétil (evento `bounce` do sim): poeirinha (`dust`) no chão e o som
+   * `sound`, cada quique mais baixo que o anterior.
+   */
+  bounce?: { dust: readonly string[]; sound?: SfxName };
+  /**
+   * Saque (a bola do Igão): a peça `ball` aparece na mão de trás no começo do especial
+   * e, a partir do frame `from`, é jogada para cima em arco (`peak` px acima da reta)
+   * até o ponto onde o sim solta o projétil, no 1º frame ativo (a mão da frente bate
+   * nela ali). Na batida, o estouro `burst` e o som `sound`. Se ele apanhar no meio,
+   * a bola some.
+   */
+  serve?: { ball: string; from: number; peak: number; burst: string; sound?: SfxName };
+  /**
+   * Bola quicando na provocação (o Igão antes de sacar): em cada trecho `[de, até]`
+   * (ticks da provocação) a peça `ball` sai da mão da frente, quica no chão no meio do
+   * trecho (som `sound` e poeirinha `dust`) e volta para a mão. Fora dos trechos, a
+   * bola na mão é a peça segurada do clipe.
+   */
+  dribble?: {
+    ball: string;
+    bounces: readonly (readonly [number, number])[];
+    sound?: SfxName;
+    dust?: readonly string[];
   };
   /** Clarão na boca da arma (socket `muzzle` da peça na mão) no 1º frame ativo. */
   muzzleFlash?: string;
@@ -228,6 +257,28 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
       hitSound: 'combo_hit',
       finishSound: 'combo_finish',
       missSound: 'command_miss',
+    },
+  },
+  igao: {
+    projectile: {
+      frames: ['fx_ball'],
+      scale: 1,
+      spin: true,
+      trail: 'fx_streak1',
+      trailUntilBounce: true,
+    },
+    bounce: { dust: ['fx_dust1', 'fx_dust2', 'fx_dust3'], sound: 'ball_bounce' },
+    serve: { ball: 'fx_ball', from: 3, peak: 34, burst: 'fx_burst', sound: 'serve_spike' },
+    // duas batidas de bola no chão antes de apontar (o clipe `igao_taunt` tira a bola da
+    // mão nesses trechos)
+    dribble: {
+      ball: 'fx_ball',
+      bounces: [
+        [16, 30],
+        [32, 46],
+      ],
+      sound: 'ball_bounce',
+      dust: ['fx_dust2', 'fx_dust3'],
     },
   },
   'joao-frango': {

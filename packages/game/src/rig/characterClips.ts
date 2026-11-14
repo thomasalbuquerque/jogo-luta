@@ -800,6 +800,106 @@ function comboKeys(hits: number, step: number, recovery: number): Key[] {
   return keys;
 }
 
+/** Pernas do saque do Igão: firmes no chão, um pouco abertas (o saque é sem pulo). */
+const SERVE_LEGS: Rot = {
+  thighNear: 8,
+  shinNear: 8,
+  footNear: -16,
+  thighFar: -12,
+  shinFar: 10,
+  footFar: -2,
+};
+
+/** Igão jogando a bola para cima com a mão de trás; o braço da frente começa a armar. */
+const TOSS: Rot = {
+  ...SERVE_LEGS,
+  torso: 0,
+  head: -12,
+  upperArmNear: 10,
+  forearmNear: -100,
+  handNear: 10,
+  upperArmFar: -130,
+  forearmFar: -20,
+  handFar: -20,
+};
+
+/**
+ * Braço da frente armado lá no alto, para trás da cabeça, olhando a bola; a mão de trás
+ * ainda no alto, de onde a bola saiu.
+ */
+const SPIKE_COCK: Rot = {
+  ...SERVE_LEGS,
+  torso: -12,
+  head: -22,
+  upperArmNear: -185,
+  forearmNear: -30,
+  handNear: -20,
+  upperArmFar: -150,
+  forearmFar: -10,
+  handFar: -10,
+};
+
+/**
+ * A batida: o braço da frente esticado lá em cima, um pouco para a frente, com a mão
+ * aberta no ponto onde o sim solta a bola (offset da ficha, a mão logo atrás e acima
+ * dela). Ângulos achados com o `solvePose`; refaça se mudar o braço, a mão ou o offset.
+ */
+const SPIKE_HIT: Rot = {
+  ...SERVE_LEGS,
+  torso: 12,
+  head: -16,
+  upperArmNear: -156,
+  forearmNear: 0,
+  handNear: 0,
+  upperArmFar: -60,
+  forearmFar: -50,
+  handFar: 0,
+};
+
+/** O braço descendo na frente do corpo depois da batida. */
+const SPIKE_FOLLOW: Rot = {
+  ...SERVE_LEGS,
+  torso: 20,
+  head: -2,
+  upperArmNear: -55,
+  forearmNear: -20,
+  handNear: 20,
+  upperArmFar: 15,
+  forearmFar: -60,
+  handFar: 10,
+};
+
+/**
+ * Igão segurando a bola na altura da cintura, na frente do corpo, antes de quicar.
+ * `push` > 0 desce a mão (a batida na bola); a bola solta é desenhada pelo FightScene.
+ */
+function dribble(push: number): Rot {
+  return {
+    ...STANDING,
+    torso: 8 + push * 0.2,
+    head: 6,
+    upperArmNear: -40 + push,
+    forearmNear: -40 + push * 0.6,
+    handNear: 20 + push * 0.5,
+    upperArmFar: -20,
+    forearmFar: -70,
+    handFar: 10,
+  };
+}
+
+/** Bola presa na mão da frente, na cintura, e a mão de trás apontando para o adversário. */
+const BALL_POINT: Rot = {
+  ...STANDING,
+  torso: -6,
+  head: -12,
+  upperArmNear: 8,
+  forearmNear: -50,
+  handNear: 15,
+  upperArmFar: -86,
+  forearmFar: -4,
+  handFar: 0,
+};
+
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.
   schummaki_special: {
@@ -1468,6 +1568,51 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 70, rot: beckon(42), ease: 'inOut' },
       { t: 76, rot: beckon(0), expression: 'normal', ease: 'inOut' },
       { t: 84, rot: STANCE, handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Saque: a mão de trás joga a bola para cima (a bola solta é desenhada pelo
+  // FightScene) e o braço da frente arma atrás da cabeça (startup: o aviso); bate lá
+  // em cima com a mão aberta no 1º frame ativo, sem pular, e o braço desce na frente.
+  igao_special: {
+    timing: 'move',
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 0.3, rot: TOSS, handFar: 'open', ease: 'out' },
+      { t: 0.75, rot: SPIKE_COCK, handNear: 'open', ease: 'inOut' },
+      { t: 0.85, rot: { ...SPIKE_COCK, torso: -14, upperArmNear: -190 } },
+      { t: 1, rot: SPIKE_HIT, expression: 'taunt', ease: 'in' },
+      { t: 2, rot: SPIKE_HIT },
+      { t: 2.45, rot: SPIKE_FOLLOW, handFar: 'fist', ease: 'out' },
+      { t: 2.8, rot: SPIKE_FOLLOW, expression: 'normal' },
+      { t: 3, rot: STANCE, handNear: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Quica a bola no chão duas vezes (a bola solta é desenhada pelo FightScene nos
+  // trechos do `dribble` em render/fx.ts: aqui a mão fica vazia), segura, aponta com a
+  // mão de trás e solta "Cê tá miolo né nê?" (voz no `voiceAt` da ficha, 62).
+  igao_taunt: {
+    timing: 'once',
+    length: 110,
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 8, rot: dribble(0), handNear: 'open', handFar: 'open', prop: 'fx_ball' },
+      { t: 14, rot: dribble(-8), ease: 'inOut' },
+      { t: 16, rot: dribble(4), prop: null, ease: 'in' },
+      { t: 20, rot: dribble(8), ease: 'out' },
+      { t: 27, rot: dribble(-4), ease: 'inOut' },
+      { t: 30, rot: dribble(0), prop: 'fx_ball' },
+      { t: 32, rot: dribble(4), prop: null, ease: 'in' },
+      { t: 36, rot: dribble(8), ease: 'out' },
+      { t: 43, rot: dribble(-4), ease: 'inOut' },
+      { t: 46, rot: dribble(0), prop: 'fx_ball' },
+      { t: 54, rot: BALL_POINT, handFar: 'taunt', ease: 'inOut' },
+      { t: 60, rot: { ...BALL_POINT, torso: -8, head: -16 }, expression: 'taunt', ease: 'out' },
+      { t: 92, rot: { ...BALL_POINT, torso: -10, head: -18 }, ease: 'inOut' },
+      { t: 98, rot: BALL_POINT, expression: 'normal', handFar: 'open', ease: 'inOut' },
+      { t: 102, rot: dribble(0), prop: null },
+      { t: 110, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
     ],
   },
 };

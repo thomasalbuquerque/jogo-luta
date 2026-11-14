@@ -45,6 +45,8 @@ export const SFX_NAMES = [
   'combo_hit',
   'combo_finish',
   'command_miss',
+  'serve_spike',
+  'ball_bounce',
   'count',
   'go',
   'ui_move',
@@ -491,6 +493,49 @@ function comboFinish(sr: number): Float32Array<ArrayBuffer> {
 }
 
 /**
+ * "Pá!" do Saque do Igão: a mão aberta estalando na bola, um tapa seco e brilhante,
+ * com o "tum" oco da bola cheia de ar por baixo.
+ */
+function serveSpike(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(71);
+  const crack = new OnePole(sr);
+  const skin = new BandPass(sr);
+  const ball = new Osc(sr);
+  return render(
+    sr,
+    0.3,
+    (t) => {
+      const n = r() * 2 - 1;
+      const c = crack.highpass(n, 2600) * decay(t, 0.006) * 1.1;
+      const smack = skin.process(n, 1100, 1.2) * adEnv(t, 0.0005, 0.03) * 1.4;
+      const hollow = ball.sine(sweep(t, 260, 150, 0.03)) * adEnv(t, 0.001, 0.08) * 0.7;
+      return drive(c + smack + hollow, 1.6);
+    },
+    0.85,
+  );
+}
+
+/**
+ * "Tum" da bola de vôlei quicando no chão (o Saque e a provocação do Igão): um baque
+ * oco e curto de borracha cheia de ar, com o tom caindo rápido.
+ */
+function ballBounce(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(73);
+  const osc = new Osc(sr);
+  const tap = new BandPass(sr);
+  return render(
+    sr,
+    0.22,
+    (t) => {
+      const body = osc.sine(sweep(t, 210, 95, 0.035)) * adEnv(t, 0.001, 0.07) * 1.2;
+      const slap = tap.process(r() * 2 - 1, 700, 2) * adEnv(t, 0.0005, 0.012) * 0.9;
+      return drive(body + slap, 1.3);
+    },
+    0.8,
+  );
+}
+
+/**
  * "Buzz" de comando errado (o Comando do Meia que não pegou): zumbido grave de onda
  * quadrada, duas notas desafinadas batendo, como o erro de input dos jogos de luta.
  */
@@ -581,6 +626,10 @@ export function renderSfx(name: SfxName, sampleRate: number): Float32Array<Array
       return comboFinish(sampleRate);
     case 'command_miss':
       return commandMiss(sampleRate);
+    case 'serve_spike':
+      return serveSpike(sampleRate);
+    case 'ball_bounce':
+      return ballBounce(sampleRate);
   }
 }
 
