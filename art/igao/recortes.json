@@ -16,7 +16,7 @@
     },
     "efeitos": {
       "file": "4-efeitos.png",
-      "scale": 0.5,
+      "scale": 0.75,
       "keyRange": [120, 225]
     },
     "figurinha": {
