@@ -1,32 +1,65 @@
 {
   "out": "stages/laje",
   "scale": 1,
-  "atlasWidth": 2048,
+  "atlasWidth": 4096,
   "imageFormat": "webp",
   "sheets": {
-    "pecas": { "file": "5-pecas.png" }
+    "pecas": {
+      "file": "5-pecas-2x.png"
+    }
   },
   "parts": {
     "building": {
       "sheet": "pecas",
-      "rect": [78, 82, 1385, 343],
-      "pivot": [768, 135],
-      "sockets": { "wallLeft": [103, 300], "wallRight": [1432, 300] }
+      "rect": [156, 164, 2770, 686],
+      "pivot": [1536, 270],
+      "sockets": {
+        "wallLeft": [206, 600],
+        "wallRight": [2864, 600]
+      }
     },
     "plank": {
       "sheet": "pecas",
-      "rect": [68, 618, 540, 104],
-      "pivot": [78, 636],
-      "sockets": { "right": [598, 636] }
+      "rect": [136, 1236, 1080, 208],
+      "pivot": [156, 1272],
+      "sockets": {
+        "right": [1196, 1272]
+      }
     },
-    "grill": { "sheet": "pecas", "rect": [654, 587, 215, 186], "pivot": [761, 766] },
-    "tank": { "sheet": "pecas", "rect": [915, 581, 217, 188], "pivot": [1023, 760] },
-    "chair": { "sheet": "pecas", "rect": [1147, 588, 147, 185], "pivot": [1220, 766] },
-    "cooler": { "sheet": "pecas", "rect": [1323, 648, 145, 121], "pivot": [1395, 763] }
+    "grill": {
+      "sheet": "pecas",
+      "rect": [1308, 1174, 430, 372],
+      "pivot": [1522, 1532]
+    },
+    "tank": {
+      "sheet": "pecas",
+      "rect": [1830, 1162, 434, 376],
+      "pivot": [2046, 1520]
+    },
+    "chair": {
+      "sheet": "pecas",
+      "rect": [2294, 1176, 294, 370],
+      "pivot": [2440, 1532]
+    },
+    "cooler": {
+      "sheet": "pecas",
+      "rect": [2646, 1296, 290, 242],
+      "pivot": [2790, 1526]
+    }
   },
   "layers": {
-    "sky": { "file": "2-ceu.png", "key": false, "width": 1536 },
-    "far": { "file": "3-longe.png", "width": 1536 },
-    "mid": { "file": "4-meio.png", "width": 1536 }
+    "sky": {
+      "file": "2-ceu-2x.png",
+      "key": false,
+      "width": 3072
+    },
+    "far": {
+      "file": "3-longe-2x.png",
+      "width": 3072
+    },
+    "mid": {
+      "file": "4-meio-2x.png",
+      "width": 3072
+    }
   }
 }

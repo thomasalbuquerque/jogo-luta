@@ -8,6 +8,7 @@ import { drawControlsCard } from '../ui/controlsCard';
 import { MenuList, type MenuOption } from '../ui/MenuList';
 import { titleText, UI, uiText } from '../ui/theme';
 import type { FightScene, LeaveTarget } from './FightScene';
+import { VIEW } from '../render/view';
 
 const PLAYERS = 2;
 
@@ -27,7 +28,7 @@ export class PauseScene extends Phaser.Scene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     // por cima do HUD e do debug
     this.scene.bringToTop();
     this.controls = new MenuInput();

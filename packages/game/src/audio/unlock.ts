@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { music } from './music';
+import { VIEW } from '../render/view';
 
 /** Evento do jogo quando o mudo liga ou desliga (M). */
 const MUTE_CHANGED = 'mute-changed';
@@ -52,7 +53,7 @@ export function setupAudio(game: Phaser.Game): void {
  */
 export function addAudioHint(scene: Phaser.Scene, y = 12): void {
   const text = scene.add
-    .text(scene.scale.width / 2, y, '', {
+    .text(VIEW.width / 2, y, '', {
       fontFamily: 'sans-serif',
       fontSize: '18px',
       color: '#ffffff',

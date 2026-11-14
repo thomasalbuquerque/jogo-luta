@@ -20,6 +20,7 @@ import {
   fadeAlong,
   fillBehind,
   flipX,
+  nextPowerOfTwo,
   opaqueBounds,
   packShelves,
   paintPolygon,
@@ -40,6 +41,14 @@ const ATLAS_MAX_WIDTH = 1024;
 const PAD = 3;
 /** Manchas menores que isso (px² da folha) são sujeira do fundo e saem. */
 const SPECK_AREA = 120;
+/** Espaço entre as peças no atlas (no mipmap, as peças vizinhas não se misturam). */
+const ATLAS_GAP = 4;
+/**
+ * Altura final (px) de cada tamanho do retrato (a peça `portrait`), seja qual for a
+ * escala do manifesto: o grande serve a seleção e o resultado; o pequeno, os ícones
+ * de vida do HUD (reduzir o grande tanto assim na hora deixa serrilhado).
+ */
+const PORTRAIT_SIZES: Readonly<Record<string, number>> = { portrait: 400, portrait_small: 96 };
 
 interface SheetDef {
   file: string;
@@ -151,6 +160,7 @@ async function processPart(
   sheet: Image,
   scale: number,
   outline: Manifest['outline'],
+  fitHeight?: number,
 ): Promise<{ img: Image; anchors: Anchors }> {
   const [rx, ry] = def.rect;
   const img = crop(sheet, def.rect);
@@ -176,8 +186,9 @@ async function processPart(
   const [bx, by, bw, bh] = bounds;
   const trimmed = crop(img, [bx - PAD, by - PAD, bw + PAD * 2, bh + PAD * 2]);
   const [stretchX, stretchY] = def.stretch ?? [1, 1];
-  const w = Math.max(1, Math.round(trimmed.w * scale * stretchX));
-  const h = Math.max(1, Math.round(trimmed.h * scale * stretchY));
+  const k = fitHeight === undefined ? scale : fitHeight / trimmed.h;
+  const w = Math.max(1, Math.round(trimmed.w * k * stretchX));
+  const h = Math.max(1, Math.round(trimmed.h * k * stretchY));
   const out = await resize(trimmed, w, h);
   const sx = w / trimmed.w;
   const sy = h / trimmed.h;
@@ -241,23 +252,34 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
     sheets.set(key, s.key === false ? raw : chromaKey(raw, opaqueBelow, clearAbove));
   }
 
-  const names = Object.keys(manifest.parts);
+  // o retrato sai em vários tamanhos, cada um um frame
+  const entries = Object.keys(manifest.parts).flatMap(
+    (name): { name: string; frame: string; height?: number }[] =>
+      name === 'portrait'
+        ? Object.entries(PORTRAIT_SIZES).map(([frame, height]) => ({ name, frame, height }))
+        : [{ name, frame: name }],
+  );
+  const names = entries.map((e) => e.frame);
   const parts: { img: Image; anchors: Anchors }[] = [];
-  for (const name of names) {
+  for (const { name, height } of entries) {
     const def = manifest.parts[name];
     if (!def) continue;
     const sheet = sheets.get(def.sheet);
     const sheetDef = manifest.sheets[def.sheet];
     if (!sheet || !sheetDef) throw new Error(`${name}: folha desconhecida "${def.sheet}"`);
     const scale = manifest.scale * (sheetDef.scale ?? 1);
-    parts.push(await processPart(name, def, sheet, scale, manifest.outline));
+    parts.push(await processPart(name, def, sheet, scale, manifest.outline, height));
   }
 
   const pack = packShelves(
     parts.map((p) => p.img),
     manifest.atlasWidth ?? ATLAS_MAX_WIDTH,
+    ATLAS_GAP,
   );
-  const atlas = createImage(pack.w, pack.h);
+  // lados em potência de 2: só assim o jogo gera mipmaps (ver resolution.ts no game)
+  const atlasW = nextPowerOfTwo(pack.w);
+  const atlasH = nextPowerOfTwo(pack.h);
+  const atlas = createImage(atlasW, atlasH);
   const frames: Record<string, unknown> = {};
   const debugFrames: Record<string, { x: number; y: number; anchors: Anchors }> = {};
   names.forEach((name, i) => {
@@ -288,13 +310,13 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
       app: 'scripts/art/build.ts',
       image: `${manifest.out.split('/').at(-1) ?? ''}.${format}`,
       format: 'RGBA8888',
-      size: { w: pack.w, h: pack.h },
+      size: { w: atlasW, h: atlasH },
       scale: '1',
     },
   };
   writeFileSync(`${outBase}.json`, `${JSON.stringify(json, null, 1)}\n`);
   console.log(
-    `  atlas: ${String(names.length)} peças, ${String(pack.w)}x${String(pack.h)} → ${image}`,
+    `  atlas: ${String(names.length)} peças, ${String(atlasW)}x${String(atlasH)} → ${image}`,
   );
 
   for (const [name, def] of Object.entries(manifest.layers ?? {})) {
@@ -303,7 +325,7 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
 
   if (debugDir) {
     mkdirSync(debugDir, { recursive: true });
-    const svg = `<svg width="${String(pack.w)}" height="${String(pack.h)}" xmlns="http://www.w3.org/2000/svg">${debugOverlay(debugFrames)}</svg>`;
+    const svg = `<svg width="${String(atlasW)}" height="${String(atlasH)}" xmlns="http://www.w3.org/2000/svg">${debugOverlay(debugFrames)}</svg>`;
     const file = join(debugDir, `${folder}.png`);
     await toSharp(atlas)
       .flatten({ background: '#3a3f4b' })

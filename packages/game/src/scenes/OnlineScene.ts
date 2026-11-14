@@ -12,6 +12,7 @@ import { endMessage, type EndReason } from '../net/transport';
 import { MenuList } from '../ui/MenuList';
 import { fadeIn, titleText, UI, uiText } from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
+import { VIEW } from '../render/view';
 
 export interface OnlineData {
   /** Voltando de uma sala que acabou: mostra o motivo. */
@@ -60,7 +61,7 @@ export class OnlineScene extends Phaser.Scene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     // chegar aqui é estar fora de qualquer sala
     closeOnline();
     this.controls = new MenuInput();

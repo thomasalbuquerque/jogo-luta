@@ -80,6 +80,8 @@ pnpm art [pasta]      recorta a arte de art/ e gera os atlas (--debug <pasta> mo
 
 Visualizador de animações (só em dev): `http://localhost:5173/?rig`.
 
+Resolução: o layout das telas é em 1280×720 (`VIEW` em `packages/game/src/render/view.ts`), mas o canvas é maior, do tamanho da tela (`RENDER_SCALE`). Use `VIEW` para medidas da tela, nunca `scene.scale.width/height`. Câmera com zoom próprio multiplica o zoom por `RENDER_SCALE`. `?resolucao=1` força a escala antiga, para comparar. Ver "Qualidade da imagem no jogo" no `docs/ARTE.md`.
+
 Atraso de input para testar o netcode sem rede: `http://localhost:5173/?atraso=3` (ou 1/2 e 3/4 com o debug ligado). Replays, snapshot e hash do estado: ver "Determinismo e replays" no `docs/GDD.md`.
 
 Online: "Jogar online" no menu, ou `http://localhost:5173/?sala=ABCD` para entrar direto numa sala (duas abas no mesmo PC servem para testar). Ver "Online" no `docs/GDD.md`.

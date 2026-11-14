@@ -19,6 +19,7 @@ import type { OnlineSession } from '../net/session';
 import { cssColor, fadeIn, panel, teamColor, titleText, UI, uiText } from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
 import type { MatchSetup } from './FightScene';
+import { VIEW } from '../render/view';
 
 /** Miniatura do mapa (16:9, como a tela). */
 const THUMB_W = 720;
@@ -109,7 +110,7 @@ export class StageSelectScene extends Phaser.Scene {
   }
 
   private get thumbX(): number {
-    return this.hasOptions ? THUMB_X_WITH_OPTIONS : (this.scale.width - THUMB_W) / 2;
+    return this.hasOptions ? THUMB_X_WITH_OPTIONS : (VIEW.width - THUMB_W) / 2;
   }
 
   create(): void {
@@ -120,7 +121,7 @@ export class StageSelectScene extends Phaser.Scene {
     });
     fadeIn(this);
     addAudioHint(this, 2);
-    const { width, height } = this.scale;
+    const { width, height } = VIEW;
     titleText(this, width / 2, 50, 'ESCOLHA O MAPA', 38);
 
     const x = this.thumbX;

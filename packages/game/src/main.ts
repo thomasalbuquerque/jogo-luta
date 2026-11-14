@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { setupAudio } from './audio/unlock';
+import { RENDER_SCALE, RenderScalePlugin, VIEW } from './render/resolution';
 import { BackdropScene } from './scenes/BackdropScene';
 import { BootScene } from './scenes/BootScene';
 import { ControlsScene } from './scenes/ControlsScene';
@@ -17,12 +18,19 @@ import { TitleScene } from './scenes/TitleScene';
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
-  width: 1280,
-  height: 720,
+  // o layout é em 1280×720 (VIEW); o canvas tem a resolução da tela (ver resolution.ts)
+  width: Math.round(VIEW.width * RENDER_SCALE),
+  height: Math.round(VIEW.height * RENDER_SCALE),
   backgroundColor: '#1d2333',
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  // mipmaps nas texturas de lado potência de 2 (os atlas do pnpm art): imagem
+  // reduzida na tela (retrato, objeto, câmera afastada) fica lisa, sem serrilhado
+  render: { mipmapFilter: 'LINEAR_MIPMAP_LINEAR' },
+  plugins: {
+    scene: [{ key: 'renderScale', plugin: RenderScalePlugin, mapping: 'renderScale' }],
   },
   // A primeira da lista começa sozinha: carrega a arte e abre a tela inicial.
   // A ordem é a de desenho: o fundo (backdrop) fica atrás dos menus, e pausa e

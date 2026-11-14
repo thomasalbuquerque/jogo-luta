@@ -793,6 +793,35 @@ O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` 
 (`layers`: céu, longe, meio). A posição e a velocidade de cada camada ficam em
 `packages/game/src/render/stageView.ts`.
 
+As imagens do cenário vêm do gerador em 1536 px de largura, pouco para uma tela grande (o fundo
+fica embaçado). Antes do `pnpm art`, elas são ampliadas 2× com o Real-ESRGAN, e os arquivos
+ampliados ficam ao lado dos originais com `-2x` no nome (`2-ceu-2x.png`...). O `recortes.json` usa os
+ampliados, com as coordenadas em px deles (o dobro das do original). Em `stageView.ts`, as escalas
+das camadas e das decorações dividem por `LAJE_ART_RES` (2). Comando, com o
+[realesrgan-ncnn-vulkan](https://github.com/xinntao/Real-ESRGAN/releases) (usa a placa de vídeo):
+
+```text
+realesrgan-ncnn-vulkan.exe -i 4-meio.png -o 4-meio-2x.png -n realesr-animevideov3 -s 2
+```
+
+O modelo `realesr-animevideov3` é o que mais respeita o desenho. O `realesrgan-x4plus-anime` achata
+a textura da pintura. Nos personagens não precisa: as peças aparecem na tela mais ou menos do
+tamanho em que estão no atlas.
+
+### 5. Qualidade da imagem no jogo
+
+- **Resolução:** o layout é em 1280×720 (`VIEW`), mas o canvas tem o tamanho da tela em tela cheia
+  (`RENDER_SCALE`, de 1 a 3, em `packages/game/src/render/resolution.ts`). Cada câmera ganha esse
+  zoom a mais, e os textos são desenhados nessa resolução. Assim o navegador não precisa esticar a
+  imagem. `?resolucao=1` na URL volta ao jeito antigo, para comparar.
+- **Mipmaps:** o `pnpm art` grava os atlas com lados em potência de 2 (1024×512, 4096×1024...), com
+  4 px entre as peças, e o jogo liga mipmaps neles. Imagem reduzida na tela (objeto, câmera afastada)
+  fica lisa, sem serrilhado. As camadas do fundo não têm mipmap: na tela elas quase nunca ficam
+  menores que a imagem.
+- **Retrato em dois tamanhos:** a peça `portrait` sai como `portrait` (400 px de altura, para a
+  seleção e o resultado) e `portrait_small` (96 px, para os ícones de vida do HUD), seja qual for a
+  escala da folha. O `addPortrait` escolhe o pequeno quando ele basta.
+
 ---
 
 ## Referência: o estilo do jogo

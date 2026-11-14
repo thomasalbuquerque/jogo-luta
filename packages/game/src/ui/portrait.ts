@@ -1,7 +1,14 @@
 import Phaser from 'phaser';
 import { characterTextureKey } from '../render/FighterView';
+import { RENDER_SCALE } from '../render/resolution';
 
-/** Figurinha do personagem (frame `portrait` do atlas), cabendo num quadrado de `size`. */
+/** Altura do retrato pequeno do atlas (ver PORTRAIT_SIZES em scripts/art/build.ts). */
+const SMALL_PORTRAIT_PX = 96;
+
+/**
+ * Figurinha do personagem, cabendo num quadrado de `size`. Usa o retrato pequeno
+ * do atlas quando dá (ícones de vida): reduzir o grande tanto deixaria serrilhado.
+ */
 export function addPortrait(
   scene: Phaser.Scene,
   id: string,
@@ -9,11 +16,13 @@ export function addPortrait(
   y: number,
   size: number,
 ): Phaser.GameObjects.Image {
-  const img = scene.add.image(x, y, characterTextureKey(id), 'portrait');
+  const key = characterTextureKey(id);
+  const small =
+    size * RENDER_SCALE <= SMALL_PORTRAIT_PX && scene.textures.get(key).has('portrait_small');
+  const img = scene.add.image(x, y, key, small ? 'portrait_small' : 'portrait');
   img.setScale(size / Math.max(img.width, img.height));
   return img;
 }
-
 /**
  * Silhueta de cabeça e ombros (personagem que ainda não existe), centrada em
  * (cx, cy), com altura ~`size`.

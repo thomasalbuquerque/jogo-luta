@@ -18,6 +18,13 @@ export function createImage(w: number, h: number): Image {
   return { w, h, data: new Uint8ClampedArray(w * h * 4) };
 }
 
+/** Menor potência de 2 ≥ n (a placa de vídeo só faz mipmap de textura assim). */
+export function nextPowerOfTwo(n: number): number {
+  let p = 1;
+  while (p < n) p *= 2;
+  return p;
+}
+
 /** '#rrggbb' → [r, g, b]. */
 export function parseHex(hex: string): [number, number, number] {
   const n = Number.parseInt(hex.slice(1), 16);
