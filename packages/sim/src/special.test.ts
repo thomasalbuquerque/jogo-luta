@@ -13,6 +13,7 @@ import {
   moveFrame,
   stepFighter,
   TELEPORT_EDGE_MARGIN,
+  edgeSpot,
   teleportSpots,
   type Fighter,
 } from './fighter';
@@ -478,6 +479,95 @@ describe('bloco buff com aura (invulnerable)', () => {
   });
 });
 
+const TOUGH = character('t-tough', {
+  name: 'Couro grosso',
+  startup: 5,
+  active: 1,
+  recovery: 10,
+  blocks: [{ type: 'buff', durationTicks: 120, damageTakenPercent: 50 }],
+});
+
+describe('bloco buff com dano recebido reduzido (damageTakenPercent)', () => {
+  /** Leva o golpe lateral do lutador base (8%) com e sem o buff. */
+  const takeSideLight = (buffed: boolean) => {
+    const b = onGround(1, TOUGH, 60);
+    if (buffed) {
+      run([b], [0, SPECIAL]);
+      run([b], [0, 0], 16);
+      expect(b.buffTicks).toBeGreaterThan(0);
+    }
+    const a = onGround(0, BASE_CHARACTER_ID);
+    a.facing = 1;
+    const events: GameEvent[] = [];
+    stepFighter(a, Button.ATTACK | Button.RIGHT, solids);
+    for (let i = 0; i < 20; i++) {
+      stepFighter(a, 0, solids);
+      stepFighter(b, 0, solids);
+      resolveHits([a, b], events);
+    }
+    return { b, events };
+  };
+
+  it('o golpe pega normalmente, mas soma metade do dano', () => {
+    const full = takeSideLight(false);
+    const half = takeSideLight(true);
+    expect(full.b.damage).toBe(8);
+    expect(half.b.damage).toBe(4);
+    // knockback e hitstun: pegou de verdade
+    expect(half.b.state).toBe('hitstun');
+    expect(half.b.kbx).toBeGreaterThan(0);
+    expect(half.events.filter((e) => e.type === 'aura')).toEqual([]);
+    expect(half.events).toContainEqual(
+      expect.objectContaining({ type: 'hit', victim: 1, damage: 4, reduced: true }),
+    );
+    expect(full.events.find((e) => e.type === 'hit')).not.toHaveProperty('reduced');
+  });
+
+  it('golpe de 1% continua dando 1%, e o projétil também é cortado', () => {
+    const b = onGround(1, TOUGH, 60);
+    run([b], [0, SPECIAL]);
+    run([b], [0, 0], 16);
+    const shooter = onGround(0, SHOOTER, -40);
+    const shot = (damage: number) => {
+      const p = spawnProjectile(shooter, shotDef());
+      p.x = b.x;
+      p.y = b.y;
+      p.hit.damage = damage;
+      return p;
+    };
+    const weak = shot(1);
+    const strong = shot(11);
+    resolveProjectileHits([shooter, b], [weak]);
+    expect(b.damage).toBe(1);
+    b.state = 'idle';
+    resolveProjectileHits([shooter, b], [strong]);
+    expect(b.damage).toBe(1 + 5);
+  });
+
+  it('o agarrão pega e os golpes do combo também são cortados', () => {
+    const g = closeGame([COMBO_GRABBER, TOUGH]);
+    const [a, b] = g.fighters as [Fighter, Fighter];
+    steps(g, [0, SPECIAL]);
+    steps(g, [0, 0], 16);
+    expect(b.buffTicks).toBeGreaterThan(0);
+    steps(g, [SPECIAL, 0]);
+    steps(g, [0, 0], 6);
+    expect(b.state).toBe('grabbed');
+    steps(g, [0, 0], 40);
+    // 4 golpes de 1% (no mínimo 1%) e o arremesso de 7% cortado para 3%
+    expect(b.damage).toBe(4 + 3);
+    expect(a.grabTicks).toBe(0);
+  });
+
+  it('quando o buff acaba, volta a levar o dano inteiro', () => {
+    const b = onGround(1, TOUGH, 60);
+    run([b], [0, SPECIAL]);
+    run([b], [0, 0], 140);
+    expect(b.buffTicks).toBe(0);
+    expect(b.buffTaken).toBe(100);
+  });
+});
+
 describe('bloco teleporte', () => {
   it('sem direção, vai para a frente e fica invencível um pouco', () => {
     const f = onGround(0, TELEPORTER);
@@ -690,6 +780,84 @@ describe('bloco teleporte sorteado (Silent quit)', () => {
   });
 });
 
+const EDGE_QUITTER = character('t-quit-edge', {
+  name: 'Ponta',
+  startup: 14,
+  active: 20,
+  recovery: 18,
+  oncePerAir: true,
+  blocks: [{ type: 'teleport', target: 'edge', edgeInset: 60 }],
+});
+
+describe('bloco teleporte para a ponta (edge)', () => {
+  const [main] = TEST_STAGE.solids;
+  if (!main) throw new Error('mapa sem chão');
+  const left = main.x;
+  const right = main.x + main.w;
+
+  /** Põe o lutador 0 em (x, y) (centro dos pés, px), solta o especial e espera ele voltar. */
+  const quitFrom = (x: number, y: number, airborne: boolean) => {
+    const g = quitGame(EDGE_QUITTER, 1);
+    const [f] = pair(g);
+    f.x = px(x) - f.w / 2;
+    f.y = px(y) - f.h;
+    if (airborne) f.grounded = false;
+    const before = g.rng;
+    quit(g);
+    return { g, f, rngUsed: g.rng !== before };
+  };
+
+  it('caindo fora do palco à direita, volta na ponta direita, em pé, parado e dentro do bloco', () => {
+    const { g, f } = quitFrom(700, 250, true);
+    const feet = feetOf(f);
+    expect(feet.x).toBe(right - px(60));
+    expect(feet.y).toBe(main.y);
+    expect(f.vx).toBe(0);
+    expect(f.vy).toBe(0);
+    expect(f.kbx).toBe(0);
+    expect(f.kby).toBe(0);
+    expect(feet.x + f.w / 2).toBeLessThanOrEqual(right);
+    stepGame(g, [0, 0]);
+    expect(f.grounded).toBe(true);
+  });
+
+  it('caindo fora do palco à esquerda, ponta esquerda', () => {
+    const { f } = quitFrom(-650, 300, true);
+    expect(feetOf(f).x).toBe(left + px(60));
+  });
+
+  it('em cima do palco, vai para a ponta do mesmo lado', () => {
+    expect(feetOf(quitFrom(-100, 0, false).f).x).toBe(left + px(60));
+    expect(feetOf(quitFrom(100, 0, false).f).x).toBe(right - px(60));
+  });
+
+  it('em cima de uma plataforma pequena, a ponta do mesmo lado (plataformas ficam de fora)', () => {
+    expect(feetOf(quitFrom(-265, -150, false).f)).toEqual({ x: left + px(60), y: main.y });
+    expect(feetOf(quitFrom(265, -150, false).f)).toEqual({ x: right - px(60), y: main.y });
+  });
+
+  it('no meio exato, vai para o lado para onde está virado', () => {
+    const spot = (facing: -1 | 1) =>
+      edgeSpot({ x: -px(20), w: px(40), h: px(90), facing }, TEST_STAGE.solids, px(60));
+    expect(spot(1)?.x).toBe(right - px(60));
+    expect(spot(-1)?.x).toBe(left + px(60));
+  });
+
+  it('a distância pedida nunca deixa o corpo sair de cima do bloco', () => {
+    const body = { x: px(300), w: px(48), h: px(96), facing: 1 as const };
+    expect(edgeSpot(body, TEST_STAGE.solids, 0)?.x).toBe(right - px(24) - TELEPORT_EDGE_MARGIN);
+  });
+
+  it('não usa o RNG da luta, e funciona sem a luta', () => {
+    expect(quitFrom(100, 0, false).rngUsed).toBe(false);
+    const f = onGround(0, EDGE_QUITTER, 300);
+    run([f], [SPECIAL]);
+    run([f], [0], 40);
+    // o chão do teste vai de -2000 a 2000
+    expect(feetOf(f).x).toBe(px(2000) - px(60));
+  });
+});
+
 describe('bloco contra-ataque', () => {
   it('quem bate durante a janela leva o golpe; quem contra-ataca não leva nada', () => {
     const a = onGround(0, COUNTER);
@@ -737,6 +905,23 @@ describe('bloco contra-ataque', () => {
     expect(shot.owner).toBe(0);
     expect(shot.vx).toBe(px(10));
     expect(a.moveHits).toBe(1 << 1);
+  });
+
+  it('o projétil devolvido recomeça a vida e os quiques, e sai 1 evento reflect', () => {
+    const a = onGround(0, COUNTER);
+    run([a], [SPECIAL]);
+    run([a], [0], 4);
+    const shot = spawnProjectile(a, { ...shotDef(), offsetX: 0, bounces: 3 });
+    shot.owner = 1;
+    shot.vx = -px(10);
+    shot.ticksLeft = 5;
+    shot.bounces = 0;
+    const events: GameEvent[] = [];
+    resolveProjectileHits([a], [shot], events);
+    expect(shot.ticksLeft).toBe(shot.lifetime);
+    expect(shot.bounces).toBe(3);
+    expect(shot.hit.damage).toBe(shotDef().hit.damage);
+    expect(events).toEqual([expect.objectContaining({ type: 'reflect', fighter: 0, from: 1 })]);
   });
 });
 

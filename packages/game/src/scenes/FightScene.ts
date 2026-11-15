@@ -6,7 +6,7 @@ import {
   finishReplay,
   FixedStepLoop,
   getStage,
-  hasAura,
+  hasBuff,
   hashState,
   hurtbox,
   InputDelay,
@@ -24,9 +24,9 @@ import {
   STAGES,
   stepGame,
   SUBPX,
+  teleportVanishes,
   toPx,
   type Box,
-  type AuraEvent,
   type BounceEvent,
   type CueName,
   type Fighter,
@@ -35,6 +35,7 @@ import {
   type HitEvent,
   type InputMask,
   type KoEvent,
+  type ReflectEvent,
   type MoveDef,
   type Replay,
 } from '@jogo-luta/sim';
@@ -93,6 +94,8 @@ const TELEPORT_PX = 150;
 const CAMERA_RATE = 5;
 /** Ticks de clarão branco em quem leva golpe (mais nos golpes fortes). */
 const FLASH_TICKS = 3;
+/** Ticks piscando na cor do contra-ataque (quem contra-atacou e quem levou). */
+const COUNTER_FLASH_TICKS = 10;
 /** Tremor do KO (trauma, 0..1). */
 const KO_TRAUMA = 0.8;
 /** Golpe que decide a luta: câmera lenta (tempo real e escala) e zoom em quem voa. */
@@ -186,13 +189,13 @@ interface PrevPos {
  * Online (sala aberta), os inputs passam pelo lockstep da sala: o tick só roda
  * quando o input dos dois chegou, e os dois lados veem a mesma luta.
  */
-/** Frames que o Tauba leva para se juntar de novo depois de voltar do teleporte sorteado. */
+/** Frames que o Tauba leva para se juntar de novo depois de voltar do teleporte que some. */
 const REAPPEAR_FADE = 8;
 
-/** Transparência do corpo se desfazendo antes do teleporte sorteado e se juntando depois. */
+/** Transparência do corpo se desfazendo antes do teleporte que some e se juntando depois. */
 function quitAlpha(f: Fighter): number {
   const move = f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
-  if (!move?.teleport?.random) return 1;
+  if (!move || !teleportVanishes(move)) return 1;
   const frame = moveFrame(f);
   if (frame <= move.startup) return 1 - 0.65 * (frame / move.startup);
   const back = frame - move.startup - move.active;
@@ -273,6 +276,8 @@ export class FightScene extends Phaser.Scene {
   private camPos = { x: 0, y: 0, zoom: 1 };
   /** Tick até o qual cada lutador fica branco (clarão do impacto). */
   private flashUntil: number[] = [];
+  /** Pisca colorido do contra-ataque (`counter.color`): até que tick e em que cor. */
+  private colorFlash: ({ until: number; color: number } | undefined)[] = [];
   /** Lutador em foco na câmera lenta do golpe decisivo. */
   private focus: number | null = null;
   /** O golpe decisivo (ou o KO final) já ganhou câmera lenta nesta luta. */
@@ -554,6 +559,7 @@ export class FightScene extends Phaser.Scene {
     this.shake.reset();
     this.slowMo.reset();
     this.flashUntil = [];
+    this.colorFlash = [];
     this.focus = null;
     this.decisiveShown = false;
   }
@@ -763,6 +769,8 @@ export class FightScene extends Phaser.Scene {
             this.onHit(e);
             if (e.kind === 'throw' && e.combo !== undefined) this.onComboFinish(e);
           }
+          // pegou mais fraco (a aura cortou o dano): a estrelinha e o "plim", menores
+          if (e.reduced) this.onAuraPass(e, true);
           break;
         case 'ko':
           this.onKo(e);
@@ -781,6 +789,9 @@ export class FightScene extends Phaser.Scene {
           break;
         case 'bounce':
           this.onBounce(e);
+          break;
+        case 'reflect':
+          this.onReflect(e);
           break;
       }
     }
@@ -828,11 +839,12 @@ export class FightScene extends Phaser.Scene {
     const n = e.combo ?? 1;
     this.commands[holder.id]?.hit(n, false);
     const side = holder.facing;
-    // altura de cada golpe, na ordem do clipe: jab, direto, chute baixo, gancho,
-    // chute alto e giratório (fração da altura, a partir do meio do corpo)
-    const heights = [-0.24, -0.2, 0.3, -0.34, -0.3, -0.22];
+    // altura de cada golpe, na ordem do clipe (`MEIA_COMBO`): jab, chute baixo,
+    // gancho e chute alto (fração da altura, a partir do meio do corpo)
+    const heights = [-0.24, 0.3, -0.34, -0.3];
     const x = toPx(victim.x + victim.w / 2) - side * toPx(victim.w) * 0.3;
-    const y = toPx(victim.y + victim.h / 2) + toPx(victim.h) * (heights[(n - 1) % 6] ?? 0);
+    const y =
+      toPx(victim.y + victim.h / 2) + toPx(victim.h) * (heights[(n - 1) % heights.length] ?? 0);
     const texture = characterTextureKey(holder.character);
     // tamanhos pela altura do corpo do agarrado
     const h = toPx(victim.h);
@@ -909,21 +921,26 @@ export class FightScene extends Phaser.Scene {
     if (combo.finishSound) playSfx(this, combo.finishSound);
   }
 
-  /** Golpe que passou pela aura: estrelinha verde e o "plim", sem impacto nenhum. */
-  private onAuraPass(e: AuraEvent): void {
+  /**
+   * Golpe que passou pela aura invencível: estrelinha verde e o "plim", sem impacto
+   * nenhum. Com `small`, o golpe pegou mais fraco (dano cortado pela aura): a mesma
+   * estrelinha, menor, junto do impacto normal.
+   */
+  private onAuraPass(e: { victim: number; x: number; y: number }, small = false): void {
     const victim = this.state.fighters[e.victim];
     const view = this.views[e.victim];
     const aura = victim ? CHARACTER_FX[victim.character]?.aura : undefined;
     if (!victim || !view || !aura) return;
     const x = toPx(e.x);
     const y = toPx(e.y);
+    const k = small ? 0.65 : 1;
     this.fx.spawn({
       texture: FX_TEXTURE.glow,
       x,
       y,
       life: 12,
-      scale: 0.5,
-      scaleEnd: 1.3,
+      scale: 0.5 * k,
+      scaleEnd: 1.3 * k,
       tint: aura.color,
       additive: true,
     });
@@ -933,17 +950,18 @@ export class FightScene extends Phaser.Scene {
       x,
       y,
       life: 16,
-      scale: view.scale * 1.6,
-      scaleEnd: view.scale * 2.6,
+      scale: view.scale * 1.6 * k,
+      scaleEnd: view.scale * 2.6 * k,
       spin: 0.08,
     });
-    if (aura.passSound) playSfx(this, aura.passSound);
+    if (aura.passSound) playSfx(this, aura.passSound, small ? { volume: 0.6 } : undefined);
   }
 
   /** Quique do projétil (a bola do Igão): poeirinha e o "tum", cada vez mais baixo. */
   private onBounce(e: BounceEvent): void {
-    const owner = this.state.fighters[e.owner];
-    const view = this.views[e.owner];
+    // a poeirinha e o "tum" são da bola de quem sacou, mesmo devolvida
+    const owner = this.state.fighters[e.shooter];
+    const view = this.views[e.shooter];
     const bounce = owner ? CHARACTER_FX[owner.character]?.bounce : undefined;
     if (!owner || !view || !bounce) return;
     const total = characterOfFighter(owner).special?.move.projectile?.bounces ?? 1;
@@ -1139,7 +1157,7 @@ export class FightScene extends Phaser.Scene {
     for (const f of this.state.fighters) {
       const view = this.views[f.id];
       if (!view) continue;
-      // sumido no teleporte sorteado: nem corpo, nem marcador, nem caixas
+      // sumido no teleporte que some: nem corpo, nem marcador, nem caixas
       const hidden = f.state === 'ko' || isVanished(f);
       view.setVisible(!hidden);
       const command = this.commands[f.id];
@@ -1179,7 +1197,13 @@ export class FightScene extends Phaser.Scene {
       // invencível pisca; levando golpe, pisca claro
       const blink = f.invulnTicks > 0 && Math.floor(this.state.tick / 4) % 2 === 0;
       view.setAlpha(Math.min(blink ? 0.35 : 1, quitAlpha(f)));
-      if (this.state.tick < (this.flashUntil[f.id] ?? 0)) {
+      const colored = this.colorFlash[f.id];
+      if (colored && this.state.tick < colored.until) {
+        // pisca na cor do contra-ataque: pintado inteiro e tingido, alternando
+        const solid = Math.floor((colored.until - this.state.tick) / 2) % 2 === 0;
+        if (solid) view.setFlash(colored.color);
+        else view.setTint(colored.color);
+      } else if (this.state.tick < (this.flashUntil[f.id] ?? 0)) {
         view.setFlash();
       } else {
         const hurt = f.state === 'hitstun' && Math.floor(f.stateTicks / 3) % 2 === 0;
@@ -1248,7 +1272,7 @@ export class FightScene extends Phaser.Scene {
       const frame = moveFrame(f);
       if (fx.counter && move.counter) this.spawnCounterFx(f, view, fx.counter, move, justCaught);
       if (fx.slam) this.spawnSlamFx(f, view, fx.slam, move, frame);
-      if (fx.vanishSquares && move.teleport?.random) {
+      if (fx.vanishSquares && teleportVanishes(move)) {
         this.spawnQuitFx(f, view, fx.vanishSquares, move, frame);
       }
       if (fx.muzzleFlash && frame === move.startup + 1) {
@@ -1333,7 +1357,7 @@ export class FightScene extends Phaser.Scene {
 
     // fumacinha soltando dos projéteis
     for (const p of this.state.projectiles) {
-      const owner = this.state.fighters.find((f) => f.id === p.owner);
+      const owner = this.state.fighters.find((f) => f.id === p.shooter);
       const puffs = owner ? CHARACTER_FX[owner.character]?.projectile?.puffs : undefined;
       const view = owner ? this.views[owner.id] : undefined;
       if (!owner || !puffs || !view || t % 5 !== 0) continue;
@@ -1469,9 +1493,13 @@ export class FightScene extends Phaser.Scene {
   private drawProjectiles(alpha: number): void {
     const g = this.overlayGfx;
     this.state.projectiles.forEach((p, i) => {
-      const owner = this.state.fighters.find((f) => f.id === p.owner);
+      // a arte é a de quem soltou, mesmo depois de devolvido pelo contra-ataque
+      const owner = this.state.fighters.find((f) => f.id === p.shooter);
       const art = owner ? CHARACTER_FX[owner.character]?.projectile : undefined;
       const view = owner ? this.views[owner.id] : undefined;
+      // devolvido por quem tem cor de contra-ataque: pintado dela até sumir
+      const holder = p.owner === p.shooter ? undefined : this.state.fighters[p.owner];
+      const reflectColor = holder ? CHARACTER_FX[holder.character]?.counter?.color : undefined;
       // interpola voltando a velocidade do último tick
       const x = toPx(p.x - p.vx * (1 - alpha));
       const y = toPx(p.y - p.vy * (1 - alpha));
@@ -1490,6 +1518,8 @@ export class FightScene extends Phaser.Scene {
         this.projectileImages[i] = img;
       }
       img.setTexture(key, frame).setVisible(true);
+      if (reflectColor === undefined) img.clearTint();
+      else img.setTintFill(reflectColor);
       img
         .setPosition(x + w / 2, y + h / 2)
         .setScale(view.scale * (art.scale ?? 0.85))
@@ -1515,6 +1545,8 @@ export class FightScene extends Phaser.Scene {
           .setFlipX(side === -1)
           .setRotation(art.trailUntilBounce ? Math.atan2(p.vy, Math.abs(p.vx)) * side : 0)
           .setAlpha(0.8);
+        if (reflectColor === undefined) trail.clearTint();
+        else trail.setTint(reflectColor);
       }
     });
     // esconde as imagens que sobraram (projéteis que sumiram)
@@ -1949,6 +1981,7 @@ export class FightScene extends Phaser.Scene {
         scale: s * 1.1,
         scaleEnd: s * 0.75,
         alpha: 0.95,
+        ...(fx.color !== undefined && { tint: fx.color }),
       });
     }
     if (justCaught && fx.ding) {
@@ -1967,6 +2000,56 @@ export class FightScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * O contra-ataque pegou (golpe ou projétil) e o personagem tem `counter.color`: um
+   * clarão grande e um anel de onda de choque abrindo, dessa cor, no ponto do contato
+   * (`x`/`y` em px de mundo), e quem contra-atacou pisca nessa cor.
+   */
+  private spawnCounterFlash(counterer: Fighter, x: number, y: number): void {
+    const color = CHARACTER_FX[counterer.character]?.counter?.color;
+    if (color === undefined) return;
+    const h = toPx(counterer.h);
+    this.fx.spawn({
+      texture: FX_TEXTURE.glow,
+      x,
+      y,
+      life: 18,
+      scale: (h * 1.6) / 64,
+      scaleEnd: (h * 3) / 64,
+      tint: color,
+      additive: true,
+    });
+    this.fx.spawn({
+      texture: FX_TEXTURE.glow,
+      x,
+      y,
+      life: 10,
+      scale: (h * 0.8) / 64,
+      scaleEnd: (h * 1.4) / 64,
+      additive: true,
+    });
+    this.fx.spawn({
+      texture: FX_TEXTURE.ring,
+      x,
+      y,
+      life: 20,
+      scale: (h * 0.4) / 128,
+      scaleEnd: (h * 3.2) / 128,
+      tint: color,
+      additive: true,
+    });
+    this.colorFlash[counterer.id] = { until: this.state.tick + COUNTER_FLASH_TICKS, color };
+  }
+
+  /** Projétil devolvido pelo contra-ataque: o clarão e o som do contra-ataque. */
+  private onReflect(e: ReflectEvent): void {
+    const counterer = this.state.fighters[e.fighter];
+    if (!counterer) return;
+    this.spawnCounterFlash(counterer, toPx(e.x), toPx(e.y));
+    this.shake.add(0.3);
+    playSfx(this, 'counter');
+  }
+
   /** Golpe devolvido pelo contra-ataque: estalo e linhas de impacto no ponto do acerto. */
   private spawnCounterHitFx(e: HitEvent): void {
     const counterer = this.state.fighters[e.attacker];
@@ -1978,6 +2061,14 @@ export class FightScene extends Phaser.Scene {
     const x = toPx(e.x);
     const y = toPx(e.y);
     const s = view.scale;
+    this.spawnCounterFlash(counterer, x, y);
+    if (fx.color !== undefined) {
+      // quem levou o golpe devolvido pisca na cor do contra-ataque, não no branco
+      this.colorFlash[victim.id] = {
+        until: this.state.tick + COUNTER_FLASH_TICKS,
+        color: fx.color,
+      };
+    }
     if (fx.burst) {
       this.fx.spawn({
         texture,
@@ -2007,16 +2098,16 @@ export class FightScene extends Phaser.Scene {
   }
 
   /**
-   * Aura (`aura` do personagem), a cada quadro desenhado: o brilho colado na silhueta
-   * enquanto ela dura (piscando no fim) e a brasa na ponta do palheiro na mão.
+   * Aura (`aura` do personagem), a cada quadro desenhado: o brilho atrás do boneco
+   * enquanto o buff dura (piscando no fim) e a brasa na ponta do palheiro na mão.
    */
   private drawAura(f: Fighter, view: FighterView): void {
     const aura = CHARACTER_FX[f.character]?.aura;
     if (!aura) return;
-    const on = hasAura(f);
+    const on = hasBuff(f);
     const blinkOff = f.buffTicks <= aura.blinkTicks && Math.floor(f.buffTicks / 4) % 2 === 0;
-    const pulse = 4.2 + 1.2 * Math.sin(this.state.tick * 0.22);
-    view.setGlow(aura.color, on && !blinkOff ? pulse : 0);
+    const pulse = 0.5 + 0.5 * Math.sin(this.state.tick * 0.22);
+    view.setAura(aura.color, on && !blinkOff ? pulse : null);
     const ember = view.handSocket('ember');
     if (!ember) return;
     const g = this.overlayGfx;
@@ -2089,7 +2180,7 @@ export class FightScene extends Phaser.Scene {
         alpha: 0.55,
       });
     }
-    if (hasAura(f) && t % 4 === 0) this.spawnAuraWisp(f, view, aura);
+    if (hasBuff(f) && t % 4 === 0) this.spawnAuraWisp(f, view, aura);
 
     const frame = move ? moveFrame(f) : 0;
     const fresh = frame !== this.auraFrame[f.id];

@@ -85,7 +85,9 @@ export interface BuffDef {
   speedPercent: number;
   /** Peso (maior = voa menos). */
   weightPercent: number;
-  /** Aura: golpes, projéteis e agarrões passam pelo lutador enquanto o buff dura. */
+  /** Dano recebido (o golpe pega normalmente, mas soma menos %). */
+  damageTakenPercent: number;
+  /** Aura invencível: golpes, projéteis e agarrões passam pelo lutador enquanto o buff dura. */
   invulnerable: boolean;
 }
 
@@ -120,14 +122,17 @@ export interface MoveDef extends HitProps {
   buff?: BuffDef;
   /**
    * Teleporte no 1º frame ativo, na direção apertada (ou para a frente). Com
-   * `random`, o lutador some durante todo o active (parado e intangível) e, no fim
-   * dele, reaparece num chão sorteado do palco: sorteia `candidates` pontos e vai
-   * para o mais perto do adversário em `nearChance`% das vezes (senão, o mais longe).
+   * `random` ou `edge` é um teleporte que some (`teleportVanishes`): o lutador some
+   * durante todo o active (parado e intangível) e, no fim dele, reaparece. `random`:
+   * num chão sorteado do palco (sorteia `candidates` pontos e vai para o mais perto
+   * do adversário em `nearChance`% das vezes; senão, o mais longe). `edge`: em pé na
+   * ponta do palco mais perto dele, com o centro dos pés a `inset` subpx da quina.
    */
   teleport?: {
     distance: number;
     invulnTicks: number;
     random?: { candidates: number; nearChance: number };
+    edge?: { inset: number };
   };
   /** Contra-ataque: levar golpe durante o active devolve este acerto em quem bateu. */
   counter?: HitProps;
@@ -290,6 +295,14 @@ export function totalFrames(move: MoveDef): number {
 /** Frame dentro da janela ativa (startup+1..startup+active). */
 export function isActiveFrame(move: MoveDef, frame: number): boolean {
   return frame > move.startup && frame <= move.startup + move.active;
+}
+
+/**
+ * Teleporte que some (sorteado ou para a ponta): o lutador some no active e
+ * reaparece no fim dele, em vez de pular na direção apertada.
+ */
+export function teleportVanishes(move: MoveDef): boolean {
+  return move.teleport?.random !== undefined || move.teleport?.edge !== undefined;
 }
 
 /** Caixas de ataque ligadas num frame (relativas ao corpo). */

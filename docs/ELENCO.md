@@ -127,27 +127,31 @@ Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):
   ("silent quit").
 - **Bordão:** não fala: toca. O balão mostra notas musicais (🎵🎶) e o som é o trompete.
 - **Estilo de luta:** fujão (trickster). Peso médio-leve, bom no chão e no ar, golpes normais sem
-  nada de especial. O jogo dele é sumir quando aperta e voltar quando o adversário se distrai.
-- **Especial — Silent quit (teleporte):** ele some do nada e reaparece num lugar **sorteado** do
-  palco: o jogador não escolhe para onde vai. Na maioria das vezes cai longe do adversário; às vezes
-  cai do lado dele (o "efeito negativo").
-  - **Sorteio:** sorteia 3 pontos em cima das plataformas do palco (nunca fora dele, nunca dentro
-    de bloco). Com 3 em 4 de chance vai para o ponto mais longe do adversário mais próximo; com 1 em
-    4, para o mais perto. O sorteio usa o RNG com seed do estado (`state.rng`), então replay e online
-    continuam determinísticos.
+  nada de especial. O jogo dele é sumir quando aperta e voltar de qualquer lugar.
+- **Especial — Silent quit (teleporte):** ele some do nada e reaparece **na ponta do palco mais
+  perto dele**, em pé em cima do bloco principal, a 60 px da quina. O jogador não escolhe para onde
+  vai, mas todo mundo sabe onde ele vai aparecer: a borda, o lugar mais perigoso do palco.
+  - **Destino:** a quina de cima do bloco sólido mais perto do centro dos pés dele, na horizontal
+    (as plataformas atravessáveis ficam de fora; empate: a do lado para onde está virado). Caindo no
+    buraco da direita, volta na ponta direita; em cima do palco em x = +100, também; em cima da
+    plataforma pequena da esquerda, na ponta esquerda. Sem sorteio: não usa o RNG.
+  - **Antes (até a 2ª rodada de balanceamento):** reaparecia num lugar sorteado do palco, quase
+    sempre longe do adversário. Virou recuperação forte demais: voltava de qualquer lugar e ainda
+    caía num lugar seguro. O modo sorteado (`target: 'random'`) continua no bloco.
   - **Tempo:** startup de 14 (ele congela e começa a sumir, ainda vulnerável), uns 20 ticks fora da
-    luta (invisível e intangível), reaparece e tem recovery de 18 sem invencibilidade: se cair do
-    lado do adversário, apanha.
+    luta (invisível e intangível), reaparece e tem recovery de 18 sem invencibilidade: quem esperar
+    na borda pune.
   - **Sem hitbox:** é só fuga e reposicionamento, não causa dano.
-  - **Recarga longa:** uns 240 ticks (4 s), contada do começo. Funciona no ar 1 vez (`oncePerAir`):
-    como sempre cai num palco, serve de recuperação, e por isso a recarga é tão longa. Usar fora do
-    palco é seguro, mas gasta o especial por 4 s.
+  - **Recarga longa:** 300 ticks (5 s), contada do começo. Funciona no ar 1 vez (`oncePerAir`):
+    como sempre volta para o palco, serve de recuperação, e por isso a recarga é tão longa: se for
+    arremessado de novo logo depois, não tem. Usar no meio da luta como fuga custa posição (ele sai
+    do centro e vai para o canto).
   - **Efeitos:** ao sumir, o corpo se desfaz em quadradinhos (como uma chamada caindo) com um "plim"
     de desconexão; ao voltar, os quadradinhos se juntam com um "plim" de conexão. Nada de logo ou
     som do Discord: tudo genérico.
-  - **Precisa de código novo:** o bloco teleporte de hoje só vai na direção apertada. Falta uma
-    opção de destino sorteado (`target: 'random'`, com a chance de cair perto) no mesmo bloco, em
-    vez de um bloco novo.
+  - **Código novo (feito):** o bloco teleporte ganhou os destinos que somem: sorteado
+    (`target: 'random'`) e na ponta (`target: 'edge'`, com `edgeInset`), no mesmo bloco, em vez de um
+    bloco novo.
 - **Provocação:** um trompete aparece na mão dele com uma fumacinha, ele toca um trechinho de uns
   2 s e o trompete some. Enquanto toca, saem notas musicais do trompete e o balão mostra 🎵🎶. A
   música é original, no clima de fanfarra clássica de concerto: em Dó maior, Sol–Dó–Mi–Sol (curtas),
@@ -159,7 +163,7 @@ Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):
   preto, branco e dourado (o dourado do trompete e do lenço ajuda a ler o personagem nos menus
   escuros).
 - **No jogo:** jogável. No especial ele ajeita a gravata, se desfaz em quadradinhos com um "plim"
-  descendo, fica 20 ticks sumido e volta num chão sorteado (quase sempre longe do adversário) com os
+  descendo, fica 20 ticks sumido e volta na ponta do palco mais perto dele com os
   quadradinhos se juntando e um "plim" subindo. Na provocação o trompete aparece com fumacinha, as
   notas saem da boca do trompete no ritmo da fanfarra e o balão mostra 🎵🎶. Sem áudio gravado, a
   fanfarra é sintetizada (`packages/game/src/audio/fanfare.ts`). Ficha em
@@ -286,15 +290,20 @@ Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
   perna, braços abertos, olhando o adversário como quem avalia a postura do aluno). Quem bater nele
   nessa janela leva a "correção": um tapa firme de mão aberta nas costas, de fisioterapeuta, que
   arremessa.
-  - **Janela:** startup curto (~6 ticks), active de ~20 ticks (a janela do contra-ataque), recovery
-    longo (~28 ticks) se ninguém bater: ele perde o equilíbrio e fica exposto.
+  - **Janela:** startup curto (~6 ticks), active de 60 ticks (1 s, a janela do contra-ataque),
+    recovery longo (~28 ticks) se ninguém bater: ele perde o equilíbrio e fica exposto.
   - **Golpe devolvido:** dano ~14, knockback alto (ângulo ~40°, para longe dele). Projétil que
     acertar na janela volta para quem soltou (resposta natural ao João Frango e ao Tchula).
-  - **Recarga:** ~90 ticks (1,5 s), contada do começo, para não virar escudo infinito.
+  - **Recarga:** 120 ticks (2 s), contada do começo, para não virar escudo: a janela fica aberta
+    no máximo metade do tempo, e sobram 26 ticks sem contra-ataque depois de cada uso.
   - **No ar:** funciona, sem impulso (não ajuda a voltar ao palco).
   - **Perde do agarrão:** como todo contra-ataque, o agarrão passa por ele.
   - **Efeitos:** na pose, um brilho leve em volta dele (aviso de que está esperando); quando pega,
     um "ding" e um congelamento curto; no golpe, um "créc" de coluna estalando e linhas de impacto.
+    Para ninguém deixar de perceber que foi contra-ataque, tudo em ciano claro (`#3FE8E0`, puxado do
+    turquesa dele): os anéis da janela, um clarão grande e um anel de onda de choque no ponto do
+    contato, ele piscando em ciano, quem levou o golpe devolvido também, e o projétil devolvido
+    pintado de ciano até sumir (com o som do contra-ataque também na devolução).
   - **Quase nada novo no `sim`:** cabe no bloco contra-ataque. O oponente só toma o golpe e entra
     no hitstun normal: nenhuma animação nova para ele. O `sim` só passou a marcar quem o
     contra-ataque pegou (no `moveHits`), para o jogo tocar o tapa em vez do recovery de quem errou.
@@ -513,35 +522,40 @@ Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
 - **Estilo de luta:** destemida. Leve e rápida no chão, pulo bom, golpes normais um pouco mais
   fracos que a média. O jogo dela é achar a hora de fumar e, com a aura ligada, ir para cima sem
   medo de apanhar. Contraste com o Crocko: o Crocko espera o golpe para devolver; a Marília
-  simplesmente não sente o golpe.
+  aguenta o golpe e segue.
 - **Especial — Tragadinha (buff):** ela tira um cigarrinho de palha (palheiro) do bolso de trás,
   põe na boca e dá uma tragada (a ponta acende em brasa). Ao soltar, a fumaça sai verde clarinha e
-  envolve o corpo dela: vira uma aura. Com a aura, ela não toma dano por um tempo.
+  envolve o corpo dela: vira uma aura. Com a aura, ela sente bem menos os golpes por um tempo.
   - **Tempo:** startup longo (~40 ticks: ~12 tirando o palheiro, ~18 na tragada, ~10 soltando a
     fumaça), vulnerável o tempo todo: é o preço do especial, e quem estiver perto pune. Se ela
     apanhar no startup, o palheiro cai e o especial é perdido (a recarga já contou). Recovery curto
     (~12 ticks, ela joga o palheiro fora).
-  - **A aura:** liga no 1º frame ativo e dura ~120 ticks (2 s). Golpes, projéteis e agarrões passam
-    por ela, como na esquiva: sem dano, sem knockback, sem hitstun. Ela anda, pula e ataca
-    normalmente. Não salva da blast zone: sair do mapa com a aura ainda é KO.
-  - **Recarga:** longa, ~480 ticks (8 s), contada do começo, para a aura não ficar quase sempre
-    ligada.
+  - **A aura:** liga no 1º frame ativo e dura 300 ticks (5 s). Ela leva golpes, projéteis e
+    agarrões normalmente (knockback, hitstun, arremesso), mas soma só 60% do dano (no mínimo 1%).
+    Ela anda, pula e ataca normalmente. Dá para matar e agarrar com a aura ligada; como o
+    knockback usa o % acumulado, ela só demora mais para chegar no % de morrer. Até a 2ª rodada de
+    balanceamento a aura era invencível (golpes passavam por ela); ficou ligada pouco tempo e era
+    tudo ou nada.
+  - **Recarga:** 450 ticks (7,5 s), contada do começo: entre uma aura e outra há pelo menos 150
+    ticks (2,5 s) sem proteção, 40 deles parada fumando.
   - **No ar:** funciona, sem impulso; como o startup é longo e ela vai caindo, não serve de
     recuperação.
   - **Efeitos:** brasa laranja na ponta do palheiro durante a tragada; fumacinha cinza quando ela
     traga; ao soltar, uma baforada verde clarinha (`#B5F2C6`) que se espalha em volta do corpo e
     vira a aura: um contorno de luz verde clarinho colado na silhueta, com fiapos de fumaça verde
-    subindo. Golpe que passa pela aura faz um brilho verde e um "plim" (sem dano). Nos últimos 30
+    subindo. Golpe que pega com a aura ligada faz, junto do impacto, uma estrelinha verde e um "plim"
+    menores (o golpe pegou mais fraco). Nos últimos 30
     ticks a aura pisca, avisando que vai acabar.
   - **Como desenhar a aura:** no código, nunca com imagem. Ela é um brilho verde clarinho
-    (`#B5F2C6`) aplicado no boneco inteiro (o efeito Glow do Phaser no container do rig), então
-    acompanha cada pose: soco, pulo, agachada. Uma silhueta pronta ficaria parada de pé e descolada
-    do corpo nos golpes, e uma bolha redonda leria como escudo e esconderia a personagem. Se o Glow
-    não rodar no navegador, o plano B é uma cópia do boneco pintada de verde, um pouco maior, atrás
-    dela. Da folha de efeitos vêm só o palheiro, as fumacinhas cinzas, os fiapos verdes (sobem em
+    (`#B5F2C6`) atrás do boneco: um brilho macio e aditivo, do tamanho do corpo (mais alto que
+    largo), pulsando, criado uma vez e só mostrado ou escondido. Antes era o efeito Glow do Phaser
+    no container do rig, mas ele derrubava o desempenho em tela cheia (pós-processamento lendo o
+    boneco centenas de vezes por pixel), e foi trocado. Uma bolha redonda leria como escudo e
+    esconderia a personagem. Da folha de efeitos vêm só o palheiro, as fumacinhas cinzas, os fiapos verdes (sobem em
     volta dela) e a estrelinha do "plim"; a brasa é um pontinho laranja piscando, também no código.
-  - **Código novo (feito):** o bloco buff ganhou a opção `invulnerable: true` (ver "Aura" no
-    `docs/GDD.md`), em vez de um bloco novo.
+  - **Código novo (feito):** o bloco buff ganhou a opção `damageTakenPercent` (ver "Aura" no
+    `docs/GDD.md`), em vez de um bloco novo. A opção `invulnerable: true` (aura invencível) continua
+    no bloco, mas ela não usa mais.
 - **Provocação:** põe as duas mãos no rosto, arregala os olhos, balança a cabeça e grita "Gentiii!".
 - **Visual:** roupa do dia a dia. Camiseta rosa-framboesa (`#E2557F`) lisa, de manga curta, um
   pouco folgada e para fora da calça; calça jeans clara (`#8DB0D8`) de cintura alta e perna reta,
@@ -552,8 +566,8 @@ Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
   (é mais forte e frio).
 - **No jogo:** jogável. Ela tira o palheiro do bolso de trás, leva à boca e traga (a brasa acende),
   solta a baforada verde no 1º frame ativo e fica zen, com o brilho verde colado no corpo e fiapos de
-  fumaça subindo; no recovery joga o palheiro fora com um peteleco. Golpe que passa pela aura faz a
-  estrelinha e o "plim". Na provocação, as mãos vão nas bochechas e ela balança a cabeça gritando.
+  fumaça subindo; no recovery joga o palheiro fora com um peteleco. Golpe que pega com a aura faz a
+  estrelinha e o "plim" junto do impacto. Na provocação, as mãos vão nas bochechas e ela balança a cabeça gritando.
   Ficha em `packages/sim/src/characters/marilia.ts`.
 - **Ideias guardadas:** se o João Frango provocar com ela na luta ("Ô Mariiiliaaa!"), ela responde
   "Gentiii!"; respawn soltando uma baforada; "Gentiii!" ao levar KO.
@@ -569,7 +583,7 @@ Outfit: raspberry pink (#E2557F) plain short-sleeve T-shirt, slightly loose, unt
 Signature details: loose shoulder-length brown hair (not below the shoulders), the pink T-shirt, a hand-rolled straw cigarette.
 Colors: primary #E2557F, secondary #8DB0D8, accent #8FD9A8.
 Face/personality: expressive, big wide eyes, dramatic "can you believe this?" look.
-Special move: "Tragadinha" — she pulls a hand-rolled straw cigarette from her back pocket, takes a drag, and exhales a light green smoke that wraps around her body as a glowing aura; while it lasts, hits pass through her.
+Special move: "Tragadinha" — she pulls a hand-rolled straw cigarette from her back pocket, takes a drag, and exhales a light green smoke that wraps around her body as a glowing aura; while it lasts, she shrugs hits off.
 Taunt: puts both hands on her cheeks, eyes wide, shakes her head and shouts her catchphrase.
 Extra parts for the parts sheet: one hand holding a thin hand-rolled cigarette between two fingers.
 Props and effects for the effects sheet: the hand-rolled straw cigarette (side view, pointing right, no hands); 1 small orange ember glow; 3 small gray smoke puffs; 4 light green smoke wisps; 1 small light green sparkle.
@@ -623,29 +637,29 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   - **Tempo:** startup curto (6 ticks, 1 por símbolo), active curto (4 ticks, a janela do agarrão).
     Recovery longo se errar (~32 ticks): é o "fica exposto".
   - **Alcance:** curto, uns 36 px à frente do corpo, da cintura ao ombro. Precisa estar colado.
-  - **Se pegar:** o adversário fica preso ~60 ticks (1 s). A cada ~6 ticks sai um golpe do combo (9
-    golpes) que dá 1% de dano sem knockback; o contador mostra "2 HITS", "3 HITS"... e o último
+  - **Se pegar:** o adversário fica preso 30 ticks (meio segundo: com 3 ou 4 jogadores, menos tempo
+    exposto). A cada 6 ticks sai um golpe do combo (4 golpes) que dá 2% de dano sem knockback; o contador mostra "2 HITS", "3 HITS"... e o último
     chute é o arremesso (dano ~7, knockback médio-alto, ângulo ~40°, para o lado em que ele está
-    virado). Fecha em "10 HITS" e ~16% no total. Como em todo agarrão, ←/→ durante o combo escolhe
+    virado). Fecha em "5 HITS" e 15% no total. Como em todo agarrão, ←/→ durante o combo escolhe
     para que lado arremessa.
   - **Se errar:** o comando fica vermelho, com um "X" grande por cima, e treme; ele fica parado no
     recovery longo, de guarda aberta.
   - **Riscos:** se alguém (o companheiro do agarrado, no 2v2) bater nele no meio do combo, ele solta
-    o adversário e o contador some. A aura da Marília não deixa ele pegar (o comando fica vermelho,
-    como num erro). Ganha do contra-ataque do Crocko, como todo agarrão.
+    o adversário e o contador some. Na Marília com a aura ele pega normalmente, mas os golpes
+    somam menos dano. Ganha do contra-ataque do Crocko, como todo agarrão.
   - **Recarga:** ~90 ticks (1,5 s), contada do começo.
   - **No ar:** funciona, sem impulso. Se pegar no ar, os dois ficam parados no ar até o arremesso.
   - **Efeitos:** setas acendendo no startup; a cada golpe do combo, uma faísca de impacto, linhas de
     velocidade e um "pá" curto, com um tremor leve (sem congelar, para o combo correr); o contador
     "N HITS" em amarelo, inclinado, crescendo um pouco a cada golpe, ao lado dele; no arremesso, uma
     explosão de impacto maior e um "póu" forte. No erro, um "buzz" grave, de comando errado.
-  - **A animação:** 1 clipe de combo com umas 6 poses de soco e chute que se repetem (jab, direto,
-    chute baixo, gancho, chute alto, chute giratório) e 1 pose final de chute forte (o arremesso),
+  - **A animação:** 1 clipe de combo com 4 poses de soco e chute (jab, chute baixo, gancho e chute
+    alto, de 6 desenhadas: o direto e o chute giratório ficam guardados) e 1 pose final de chute forte (o arremesso),
     todas com os punhos fechados, nunca agarrando. O combo anda pelos golpes do agarrão, não pelo
     frame do golpe (que fica parado enquanto segura). O adversário usa a pose de agarrado que já
     existe, com um tranco a cada golpe: nenhuma animação nova para ele.
   - **Precisa de código novo (pequeno):** o bloco agarrão de hoje só dá dano no arremesso. Falta
-    uma opção de golpes durante o agarrão no mesmo bloco (ex.: `combo: { hits: 9, damage: 1 }`),
+    uma opção de golpes durante o agarrão no mesmo bloco (ex.: `combo: { hits: 4, damage: 2 }`),
     que espalha os golpes pelo `holdTicks` e solta um evento de acerto a cada um (para a faísca, o
     som e o contador), em vez de um bloco novo. O contador e o comando são só do `game`: o `sim` já
     diz se o agarrão pegou (`moveHits` e `grabTicks` de quem segura).
@@ -661,8 +675,8 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   ciano-elétrico e jeans (o ciano é mais azul e mais vivo que o turquesa do Crocko, e o branco da
   camiseta lê bem nos menus escuros).
 - **No jogo:** jogável. O comando acende em cima da cabeça enquanto ele entra colado; se pega, o
-  adversário fica preso levando 9 golpes (faísca, "pá" e o contador "N HITS" atrás dele) e o chute
-  final arremessa com uma explosão e o "póu", fechando em "10 HITS" e 16%. Se erra, o comando fica
+  adversário fica preso levando 4 golpes (faísca, "pá" e o contador "N HITS" atrás dele) e o chute
+  final arremessa com uma explosão e o "póu", fechando em "5 HITS" e 15%. Se erra, o comando fica
   vermelho com o X, toca o "buzz" e ele fica de guarda aberta. Na provocação ajeita os óculos com o
   indicador e chama com a mão de trás; o balão "Vem!" sai no `voiceAt`. Ficha em
   `packages/sim/src/characters/meia.ts`.
@@ -724,29 +738,31 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
   fica no chão esperando; o Igão vive no ar.
 - **Especial — Saque (projétil):** ele joga a bola de vôlei para cima com uma mão, sem saltar, e
   bate nela de cima para baixo com a mão aberta. A bola sai em diagonal, para baixo e para a
-  frente, bate no chão e quica 3 vezes, cada quique mais baixo, até acertar alguém ou acabar o
+  frente, bate no chão e quica 4 vezes, cada quique mais baixo, até acertar alguém ou acabar o
   tempo.
   - **Tempo:** startup médio (~18 ticks: a bola subindo e o braço armando são o aviso), active de
     1 tick (a batida), recovery médio (~18 ticks, o braço descendo).
   - **A bola:** nasce na mão esticada lá em cima, um pouco à frente da cabeça (32 px à frente e
     54 px acima do centro do corpo: o braço dele não alcança mais alto que isso), e sai a 9,5
     px/tick num ângulo de 40° para baixo, com gravidade 0,45. Caixa redonda de 28 × 28 px.
-  - **Os quiques:** guarda 72% da velocidade vertical a cada quique (a horizontal não muda). Com
-    esses números, o 1º quique sobe uns 66 px (ainda pega quem está em pé), o 2º uns 32 px e o 3º
-    uns 14 px, rente ao chão. Vida de 85 ticks (1,4 s): ela anda uns 600 px no total, um pouco mais
-    que meio palco. Quem pular por cima escapa; o 1º quique é o mais difícil de pular.
+  - **Os quiques:** 4, guardando 78% da velocidade vertical a cada quique (a horizontal não muda).
+    Com esses números, o 1º quique sobe uns 78 px (ainda pega quem está em pé, até os baixinhos de
+    90 px), o 2º uns 45 px, o 3º uns 25 px e o 4º uns 14 px, rente ao chão. Vida de 110 ticks
+    (1,8 s): ela anda uns 800 px no total, quase o palco inteiro. Quem pular por cima escapa; o 1º
+    quique é o mais difícil de pular.
   - **Onde quica e onde some:** quica no topo do chão e no topo das plataformas atravessáveis
     (vindo de cima, como um lutador pousando). Na lateral ou embaixo de um bloco sólido (parede),
     some, como todo projétil hoje. Depois do último quique, o próximo toque no chão faz ela sumir;
     numa plataforma atravessável sem quiques sobrando, ela passa direto, como hoje. Saiu do palco,
     cai até a blast zone ou até o tempo acabar.
-  - **Golpe:** dano ~8, knockback médio (ângulo ~50°, para o lado em que a bola anda). O mesmo em
+  - **Golpe:** dano ~11, knockback médio (ângulo ~50°, para o lado em que a bola anda). O mesmo em
     qualquer quique. Some ao acertar alguém.
-  - **Recarga:** ~90 ticks (1,5 s), contada do começo: uma bola em quadra por vez.
+  - **Recarga:** ~90 ticks (1,5 s), contada do começo: a 2ª bola só sai quando a 1ª já quicou 3
+    vezes, no fim do caminho.
   - **No ar:** funciona igual (vira um saque viagem), sem impulso: não ajuda a voltar ao palco. A
     bola sai de mais alto, então o 1º quique fica mais longe.
-  - **Interações:** a correção do Crocko devolve a bola para quem sacou, com os quiques que
-    sobraram; a aura da Marília deixa a bola passar.
+  - **Interações:** a correção do Crocko devolve a bola para quem sacou, que faz o caminho de
+    volta inteiro (a vida e os quiques recomeçam, o dano continua 11%); na Marília com a aura a bola acerta, mas dá menos dano.
   - **Efeitos:** a bola gira no ar no sentido em que anda (rotação no código, não precisa de
     quadros); na batida, um estouro de impacto na mão e um "pá!" de tapa forte; atrás da bola, um
     rastro curto até o 1º quique; a cada quique, uma poeirinha no chão e um "tum" que vai ficando
@@ -779,7 +795,7 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
   fone, e o violeta do Igão é mais escuro e mais fechado; o verde-limão é bem mais amarelado e vivo
   que o verde do Dadazinho e a menta da Marília).
 - **No jogo:** jogável. No Saque a bola sai da mão de trás, sobe girando, ele bate lá em cima
-  com um estouro e o "pá!", e ela desce em diagonal com um rastro curto, quica 3 vezes com uma
+  com um estouro e o "pá!", e ela desce em diagonal com um rastro curto, quica 4 vezes com uma
   poeirinha e um "tum" cada vez mais baixo, girando no sentido em que anda. Na provocação quica a
   bola no chão duas vezes, segura na cintura, aponta com a outra mão e o balão "Cê tá miolo né
   nê?" sai no `voiceAt`. Ficha em `packages/sim/src/characters/igao.ts`.
@@ -798,7 +814,7 @@ Outfit: violet purple (#6A3FB8) short-sleeve fitted volleyball jersey, untucked,
 Signature details: the violet jersey with lime green collar and side stripes, the black knee pads, short brown hair.
 Colors: primary #6A3FB8, secondary #C4E53A, accent #2E1F57.
 Face/personality: cocky teasing grin, one eyebrow slightly raised.
-Special move: "Saque" — standing on the ground, without jumping, he tosses a volleyball up with one hand and spikes it with the other open hand, sending it diagonally down and forward; it bounces three times along the ground, each bounce lower.
+Special move: "Saque" — standing on the ground, without jumping, he tosses a volleyball up with one hand and spikes it with the other open hand, sending it diagonally down and forward; it bounces four times along the ground, each bounce lower.
 Taunt: bounces the volleyball on the ground twice with one hand, like before a serve, catches it, then points at the opponent and teases them.
 Extra parts for the parts sheet: one hand pointing with the index finger.
 Props and effects for the effects sheet: 1 volleyball (white with curved violet and lime green panels, no logo); 1 white-yellow impact burst for the hand hitting the ball; 3 short white speed streaks; 3 small light-brown dust puffs for the bounces.

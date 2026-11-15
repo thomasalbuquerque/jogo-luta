@@ -16,6 +16,10 @@ import {
   type Skin,
 } from '../rig/skeleton';
 import { FOOT_BEHIND, FOREARM_IN_FRONT, SHIN_IN_FRONT } from '../rig/library';
+import { FX_TEXTURE } from './fxTextures';
+
+/** Lado da textura do brilho redondo (`FX_TEXTURE.glow`), em px. */
+const GLOW_TEXTURE_SIZE = 64;
 
 /** Chave da textura (atlas) de um personagem. */
 export function characterTextureKey(id: string): string {
@@ -75,8 +79,11 @@ export class FighterView {
   private placedHandFar: { placed: PlacedBone; lift: number } | null = null;
   /** Cabeça na última pose (a boca, de onde sai a fumaça). */
   private placedHead: { placed: PlacedBone; lift: number } | null = null;
-  /** Brilho em volta do boneco inteiro (a aura da Marília), criado no 1º uso. */
-  private glow: Phaser.FX.Glow | null = null;
+  /**
+   * Brilho atrás do boneco inteiro (a aura da Marília): imagem aditiva criada no 1º uso
+   * e depois só mostrada ou escondida.
+   */
+  private auraGlow: Phaser.GameObjects.Image | null = null;
   private readonly skin: Skin;
   private readonly fit: RigFit;
   private readonly textureKey: string;
@@ -220,27 +227,31 @@ export class FighterView {
   }
 
   /**
-   * Brilho colado na silhueta, acompanhando cada pose (o efeito Glow do Phaser no
-   * container). `strength` 0 desliga. Sem WebGL (Canvas) não há Glow: não desenha nada.
+   * Brilho macio atrás do boneco, do tamanho do corpo (mais alto que largo), pintado
+   * de `color`. `pulse` de 0 a 1 faz ele respirar (escala e alpha); `null` esconde.
+   * É um sprite aditivo com `tint`: barato, ao contrário do Glow do Phaser
+   * (pós-processamento no container), que derrubava o desempenho em tela cheia.
    */
-  setGlow(color: number, strength: number): this {
-    if (strength <= 0) {
-      // o pipeline do container ignora `active = false` do efeito: tira o Glow de vez
-      if (this.glow) {
-        this.container.postFX.remove(this.glow);
-        this.glow = null;
-      }
+  setAura(color: number, pulse: number | null): this {
+    if (pulse === null) {
+      this.auraGlow?.setVisible(false);
       return this;
     }
-    if (!this.glow) {
-      // no Canvas o controlador de efeitos não cria nada
-      const glow = this.container.postFX.addGlow(color, strength, 0, false, 0.12, 14) as
-        Phaser.FX.Glow | undefined;
-      if (!glow) return this;
-      this.glow = glow;
+    if (!this.auraGlow) {
+      const img = this.container.scene.add.image(0, 0, FX_TEXTURE.glow);
+      img.setBlendMode(Phaser.BlendModes.ADD);
+      // fica sempre atrás das peças: a troca de ordem só sobe as peças (`bringToTop`)
+      this.container.addAt(img, 0);
+      this.auraGlow = img;
     }
-    this.glow.color = color;
-    this.glow.outerStrength = strength;
+    const h = this.fit.height;
+    const grow = 1 + 0.07 * pulse;
+    this.auraGlow
+      .setVisible(true)
+      .setTint(color)
+      .setAlpha(0.55 + 0.3 * pulse)
+      .setPosition(0, -h * 0.5)
+      .setScale((h * 0.95 * grow) / GLOW_TEXTURE_SIZE, (h * 1.45 * grow) / GLOW_TEXTURE_SIZE);
     return this;
   }
 

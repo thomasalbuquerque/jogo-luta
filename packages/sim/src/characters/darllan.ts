@@ -14,7 +14,7 @@ export const DARLLAN = defineCharacter({
   // secundária: o rosa-glacê do bolso, que lê bem do lado do marrom
   colors: { primary: '#6b4226', secondary: '#e8789a' },
   stats: {
-    weight: 124,
+    weight: 118,
     walkSpeed: 5.4,
     airSpeed: 5,
     jumpHeight: 162,
@@ -38,10 +38,11 @@ export const DARLLAN = defineCharacter({
     name: 'Rolo na bancada',
     // O rolo subindo é o aviso (startup longo); a pancada é curta e ele fica
     // agachado com o rolo no chão (recovery longo): quem esquivar pune.
-    startup: 18,
+    startup: 24,
     active: 5,
     recovery: 26,
-    cooldownTicks: 60,
+    // contada do começo: sobram 45 ticks sem rolo depois de cada uso
+    cooldownTicks: 100,
     blocks: [
       {
         type: 'area',

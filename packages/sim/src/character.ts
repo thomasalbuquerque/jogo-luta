@@ -154,8 +154,13 @@ const BuffBlock = z.strictObject({
   speedPercent: int(50, 300).default(100),
   weightPercent: int(50, 300).default(100),
   /**
-   * Aura: enquanto o buff dura, golpes, projéteis e agarrões passam pelo lutador
-   * (sem dano, sem knockback). Não salva da blast zone.
+   * Dano recebido, em % (100 = normal): o golpe pega normalmente (knockback, hitstun,
+   * agarrão), mas soma menos dano. É a aura da Marília.
+   */
+  damageTakenPercent: int(10, 100).default(100),
+  /**
+   * Aura invencível: enquanto o buff dura, golpes, projéteis e agarrões passam pelo
+   * lutador (sem dano, sem knockback). Não salva da blast zone.
    */
   invulnerable: z.boolean().default(false),
 });
@@ -166,8 +171,10 @@ const TeleportBlock = z.strictObject({
    * `direction`: vai `distance` px na direção apertada, no 1º frame ativo.
    * `random`: some durante o active e reaparece, no fim dele, num chão sorteado do
    * palco (o jogador não escolhe). Usa o RNG da luta: replay e online continuam iguais.
+   * `edge`: some durante o active e reaparece, no fim dele, em pé na ponta do palco
+   * (quina de cima de um bloco sólido) mais perto dele. Previsível, sem RNG.
    */
-  target: z.enum(['direction', 'random']).default('direction'),
+  target: z.enum(['direction', 'random', 'edge']).default('direction'),
   /** px (só no `direction`). */
   distance: num(10, 600).default(200),
   invulnTicks: int(0, 60).default(0),
@@ -175,6 +182,11 @@ const TeleportBlock = z.strictObject({
   candidates: int(1, 8).default(3),
   /** `random`: chance (%) de ir para o ponto mais perto do adversário; senão, o mais longe. */
   nearChance: int(0, 100).default(25),
+  /**
+   * `edge`: distância (px) da quina até o centro dos pés. Nunca menos que o necessário
+   * para o corpo inteiro ficar em cima do bloco (metade da largura + uma margem).
+   */
+  edgeInset: num(0, 400).default(0),
 });
 
 const GrabBlock = z.strictObject({
@@ -506,6 +518,7 @@ function compileSpecial(s: ParsedSpecial): Special {
           damagePercent: b.damagePercent,
           speedPercent: b.speedPercent,
           weightPercent: b.weightPercent,
+          damageTakenPercent: b.damageTakenPercent,
           invulnerable: b.invulnerable,
         };
         break;
@@ -513,6 +526,8 @@ function compileSpecial(s: ParsedSpecial): Special {
         move.teleport = { distance: px(b.distance), invulnTicks: b.invulnTicks };
         if (b.target === 'random') {
           move.teleport.random = { candidates: b.candidates, nearChance: b.nearChance };
+        } else if (b.target === 'edge') {
+          move.teleport.edge = { inset: px(b.edgeInset) };
         }
         break;
     }

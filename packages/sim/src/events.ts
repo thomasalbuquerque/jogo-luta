@@ -4,7 +4,14 @@
  * começo de cada tick.
  */
 export type GameEvent =
-  HitEvent | AuraEvent | GrabEvent | KoEvent | RespawnEvent | ActionEvent | BounceEvent;
+  | HitEvent
+  | AuraEvent
+  | GrabEvent
+  | KoEvent
+  | RespawnEvent
+  | ActionEvent
+  | BounceEvent
+  | ReflectEvent;
 
 /**
  * Alguém levou um golpe. `hit`: golpe normal; `counter`: devolvido pelo
@@ -22,8 +29,10 @@ export interface HitEvent {
   combo?: number;
   attacker: number;
   victim: number;
-  /** Dano causado, em %. */
+  /** Dano que o alvo levou de verdade, em %. */
   damage: number;
+  /** O dano foi cortado pelo buff do alvo (a aura da Marília): o golpe pegou mais fraco. */
+  reduced?: true;
   /** Velocidade do arremesso, em subpx/tick. */
   knockback: number;
   /** Ponto do impacto, em subpx. */
@@ -39,6 +48,18 @@ export interface AuraEvent {
   type: 'aura';
   attacker: number;
   victim: number;
+  x: number;
+  y: number;
+}
+
+/**
+ * O contra-ataque devolveu um projétil: `fighter` (quem contra-atacou) virou o dono
+ * dele, que era de `from`. `x`/`y`: ponto do contato, em subpx.
+ */
+export interface ReflectEvent {
+  type: 'reflect';
+  fighter: number;
+  from: number;
   x: number;
   y: number;
 }
@@ -61,11 +82,13 @@ export interface KoEvent {
 /**
  * Um projétil com quiques (a bola do Igão) quicou no topo de um chão ou plataforma.
  * `x`/`y`: ponto do quique (meio da bola, no topo da superfície), em subpx;
- * `bouncesLeft`: quiques que ainda sobram.
+ * `bouncesLeft`: quiques que ainda sobram. `shooter`: quem soltou (o dono pode ser
+ * quem devolveu no contra-ataque).
  */
 export interface BounceEvent {
   type: 'bounce';
   owner: number;
+  shooter: number;
   x: number;
   y: number;
   bouncesLeft: number;

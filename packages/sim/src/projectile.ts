@@ -7,8 +7,10 @@ import { cosDeg, sinDeg, TRIG_ONE } from './trig';
 
 /** Projétil em voo (bloco `projectile`). Só dados: faz parte do estado da luta. */
 export interface Projectile extends Box {
-  /** Id de quem soltou (não acerta o dono). */
+  /** Id do dono (não acerta o dono): quem soltou, ou quem devolveu no contra-ataque. */
   owner: number;
+  /** Id de quem soltou primeiro (não muda ao ser devolvido): o render desenha a arte dele. */
+  shooter: number;
   vx: number;
   vy: number;
   gravity: number;
@@ -22,6 +24,9 @@ export interface Projectile extends Box {
   bounces: number;
   /** Quanto da velocidade vertical sobra a cada quique, em %. */
   bounceKeep: number;
+  /** Vida e quiques com que nasceu: o contra-ataque devolve o projétil com eles de novo. */
+  lifetime: number;
+  maxBounces: number;
 }
 
 /** Cria o projétil na frente do lutador, saindo no ângulo da ficha. */
@@ -30,6 +35,7 @@ export function spawnProjectile(f: Fighter, def: ProjectileDef): Projectile {
   const cy = f.y + idiv(f.h, 2) + def.offsetY;
   return {
     owner: f.id,
+    shooter: f.id,
     x: cx - idiv(def.w, 2),
     y: cy - idiv(def.h, 2),
     w: def.w,
@@ -43,6 +49,8 @@ export function spawnProjectile(f: Fighter, def: ProjectileDef): Projectile {
     passed: 0,
     bounces: def.bounces,
     bounceKeep: def.bounceKeep,
+    lifetime: def.lifetimeTicks,
+    maxBounces: def.bounces,
   };
 }
 
@@ -96,6 +104,7 @@ function bounce(
   events?.push({
     type: 'bounce',
     owner: p.owner,
+    shooter: p.shooter,
     x: p.x + idiv(p.w, 2),
     y: top,
     bouncesLeft: p.bounces,

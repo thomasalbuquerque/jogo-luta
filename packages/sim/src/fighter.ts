@@ -8,6 +8,7 @@ import {
   isActiveFrame,
   selectAttack,
   selectSpecial,
+  teleportVanishes,
   totalFrames,
   type MoveDef,
   type MoveId,
@@ -133,6 +134,8 @@ export interface Fighter extends Body {
   buffDamage: number;
   buffSpeed: number;
   buffWeight: number;
+  /** Dano recebido com o buff, em % (100 = normal): a aura da Marília corta o dano. */
+  buffTaken: number;
   /** Aura do buff (`invulnerable`): golpes passam pelo lutador enquanto `buffTicks` > 0. */
   buffInvuln: boolean;
   /** Agarrado: id de quem segura (-1 = ninguém). */
@@ -206,6 +209,7 @@ export function createFighter(
     buffDamage: 100,
     buffSpeed: 100,
     buffWeight: 100,
+    buffTaken: 100,
     buffInvuln: false,
     grabbedBy: -1,
     grabTicks: 0,
@@ -508,9 +512,8 @@ function stepAttack(f: Fighter, input: InputMask, prev: InputMask, world: World)
     if (dir !== 0) f.facing = dir;
     return;
   }
-  const random = move?.teleport?.random;
-  if (move && random && moveFrame(f) === move.startup + move.active + 1) {
-    reappear(f, random, world);
+  if (move?.teleport && teleportVanishes(move)) {
+    if (moveFrame(f) === move.startup + move.active + 1) reappear(f, move.teleport, world);
   }
   if (!move || moveFrame(f) > totalFrames(move)) {
     finishAction(f, input, prev);
@@ -528,12 +531,13 @@ function stepAttack(f: Fighter, input: InputMask, prev: InputMask, world: World)
  * frame só avança fora do hitstop.
  */
 function fireBlocks(f: Fighter, move: MoveDef, input: InputMask, world: World): void {
-  if (move.teleport && !move.teleport.random) teleport(f, move.teleport, input, world.solids);
+  if (move.teleport && !teleportVanishes(move)) teleport(f, move.teleport, input, world.solids);
   if (move.buff) {
     f.buffTicks = move.buff.durationTicks;
     f.buffDamage = move.buff.damagePercent;
     f.buffSpeed = move.buff.speedPercent;
     f.buffWeight = move.buff.weightPercent;
+    f.buffTaken = move.buff.damageTakenPercent;
     f.buffInvuln = move.buff.invulnerable;
   }
   if (move.projectile) {
@@ -569,16 +573,16 @@ function teleport(
 }
 
 /**
- * Sumiu no teleporte sorteado (Silent quit): durante o active do especial fica
+ * Sumiu no teleporte que some (Silent quit): durante o active do especial fica
  * parado, invisível e intangível. O render esconde o corpo e o combate ignora.
  */
 export function isVanished(f: Fighter): boolean {
   if (f.state !== 'attack' || f.move !== 'special') return false;
   const move = moveDef(f, 'special');
-  return move.teleport?.random !== undefined && isActiveFrame(move, moveFrame(f));
+  return teleportVanishes(move) && isActiveFrame(move, moveFrame(f));
 }
 
-/** Distância das pontas do chão em que o teleporte sorteado não deixa cair. */
+/** Distância das pontas do chão em que o teleporte que some não deixa cair. */
 export const TELEPORT_EDGE_MARGIN = px(12);
 
 /**
@@ -634,20 +638,52 @@ function dist2(a: Spawn, b: Spawn): number {
 }
 
 /**
- * Fim do sumiço: reaparece em pé num dos pontos sorteados, virado para o
- * adversário mais perto. Vai para o ponto mais longe dele, ou, em `nearChance`%
- * das vezes, para o mais perto. Sem a luta (lutador solto, nos testes), fica onde está.
+ * Ponto do teleporte para a ponta: em pé em cima do bloco sólido, perto da quina
+ * de cima mais próxima do lutador (pela distância horizontal até o centro dos pés;
+ * empate: a do lado para onde ele está virado). O centro dos pés fica a `inset` da
+ * quina, mas nunca tão perto que o corpo saia de cima do bloco. Plataformas
+ * atravessáveis ficam de fora. Sem bloco sólido, devolve null.
  */
-function reappear(
+export function edgeSpot(
+  f: Pick<Fighter, 'x' | 'w' | 'h' | 'facing'>,
+  solids: readonly Solid[],
+  inset: number,
+): Spawn | null {
+  const half = idiv(f.w, 2);
+  const cx = f.x + half;
+  const minInset = half + TELEPORT_EDGE_MARGIN;
+  let best: { spot: Spawn; gap: number; ahead: boolean } | null = null;
+  for (const s of solids) {
+    if (s.kind !== 'solid') continue;
+    // bloco estreito demais para a distância pedida: fica no meio dele
+    const d = Math.min(Math.max(inset, minInset), idiv(s.w, 2));
+    for (const [corner, x] of [
+      [s.x, s.x + d],
+      [s.x + s.w, s.x + s.w - d],
+    ] as const) {
+      const gap = Math.abs(corner - cx);
+      const ahead = (corner - cx) * f.facing > 0;
+      if (!best || gap < best.gap || (gap === best.gap && ahead && !best.ahead)) {
+        best = { spot: { x, y: s.y }, gap, ahead };
+      }
+    }
+  }
+  return best ? best.spot : null;
+}
+
+/**
+ * Ponto sorteado do teleporte: sorteia `candidates` pontos e vai para o mais longe
+ * do adversário mais perto, ou, em `nearChance`% das vezes, para o mais perto.
+ */
+function randomSpot(
   f: Fighter,
   def: NonNullable<NonNullable<MoveDef['teleport']>['random']>,
-  world: World,
-): void {
-  const match = world.match;
-  if (!match) return;
-  const spots = teleportSpots(f, world.solids, def.candidates, match);
-  if (spots.length === 0) return;
-  const foes = match.fighters.filter((o) => o.team !== f.team && o.state !== 'ko');
+  solids: readonly Solid[],
+  match: MatchContext,
+  foes: readonly Fighter[],
+): Spawn | null {
+  const spots = teleportSpots(f, solids, def.candidates, match);
+  if (spots.length === 0) return null;
   const near = rngChance(match, def.nearChance);
   // distância de cada ponto até o adversário mais perto dele
   const gaps = spots.map((p) => Math.min(...foes.map((o) => dist2(p, feet(o)))));
@@ -657,7 +693,20 @@ function reappear(
     const bestGap = gaps[best] ?? 0;
     if (near ? gap < bestGap : gap > bestGap) best = i;
   }
-  const spot = spots[best];
+  return spots[best] ?? null;
+}
+
+/**
+ * Fim do sumiço: reaparece em pé no ponto do teleporte (sorteado ou na ponta),
+ * parado e virado para o adversário mais perto. O sorteado precisa da luta (RNG e
+ * adversários): sem ela (lutador solto, nos testes), fica onde está.
+ */
+function reappear(f: Fighter, def: NonNullable<MoveDef['teleport']>, world: World): void {
+  const match = world.match;
+  const foes = match ? match.fighters.filter((o) => o.team !== f.team && o.state !== 'ko') : [];
+  let spot: Spawn | null = null;
+  if (def.edge) spot = edgeSpot(f, world.solids, def.edge.inset);
+  else if (def.random && match) spot = randomSpot(f, def.random, world.solids, match, foes);
   if (!spot) return;
   f.x = spot.x - idiv(f.w, 2);
   f.y = spot.y - f.h;
@@ -684,6 +733,7 @@ function clearBuff(f: Fighter): void {
   f.buffDamage = 100;
   f.buffSpeed = 100;
   f.buffWeight = 100;
+  f.buffTaken = 100;
   f.buffInvuln = false;
 }
 
@@ -695,6 +745,20 @@ export function hasAura(f: Fighter): boolean {
 /** Dano que o lutador causa, com o buff ativo. */
 export function dealtDamage(f: Fighter, damage: number): number {
   return idiv(damage * f.buffDamage, 100);
+}
+
+/**
+ * Dano que o lutador recebe, com o buff ativo (`damageTakenPercent`). Nunca zera um
+ * golpe que dá dano: no mínimo 1%.
+ */
+export function takenDamage(f: Fighter, damage: number): number {
+  if (damage <= 0 || f.buffTaken === 100) return damage;
+  return Math.max(1, idiv(damage * f.buffTaken, 100));
+}
+
+/** Buff ligado (qualquer bloco buff), ainda dentro da duração. */
+export function hasBuff(f: Fighter): boolean {
+  return f.buffTicks > 0;
 }
 
 /** Peso que vale no knockback, com o buff ativo. */
@@ -727,7 +791,7 @@ function moveFrameEffects(f: Fighter): void {
       f.canCutJump = false;
     }
   }
-  if (move.teleport?.random && isActiveFrame(move, frame)) {
+  if (teleportVanishes(move) && isActiveFrame(move, frame)) {
     // sumido: parado onde estava até reaparecer
     f.vx = 0;
     f.vy = 0;
@@ -906,7 +970,7 @@ function moveOverridesGravity(f: Fighter): boolean {
   // Parado no ar no startup (só no ar: no chão, sem gravidade, ele "sairia" do chão).
   if (move.hoverStartup && !f.grounded && frame <= move.startup) return true;
   if (move.dash && !f.grounded && isActiveFrame(move, frame)) return true;
-  if (move.teleport?.random && isActiveFrame(move, frame)) return true;
+  if (teleportVanishes(move) && isActiveFrame(move, frame)) return true;
   return move.fallSpeed !== undefined && isActiveFrame(move, frame);
 }
 

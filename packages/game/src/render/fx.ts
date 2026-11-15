@@ -75,7 +75,7 @@ export interface CharacterFx {
    * sai também quando ela aparece ou some.
    */
   heldInTauntHand?: boolean;
-  /** Teleporte sorteado: quadradinhos quando o corpo se desfaz (some) e se junta (volta). */
+  /** Teleporte que some (o Silent quit): quadradinhos quando o corpo se desfaz (some) e se junta (volta). */
   vanishSquares?: readonly string[];
   /**
    * Provocação: peças que saem do socket `bell` da mão (notas do trompete), nos `ticks`
@@ -87,8 +87,19 @@ export interface CharacterFx {
    * avalia a postura (no lugar do contorno branco). Quando pega alguém (golpe ou
    * projétil), um brilho (`ding`) perto da cabeça; no golpe devolvido, um estalo
    * (`burst`) e linhas de impacto (`lines`) no ponto do acerto, com o som `sound`.
+   * Com `color`, o contra-ataque fica impossível de não ver: os anéis saem nessa cor
+   * e, quando pega (golpe ou projétil), um clarão grande e um anel de onda de choque
+   * dessa cor no ponto do contato, o boneco pisca nessa cor, quem levou o golpe
+   * devolvido também, e o projétil devolvido fica pintado dela até sumir.
    */
-  counter?: { glow: string; ding?: string; burst?: string; lines?: string; sound?: SfxName };
+  counter?: {
+    glow: string;
+    ding?: string;
+    burst?: string;
+    lines?: string;
+    sound?: SfxName;
+    color?: number;
+  };
   /**
    * Pancada no chão (área): um brilho (`shine`) no socket `shine` da peça na mão
    * quando ela chega lá em cima; no 1º frame ativo, nuvens de farinha (`cloud`) para
@@ -123,15 +134,17 @@ export interface CharacterFx {
     despawnSound?: SfxName;
   };
   /**
-   * Tragada e aura (bloco buff com `invulnerable`, a Tragadinha da Marília). Enquanto a
+   * Tragada e aura (bloco buff, a Tragadinha da Marília). Enquanto a
    * mão segura o palheiro, uma brasa (`emberColor`) pisca no socket `ember` da mão,
    * soltando fumacinhas cinzas (`smoke`), mais na tragada (`inhale`: fração do startup
    * em que ela começa e acaba, com o som `dragSound`). No 1º frame ativo, a baforada:
    * fumaça pintada de `color` espalhando em volta do corpo e o som `exhaleSound`. Com a
-   * aura ligada, o boneco ganha um brilho `color` colado na silhueta (o Glow do Phaser,
-   * acompanha cada pose) e fiapos (`wisps`) sobem em volta; nos últimos `blinkTicks` o
-   * brilho pisca. Golpe que passa pela aura (evento `aura` do sim): estrelinha
-   * (`sparkle`) e o som `passSound`. Quando a mão solta o palheiro (o peteleco do
+   * aura ligada (o buff), o boneco ganha um brilho `color` atrás dele (sprite aditivo do
+   * tamanho do corpo, pulsando: nada de `postFX`, que pesa demais em tela cheia) e
+   * fiapos (`wisps`) sobem em volta; nos últimos `blinkTicks` o brilho pisca. Golpe que
+   * pega com o dano cortado (evento `hit` com `reduced`): estrelinha (`sparkle`) e o
+   * som `passSound`, menores, junto do impacto; golpe que passa pela aura invencível
+   * (evento `aura`), os mesmos em tamanho cheio. Quando a mão solta o palheiro (o peteleco do
    * recovery, ou um golpe no meio da tragada), a peça `cig` cai girando.
    */
   aura?: {
@@ -204,6 +217,8 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
       burst: 'fx_crack',
       lines: 'fx_lines',
       sound: 'spine_crack',
+      // ciano claro puxado do turquesa dele (#1ba39c)
+      color: 0x3fe8e0,
     },
   },
   darllan: {

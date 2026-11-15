@@ -36,12 +36,14 @@ export const JOAO_FRANGO = defineCharacter({
     startup: 10,
     active: 1,
     recovery: 16,
-    cooldownTicks: 42,
+    // contada do começo: sobram 27 ticks sem frango depois de cada tiro
+    cooldownTicks: 54,
     blocks: [
       {
         type: 'projectile',
-        speed: 9.5,
-        lifetimeTicks: 60,
+        // 10,5 × 54 ≈ 567 px de alcance
+        speed: 10.5,
+        lifetimeTicks: 54,
         size: { w: 34, h: 22 },
         offset: { x: 30, y: -12 },
         hit: { damage: 5, angle: 25, baseKnockback: 6, knockbackScale: 0.05 },

@@ -12,6 +12,7 @@ import {
   moveFrame,
   releaseGrabbed,
   skipToRecovery,
+  takenDamage,
   type Fighter,
 } from './fighter';
 import type { AuraEvent, GameEvent, HitEvent } from './events';
@@ -82,11 +83,32 @@ function hitEvent(
   kind: HitEvent['kind'],
   attacker: number,
   victim: Fighter,
-  damage: number,
+  dealt: Dealt,
   at: { x: number; y: number },
 ): HitEvent {
   const knockback = launchSpeed(victim);
-  return { type: 'hit', kind, attacker, victim: victim.id, damage, knockback, x: at.x, y: at.y };
+  const { taken: damage } = dealt;
+  const e: HitEvent = {
+    type: 'hit',
+    kind,
+    attacker,
+    victim: victim.id,
+    damage,
+    knockback,
+    x: at.x,
+    y: at.y,
+  };
+  if (dealt.taken < dealt.damage) e.reduced = true;
+  return e;
+}
+
+/**
+ * Dano de um acerto: `damage` é o que o golpe dá (com o buff de quem bate) e `taken`
+ * o que o alvo levou de verdade (menos, com a aura da Marília).
+ */
+export interface Dealt {
+  damage: number;
+  taken: number;
 }
 
 function center(f: Fighter): { x: number; y: number } {
@@ -180,11 +202,19 @@ function knockbackSide(attacker: Fighter, victim: Fighter, move: HitProps): -1 |
 }
 
 /**
- * Soma `damage` ao alvo e arremessa para o lado `side` com o ângulo e a força do
- * acerto. Devolve os ticks de hitstop do impacto.
+ * Soma `damage` ao alvo (cortado pelo buff dele, `takenDamage`) e arremessa para o
+ * lado `side` com o ângulo e a força do acerto. Devolve os ticks de hitstop do
+ * impacto (pelo dano do golpe, sem o corte: o impacto parece o mesmo) e o dano que
+ * o alvo levou de verdade.
  */
-export function launch(victim: Fighter, hit: HitProps, side: -1 | 1, damage: number): number {
-  victim.damage = Math.min(victim.damage + damage, MAX_DAMAGE);
+export function launch(
+  victim: Fighter,
+  hit: HitProps,
+  side: -1 | 1,
+  damage: number,
+): { stop: number; taken: number } {
+  const taken = takenDamage(victim, damage);
+  victim.damage = Math.min(victim.damage + taken, MAX_DAMAGE);
 
   const kb = knockback(hit, victim.damage, effectiveWeight(victim));
   const cos = cosDeg(hit.angle);
@@ -199,40 +229,41 @@ export function launch(victim: Fighter, hit: HitProps, side: -1 | 1, damage: num
   victim.vy = 0;
   victim.facing = side === 1 ? -1 : 1;
   enterHitstun(victim, hitstunTicks(kb));
-  return hitstopTicks(damage);
+  return { stop: hitstopTicks(damage), taken };
 }
 
 /**
  * Aplica um acerto: soma o dano, arremessa o alvo e marca como já acertado por
- * este golpe. Devolve o dano causado.
+ * este golpe. Devolve o dano do golpe e o que o alvo levou.
  */
-export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): number {
+export function applyHit(attacker: Fighter, victim: Fighter, moveId: MoveId): Dealt {
   const move = moveDef(attacker, moveId);
   attacker.moveHits |= 1 << victim.id;
   const damage = dealtDamage(attacker, move.damage);
-  const stop = launch(victim, move, knockbackSide(attacker, victim, move), damage);
+  const { stop, taken } = launch(victim, move, knockbackSide(attacker, victim, move), damage);
   attacker.hitstop = Math.max(attacker.hitstop, stop);
   victim.hitstop = Math.max(victim.hitstop, stop);
-  return damage;
+  return { damage, taken };
 }
 
 /**
  * Contra-ataque: quem bateu (`striker`) leva o acerto do bloco `counter`, e quem
  * contra-atacou pula para o recovery do especial, com quem ele pegou marcado no
  * `moveHits` (o render toca o golpe devolvido em vez do recovery de quem errou).
- * Devolve o dano causado.
+ * Devolve o dano do golpe e o que quem bateu levou.
  */
-export function applyCounter(counterer: Fighter, striker: Fighter): number {
+export function applyCounter(counterer: Fighter, striker: Fighter): Dealt {
   const counter = moveDef(counterer, 'special').counter;
-  if (!counter) return 0;
+  if (!counter) return { damage: 0, taken: 0 };
   striker.moveHits |= 1 << counterer.id;
   counterer.moveHits |= 1 << striker.id;
   const damage = dealtDamage(counterer, counter.damage);
-  const stop = launch(striker, counter, knockbackSide(counterer, striker, counter), damage);
+  const side = knockbackSide(counterer, striker, counter);
+  const { stop, taken } = launch(striker, counter, side, damage);
   counterer.hitstop = Math.max(counterer.hitstop, stop);
   striker.hitstop = Math.max(striker.hitstop, stop);
   skipToRecovery(counterer);
-  return damage;
+  return { damage, taken };
 }
 
 /**
@@ -262,9 +293,9 @@ export function resolveHits(
       }
       continue;
     }
-    const damage =
+    const dealt =
       h.kind === 'counter' ? applyCounter(attacker, victim) : applyHit(attacker, victim, h.move);
-    events?.push(hitEvent(h.kind, attacker.id, victim, damage, h));
+    events?.push(hitEvent(h.kind, attacker.id, victim, dealt, h));
   }
   return hits;
 }
@@ -272,7 +303,8 @@ export function resolveHits(
 /**
  * Projéteis que encostam num lutador (que não seja o dono) acertam e somem.
  * Só o alvo congela no impacto: quem soltou está longe. Quem está no
- * contra-ataque devolve o projétil (vira o dono dele). Sem fogo amigo, o
+ * contra-ataque devolve o projétil (vira o dono dele, com a vida e os quiques do
+ * começo, e sai o evento `reflect`). Sem fogo amigo, o
  * projétil passa pelos companheiros do dono.
  */
 export function resolveProjectileHits(
@@ -304,19 +336,25 @@ export function resolveProjectileHits(
       continue;
     }
     if (isCountering(victim)) {
+      // devolve: vira o dono e faz o caminho de volta inteiro (a vida e os quiques
+      // recomeçam), com o dano e o knockback do próprio projétil
+      const at = contactPoint(p, hurtbox(victim));
+      events?.push({ type: 'reflect', fighter: victim.id, from: p.owner, x: at.x, y: at.y });
       victim.moveHits |= 1 << p.owner;
       p.owner = victim.id;
       p.vx = 0 - p.vx;
       p.facing = p.facing === 1 ? -1 : 1;
+      p.ticksLeft = p.lifetime;
+      p.bounces = p.maxBounces;
+      p.passed = 0;
       skipToRecovery(victim);
       projectiles[alive++] = p;
       continue;
     }
-    const stop = launch(victim, p.hit, projectileSide(p), p.hit.damage);
+    const { stop, taken } = launch(victim, p.hit, projectileSide(p), p.hit.damage);
     victim.hitstop = Math.max(victim.hitstop, stop);
-    events?.push(
-      hitEvent('projectile', p.owner, victim, p.hit.damage, contactPoint(p, hurtbox(victim))),
-    );
+    const dealt = { damage: p.hit.damage, taken };
+    events?.push(hitEvent('projectile', p.owner, victim, dealt, contactPoint(p, hurtbox(victim))));
   }
   projectiles.length = alive;
 }
@@ -356,8 +394,7 @@ export function stepGrabs(
     const grab = moveDef(h, h.move).grab;
     if (h.grabTicks === 0) {
       v.grabbedBy = -1;
-      const damage = applyHit(h, v, h.move);
-      const e = hitEvent('throw', h.id, v, damage, center(v));
+      const e = hitEvent('throw', h.id, v, applyHit(h, v, h.move), center(v));
       if (grab?.combo) e.combo = grab.combo.hits + 1;
       events?.push(e);
       skipToRecovery(h);
@@ -366,8 +403,9 @@ export function stepGrabs(
       if (n > 0) {
         // golpe do combo: dano sem knockback e sem congelar; o alvo continua preso
         const damage = dealtDamage(h, grab.combo.damage);
-        v.damage = Math.min(v.damage + damage, MAX_DAMAGE);
-        events?.push({ ...hitEvent('combo', h.id, v, damage, center(v)), combo: n });
+        const taken = takenDamage(v, damage);
+        v.damage = Math.min(v.damage + taken, MAX_DAMAGE);
+        events?.push({ ...hitEvent('combo', h.id, v, { damage, taken }, center(v)), combo: n });
       }
     }
   }

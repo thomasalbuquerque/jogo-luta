@@ -78,13 +78,14 @@ describe('elenco', () => {
     expect(DADA.stats.height).toBe(JOAO.stats.height);
   });
 
-  it('Tauba foge: some e reaparece num lugar sorteado, sem bater; recarga longa', () => {
+  it('Tauba foge: some e reaparece na ponta do palco, sem bater; recarga longa', () => {
     const special = TAUBA.special;
-    expect(special?.move.teleport?.random).toEqual({ candidates: 3, nearChance: 25 });
+    expect(special?.move.teleport?.edge).toEqual({ inset: px(60) });
+    expect(special?.move.teleport?.random).toBeUndefined();
     expect(special?.move.hitboxes).toEqual([]);
     expect(special?.move.projectile).toBeUndefined();
     expect(special?.oncePerAir).toBe(true);
-    expect(special?.cooldownTicks).toBeGreaterThanOrEqual(240);
+    expect(special?.cooldownTicks).toBe(300);
     expect(TAUBA.stats.weight).toBeLessThan(100);
     expect(TAUBA.stats.weight).toBeGreaterThan(DADA.stats.weight);
     // golpes do moveset base, sem ajuste
@@ -118,17 +119,19 @@ describe('elenco', () => {
     );
   });
 
-  it('Crocko espera vir: contra-ataque curto e forte com recarga; alto, pesado e de braço comprido', () => {
+  it('Crocko espera vir: contra-ataque de 1 s, forte, com recarga; alto, pesado e de braço comprido', () => {
     const special = CROCKO.special;
     const base = getCharacter('base');
     if (!special?.move.counter) throw new Error('sem contra-ataque');
-    // entra rápido na pose, espera ~1/3 s e, se ninguém bater, fica exposto
+    // entra rápido na pose, espera 1 s e, se ninguém bater, fica exposto
     expect(special.move.startup).toBeLessThanOrEqual(8);
-    expect(special.move.active).toBeGreaterThanOrEqual(15);
-    expect(special.move.recovery).toBeGreaterThan(special.move.active);
-    // não vira escudo infinito
+    expect(special.move.active).toBe(60);
+    expect(special.move.recovery).toBeGreaterThanOrEqual(20);
+    // não vira escudo: a janela fica aberta no máximo metade do tempo, e sobra um
+    // respiro sem contra-ataque depois de cada uso
+    expect(special.move.active * 2).toBeLessThanOrEqual(special.cooldownTicks);
     expect(special.cooldownTicks).toBeGreaterThan(
-      special.move.startup + special.move.active + special.move.recovery,
+      special.move.startup + special.move.active + special.move.recovery + 20,
     );
     // só o contra-ataque: nada de hitbox ou projétil próprio
     expect(special.move.hitboxes).toEqual([]);
@@ -251,19 +254,30 @@ describe('elenco', () => {
       expect(MARILIA.blurb.length).toBeGreaterThan(0);
     });
 
-    it('com a aura, o golpe passa; quando ela acaba, volta a tomar', () => {
+    /** O soco lateral do lutador base (8%) na Marília, que está parada. */
+    const sideLight = (marilia: Fighter, foe: Fighter) => {
+      run([marilia, foe], [0, Button.ATTACK | Button.LEFT]);
+      run([marilia, foe], [0, 0], 30);
+    };
+
+    it('com a aura, leva o golpe (knockback) mas só 60% do dano; quando ela acaba, dano inteiro', () => {
       const { marilia, foe } = setup();
       run([marilia, foe], [Button.SPECIAL, 0]);
       run([marilia, foe], [0, 0], 40);
-      expect(hasAura(marilia)).toBe(true);
-      run([marilia, foe], [0, Button.ATTACK]);
-      run([marilia, foe], [0, 0], 30);
-      expect(marilia.damage).toBe(0);
-      run([marilia, foe], [0, 0], 90);
+      expect(marilia.buffTicks).toBeGreaterThan(0);
       expect(hasAura(marilia)).toBe(false);
-      run([marilia, foe], [0, Button.ATTACK]);
-      run([marilia, foe], [0, 0], 20);
-      expect(marilia.damage).toBeGreaterThan(0);
+      const x0 = marilia.x;
+      sideLight(marilia, foe);
+      // 8% × 60% = 4,8 → 4%, e foi arremessada para longe do golpe
+      expect(marilia.damage).toBe(4);
+      expect(marilia.x).toBeLessThan(x0 - px(20));
+      // a aura dura 5 s
+      run([marilia, foe], [0, 0], 300);
+      expect(marilia.buffTicks).toBe(0);
+      const before = marilia.damage;
+      foe.x = marilia.x + marilia.w / 2 + px(50) - foe.w / 2;
+      sideLight(marilia, foe);
+      expect(marilia.damage - before).toBe(8);
     });
 
     it('vulnerável no startup: apanhando, a aura não liga', () => {
@@ -272,7 +286,7 @@ describe('elenco', () => {
       run([marilia, foe], [0, Button.ATTACK]);
       run([marilia, foe], [0, 0], 60);
       expect(marilia.damage).toBeGreaterThan(0);
-      expect(hasAura(marilia)).toBe(false);
+      expect(marilia.buffTicks).toBe(0);
     });
 
     it('baixinha, leve, rápida no chão e golpes um pouco mais fracos', () => {
@@ -282,7 +296,7 @@ describe('elenco', () => {
       expect(MARILIA.stats.walkSpeed).toBeGreaterThan(base.stats.walkSpeed);
       expect(MARILIA.stats.jumpHeight).toBeGreaterThan(base.stats.jumpHeight);
       expect(MARILIA.moves.sideAir.damage).toBeLessThan(base.moves.sideAir.damage);
-      expect(MARILIA.special?.cooldownTicks).toBe(480);
+      expect(MARILIA.special?.cooldownTicks).toBe(450);
     });
   });
 
@@ -316,18 +330,19 @@ describe('elenco', () => {
     it('jogável, com especial e provocação', () => {
       expect(PLAYABLE_CHARACTERS).toContain('meia');
       expect(MEIA.special?.name).toBe('Comando');
-      expect(MEIA.special?.move.grab?.combo).toEqual({ hits: 9, damage: 1 });
+      expect(MEIA.special?.move.grab?.combo).toEqual({ hits: 4, damage: 2 });
+      expect(MEIA.special?.move.grab?.holdTicks).toBe(30);
       expect(MEIA.taunt.text).toBe('Vem!');
       expect(MEIA.blurb.length).toBeGreaterThan(0);
     });
 
-    it('colado, pega e solta o combo: 10 golpes e 16%', () => {
+    it('colado, pega e solta o combo: 5 golpes e 15%', () => {
       const { g, foe } = setup(56);
       stepGame(g, [Button.SPECIAL, 0]);
       const hits = hitsOf(g, 90);
-      expect(hits.map((h) => h.combo)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      expect(hits.map((h) => h.combo)).toEqual([1, 2, 3, 4, 5]);
       expect(hits.at(-1)?.kind).toBe('throw');
-      expect(foe.damage).toBe(16);
+      expect(foe.damage).toBe(15);
       expect(hits.at(-1)?.knockback).toBeGreaterThan(0);
     });
 
@@ -348,6 +363,9 @@ describe('elenco', () => {
       expect(MEIA.stats.width).toBeLessThan(base.stats.width);
       expect(MEIA.stats.weight).toBeLessThan(base.stats.weight);
       expect(MEIA.stats.walkSpeed).toBeGreaterThan(base.stats.walkSpeed);
+      // o Schummaki continua o mais rápido no chão
+      expect(MEIA.stats.walkSpeed).toBeLessThan(SCHUMMAKI.stats.walkSpeed);
+      expect(MEIA.stats.dashSpeed).toBeLessThan(SCHUMMAKI.stats.dashSpeed);
       for (const id of ['neutralLight', 'sideLight', 'sideAir'] as const) {
         expect(MEIA.moves[id].startup).toBeLessThan(base.moves[id].startup);
         expect(MEIA.moves[id].damage).toBeLessThan(base.moves[id].damage);
@@ -401,24 +419,28 @@ describe('elenco', () => {
     it('jogável, com especial e provocação', () => {
       expect(PLAYABLE_CHARACTERS).toContain('igao');
       expect(IGAO.special?.name).toBe('Saque');
-      expect(IGAO.special?.move.projectile?.bounces).toBe(3);
+      expect(IGAO.special?.move.projectile?.bounces).toBe(4);
       expect(IGAO.taunt.text).toBe('Cê tá miolo né nê?');
       expect(IGAO.blurb.length).toBeGreaterThan(0);
     });
 
-    it('a bola sai para baixo e para a frente e quica 3 vezes, cada vez mais baixo', () => {
+    it('a bola sai para baixo e para a frente e quica 4 vezes, cada vez mais baixo', () => {
       const { bounces, travel } = serve();
-      expect(bounces).toHaveLength(3);
-      const [first, second, third] = bounces.map((b) => b.peak) as [number, number, number];
-      // 1º pega quem está em pé; o 3º passa rente ao chão
-      expect(first).toBeGreaterThan(px(55));
-      expect(first).toBeLessThan(px(85));
+      expect(bounces).toHaveLength(4);
+      const peaks = bounces.map((b) => b.peak) as [number, number, number, number];
+      const [first, second, third, fourth] = peaks;
+      // o 1º não passa por cima de quem está parado (os mais baixos têm 90 px)
+      const shortest = Math.min(...PLAYABLE_CHARACTERS.map((id) => getCharacter(id).stats.height));
+      expect(shortest).toBe(px(90));
+      expect(first).toBeGreaterThan(px(65));
+      expect(first).toBeLessThan(shortest);
       expect(second).toBeLessThan(first);
       expect(third).toBeLessThan(second);
-      expect(third).toBeLessThan(px(20));
-      // anda um pouco mais que meio palco
-      expect(travel).toBeGreaterThan(px(500));
-      expect(travel).toBeLessThan(px(700));
+      expect(fourth).toBeLessThan(third);
+      expect(fourth).toBeLessThan(px(25));
+      // anda quase o palco inteiro
+      expect(travel).toBeGreaterThan(px(700));
+      expect(travel).toBeLessThan(px(900));
     });
 
     it('acerta quem está em pé no caminho', () => {
@@ -433,13 +455,60 @@ describe('elenco', () => {
       igao.facing = 1;
       stepGame(g, [Button.SPECIAL, 0]);
       for (let i = 0; i < 90 && foe.damage === 0; i++) stepGame(g, [0, 0]);
-      expect(foe.damage).toBe(8);
+      expect(foe.damage).toBe(11);
       expect(foe.kbx).toBeGreaterThan(0);
     });
 
-    it('uma bola em quadra por vez: a recarga cobre a vida da bola', () => {
-      const shot = IGAO.special?.move.projectile;
-      expect(IGAO.special?.cooldownTicks).toBeGreaterThanOrEqual(shot?.lifetimeTicks ?? 0);
+    it.each([150, 300, 500])(
+      'o Crocko no contra-ataque a %i px devolve a bola, que volta e acerta o Igão parado',
+      (gap) => {
+        const g = createGame({
+          characters: ['igao', 'crocko'],
+          rules: { stocks: 3, timeLimitTicks: 0 },
+        });
+        const [igao, crocko] = g.fighters as [Fighter, Fighter];
+        for (let i = 0; i < 41; i++) stepGame(g, [0, 0]);
+        igao.x = px(-300) - igao.w / 2;
+        crocko.x = px(-300 + gap) - crocko.w / 2;
+        igao.facing = 1;
+        crocko.facing = -1;
+        stepGame(g, [Button.SPECIAL, 0]);
+        const reflects: { fighter: number; from: number }[] = [];
+        let countering = false;
+        for (let i = 0; i < 400 && igao.damage === 0; i++) {
+          // o Crocko entra no contra-ataque quando a bola está chegando
+          const p = g.projectiles[0];
+          const near = p !== undefined && p.owner === 0 && crocko.x - (p.x + p.w) < px(120);
+          stepGame(g, [0, near && !countering ? Button.SPECIAL : 0]);
+          if (near) countering = true;
+          for (const e of g.events) if (e.type === 'reflect') reflects.push(e);
+        }
+        expect(reflects).toEqual([expect.objectContaining({ fighter: 1, from: 0 })]);
+        expect(crocko.damage).toBe(0);
+        expect(igao.damage).toBe(11);
+      },
+    );
+
+    it('a 2ª bola só sai depois de a 1ª quicar 3 vezes', () => {
+      const g = createGame({
+        characters: ['igao', 'base'],
+        rules: { stocks: 3, timeLimitTicks: 0 },
+      });
+      const [igao, other] = g.fighters as [Fighter, Fighter];
+      for (let i = 0; i < 41; i++) stepGame(g, [0, 0]);
+      other.x = px(265) - other.w / 2;
+      other.y = px(-150) - other.h;
+      igao.x = px(-400) - igao.w / 2;
+      igao.facing = 1;
+      let bounces = 0;
+      let bouncesAtSecond = -1;
+      for (let i = 0; i < 200 && bouncesAtSecond < 0; i++) {
+        // aperta o especial de novo a cada 2 ticks: sai assim que recarregar
+        stepGame(g, [i % 2 === 0 ? Button.SPECIAL : 0, 0]);
+        for (const e of g.events) if (e.type === 'bounce') bounces++;
+        if (g.projectiles.length > 1) bouncesAtSecond = bounces;
+      }
+      expect(bouncesAtSecond).toBeGreaterThanOrEqual(3);
     });
 
     it('o pulo mais alto e o mais alto do elenco, junto com o Schummaki; aéreos com mais alcance', () => {
