@@ -1,11 +1,17 @@
 import type { Clip, Key, Rot } from './animation';
-import { STANCE } from './clips';
+import { BASE_CLIPS, STANCE } from './clips';
 
 /*
- * Clipes próprios de cada personagem (especial e provocação), pelo id de
- * animação da ficha: `<id>_special` (padrão) e `taunt.animation`.
+ * Clipes próprios de cada personagem (especial, provocação e, se precisar, outro clipe
+ * base), pelo id de animação da ficha: `<id>_<chave>` (padrão) e `taunt.animation`.
  * Convenção de ângulos e de tempo: ver `clips.ts`.
  */
+
+/** Um clipe do esqueleto base com alguns ângulos trocados em todas as chaves. */
+function withRot(clip: Clip | undefined, rot: Rot): Clip {
+  if (!clip) throw new Error('clipe base ausente');
+  return { ...clip, keys: clip.keys.map((k) => ({ ...k, rot: { ...k.rot, ...rot } })) };
+}
 
 /**
  * Schummaki ao volante: as duas mãos lado a lado no volante imaginário, na frente
@@ -976,6 +982,9 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 80, rot: STANCE, expression: 'normal', ease: 'inOut' },
     ],
   },
+  // Guarda do João: a mesma do esqueleto base, com o punho reto, na linha do antebraço
+  // (o punho dele na folha já sai alinhado com o pulso; dobrado, parecia quebrado).
+  joao_frango_idle: withRot(BASE_CLIPS.idle, { handNear: 0, handFar: 0 }),
   // Frango assado voador: puxa o braço para trás e arremessa reto.
   joao_frango_special: {
     timing: 'move',
