@@ -93,6 +93,13 @@ export const DRAW_ORDER: readonly BoneId[] = [
  */
 export const FOREARM_FOLD = 85;
 
+/** Trocas na ordem de desenho de um personagem (ver `drawOrder`). */
+export interface DrawOrderOptions {
+  forearmFront?: boolean;
+  shinFront?: boolean;
+  footBehind?: boolean;
+}
+
 /**
  * Ordem de desenho da pose: a `DRAW_ORDER`, mas com o antebraço logo depois do
  * braço (na frente dele, atrás da mão) quando o cotovelo está dobrado para a frente.
@@ -100,10 +107,20 @@ export const FOREARM_FOLD = 85;
  * pele: a ponta do braço guarda o contorno do cotovelo e a do antebraço some aos poucos).
  * `shinFront`: a canela fica na frente da coxa (e atrás do pé): a joelheira do Igão,
  * no topo da canela, cobre a ponta do joelho da coxa.
+ * `footBehind`: o pé fica atrás da canela: a barra da calça comprida cai por cima do
+ * tênis (Dadazinho), em vez de o tênis cobrir a barra.
  */
-export function drawOrder(pose: Pose, forearmFront = false, shinFront = false): BoneId[] {
+export function drawOrder(
+  pose: Pose,
+  { forearmFront = false, shinFront = false, footBehind = false }: DrawOrderOptions = {},
+): BoneId[] {
   const order = [...DRAW_ORDER];
   for (const side of ['Near', 'Far'] as const) {
+    if (footBehind) {
+      const foot: BoneId = `foot${side}`;
+      order.splice(order.indexOf(foot), 1);
+      order.splice(order.indexOf(`shin${side}`), 0, foot);
+    }
     if (shinFront) {
       const shin: BoneId = `shin${side}`;
       order.splice(order.indexOf(shin), 1);

@@ -64,7 +64,7 @@ describe('esqueleto', () => {
   });
 
   it('com forearmFront o antebraço fica na frente do braço mesmo esticado', () => {
-    const straight = drawOrder(REST_POSE, true);
+    const straight = drawOrder(REST_POSE, { forearmFront: true });
     for (const side of ['Near', 'Far'] as const) {
       expect(straight.indexOf(`forearm${side}`)).toBe(straight.indexOf(`upperArm${side}`) + 1);
       expect(straight.indexOf(`forearm${side}`)).toBeLessThan(straight.indexOf(`hand${side}`));
@@ -72,11 +72,22 @@ describe('esqueleto', () => {
   });
 
   it('com shinFront a canela fica na frente da coxa e atrás do pé', () => {
-    const order = drawOrder(REST_POSE, false, true);
+    const order = drawOrder(REST_POSE, { shinFront: true });
     for (const side of ['Near', 'Far'] as const) {
       expect(order.indexOf(`shin${side}`)).toBe(order.indexOf(`thigh${side}`) + 1);
       expect(order.indexOf(`shin${side}`)).toBeLessThan(order.indexOf(`foot${side}`));
     }
+    expect([...order].sort()).toEqual([...BONE_IDS].sort());
+  });
+
+  it('com footBehind o pé fica atrás da canela e da coxa', () => {
+    const order = drawOrder(REST_POSE, { footBehind: true });
+    for (const side of ['Near', 'Far'] as const) {
+      expect(order.indexOf(`foot${side}`)).toBe(order.indexOf(`shin${side}`) - 1);
+      expect(order.indexOf(`foot${side}`)).toBeLessThan(order.indexOf(`thigh${side}`));
+    }
+    // a perna da frente continua toda na frente da de trás
+    expect(order.indexOf('footNear')).toBeGreaterThan(order.indexOf('thighFar'));
     expect([...order].sort()).toEqual([...BONE_IDS].sort());
   });
 
