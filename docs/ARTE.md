@@ -799,7 +799,7 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   um revólver; sem valor = 0, então repita o valor em cada chave enquanto ela estiver na mão).
 - `render/fx.ts`: quais peças `fx_*` cada especial usa (fumaça, linhas de velocidade, projétil,
   clarão na boca da arma, a fumacinha quando a peça da mão aparece ou some, os quadradinhos do
-  teleporte sorteado, as notas que saem do socket `bell` na provocação, a linha de mira e o brilho
+  teleporte, as notas que saem do socket `bell` na provocação, a linha de mira e o brilho
   da luneta, a cápsula saltando do ferrolho e o som do tiro, e no contra-ataque do Crocko os anéis
   subindo pelo corpo, o brilho quando pega, o estalo e as linhas de impacto; na pancada do Darllan o
   brilho no rolo erguido, a farinha para os dois lados, as migalhas e o tremor da câmera, e na

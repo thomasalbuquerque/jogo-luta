@@ -127,27 +127,31 @@ Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):
   ("silent quit").
 - **Bordão:** não fala: toca. O balão mostra notas musicais (🎵🎶) e o som é o trompete.
 - **Estilo de luta:** fujão (trickster). Peso médio-leve, bom no chão e no ar, golpes normais sem
-  nada de especial. O jogo dele é sumir quando aperta e voltar quando o adversário se distrai.
-- **Especial — Silent quit (teleporte):** ele some do nada e reaparece num lugar **sorteado** do
-  palco: o jogador não escolhe para onde vai. Na maioria das vezes cai longe do adversário; às vezes
-  cai do lado dele (o "efeito negativo").
-  - **Sorteio:** sorteia 3 pontos em cima das plataformas do palco (nunca fora dele, nunca dentro
-    de bloco). Com 3 em 4 de chance vai para o ponto mais longe do adversário mais próximo; com 1 em
-    4, para o mais perto. O sorteio usa o RNG com seed do estado (`state.rng`), então replay e online
-    continuam determinísticos.
+  nada de especial. O jogo dele é sumir quando aperta e voltar de qualquer lugar.
+- **Especial — Silent quit (teleporte):** ele some do nada e reaparece **na ponta do palco mais
+  perto dele**, em pé em cima do bloco principal, a 60 px da quina. O jogador não escolhe para onde
+  vai, mas todo mundo sabe onde ele vai aparecer: a borda, o lugar mais perigoso do palco.
+  - **Destino:** a quina de cima do bloco sólido mais perto do centro dos pés dele, na horizontal
+    (as plataformas atravessáveis ficam de fora; empate: a do lado para onde está virado). Caindo no
+    buraco da direita, volta na ponta direita; em cima do palco em x = +100, também; em cima da
+    plataforma pequena da esquerda, na ponta esquerda. Sem sorteio: não usa o RNG.
+  - **Antes (até a 2ª rodada de balanceamento):** reaparecia num lugar sorteado do palco, quase
+    sempre longe do adversário. Virou recuperação forte demais: voltava de qualquer lugar e ainda
+    caía num lugar seguro. O modo sorteado (`target: 'random'`) continua no bloco.
   - **Tempo:** startup de 14 (ele congela e começa a sumir, ainda vulnerável), uns 20 ticks fora da
-    luta (invisível e intangível), reaparece e tem recovery de 18 sem invencibilidade: se cair do
-    lado do adversário, apanha.
+    luta (invisível e intangível), reaparece e tem recovery de 18 sem invencibilidade: quem esperar
+    na borda pune.
   - **Sem hitbox:** é só fuga e reposicionamento, não causa dano.
-  - **Recarga longa:** uns 240 ticks (4 s), contada do começo. Funciona no ar 1 vez (`oncePerAir`):
-    como sempre cai num palco, serve de recuperação, e por isso a recarga é tão longa. Usar fora do
-    palco é seguro, mas gasta o especial por 4 s.
+  - **Recarga longa:** 300 ticks (5 s), contada do começo. Funciona no ar 1 vez (`oncePerAir`):
+    como sempre volta para o palco, serve de recuperação, e por isso a recarga é tão longa: se for
+    arremessado de novo logo depois, não tem. Usar no meio da luta como fuga custa posição (ele sai
+    do centro e vai para o canto).
   - **Efeitos:** ao sumir, o corpo se desfaz em quadradinhos (como uma chamada caindo) com um "plim"
     de desconexão; ao voltar, os quadradinhos se juntam com um "plim" de conexão. Nada de logo ou
     som do Discord: tudo genérico.
-  - **Precisa de código novo:** o bloco teleporte de hoje só vai na direção apertada. Falta uma
-    opção de destino sorteado (`target: 'random'`, com a chance de cair perto) no mesmo bloco, em
-    vez de um bloco novo.
+  - **Código novo (feito):** o bloco teleporte ganhou os destinos que somem: sorteado
+    (`target: 'random'`) e na ponta (`target: 'edge'`, com `edgeInset`), no mesmo bloco, em vez de um
+    bloco novo.
 - **Provocação:** um trompete aparece na mão dele com uma fumacinha, ele toca um trechinho de uns
   2 s e o trompete some. Enquanto toca, saem notas musicais do trompete e o balão mostra 🎵🎶. A
   música é original, no clima de fanfarra clássica de concerto: em Dó maior, Sol–Dó–Mi–Sol (curtas),
@@ -159,7 +163,7 @@ Trechos prontos para os textos do Firefly (pasta `art/dadazinho/`):
   preto, branco e dourado (o dourado do trompete e do lenço ajuda a ler o personagem nos menus
   escuros).
 - **No jogo:** jogável. No especial ele ajeita a gravata, se desfaz em quadradinhos com um "plim"
-  descendo, fica 20 ticks sumido e volta num chão sorteado (quase sempre longe do adversário) com os
+  descendo, fica 20 ticks sumido e volta na ponta do palco mais perto dele com os
   quadradinhos se juntando e um "plim" subindo. Na provocação o trompete aparece com fumacinha, as
   notas saem da boca do trompete no ritmo da fanfarra e o balão mostra 🎵🎶. Sem áudio gravado, a
   fanfarra é sintetizada (`packages/game/src/audio/fanfare.ts`). Ficha em

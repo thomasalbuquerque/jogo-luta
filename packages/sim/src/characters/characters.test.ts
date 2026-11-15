@@ -78,13 +78,14 @@ describe('elenco', () => {
     expect(DADA.stats.height).toBe(JOAO.stats.height);
   });
 
-  it('Tauba foge: some e reaparece num lugar sorteado, sem bater; recarga longa', () => {
+  it('Tauba foge: some e reaparece na ponta do palco, sem bater; recarga longa', () => {
     const special = TAUBA.special;
-    expect(special?.move.teleport?.random).toEqual({ candidates: 3, nearChance: 25 });
+    expect(special?.move.teleport?.edge).toEqual({ inset: px(60) });
+    expect(special?.move.teleport?.random).toBeUndefined();
     expect(special?.move.hitboxes).toEqual([]);
     expect(special?.move.projectile).toBeUndefined();
     expect(special?.oncePerAir).toBe(true);
-    expect(special?.cooldownTicks).toBeGreaterThanOrEqual(240);
+    expect(special?.cooldownTicks).toBe(300);
     expect(TAUBA.stats.weight).toBeLessThan(100);
     expect(TAUBA.stats.weight).toBeGreaterThan(DADA.stats.weight);
     // golpes do moveset base, sem ajuste
