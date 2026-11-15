@@ -286,11 +286,12 @@ Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
   perna, braços abertos, olhando o adversário como quem avalia a postura do aluno). Quem bater nele
   nessa janela leva a "correção": um tapa firme de mão aberta nas costas, de fisioterapeuta, que
   arremessa.
-  - **Janela:** startup curto (~6 ticks), active de ~20 ticks (a janela do contra-ataque), recovery
-    longo (~28 ticks) se ninguém bater: ele perde o equilíbrio e fica exposto.
+  - **Janela:** startup curto (~6 ticks), active de 60 ticks (1 s, a janela do contra-ataque),
+    recovery longo (~28 ticks) se ninguém bater: ele perde o equilíbrio e fica exposto.
   - **Golpe devolvido:** dano ~14, knockback alto (ângulo ~40°, para longe dele). Projétil que
     acertar na janela volta para quem soltou (resposta natural ao João Frango e ao Tchula).
-  - **Recarga:** ~90 ticks (1,5 s), contada do começo, para não virar escudo infinito.
+  - **Recarga:** 120 ticks (2 s), contada do começo, para não virar escudo: a janela fica aberta
+    no máximo metade do tempo, e sobram 26 ticks sem contra-ataque depois de cada uso.
   - **No ar:** funciona, sem impulso (não ajuda a voltar ao palco).
   - **Perde do agarrão:** como todo contra-ataque, o agarrão passa por ele.
   - **Efeitos:** na pose, um brilho leve em volta dele (aviso de que está esperando); quando pega,

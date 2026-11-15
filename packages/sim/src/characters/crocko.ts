@@ -4,8 +4,8 @@ import { defineCharacter } from '../character';
  * Crocko — paciente (docs/ELENCO.md). Professor de pilates e fisioterapeuta: alto
  * (1,80 m, como o Darllan), pesado, de bom alcance e queda rápida, meio lento no
  * chão. Especial: Correção postural, um contra-ataque. Ele para numa pose de
- * pilates e quem bater nele nessa janela leva um tapa de fisioterapeuta nas costas
- * que arremessa.
+ * pilates por 1 s e quem bater nele nessa janela leva um tapa de fisioterapeuta nas
+ * costas que arremessa; projétil volta para quem soltou.
  */
 export const CROCKO = defineCharacter({
   id: 'crocko',
@@ -35,13 +35,14 @@ export const CROCKO = defineCharacter({
   },
   special: {
     name: 'Correção postural',
-    // Entra rápido na pose (startup curto) e espera ~1/3 s. Se ninguém bater, perde
-    // o equilíbrio e fica exposto (recovery longo). A recarga conta do começo: não
-    // vira escudo infinito.
+    // Entra rápido na pose (startup curto) e espera 1 s. Se ninguém bater, perde o
+    // equilíbrio e fica exposto (recovery longo). A recarga conta do começo: a janela
+    // fica aberta no máximo metade do tempo, e sobram 26 ticks sem contra-ataque
+    // depois de cada uso. Não vira escudo.
     startup: 6,
-    active: 20,
+    active: 60,
     recovery: 28,
-    cooldownTicks: 90,
+    cooldownTicks: 120,
     blocks: [
       {
         type: 'counter',

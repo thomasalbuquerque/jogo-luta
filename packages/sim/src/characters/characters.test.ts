@@ -118,17 +118,19 @@ describe('elenco', () => {
     );
   });
 
-  it('Crocko espera vir: contra-ataque curto e forte com recarga; alto, pesado e de braço comprido', () => {
+  it('Crocko espera vir: contra-ataque de 1 s, forte, com recarga; alto, pesado e de braço comprido', () => {
     const special = CROCKO.special;
     const base = getCharacter('base');
     if (!special?.move.counter) throw new Error('sem contra-ataque');
-    // entra rápido na pose, espera ~1/3 s e, se ninguém bater, fica exposto
+    // entra rápido na pose, espera 1 s e, se ninguém bater, fica exposto
     expect(special.move.startup).toBeLessThanOrEqual(8);
-    expect(special.move.active).toBeGreaterThanOrEqual(15);
-    expect(special.move.recovery).toBeGreaterThan(special.move.active);
-    // não vira escudo infinito
+    expect(special.move.active).toBe(60);
+    expect(special.move.recovery).toBeGreaterThanOrEqual(20);
+    // não vira escudo: a janela fica aberta no máximo metade do tempo, e sobra um
+    // respiro sem contra-ataque depois de cada uso
+    expect(special.move.active * 2).toBeLessThanOrEqual(special.cooldownTicks);
     expect(special.cooldownTicks).toBeGreaterThan(
-      special.move.startup + special.move.active + special.move.recovery,
+      special.move.startup + special.move.active + special.move.recovery + 20,
     );
     // só o contra-ataque: nada de hitbox ou projétil próprio
     expect(special.move.hitboxes).toEqual([]);
