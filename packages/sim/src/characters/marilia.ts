@@ -45,7 +45,7 @@ export const MARILIA = defineCharacter({
     // Contada do começo: tragada 1–40, aura 41–340, sem aura 341–450, e a próxima
     // tragada leva mais 40. Entre uma aura e outra, pelo menos 150 ticks sem proteção.
     cooldownTicks: 450,
-    blocks: [{ type: 'buff', durationTicks: 300, damageTakenPercent: 60 }],
+    blocks: [{ type: 'buff', durationTicks: 350, damageTakenPercent: 60 }],
   },
   taunt: {
     text: 'Gentiii!',
