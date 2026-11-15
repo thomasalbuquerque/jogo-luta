@@ -231,6 +231,7 @@ Só crie um bloco de especial novo quando a ideia do amigo realmente pedir.
 Objetivo: nenhum personagem domina, e o jogo roda bem em qualquer PC do grupo.
 
 - [x] Balanceamento do elenco: alturas reais, 3 faixas de queda, Schummaki, Meia e João Frango contidos, Gabs e Tchula reforçados (proposta e números em `docs/BALANCEAMENTO.md`).
+- [x] 2ª rodada, só especiais (depois de os amigos jogarem): contra-ataque do Crocko de 1 s com efeito ciano e devolvendo a bola do Igão direito, aura da Marília cortando o dano (sem o Glow que travava o jogo), Tauba voltando na ponta do palco, Saque do Igão mais forte, Comando do Meia em 5 golpes; Frango, Darllan e Schummaki ajustados (`docs/BALANCEAMENTO-ESPECIAIS.md`).
 - [ ] Testar em Chrome, Firefox, Edge e Safari, inclusive num notebook fraco.
 - [ ] Otimizar carregamento: texture atlas, imagens em WebP, carregar só os personagens escolhidos.
 - [ ] Página inicial com controles e "como jogar"; domínio próprio é opcional.
