@@ -6,7 +6,7 @@ import {
   finishReplay,
   FixedStepLoop,
   getStage,
-  hasAura,
+  hasBuff,
   hashState,
   hurtbox,
   InputDelay,
@@ -26,7 +26,6 @@ import {
   SUBPX,
   toPx,
   type Box,
-  type AuraEvent,
   type BounceEvent,
   type CueName,
   type Fighter,
@@ -763,6 +762,8 @@ export class FightScene extends Phaser.Scene {
             this.onHit(e);
             if (e.kind === 'throw' && e.combo !== undefined) this.onComboFinish(e);
           }
+          // pegou mais fraco (a aura cortou o dano): a estrelinha e o "plim", menores
+          if (e.reduced) this.onAuraPass(e, true);
           break;
         case 'ko':
           this.onKo(e);
@@ -910,21 +911,26 @@ export class FightScene extends Phaser.Scene {
     if (combo.finishSound) playSfx(this, combo.finishSound);
   }
 
-  /** Golpe que passou pela aura: estrelinha verde e o "plim", sem impacto nenhum. */
-  private onAuraPass(e: AuraEvent): void {
+  /**
+   * Golpe que passou pela aura invencível: estrelinha verde e o "plim", sem impacto
+   * nenhum. Com `small`, o golpe pegou mais fraco (dano cortado pela aura): a mesma
+   * estrelinha, menor, junto do impacto normal.
+   */
+  private onAuraPass(e: { victim: number; x: number; y: number }, small = false): void {
     const victim = this.state.fighters[e.victim];
     const view = this.views[e.victim];
     const aura = victim ? CHARACTER_FX[victim.character]?.aura : undefined;
     if (!victim || !view || !aura) return;
     const x = toPx(e.x);
     const y = toPx(e.y);
+    const k = small ? 0.65 : 1;
     this.fx.spawn({
       texture: FX_TEXTURE.glow,
       x,
       y,
       life: 12,
-      scale: 0.5,
-      scaleEnd: 1.3,
+      scale: 0.5 * k,
+      scaleEnd: 1.3 * k,
       tint: aura.color,
       additive: true,
     });
@@ -934,11 +940,11 @@ export class FightScene extends Phaser.Scene {
       x,
       y,
       life: 16,
-      scale: view.scale * 1.6,
-      scaleEnd: view.scale * 2.6,
+      scale: view.scale * 1.6 * k,
+      scaleEnd: view.scale * 2.6 * k,
       spin: 0.08,
     });
-    if (aura.passSound) playSfx(this, aura.passSound);
+    if (aura.passSound) playSfx(this, aura.passSound, small ? { volume: 0.6 } : undefined);
   }
 
   /** Quique do projétil (a bola do Igão): poeirinha e o "tum", cada vez mais baixo. */
@@ -2008,16 +2014,16 @@ export class FightScene extends Phaser.Scene {
   }
 
   /**
-   * Aura (`aura` do personagem), a cada quadro desenhado: o brilho colado na silhueta
-   * enquanto ela dura (piscando no fim) e a brasa na ponta do palheiro na mão.
+   * Aura (`aura` do personagem), a cada quadro desenhado: o brilho atrás do boneco
+   * enquanto o buff dura (piscando no fim) e a brasa na ponta do palheiro na mão.
    */
   private drawAura(f: Fighter, view: FighterView): void {
     const aura = CHARACTER_FX[f.character]?.aura;
     if (!aura) return;
-    const on = hasAura(f);
+    const on = hasBuff(f);
     const blinkOff = f.buffTicks <= aura.blinkTicks && Math.floor(f.buffTicks / 4) % 2 === 0;
-    const pulse = 4.2 + 1.2 * Math.sin(this.state.tick * 0.22);
-    view.setGlow(aura.color, on && !blinkOff ? pulse : 0);
+    const pulse = 0.5 + 0.5 * Math.sin(this.state.tick * 0.22);
+    view.setAura(aura.color, on && !blinkOff ? pulse : null);
     const ember = view.handSocket('ember');
     if (!ember) return;
     const g = this.overlayGfx;
@@ -2090,7 +2096,7 @@ export class FightScene extends Phaser.Scene {
         alpha: 0.55,
       });
     }
-    if (hasAura(f) && t % 4 === 0) this.spawnAuraWisp(f, view, aura);
+    if (hasBuff(f) && t % 4 === 0) this.spawnAuraWisp(f, view, aura);
 
     const frame = move ? moveFrame(f) : 0;
     const fresh = frame !== this.auraFrame[f.id];

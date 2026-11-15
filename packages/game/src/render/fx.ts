@@ -123,15 +123,17 @@ export interface CharacterFx {
     despawnSound?: SfxName;
   };
   /**
-   * Tragada e aura (bloco buff com `invulnerable`, a Tragadinha da Marília). Enquanto a
+   * Tragada e aura (bloco buff, a Tragadinha da Marília). Enquanto a
    * mão segura o palheiro, uma brasa (`emberColor`) pisca no socket `ember` da mão,
    * soltando fumacinhas cinzas (`smoke`), mais na tragada (`inhale`: fração do startup
    * em que ela começa e acaba, com o som `dragSound`). No 1º frame ativo, a baforada:
    * fumaça pintada de `color` espalhando em volta do corpo e o som `exhaleSound`. Com a
-   * aura ligada, o boneco ganha um brilho `color` colado na silhueta (o Glow do Phaser,
-   * acompanha cada pose) e fiapos (`wisps`) sobem em volta; nos últimos `blinkTicks` o
-   * brilho pisca. Golpe que passa pela aura (evento `aura` do sim): estrelinha
-   * (`sparkle`) e o som `passSound`. Quando a mão solta o palheiro (o peteleco do
+   * aura ligada (o buff), o boneco ganha um brilho `color` atrás dele (sprite aditivo do
+   * tamanho do corpo, pulsando: nada de `postFX`, que pesa demais em tela cheia) e
+   * fiapos (`wisps`) sobem em volta; nos últimos `blinkTicks` o brilho pisca. Golpe que
+   * pega com o dano cortado (evento `hit` com `reduced`): estrelinha (`sparkle`) e o
+   * som `passSound`, menores, junto do impacto; golpe que passa pela aura invencível
+   * (evento `aura`), os mesmos em tamanho cheio. Quando a mão solta o palheiro (o peteleco do
    * recovery, ou um golpe no meio da tragada), a peça `cig` cai girando.
    */
   aura?: {

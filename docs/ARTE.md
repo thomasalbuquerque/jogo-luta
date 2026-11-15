@@ -753,7 +753,9 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   "N HITS" não vêm da folha: são desenhados pelo `CommandView` (`render/command.ts` diz o que
   aparece em cada frame), porque a sequência espelha com ele e o contador muda de número.
 - **Aura no código** (Marília): a silhueta verde que veio na folha de efeitos não é recortada. O brilho
-  é o Glow do Phaser no container do boneco (`FighterView.setGlow`), então acompanha cada pose.
+  é uma imagem aditiva (`FX_TEXTURE.glow`) pintada de verde atrás do boneco, do tamanho do corpo e
+  pulsando. Nada de `postFX`/`preFX` na luta: o Glow do Phaser no container do boneco, usado antes,
+  derrubava o desempenho em tela cheia.
 - **Camisa roxa** (Igão): o roxo da camisa e da bola tem pouca diferença do magenta do fundo e,
   com a faixa padrão do chroma key, ficava 10 a 25% transparente. As folhas de peças e de efeitos
   levam `keyRange` (ver acima).
@@ -804,9 +806,9 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   provocação as migalhas que saem do socket `biscuit` da mão na mordida; no especial do Gabs o
   bonequinho `summon` no ponto da área, com as linhas de varredura, o pisca, a faísca e os blips 8-bit;
   na Tragadinha da Marília a brasa no socket `ember` da mão, a fumacinha, a baforada verde no 1º
-  frame ativo, o brilho Glow da aura colado no boneco (piscando nos últimos 30 ticks), os fiapos
-  verdes subindo, o palheiro caindo no peteleco e, quando um golpe passa pela aura, a estrelinha e o
-  "plim"; no Comando do Meia a poeirinha nos pés, o comando acendendo em cima da cabeça, e a cada
+  frame ativo, o brilho verde da aura atrás do boneco (piscando nos últimos 30 ticks), os fiapos
+  verdes subindo, o palheiro caindo no peteleco e, quando um golpe pega com a aura, a estrelinha e o
+  "plim" junto do impacto; no Comando do Meia a poeirinha nos pés, o comando acendendo em cima da cabeça, e a cada
   golpe do combo uma faísca, uma linha de velocidade, o "pá" e um tranco no agarrado, o contador
   "N HITS" e, no chute final, a explosão grande, a fumaça e o "póu"; no Saque do Igão a bola
   jogada da mão de trás, o estouro e o "pá!" na batida, a bola girando com o rastro até o 1º quique
