@@ -1069,6 +1069,8 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 90, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
     ],
   },
+  // Guarda do Dadazinho: punho reto, na linha do antebraço, como a do João Frango.
+  dadazinho_idle: withRot(BASE_CLIPS.idle, { handNear: 0, handFar: 0 }),
   // Doze: a arma aparece na mão, ele mira, o tiro dá um coice para trás e a arma some.
   dadazinho_special: {
     timing: 'move',
