@@ -611,6 +611,10 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   toco continua lá, pintado da cor da pele com `paint`, e tapa a fresta quando o membro dobra.
 - **Ombro da frente:** a cava ou o toco do ombro sai do tronco (com `outline` no corte) e o
   `shoulderNear` fica no corte, um pouco abaixo da linha do ombro: a manga cobre o resto.
+  O corte sai da linha de cima do ombro numa curva suave (tangente a ela), não numa descida
+  reta: se a manga não chegar até ali, a quina do corte fica acima dela, com uma cavidade e um
+  risco do contorno à mostra (Crocko). Se ainda sobrar um "V" entre o ombro e a manga, suba o
+  `shoulderNear` alguns px.
 - **Quadril:** o `pivot` da coxa fica dentro do short dela, acima da barra, para a barra da coxa
   ficar escondida atrás do short do quadril.
 - **Ponta que entra em outra peça** (canela dentro do pé): o toco da canela é apagado, a canela não
