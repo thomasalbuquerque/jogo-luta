@@ -183,7 +183,8 @@ export class PeerLink implements Link {
   onReady: (() => void) | null = null;
   onTransport: ((transport: Transport) => void) | null = null;
   onFail: ((reason: EndReason) => void) | null = null;
-  private readonly peer: Peer;
+  /** Só existe depois que a configuração (com as credenciais do TURN) chega. */
+  private peer: Peer | null = null;
   private closed = false;
   /** O servidor de sinalização já respondeu alguma vez. */
   private registered = false;
@@ -196,20 +197,33 @@ export class PeerLink implements Link {
   constructor(
     private readonly role: 'host' | 'guest',
     private readonly code: string,
-    config: NetConfig,
+    config: NetConfig | Promise<NetConfig>,
   ) {
+    void Promise.resolve(config).then(
+      (loaded) => {
+        if (!this.closed) this.start(loaded);
+      },
+      () => {
+        this.fail('error');
+      },
+    );
+  }
+
+  private start(config: NetConfig): void {
     const options: PeerOptions = {
       config: { iceServers: config.iceServers, sdpSemantics: 'unified-plan' },
       ...config.signaling,
     };
-    this.peer = role === 'host' ? new Peer(roomPeerId(code), options) : new Peer(options);
-    this.peer.on('open', () => {
+    const peer =
+      this.role === 'host' ? new Peer(roomPeerId(this.code), options) : new Peer(options);
+    this.peer = peer;
+    peer.on('open', () => {
       if (this.closed) return;
       this.registered = true;
       this.onReady?.();
       if (this.role === 'guest') this.dial();
     });
-    this.peer.on('connection', (conn) => {
+    peer.on('connection', (conn) => {
       // só o host recebe conexões: quem entra não fala com os outros que entraram
       if (this.role !== 'host') {
         conn.close();
@@ -220,10 +234,10 @@ export class PeerLink implements Link {
       });
     });
     // caiu do servidor de sinalização: a luta em andamento não depende dele, mas a reconexão sim
-    this.peer.on('disconnected', () => {
+    peer.on('disconnected', () => {
       this.later(this.reconnectSignaling, RETRY_MS);
     });
-    this.peer.on('error', (error) => {
+    peer.on('error', (error) => {
       this.onPeerError(error.type);
     });
   }
@@ -241,7 +255,7 @@ export class PeerLink implements Link {
     this.timers.clear();
     // dá tempo de a despedida sair antes de derrubar tudo
     window.setTimeout(() => {
-      this.peer.destroy();
+      this.peer?.destroy();
     }, CLOSE_GRACE_MS + 100);
   }
 
@@ -259,7 +273,7 @@ export class PeerLink implements Link {
   }
 
   private readonly reconnectSignaling = (): void => {
-    if (this.peer.destroyed || !this.peer.disconnected) return;
+    if (!this.peer || this.peer.destroyed || !this.peer.disconnected) return;
     this.peer.reconnect();
   };
 
@@ -296,14 +310,15 @@ export class PeerLink implements Link {
 
   /** Quem entra: disca para a sala (a 1ª vez e a cada queda). */
   private readonly dial = (): void => {
-    if (this.closed || this.role !== 'guest' || this.live.size > 0 || this.dialing) return;
-    if (this.peer.disconnected) {
+    const peer = this.peer;
+    if (this.closed || !peer || this.role !== 'guest' || this.live.size > 0 || this.dialing) return;
+    if (peer.disconnected) {
       // sem servidor de sinalização não dá para discar: o 'open' dele disca de novo
       this.reconnectSignaling();
       this.later(this.dial, RETRY_MS * 2);
       return;
     }
-    const conn = this.peer.connect(roomPeerId(this.code), {
+    const conn = peer.connect(roomPeerId(this.code), {
       reliable: true,
       serialization: 'json',
     });

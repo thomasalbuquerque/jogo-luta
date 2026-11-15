@@ -1,5 +1,5 @@
 import { newSeed } from '../match/replayFile';
-import { netConfig } from './config';
+import { loadNetConfig } from './config';
 import { PeerLink } from './peerLink';
 import { randomRoomCode } from './roomCode';
 import { OnlineSession } from './session';
@@ -28,7 +28,7 @@ function open(role: 'host' | 'guest', code: string): OnlineSession {
   const session = new OnlineSession({
     role,
     code,
-    link: new PeerLink(role, code, netConfig(import.meta.env)),
+    link: new PeerLink(role, code, loadNetConfig(import.meta.env)),
     build: BUILD_ID,
     clock: () => performance.now(),
     newSeed,
