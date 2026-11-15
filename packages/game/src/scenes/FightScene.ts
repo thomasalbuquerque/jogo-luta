@@ -24,6 +24,7 @@ import {
   STAGES,
   stepGame,
   SUBPX,
+  teleportVanishes,
   toPx,
   type Box,
   type BounceEvent,
@@ -185,13 +186,13 @@ interface PrevPos {
  * Online (sala aberta), os inputs passam pelo lockstep da sala: o tick só roda
  * quando o input dos dois chegou, e os dois lados veem a mesma luta.
  */
-/** Frames que o Tauba leva para se juntar de novo depois de voltar do teleporte sorteado. */
+/** Frames que o Tauba leva para se juntar de novo depois de voltar do teleporte que some. */
 const REAPPEAR_FADE = 8;
 
-/** Transparência do corpo se desfazendo antes do teleporte sorteado e se juntando depois. */
+/** Transparência do corpo se desfazendo antes do teleporte que some e se juntando depois. */
 function quitAlpha(f: Fighter): number {
   const move = f.state === 'attack' && f.move === 'special' ? currentMove(f) : null;
-  if (!move?.teleport?.random) return 1;
+  if (!move || !teleportVanishes(move)) return 1;
   const frame = moveFrame(f);
   if (frame <= move.startup) return 1 - 0.65 * (frame / move.startup);
   const back = frame - move.startup - move.active;
@@ -1146,7 +1147,7 @@ export class FightScene extends Phaser.Scene {
     for (const f of this.state.fighters) {
       const view = this.views[f.id];
       if (!view) continue;
-      // sumido no teleporte sorteado: nem corpo, nem marcador, nem caixas
+      // sumido no teleporte que some: nem corpo, nem marcador, nem caixas
       const hidden = f.state === 'ko' || isVanished(f);
       view.setVisible(!hidden);
       const command = this.commands[f.id];
@@ -1255,7 +1256,7 @@ export class FightScene extends Phaser.Scene {
       const frame = moveFrame(f);
       if (fx.counter && move.counter) this.spawnCounterFx(f, view, fx.counter, move, justCaught);
       if (fx.slam) this.spawnSlamFx(f, view, fx.slam, move, frame);
-      if (fx.vanishSquares && move.teleport?.random) {
+      if (fx.vanishSquares && teleportVanishes(move)) {
         this.spawnQuitFx(f, view, fx.vanishSquares, move, frame);
       }
       if (fx.muzzleFlash && frame === move.startup + 1) {

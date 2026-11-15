@@ -13,6 +13,7 @@ import {
   moveFrame,
   stepFighter,
   TELEPORT_EDGE_MARGIN,
+  edgeSpot,
   teleportSpots,
   type Fighter,
 } from './fighter';
@@ -776,6 +777,84 @@ describe('bloco teleporte sorteado (Silent quit)', () => {
         expect(world.some((s) => s.y === p.y)).toBe(true);
       }
     }
+  });
+});
+
+const EDGE_QUITTER = character('t-quit-edge', {
+  name: 'Ponta',
+  startup: 14,
+  active: 20,
+  recovery: 18,
+  oncePerAir: true,
+  blocks: [{ type: 'teleport', target: 'edge', edgeInset: 60 }],
+});
+
+describe('bloco teleporte para a ponta (edge)', () => {
+  const [main] = TEST_STAGE.solids;
+  if (!main) throw new Error('mapa sem chão');
+  const left = main.x;
+  const right = main.x + main.w;
+
+  /** Põe o lutador 0 em (x, y) (centro dos pés, px), solta o especial e espera ele voltar. */
+  const quitFrom = (x: number, y: number, airborne: boolean) => {
+    const g = quitGame(EDGE_QUITTER, 1);
+    const [f] = pair(g);
+    f.x = px(x) - f.w / 2;
+    f.y = px(y) - f.h;
+    if (airborne) f.grounded = false;
+    const before = g.rng;
+    quit(g);
+    return { g, f, rngUsed: g.rng !== before };
+  };
+
+  it('caindo fora do palco à direita, volta na ponta direita, em pé, parado e dentro do bloco', () => {
+    const { g, f } = quitFrom(700, 250, true);
+    const feet = feetOf(f);
+    expect(feet.x).toBe(right - px(60));
+    expect(feet.y).toBe(main.y);
+    expect(f.vx).toBe(0);
+    expect(f.vy).toBe(0);
+    expect(f.kbx).toBe(0);
+    expect(f.kby).toBe(0);
+    expect(feet.x + f.w / 2).toBeLessThanOrEqual(right);
+    stepGame(g, [0, 0]);
+    expect(f.grounded).toBe(true);
+  });
+
+  it('caindo fora do palco à esquerda, ponta esquerda', () => {
+    const { f } = quitFrom(-650, 300, true);
+    expect(feetOf(f).x).toBe(left + px(60));
+  });
+
+  it('em cima do palco, vai para a ponta do mesmo lado', () => {
+    expect(feetOf(quitFrom(-100, 0, false).f).x).toBe(left + px(60));
+    expect(feetOf(quitFrom(100, 0, false).f).x).toBe(right - px(60));
+  });
+
+  it('em cima de uma plataforma pequena, a ponta do mesmo lado (plataformas ficam de fora)', () => {
+    expect(feetOf(quitFrom(-265, -150, false).f)).toEqual({ x: left + px(60), y: main.y });
+    expect(feetOf(quitFrom(265, -150, false).f)).toEqual({ x: right - px(60), y: main.y });
+  });
+
+  it('no meio exato, vai para o lado para onde está virado', () => {
+    const spot = (facing: -1 | 1) =>
+      edgeSpot({ x: -px(20), w: px(40), h: px(90), facing }, TEST_STAGE.solids, px(60));
+    expect(spot(1)?.x).toBe(right - px(60));
+    expect(spot(-1)?.x).toBe(left + px(60));
+  });
+
+  it('a distância pedida nunca deixa o corpo sair de cima do bloco', () => {
+    const body = { x: px(300), w: px(48), h: px(96), facing: 1 as const };
+    expect(edgeSpot(body, TEST_STAGE.solids, 0)?.x).toBe(right - px(24) - TELEPORT_EDGE_MARGIN);
+  });
+
+  it('não usa o RNG da luta, e funciona sem a luta', () => {
+    expect(quitFrom(100, 0, false).rngUsed).toBe(false);
+    const f = onGround(0, EDGE_QUITTER, 300);
+    run([f], [SPECIAL]);
+    run([f], [0], 40);
+    // o chão do teste vai de -2000 a 2000
+    expect(feetOf(f).x).toBe(px(2000) - px(60));
   });
 });
 

@@ -75,7 +75,7 @@ export interface CharacterFx {
    * sai também quando ela aparece ou some.
    */
   heldInTauntHand?: boolean;
-  /** Teleporte sorteado: quadradinhos quando o corpo se desfaz (some) e se junta (volta). */
+  /** Teleporte que some (o Silent quit): quadradinhos quando o corpo se desfaz (some) e se junta (volta). */
   vanishSquares?: readonly string[];
   /**
    * Provocação: peças que saem do socket `bell` da mão (notas do trompete), nos `ticks`
