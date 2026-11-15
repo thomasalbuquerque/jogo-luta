@@ -401,24 +401,28 @@ describe('elenco', () => {
     it('jogável, com especial e provocação', () => {
       expect(PLAYABLE_CHARACTERS).toContain('igao');
       expect(IGAO.special?.name).toBe('Saque');
-      expect(IGAO.special?.move.projectile?.bounces).toBe(3);
+      expect(IGAO.special?.move.projectile?.bounces).toBe(4);
       expect(IGAO.taunt.text).toBe('Cê tá miolo né nê?');
       expect(IGAO.blurb.length).toBeGreaterThan(0);
     });
 
-    it('a bola sai para baixo e para a frente e quica 3 vezes, cada vez mais baixo', () => {
+    it('a bola sai para baixo e para a frente e quica 4 vezes, cada vez mais baixo', () => {
       const { bounces, travel } = serve();
-      expect(bounces).toHaveLength(3);
-      const [first, second, third] = bounces.map((b) => b.peak) as [number, number, number];
-      // 1º pega quem está em pé; o 3º passa rente ao chão
-      expect(first).toBeGreaterThan(px(55));
-      expect(first).toBeLessThan(px(85));
+      expect(bounces).toHaveLength(4);
+      const peaks = bounces.map((b) => b.peak) as [number, number, number, number];
+      const [first, second, third, fourth] = peaks;
+      // o 1º não passa por cima de quem está parado (os mais baixos têm 90 px)
+      const shortest = Math.min(...PLAYABLE_CHARACTERS.map((id) => getCharacter(id).stats.height));
+      expect(shortest).toBe(px(90));
+      expect(first).toBeGreaterThan(px(65));
+      expect(first).toBeLessThan(shortest);
       expect(second).toBeLessThan(first);
       expect(third).toBeLessThan(second);
-      expect(third).toBeLessThan(px(20));
-      // anda um pouco mais que meio palco
-      expect(travel).toBeGreaterThan(px(500));
-      expect(travel).toBeLessThan(px(700));
+      expect(fourth).toBeLessThan(third);
+      expect(fourth).toBeLessThan(px(25));
+      // anda quase o palco inteiro
+      expect(travel).toBeGreaterThan(px(700));
+      expect(travel).toBeLessThan(px(900));
     });
 
     it('acerta quem está em pé no caminho', () => {
@@ -433,13 +437,30 @@ describe('elenco', () => {
       igao.facing = 1;
       stepGame(g, [Button.SPECIAL, 0]);
       for (let i = 0; i < 90 && foe.damage === 0; i++) stepGame(g, [0, 0]);
-      expect(foe.damage).toBe(8);
+      expect(foe.damage).toBe(11);
       expect(foe.kbx).toBeGreaterThan(0);
     });
 
-    it('uma bola em quadra por vez: a recarga cobre a vida da bola', () => {
-      const shot = IGAO.special?.move.projectile;
-      expect(IGAO.special?.cooldownTicks).toBeGreaterThanOrEqual(shot?.lifetimeTicks ?? 0);
+    it('a 2ª bola só sai depois de a 1ª quicar 3 vezes', () => {
+      const g = createGame({
+        characters: ['igao', 'base'],
+        rules: { stocks: 3, timeLimitTicks: 0 },
+      });
+      const [igao, other] = g.fighters as [Fighter, Fighter];
+      for (let i = 0; i < 41; i++) stepGame(g, [0, 0]);
+      other.x = px(265) - other.w / 2;
+      other.y = px(-150) - other.h;
+      igao.x = px(-400) - igao.w / 2;
+      igao.facing = 1;
+      let bounces = 0;
+      let bouncesAtSecond = -1;
+      for (let i = 0; i < 200 && bouncesAtSecond < 0; i++) {
+        // aperta o especial de novo a cada 2 ticks: sai assim que recarregar
+        stepGame(g, [i % 2 === 0 ? Button.SPECIAL : 0, 0]);
+        for (const e of g.events) if (e.type === 'bounce') bounces++;
+        if (g.projectiles.length > 1) bouncesAtSecond = bounces;
+      }
+      expect(bouncesAtSecond).toBeGreaterThanOrEqual(3);
     });
 
     it('o pulo mais alto e o mais alto do elenco, junto com o Schummaki; aéreos com mais alcance', () => {

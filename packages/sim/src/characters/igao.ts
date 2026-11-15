@@ -5,7 +5,7 @@ import { defineCharacter } from '../character';
  * peso médio, um pouco lento no chão, o pulo mais alto de todos e queda rápida para
  * descer batendo. Os aéreos alcançam mais (braço comprido) e o aéreo para baixo é
  * uma cortada. O preço: o corpo comprido é fácil de acertar. Especial: Saque, a bola
- * sai em diagonal para baixo e quica 3 vezes no chão, cada vez mais baixo, para
+ * sai em diagonal para baixo e quica 4 vezes no chão, cada vez mais baixo, para
  * obrigar o adversário a pular.
  */
 export const IGAO = defineCharacter({
@@ -37,7 +37,8 @@ export const IGAO = defineCharacter({
   special: {
     name: 'Saque',
     // A bola sobe e o braço arma (startup: o aviso), a batida (1 tick) e o braço
-    // descendo (recovery). Uma bola em quadra por vez: a recarga conta do começo.
+    // descendo (recovery). A recarga conta do começo: a 2ª bola só sai depois de a
+    // 1ª quicar 3 vezes, já no fim do caminho.
     startup: 18,
     active: 1,
     recovery: 18,
@@ -50,14 +51,14 @@ export const IGAO = defineCharacter({
         speed: 9.5,
         launchAngle: 320,
         gravity: 0.45,
-        lifetimeTicks: 85,
+        lifetimeTicks: 110,
         size: { w: 28, h: 28 },
         offset: { x: 32, y: -54 },
-        // guarda 72% da velocidade vertical: 1º quique uns 66 px, 2º uns 32, 3º uns 14;
-        // anda uns 600 px no total
-        bounces: 3,
-        bounceKeep: 72,
-        hit: { damage: 8, angle: 50, baseKnockback: 7, knockbackScale: 0.1 },
+        // guarda 78% da velocidade vertical: o 1º quique fica abaixo dos 90 px do mais
+        // baixinho e os outros cada vez mais baixos; anda uns 800 px no total
+        bounces: 4,
+        bounceKeep: 78,
+        hit: { damage: 11, angle: 50, baseKnockback: 7, knockbackScale: 0.1 },
       },
     ],
   },

@@ -724,25 +724,27 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
   fica no chão esperando; o Igão vive no ar.
 - **Especial — Saque (projétil):** ele joga a bola de vôlei para cima com uma mão, sem saltar, e
   bate nela de cima para baixo com a mão aberta. A bola sai em diagonal, para baixo e para a
-  frente, bate no chão e quica 3 vezes, cada quique mais baixo, até acertar alguém ou acabar o
+  frente, bate no chão e quica 4 vezes, cada quique mais baixo, até acertar alguém ou acabar o
   tempo.
   - **Tempo:** startup médio (~18 ticks: a bola subindo e o braço armando são o aviso), active de
     1 tick (a batida), recovery médio (~18 ticks, o braço descendo).
   - **A bola:** nasce na mão esticada lá em cima, um pouco à frente da cabeça (32 px à frente e
     54 px acima do centro do corpo: o braço dele não alcança mais alto que isso), e sai a 9,5
     px/tick num ângulo de 40° para baixo, com gravidade 0,45. Caixa redonda de 28 × 28 px.
-  - **Os quiques:** guarda 72% da velocidade vertical a cada quique (a horizontal não muda). Com
-    esses números, o 1º quique sobe uns 66 px (ainda pega quem está em pé), o 2º uns 32 px e o 3º
-    uns 14 px, rente ao chão. Vida de 85 ticks (1,4 s): ela anda uns 600 px no total, um pouco mais
-    que meio palco. Quem pular por cima escapa; o 1º quique é o mais difícil de pular.
+  - **Os quiques:** 4, guardando 78% da velocidade vertical a cada quique (a horizontal não muda).
+    Com esses números, o 1º quique sobe uns 78 px (ainda pega quem está em pé, até os baixinhos de
+    90 px), o 2º uns 45 px, o 3º uns 25 px e o 4º uns 14 px, rente ao chão. Vida de 110 ticks
+    (1,8 s): ela anda uns 800 px no total, quase o palco inteiro. Quem pular por cima escapa; o 1º
+    quique é o mais difícil de pular.
   - **Onde quica e onde some:** quica no topo do chão e no topo das plataformas atravessáveis
     (vindo de cima, como um lutador pousando). Na lateral ou embaixo de um bloco sólido (parede),
     some, como todo projétil hoje. Depois do último quique, o próximo toque no chão faz ela sumir;
     numa plataforma atravessável sem quiques sobrando, ela passa direto, como hoje. Saiu do palco,
     cai até a blast zone ou até o tempo acabar.
-  - **Golpe:** dano ~8, knockback médio (ângulo ~50°, para o lado em que a bola anda). O mesmo em
+  - **Golpe:** dano ~11, knockback médio (ângulo ~50°, para o lado em que a bola anda). O mesmo em
     qualquer quique. Some ao acertar alguém.
-  - **Recarga:** ~90 ticks (1,5 s), contada do começo: uma bola em quadra por vez.
+  - **Recarga:** ~90 ticks (1,5 s), contada do começo: a 2ª bola só sai quando a 1ª já quicou 3
+    vezes, no fim do caminho.
   - **No ar:** funciona igual (vira um saque viagem), sem impulso: não ajuda a voltar ao palco. A
     bola sai de mais alto, então o 1º quique fica mais longe.
   - **Interações:** a correção do Crocko devolve a bola para quem sacou, com os quiques que
@@ -779,7 +781,7 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
   fone, e o violeta do Igão é mais escuro e mais fechado; o verde-limão é bem mais amarelado e vivo
   que o verde do Dadazinho e a menta da Marília).
 - **No jogo:** jogável. No Saque a bola sai da mão de trás, sobe girando, ele bate lá em cima
-  com um estouro e o "pá!", e ela desce em diagonal com um rastro curto, quica 3 vezes com uma
+  com um estouro e o "pá!", e ela desce em diagonal com um rastro curto, quica 4 vezes com uma
   poeirinha e um "tum" cada vez mais baixo, girando no sentido em que anda. Na provocação quica a
   bola no chão duas vezes, segura na cintura, aponta com a outra mão e o balão "Cê tá miolo né
   nê?" sai no `voiceAt`. Ficha em `packages/sim/src/characters/igao.ts`.
@@ -798,7 +800,7 @@ Outfit: violet purple (#6A3FB8) short-sleeve fitted volleyball jersey, untucked,
 Signature details: the violet jersey with lime green collar and side stripes, the black knee pads, short brown hair.
 Colors: primary #6A3FB8, secondary #C4E53A, accent #2E1F57.
 Face/personality: cocky teasing grin, one eyebrow slightly raised.
-Special move: "Saque" — standing on the ground, without jumping, he tosses a volleyball up with one hand and spikes it with the other open hand, sending it diagonally down and forward; it bounces three times along the ground, each bounce lower.
+Special move: "Saque" — standing on the ground, without jumping, he tosses a volleyball up with one hand and spikes it with the other open hand, sending it diagonally down and forward; it bounces four times along the ground, each bounce lower.
 Taunt: bounces the volleyball on the ground twice with one hand, like before a serve, catches it, then points at the opponent and teases them.
 Extra parts for the parts sheet: one hand pointing with the index finger.
 Props and effects for the effects sheet: 1 volleyball (white with curved violet and lime green panels, no logo); 1 white-yellow impact burst for the hand hitting the ball; 3 short white speed streaks; 3 small light-brown dust puffs for the bounces.
