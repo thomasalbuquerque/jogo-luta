@@ -1246,6 +1246,8 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 120, rot: STANCE, ease: 'inOut' },
     ],
   },
+  // Guarda do Crocko: punho reto, na linha do antebraço, como a do João Frango.
+  crocko_idle: withRot(BASE_CLIPS.idle, { handNear: 0, handFar: 0 }),
   // Correção postural: entra rápido na pose de pilates (startup curto) e espera a
   // janela inteira (active), respirando. Se ninguém bater, perde o equilíbrio no
   // recovery: balança, a perna levantada desce para se segurar e volta à guarda.
