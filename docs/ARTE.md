@@ -308,7 +308,7 @@ ficha (dano, velocidade, tamanho) é a mesma.
 - **João Frango:** avental no tronco, short separado, 4 mãos e as mãos em concha.
 - **Schummaki:** jaqueta com a manga arregaçada até o cotovelo (antebraço de pele, com o "cotovelo
   de pele" do Darllan), bermuda separada, coxa só de pele (com a perna da bermuda pintada, como no
-  Crocko), luvas sem dedo nas 4 mãos e as mãos no volante. O texto usado:
+  Crocko, e alargada com `fill` para ficar folgada), luvas sem dedo nas 4 mãos e as mãos no volante. O texto usado:
   `upper arm with jacket sleeve pushed up to the elbow; bare forearm without hand`, `<HIPS>` =
   `hips (graphite cargo shorts only), separate from the torso`, `<SHOE>` =
   `red and white sneaker`, `<EXTRA>` = `two hands gripping an invisible steering wheel`, e no fim
@@ -575,7 +575,7 @@ fica opaco, acima do 2º some; o padrão é `[50, 215]`), como as peças e os ef
 | `outline` | Linha de contorno desenhada num corte de roupa (manga, punho da luva), para não ficar "aberta".   |
 | `paint`   | Pinta um polígono de uma cor (`auto` = a cor em volta). Esconde o anel do toco ou um texto.       |
 | `stretch` | Estica ou encolhe a peça (`[largura, altura]`), para acertar a proporção com o conceito.          |
-| `fill`    | Põe uma cor por trás do desenho: vidro dos óculos que veio rosa (misturado com o magenta).        |
+| `fill`    | Põe uma cor por trás do desenho: vidro dos óculos que veio rosa, perna de short mais folgada.     |
 | `fade`    | Some aos poucos de `from` até `to`: a ponta da coxa de pele por cima da canela, sem linha.        |
 | `flip`    | `true` espelha a peça na horizontal (a mão que veio virada); os pontos ficam os da folha.         |
 
@@ -642,7 +642,10 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   logo abaixo da virilha, sem `outline`, e os `legNear`/`legFar` ficam uns 10 px acima do corte.
   Na coxa, a ponta do quadril até a barra do short é pintada da cor do short (`paint`) e leva
   `outline` nas bordas e na barra. Assim a perna do short gira junto com a coxa (chute, corrida)
-  em vez de ficar parada no quadril como uma saia.
+  em vez de ficar parada no quadril como uma saia. Pintada só por cima da coxa, a perna do short
+  fica justa como uma bermuda de ciclista. Para ela ficar folgada (Schummaki), um `fill` com a cor
+  do short alarga a coxa, abrindo até a barra, e o `outline` contorna o formato novo. O `fill` vai
+  uns 5 px além da linha do `outline`, senão o contorno sai só com a metade de dentro.
 - **Joelho de pele** (coxa e canela à mostra): na coxa, a ponta do joelho sai com `erase` uns 30 px
   depois do `tip`, a sobra do desenho (o volume de trás do joelho) também, e as cores perto da ponta
   são pintadas iguais às do começo da canela (claro em cima, sombra embaixo). Um `fade` do `tip` até
