@@ -154,8 +154,13 @@ const BuffBlock = z.strictObject({
   speedPercent: int(50, 300).default(100),
   weightPercent: int(50, 300).default(100),
   /**
-   * Aura: enquanto o buff dura, golpes, projéteis e agarrões passam pelo lutador
-   * (sem dano, sem knockback). Não salva da blast zone.
+   * Dano recebido, em % (100 = normal): o golpe pega normalmente (knockback, hitstun,
+   * agarrão), mas soma menos dano. É a aura da Marília.
+   */
+  damageTakenPercent: int(10, 100).default(100),
+  /**
+   * Aura invencível: enquanto o buff dura, golpes, projéteis e agarrões passam pelo
+   * lutador (sem dano, sem knockback). Não salva da blast zone.
    */
   invulnerable: z.boolean().default(false),
 });
@@ -506,6 +511,7 @@ function compileSpecial(s: ParsedSpecial): Special {
           damagePercent: b.damagePercent,
           speedPercent: b.speedPercent,
           weightPercent: b.weightPercent,
+          damageTakenPercent: b.damageTakenPercent,
           invulnerable: b.invulnerable,
         };
         break;

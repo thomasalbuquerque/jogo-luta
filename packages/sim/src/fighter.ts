@@ -133,6 +133,8 @@ export interface Fighter extends Body {
   buffDamage: number;
   buffSpeed: number;
   buffWeight: number;
+  /** Dano recebido com o buff, em % (100 = normal): a aura da Marília corta o dano. */
+  buffTaken: number;
   /** Aura do buff (`invulnerable`): golpes passam pelo lutador enquanto `buffTicks` > 0. */
   buffInvuln: boolean;
   /** Agarrado: id de quem segura (-1 = ninguém). */
@@ -206,6 +208,7 @@ export function createFighter(
     buffDamage: 100,
     buffSpeed: 100,
     buffWeight: 100,
+    buffTaken: 100,
     buffInvuln: false,
     grabbedBy: -1,
     grabTicks: 0,
@@ -534,6 +537,7 @@ function fireBlocks(f: Fighter, move: MoveDef, input: InputMask, world: World): 
     f.buffDamage = move.buff.damagePercent;
     f.buffSpeed = move.buff.speedPercent;
     f.buffWeight = move.buff.weightPercent;
+    f.buffTaken = move.buff.damageTakenPercent;
     f.buffInvuln = move.buff.invulnerable;
   }
   if (move.projectile) {
@@ -684,6 +688,7 @@ function clearBuff(f: Fighter): void {
   f.buffDamage = 100;
   f.buffSpeed = 100;
   f.buffWeight = 100;
+  f.buffTaken = 100;
   f.buffInvuln = false;
 }
 
@@ -695,6 +700,20 @@ export function hasAura(f: Fighter): boolean {
 /** Dano que o lutador causa, com o buff ativo. */
 export function dealtDamage(f: Fighter, damage: number): number {
   return idiv(damage * f.buffDamage, 100);
+}
+
+/**
+ * Dano que o lutador recebe, com o buff ativo (`damageTakenPercent`). Nunca zera um
+ * golpe que dá dano: no mínimo 1%.
+ */
+export function takenDamage(f: Fighter, damage: number): number {
+  if (damage <= 0 || f.buffTaken === 100) return damage;
+  return Math.max(1, idiv(damage * f.buffTaken, 100));
+}
+
+/** Buff ligado (qualquer bloco buff), ainda dentro da duração. */
+export function hasBuff(f: Fighter): boolean {
+  return f.buffTicks > 0;
 }
 
 /** Peso que vale no knockback, com o buff ativo. */

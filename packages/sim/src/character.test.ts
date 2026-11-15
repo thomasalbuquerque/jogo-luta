@@ -213,6 +213,7 @@ describe('especial montado com blocos', () => {
       damagePercent: 120,
       speedPercent: 100,
       weightPercent: 100,
+      damageTakenPercent: 100,
       invulnerable: false,
     });
   });

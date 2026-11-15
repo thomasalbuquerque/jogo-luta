@@ -478,6 +478,95 @@ describe('bloco buff com aura (invulnerable)', () => {
   });
 });
 
+const TOUGH = character('t-tough', {
+  name: 'Couro grosso',
+  startup: 5,
+  active: 1,
+  recovery: 10,
+  blocks: [{ type: 'buff', durationTicks: 120, damageTakenPercent: 50 }],
+});
+
+describe('bloco buff com dano recebido reduzido (damageTakenPercent)', () => {
+  /** Leva o golpe lateral do lutador base (8%) com e sem o buff. */
+  const takeSideLight = (buffed: boolean) => {
+    const b = onGround(1, TOUGH, 60);
+    if (buffed) {
+      run([b], [0, SPECIAL]);
+      run([b], [0, 0], 16);
+      expect(b.buffTicks).toBeGreaterThan(0);
+    }
+    const a = onGround(0, BASE_CHARACTER_ID);
+    a.facing = 1;
+    const events: GameEvent[] = [];
+    stepFighter(a, Button.ATTACK | Button.RIGHT, solids);
+    for (let i = 0; i < 20; i++) {
+      stepFighter(a, 0, solids);
+      stepFighter(b, 0, solids);
+      resolveHits([a, b], events);
+    }
+    return { b, events };
+  };
+
+  it('o golpe pega normalmente, mas soma metade do dano', () => {
+    const full = takeSideLight(false);
+    const half = takeSideLight(true);
+    expect(full.b.damage).toBe(8);
+    expect(half.b.damage).toBe(4);
+    // knockback e hitstun: pegou de verdade
+    expect(half.b.state).toBe('hitstun');
+    expect(half.b.kbx).toBeGreaterThan(0);
+    expect(half.events.filter((e) => e.type === 'aura')).toEqual([]);
+    expect(half.events).toContainEqual(
+      expect.objectContaining({ type: 'hit', victim: 1, damage: 4, reduced: true }),
+    );
+    expect(full.events.find((e) => e.type === 'hit')).not.toHaveProperty('reduced');
+  });
+
+  it('golpe de 1% continua dando 1%, e o projétil também é cortado', () => {
+    const b = onGround(1, TOUGH, 60);
+    run([b], [0, SPECIAL]);
+    run([b], [0, 0], 16);
+    const shooter = onGround(0, SHOOTER, -40);
+    const shot = (damage: number) => {
+      const p = spawnProjectile(shooter, shotDef());
+      p.x = b.x;
+      p.y = b.y;
+      p.hit.damage = damage;
+      return p;
+    };
+    const weak = shot(1);
+    const strong = shot(11);
+    resolveProjectileHits([shooter, b], [weak]);
+    expect(b.damage).toBe(1);
+    b.state = 'idle';
+    resolveProjectileHits([shooter, b], [strong]);
+    expect(b.damage).toBe(1 + 5);
+  });
+
+  it('o agarrão pega e os golpes do combo também são cortados', () => {
+    const g = closeGame([COMBO_GRABBER, TOUGH]);
+    const [a, b] = g.fighters as [Fighter, Fighter];
+    steps(g, [0, SPECIAL]);
+    steps(g, [0, 0], 16);
+    expect(b.buffTicks).toBeGreaterThan(0);
+    steps(g, [SPECIAL, 0]);
+    steps(g, [0, 0], 6);
+    expect(b.state).toBe('grabbed');
+    steps(g, [0, 0], 40);
+    // 4 golpes de 1% (no mínimo 1%) e o arremesso de 7% cortado para 3%
+    expect(b.damage).toBe(4 + 3);
+    expect(a.grabTicks).toBe(0);
+  });
+
+  it('quando o buff acaba, volta a levar o dano inteiro', () => {
+    const b = onGround(1, TOUGH, 60);
+    run([b], [0, SPECIAL]);
+    run([b], [0, 0], 140);
+    expect(b.buffTicks).toBe(0);
+    expect(b.buffTaken).toBe(100);
+  });
+});
+
 describe('bloco teleporte', () => {
   it('sem direção, vai para a frente e fica invencível um pouco', () => {
     const f = onGround(0, TELEPORTER);

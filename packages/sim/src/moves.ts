@@ -85,7 +85,9 @@ export interface BuffDef {
   speedPercent: number;
   /** Peso (maior = voa menos). */
   weightPercent: number;
-  /** Aura: golpes, projéteis e agarrões passam pelo lutador enquanto o buff dura. */
+  /** Dano recebido (o golpe pega normalmente, mas soma menos %). */
+  damageTakenPercent: number;
+  /** Aura invencível: golpes, projéteis e agarrões passam pelo lutador enquanto o buff dura. */
   invulnerable: boolean;
 }
 

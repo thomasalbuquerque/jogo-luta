@@ -22,8 +22,10 @@ export interface HitEvent {
   combo?: number;
   attacker: number;
   victim: number;
-  /** Dano causado, em %. */
+  /** Dano que o alvo levou de verdade, em %. */
   damage: number;
+  /** O dano foi cortado pelo buff do alvo (a aura da Marília): o golpe pegou mais fraco. */
+  reduced?: true;
   /** Velocidade do arremesso, em subpx/tick. */
   knockback: number;
   /** Ponto do impacto, em subpx. */
