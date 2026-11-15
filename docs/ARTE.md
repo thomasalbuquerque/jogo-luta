@@ -559,20 +559,20 @@ já veio sem fundo (tirado no Photoshop) leva `"key": false`. Roupa roxa ou rosa
 magenta e sairia meio transparente: a folha leva `"keyRange": [120, 225]` (abaixo do 1º valor
 fica opaco, acima do 2º some; o padrão é `[50, 215]`), como as peças e os efeitos do Igão. Campos de cada peça:
 
-| Campo     | O que é                                                                                         |
-| --------- | ----------------------------------------------------------------------------------------------- |
-| `rect`    | Retângulo da peça na folha (x, y, largura, altura), em px da imagem original.                   |
-| `pivot`   | Junta com o pai: onde a peça gira (ombro no braço, joelho na canela).                           |
-| `tip`     | Junta com o filho (cotovelo no braço). Define o comprimento e a direção do osso.                |
-| `sockets` | Outros encaixes: `neck`, `shoulderNear`, `shoulderFar` no tronco; `legNear`, `legFar` no short. |
-| `erase`   | Polígonos apagados: toco de junta, cava do ombro, a boca aberta do punho da luva.               |
-| `keep`    | Só o que está dentro fica: separa peças que vieram encostadas (as duas mãos em concha).         |
-| `outline` | Linha de contorno desenhada num corte de roupa (manga, punho da luva), para não ficar "aberta". |
-| `paint`   | Pinta um polígono de uma cor (`auto` = a cor em volta). Esconde o anel do toco ou um texto.     |
-| `stretch` | Estica ou encolhe a peça (`[largura, altura]`), para acertar a proporção com o conceito.        |
-| `fill`    | Põe uma cor por trás do desenho: vidro dos óculos que veio rosa (misturado com o magenta).      |
-| `fade`    | Some aos poucos de `from` até `to`: a ponta da coxa de pele por cima da canela, sem linha.      |
-| `flip`    | `true` espelha a peça na horizontal (a mão que veio virada); os pontos ficam os da folha.       |
+| Campo     | O que é                                                                                           |
+| --------- | ------------------------------------------------------------------------------------------------- |
+| `rect`    | Retângulo da peça na folha (x, y, largura, altura), em px da imagem original.                     |
+| `pivot`   | Junta com o pai: onde a peça gira (ombro no braço, joelho na canela).                             |
+| `tip`     | Junta com o filho (cotovelo no braço), no meio da largura da peça (centro do pulso, não a borda). |
+| `sockets` | Outros encaixes: `neck`, `shoulderNear`, `shoulderFar` no tronco; `legNear`, `legFar` no short.   |
+| `erase`   | Polígonos apagados: toco de junta, cava do ombro, a boca aberta do punho da luva.                 |
+| `keep`    | Só o que está dentro fica: separa peças que vieram encostadas (as duas mãos em concha).           |
+| `outline` | Linha de contorno desenhada num corte de roupa (manga, punho da luva), para não ficar "aberta".   |
+| `paint`   | Pinta um polígono de uma cor (`auto` = a cor em volta). Esconde o anel do toco ou um texto.       |
+| `stretch` | Estica ou encolhe a peça (`[largura, altura]`), para acertar a proporção com o conceito.          |
+| `fill`    | Põe uma cor por trás do desenho: vidro dos óculos que veio rosa (misturado com o magenta).        |
+| `fade`    | Some aos poucos de `from` até `to`: a ponta da coxa de pele por cima da canela, sem linha.        |
+| `flip`    | `true` espelha a peça na horizontal (a mão que veio virada); os pontos ficam os da folha.         |
 
 Nomes das peças: `torso`, `hips`, `upperArm`, `forearm`, `thigh`, `shin`, `foot`, `hand_fist`,
 `hand_open`, `hand_taunt`, `head_normal`, `head_hurt`, `head_taunt`, `head_ko`, `portrait` e os
