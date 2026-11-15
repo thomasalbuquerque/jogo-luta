@@ -627,7 +627,17 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   - Canela: a ponta do joelho, atrás da coxa, fica com `paint` `auto` no contorno, para não
     aparecer linha quando o joelho dobra. Se ficar um degrau no joelho, engrosse com `stretch`
     até a canela ficar só um pouco mais fina que a coxa (na folha deitada, a grossura é a altura
-    da imagem). Sem exagerar: esticar demais deforma as dobras do desenho.
+    da imagem). Sem exagerar: esticar demais deforma as dobras do desenho. Se a canela ficar
+    mais larga que a coxa no joelho, ela sobra dos dois lados como um degrau: afine com `stretch`
+    (Dadazinho: `[1, 0.9]`).
+  - Coxa com o volume do joelho para trás (um calombo embaixo da ponta, com uma quina onde ele
+    começa): o calombo sai com `erase` abaixo de uma curva suave, a quina vira pano com `fill`
+    (cor da sombra da calça) e a curva leva `outline`. O `tip` e o `pivot` ficam no meio da
+    grossura da coxa (não na linha de cima), senão a coxa sobra para um lado do joelho.
+  - Barra por cima do tênis (Dadazinho): o id entra em `FOOT_BEHIND` (`rig/library.ts`) e o pé
+    é desenhado atrás da canela. O `pivot` do pé fica no meio do cano do tênis: a barra cobre a
+    boca do tênis.
+  - Risco solto de dobra perto do quadril: some com `paint` `auto` num polígono fino em volta.
 - **Axila preenchida** (Darllan, braço que sobe bastante na provocação e no pulo): em vez de só apagar
   a cava, o corte do ombro da frente vira a lateral do corpo. O `erase` vai até uma linha que desce
   do ombro até o avental, o que sobra da bola da manga entre essa linha e a cava é pintado da cor da
