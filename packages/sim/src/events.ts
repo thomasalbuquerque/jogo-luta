@@ -4,7 +4,14 @@
  * começo de cada tick.
  */
 export type GameEvent =
-  HitEvent | AuraEvent | GrabEvent | KoEvent | RespawnEvent | ActionEvent | BounceEvent;
+  | HitEvent
+  | AuraEvent
+  | GrabEvent
+  | KoEvent
+  | RespawnEvent
+  | ActionEvent
+  | BounceEvent
+  | ReflectEvent;
 
 /**
  * Alguém levou um golpe. `hit`: golpe normal; `counter`: devolvido pelo
@@ -41,6 +48,18 @@ export interface AuraEvent {
   type: 'aura';
   attacker: number;
   victim: number;
+  x: number;
+  y: number;
+}
+
+/**
+ * O contra-ataque devolveu um projétil: `fighter` (quem contra-atacou) virou o dono
+ * dele, que era de `from`. `x`/`y`: ponto do contato, em subpx.
+ */
+export interface ReflectEvent {
+  type: 'reflect';
+  fighter: number;
+  from: number;
   x: number;
   y: number;
 }

@@ -86,6 +86,8 @@ describe('times', () => {
         passed: 0,
         bounces: 0,
         bounceKeep: 0,
+        lifetime: 30,
+        maxBounces: 0,
         hit: {
           damage: 8,
           angle: 30,

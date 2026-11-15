@@ -459,6 +459,36 @@ describe('elenco', () => {
       expect(foe.kbx).toBeGreaterThan(0);
     });
 
+    it.each([150, 300, 500])(
+      'o Crocko no contra-ataque a %i px devolve a bola, que volta e acerta o Igão parado',
+      (gap) => {
+        const g = createGame({
+          characters: ['igao', 'crocko'],
+          rules: { stocks: 3, timeLimitTicks: 0 },
+        });
+        const [igao, crocko] = g.fighters as [Fighter, Fighter];
+        for (let i = 0; i < 41; i++) stepGame(g, [0, 0]);
+        igao.x = px(-300) - igao.w / 2;
+        crocko.x = px(-300 + gap) - crocko.w / 2;
+        igao.facing = 1;
+        crocko.facing = -1;
+        stepGame(g, [Button.SPECIAL, 0]);
+        const reflects: { fighter: number; from: number }[] = [];
+        let countering = false;
+        for (let i = 0; i < 400 && igao.damage === 0; i++) {
+          // o Crocko entra no contra-ataque quando a bola está chegando
+          const p = g.projectiles[0];
+          const near = p !== undefined && p.owner === 0 && crocko.x - (p.x + p.w) < px(120);
+          stepGame(g, [0, near && !countering ? Button.SPECIAL : 0]);
+          if (near) countering = true;
+          for (const e of g.events) if (e.type === 'reflect') reflects.push(e);
+        }
+        expect(reflects).toEqual([expect.objectContaining({ fighter: 1, from: 0 })]);
+        expect(crocko.damage).toBe(0);
+        expect(igao.damage).toBe(11);
+      },
+    );
+
     it('a 2ª bola só sai depois de a 1ª quicar 3 vezes', () => {
       const g = createGame({
         characters: ['igao', 'base'],

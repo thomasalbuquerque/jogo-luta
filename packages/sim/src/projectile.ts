@@ -22,6 +22,9 @@ export interface Projectile extends Box {
   bounces: number;
   /** Quanto da velocidade vertical sobra a cada quique, em %. */
   bounceKeep: number;
+  /** Vida e quiques com que nasceu: o contra-ataque devolve o projétil com eles de novo. */
+  lifetime: number;
+  maxBounces: number;
 }
 
 /** Cria o projétil na frente do lutador, saindo no ângulo da ficha. */
@@ -43,6 +46,8 @@ export function spawnProjectile(f: Fighter, def: ProjectileDef): Projectile {
     passed: 0,
     bounces: def.bounces,
     bounceKeep: def.bounceKeep,
+    lifetime: def.lifetimeTicks,
+    maxBounces: def.bounces,
   };
 }
 

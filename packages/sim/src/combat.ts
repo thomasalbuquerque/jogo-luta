@@ -303,7 +303,8 @@ export function resolveHits(
 /**
  * Projéteis que encostam num lutador (que não seja o dono) acertam e somem.
  * Só o alvo congela no impacto: quem soltou está longe. Quem está no
- * contra-ataque devolve o projétil (vira o dono dele). Sem fogo amigo, o
+ * contra-ataque devolve o projétil (vira o dono dele, com a vida e os quiques do
+ * começo, e sai o evento `reflect`). Sem fogo amigo, o
  * projétil passa pelos companheiros do dono.
  */
 export function resolveProjectileHits(
@@ -335,10 +336,17 @@ export function resolveProjectileHits(
       continue;
     }
     if (isCountering(victim)) {
+      // devolve: vira o dono e faz o caminho de volta inteiro (a vida e os quiques
+      // recomeçam), com o dano e o knockback do próprio projétil
+      const at = contactPoint(p, hurtbox(victim));
+      events?.push({ type: 'reflect', fighter: victim.id, from: p.owner, x: at.x, y: at.y });
       victim.moveHits |= 1 << p.owner;
       p.owner = victim.id;
       p.vx = 0 - p.vx;
       p.facing = p.facing === 1 ? -1 : 1;
+      p.ticksLeft = p.lifetime;
+      p.bounces = p.maxBounces;
+      p.passed = 0;
       skipToRecovery(victim);
       projectiles[alive++] = p;
       continue;

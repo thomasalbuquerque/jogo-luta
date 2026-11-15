@@ -906,6 +906,23 @@ describe('bloco contra-ataque', () => {
     expect(shot.vx).toBe(px(10));
     expect(a.moveHits).toBe(1 << 1);
   });
+
+  it('o projétil devolvido recomeça a vida e os quiques, e sai 1 evento reflect', () => {
+    const a = onGround(0, COUNTER);
+    run([a], [SPECIAL]);
+    run([a], [0], 4);
+    const shot = spawnProjectile(a, { ...shotDef(), offsetX: 0, bounces: 3 });
+    shot.owner = 1;
+    shot.vx = -px(10);
+    shot.ticksLeft = 5;
+    shot.bounces = 0;
+    const events: GameEvent[] = [];
+    resolveProjectileHits([a], [shot], events);
+    expect(shot.ticksLeft).toBe(shot.lifetime);
+    expect(shot.bounces).toBe(3);
+    expect(shot.hit.damage).toBe(shotDef().hit.damage);
+    expect(events).toEqual([expect.objectContaining({ type: 'reflect', fighter: 0, from: 1 })]);
+  });
 });
 
 const GRABBER = character('t-grab', {

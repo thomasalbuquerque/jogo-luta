@@ -757,8 +757,8 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
     vezes, no fim do caminho.
   - **No ar:** funciona igual (vira um saque viagem), sem impulso: não ajuda a voltar ao palco. A
     bola sai de mais alto, então o 1º quique fica mais longe.
-  - **Interações:** a correção do Crocko devolve a bola para quem sacou, com os quiques que
-    sobraram; na Marília com a aura a bola acerta, mas dá menos dano.
+  - **Interações:** a correção do Crocko devolve a bola para quem sacou, que faz o caminho de
+    volta inteiro (a vida e os quiques recomeçam, o dano continua 11%); na Marília com a aura a bola acerta, mas dá menos dano.
   - **Efeitos:** a bola gira no ar no sentido em que anda (rotação no código, não precisa de
     quadros); na batida, um estouro de impacto na mão e um "pá!" de tapa forte; atrás da bola, um
     rastro curto até o 1º quique; a cada quique, uma poeirinha no chão e um "tum" que vai ficando
