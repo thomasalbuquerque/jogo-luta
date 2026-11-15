@@ -87,8 +87,19 @@ export interface CharacterFx {
    * avalia a postura (no lugar do contorno branco). Quando pega alguém (golpe ou
    * projétil), um brilho (`ding`) perto da cabeça; no golpe devolvido, um estalo
    * (`burst`) e linhas de impacto (`lines`) no ponto do acerto, com o som `sound`.
+   * Com `color`, o contra-ataque fica impossível de não ver: os anéis saem nessa cor
+   * e, quando pega (golpe ou projétil), um clarão grande e um anel de onda de choque
+   * dessa cor no ponto do contato, o boneco pisca nessa cor, quem levou o golpe
+   * devolvido também, e o projétil devolvido fica pintado dela até sumir.
    */
-  counter?: { glow: string; ding?: string; burst?: string; lines?: string; sound?: SfxName };
+  counter?: {
+    glow: string;
+    ding?: string;
+    burst?: string;
+    lines?: string;
+    sound?: SfxName;
+    color?: number;
+  };
   /**
    * Pancada no chão (área): um brilho (`shine`) no socket `shine` da peça na mão
    * quando ela chega lá em cima; no 1º frame ativo, nuvens de farinha (`cloud`) para
@@ -206,6 +217,8 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
       burst: 'fx_crack',
       lines: 'fx_lines',
       sound: 'spine_crack',
+      // ciano claro puxado do turquesa dele (#1ba39c)
+      color: 0x3fe8e0,
     },
   },
   darllan: {

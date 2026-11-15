@@ -82,11 +82,13 @@ export interface KoEvent {
 /**
  * Um projétil com quiques (a bola do Igão) quicou no topo de um chão ou plataforma.
  * `x`/`y`: ponto do quique (meio da bola, no topo da superfície), em subpx;
- * `bouncesLeft`: quiques que ainda sobram.
+ * `bouncesLeft`: quiques que ainda sobram. `shooter`: quem soltou (o dono pode ser
+ * quem devolveu no contra-ataque).
  */
 export interface BounceEvent {
   type: 'bounce';
   owner: number;
+  shooter: number;
   x: number;
   y: number;
   bouncesLeft: number;

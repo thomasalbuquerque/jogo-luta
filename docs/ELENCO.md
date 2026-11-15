@@ -300,6 +300,10 @@ Trechos prontos para os textos do Firefly (pasta `art/tchula/`):
   - **Perde do agarrão:** como todo contra-ataque, o agarrão passa por ele.
   - **Efeitos:** na pose, um brilho leve em volta dele (aviso de que está esperando); quando pega,
     um "ding" e um congelamento curto; no golpe, um "créc" de coluna estalando e linhas de impacto.
+    Para ninguém deixar de perceber que foi contra-ataque, tudo em ciano claro (`#3FE8E0`, puxado do
+    turquesa dele): os anéis da janela, um clarão grande e um anel de onda de choque no ponto do
+    contato, ele piscando em ciano, quem levou o golpe devolvido também, e o projétil devolvido
+    pintado de ciano até sumir (com o som do contra-ataque também na devolução).
   - **Quase nada novo no `sim`:** cabe no bloco contra-ataque. O oponente só toma o golpe e entra
     no hitstun normal: nenhuma animação nova para ele. O `sim` só passou a marcar quem o
     contra-ataque pegou (no `moveHits`), para o jogo tocar o tapa em vez do recovery de quem errou.

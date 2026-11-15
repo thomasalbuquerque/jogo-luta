@@ -74,6 +74,7 @@ describe('times', () => {
     const shot = (): Projectile[] => [
       {
         owner: 0,
+        shooter: 0,
         x: mate.x,
         y: mate.y,
         w: px(20),
