@@ -318,18 +318,19 @@ describe('elenco', () => {
     it('jogável, com especial e provocação', () => {
       expect(PLAYABLE_CHARACTERS).toContain('meia');
       expect(MEIA.special?.name).toBe('Comando');
-      expect(MEIA.special?.move.grab?.combo).toEqual({ hits: 9, damage: 1 });
+      expect(MEIA.special?.move.grab?.combo).toEqual({ hits: 4, damage: 2 });
+      expect(MEIA.special?.move.grab?.holdTicks).toBe(30);
       expect(MEIA.taunt.text).toBe('Vem!');
       expect(MEIA.blurb.length).toBeGreaterThan(0);
     });
 
-    it('colado, pega e solta o combo: 10 golpes e 16%', () => {
+    it('colado, pega e solta o combo: 5 golpes e 15%', () => {
       const { g, foe } = setup(56);
       stepGame(g, [Button.SPECIAL, 0]);
       const hits = hitsOf(g, 90);
-      expect(hits.map((h) => h.combo)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      expect(hits.map((h) => h.combo)).toEqual([1, 2, 3, 4, 5]);
       expect(hits.at(-1)?.kind).toBe('throw');
-      expect(foe.damage).toBe(16);
+      expect(foe.damage).toBe(15);
       expect(hits.at(-1)?.knockback).toBeGreaterThan(0);
     });
 
@@ -350,6 +351,9 @@ describe('elenco', () => {
       expect(MEIA.stats.width).toBeLessThan(base.stats.width);
       expect(MEIA.stats.weight).toBeLessThan(base.stats.weight);
       expect(MEIA.stats.walkSpeed).toBeGreaterThan(base.stats.walkSpeed);
+      // o Schummaki continua o mais rápido no chão
+      expect(MEIA.stats.walkSpeed).toBeLessThan(SCHUMMAKI.stats.walkSpeed);
+      expect(MEIA.stats.dashSpeed).toBeLessThan(SCHUMMAKI.stats.dashSpeed);
       for (const id of ['neutralLight', 'sideLight', 'sideAir'] as const) {
         expect(MEIA.moves[id].startup).toBeLessThan(base.moves[id].startup);
         expect(MEIA.moves[id].damage).toBeLessThan(base.moves[id].damage);

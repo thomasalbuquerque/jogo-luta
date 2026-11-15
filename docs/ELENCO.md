@@ -624,10 +624,10 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   - **Tempo:** startup curto (6 ticks, 1 por símbolo), active curto (4 ticks, a janela do agarrão).
     Recovery longo se errar (~32 ticks): é o "fica exposto".
   - **Alcance:** curto, uns 36 px à frente do corpo, da cintura ao ombro. Precisa estar colado.
-  - **Se pegar:** o adversário fica preso ~60 ticks (1 s). A cada ~6 ticks sai um golpe do combo (9
-    golpes) que dá 1% de dano sem knockback; o contador mostra "2 HITS", "3 HITS"... e o último
+  - **Se pegar:** o adversário fica preso 30 ticks (meio segundo: com 3 ou 4 jogadores, menos tempo
+    exposto). A cada 6 ticks sai um golpe do combo (4 golpes) que dá 2% de dano sem knockback; o contador mostra "2 HITS", "3 HITS"... e o último
     chute é o arremesso (dano ~7, knockback médio-alto, ângulo ~40°, para o lado em que ele está
-    virado). Fecha em "10 HITS" e ~16% no total. Como em todo agarrão, ←/→ durante o combo escolhe
+    virado). Fecha em "5 HITS" e 15% no total. Como em todo agarrão, ←/→ durante o combo escolhe
     para que lado arremessa.
   - **Se errar:** o comando fica vermelho, com um "X" grande por cima, e treme; ele fica parado no
     recovery longo, de guarda aberta.
@@ -640,13 +640,13 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
     velocidade e um "pá" curto, com um tremor leve (sem congelar, para o combo correr); o contador
     "N HITS" em amarelo, inclinado, crescendo um pouco a cada golpe, ao lado dele; no arremesso, uma
     explosão de impacto maior e um "póu" forte. No erro, um "buzz" grave, de comando errado.
-  - **A animação:** 1 clipe de combo com umas 6 poses de soco e chute que se repetem (jab, direto,
-    chute baixo, gancho, chute alto, chute giratório) e 1 pose final de chute forte (o arremesso),
+  - **A animação:** 1 clipe de combo com 4 poses de soco e chute (jab, chute baixo, gancho e chute
+    alto, de 6 desenhadas: o direto e o chute giratório ficam guardados) e 1 pose final de chute forte (o arremesso),
     todas com os punhos fechados, nunca agarrando. O combo anda pelos golpes do agarrão, não pelo
     frame do golpe (que fica parado enquanto segura). O adversário usa a pose de agarrado que já
     existe, com um tranco a cada golpe: nenhuma animação nova para ele.
   - **Precisa de código novo (pequeno):** o bloco agarrão de hoje só dá dano no arremesso. Falta
-    uma opção de golpes durante o agarrão no mesmo bloco (ex.: `combo: { hits: 9, damage: 1 }`),
+    uma opção de golpes durante o agarrão no mesmo bloco (ex.: `combo: { hits: 4, damage: 2 }`),
     que espalha os golpes pelo `holdTicks` e solta um evento de acerto a cada um (para a faísca, o
     som e o contador), em vez de um bloco novo. O contador e o comando são só do `game`: o `sim` já
     diz se o agarrão pegou (`moveHits` e `grabTicks` de quem segura).
@@ -662,8 +662,8 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   ciano-elétrico e jeans (o ciano é mais azul e mais vivo que o turquesa do Crocko, e o branco da
   camiseta lê bem nos menus escuros).
 - **No jogo:** jogável. O comando acende em cima da cabeça enquanto ele entra colado; se pega, o
-  adversário fica preso levando 9 golpes (faísca, "pá" e o contador "N HITS" atrás dele) e o chute
-  final arremessa com uma explosão e o "póu", fechando em "10 HITS" e 16%. Se erra, o comando fica
+  adversário fica preso levando 4 golpes (faísca, "pá" e o contador "N HITS" atrás dele) e o chute
+  final arremessa com uma explosão e o "póu", fechando em "5 HITS" e 15%. Se erra, o comando fica
   vermelho com o X, toca o "buzz" e ele fica de guarda aberta. Na provocação ajeita os óculos com o
   indicador e chama com a mão de trás; o balão "Vem!" sai no `voiceAt`. Ficha em
   `packages/sim/src/characters/meia.ts`.

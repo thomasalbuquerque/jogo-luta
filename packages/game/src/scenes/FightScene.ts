@@ -828,11 +828,12 @@ export class FightScene extends Phaser.Scene {
     const n = e.combo ?? 1;
     this.commands[holder.id]?.hit(n, false);
     const side = holder.facing;
-    // altura de cada golpe, na ordem do clipe: jab, direto, chute baixo, gancho,
-    // chute alto e giratório (fração da altura, a partir do meio do corpo)
-    const heights = [-0.24, -0.2, 0.3, -0.34, -0.3, -0.22];
+    // altura de cada golpe, na ordem do clipe (`MEIA_COMBO`): jab, chute baixo,
+    // gancho e chute alto (fração da altura, a partir do meio do corpo)
+    const heights = [-0.24, 0.3, -0.34, -0.3];
     const x = toPx(victim.x + victim.w / 2) - side * toPx(victim.w) * 0.3;
-    const y = toPx(victim.y + victim.h / 2) + toPx(victim.h) * (heights[(n - 1) % 6] ?? 0);
+    const y =
+      toPx(victim.y + victim.h / 2) + toPx(victim.h) * (heights[(n - 1) % heights.length] ?? 0);
     const texture = characterTextureKey(holder.character);
     // tamanhos pela altura do corpo do agarrado
     const h = toPx(victim.h);

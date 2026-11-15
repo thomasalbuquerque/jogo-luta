@@ -787,14 +787,23 @@ const COMBO_FINISH: Rot = {
 };
 
 /**
- * Combo do Meia, em ticks desde que o agarrão pegou: um golpe a cada `step` ticks
- * (`hits`, os golpes do combo da ficha), cada um com 3 ticks de volta à guarda antes,
- * e o chute final em `hits + 1` golpes. Depois, `recovery` ticks voltando à guarda.
+ * Golpes do combo do Meia, na ordem (índices de `COMBO_STRIKES`): um por golpe do
+ * combo da ficha (`combo.hits` 4). Jab, chute baixo, gancho e chute alto: alternam
+ * altura e braço/perna, o que lê melhor que os 4 primeiros.
  */
-function comboKeys(hits: number, step: number, recovery: number): Key[] {
+const MEIA_COMBO = [0, 2, 3, 4] as const;
+
+/**
+ * Combo do Meia, em ticks desde que o agarrão pegou: um golpe a cada `step` ticks
+ * (`strikes`, índices de `COMBO_STRIKES`), cada um com 3 ticks de volta à guarda
+ * antes, e o chute final 1 golpe depois do último. Depois, `recovery` ticks voltando à
+ * guarda.
+ */
+function comboKeys(strikes: readonly number[], step: number, recovery: number): Key[] {
   const keys: Key[] = [{ t: 0, rot: COMBO_GUARD, expression: 'normal' }];
+  const hits = strikes.length;
   for (let i = 0; i < hits; i++) {
-    const strike = COMBO_STRIKES[i % COMBO_STRIKES.length] ?? { rot: COMBO_GUARD };
+    const strike = COMBO_STRIKES[strikes[i] ?? 0] ?? { rot: COMBO_GUARD };
     const at = (i + 1) * step;
     keys.push({ t: at - 3, rot: COMBO_GUARD, ease: 'inOut' });
     keys.push({ t: at, rot: strike.rot, x: strike.x ?? 0, y: strike.y ?? 0, ease: 'out' });
@@ -1555,13 +1564,13 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 3, rot: STANCE, handNear: 'fist', handFar: 'fist', expression: 'normal', ease: 'inOut' },
     ],
   },
-  // O combo, quando o Comando pega (em ticks desde que pegou, ver `fighterClip`): 9
-  // golpes, um a cada 6 ticks como no sim (60 ticks de agarrão, `combo.hits` 9), o
-  // chute final no tick 60 e os 32 ticks do recovery.
+  // O combo, quando o Comando pega (em ticks desde que pegou, ver `fighterClip`): 4
+  // golpes, um a cada 6 ticks como no sim (30 ticks de agarrão, `combo.hits` 4), o
+  // chute final no tick 30 e os 32 ticks do recovery.
   meia_special_combo: {
     timing: 'once',
-    length: 92,
-    keys: comboKeys(9, 6, 32),
+    length: 62,
+    keys: comboKeys(MEIA_COMBO, 6, 32),
   },
   // Ajeita os óculos com o indicador, olhando para o adversário, e chama com a mão de
   // trás, palma para cima: "Vem!" (voz no `voiceAt` da ficha, 40).

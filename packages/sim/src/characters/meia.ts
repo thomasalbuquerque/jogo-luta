@@ -3,8 +3,8 @@ import { defineCharacter } from '../character';
 /**
  * Meia — técnico (docs/ELENCO.md). Pro player de jogo de luta: magro, leve, rápido
  * no chão e bom no ar, golpes base um pouco mais rápidos e mais fracos. Especial:
- * Comando, um agarrão de alcance curto. Se pegar, solta um combo de 9 golpes de 1%
- * com o adversário preso e fecha com um chute que arremessa ("10 HITS"). Se errar,
+ * Comando, um agarrão de alcance curto. Se pegar, solta um combo de 4 golpes de 2%
+ * com o adversário preso e fecha com um chute que arremessa ("5 HITS"). Se errar,
  * fica parado num recovery longo.
  */
 export const MEIA = defineCharacter({
@@ -15,13 +15,14 @@ export const MEIA = defineCharacter({
   colors: { primary: '#f4f4f0', secondary: '#22c1ee' },
   stats: {
     weight: 88,
-    walkSpeed: 7,
+    // chega colado rápido (o Schummaki, 7,4 e 14,5, continua o mais rápido no chão)
+    walkSpeed: 7.3,
     airSpeed: 5.8,
     jumpHeight: 180,
     airJumps: 1,
     // estatura média (a do Gabs), magro
     hurtbox: { w: 44, h: 96 },
-    dashSpeed: 14,
+    dashSpeed: 14.3,
   },
   moves: {
     // golpes base: startup 1 tick menor e 1% a menos que a média
@@ -46,10 +47,11 @@ export const MEIA = defineCharacter({
         type: 'grab',
         // alcance curto: ~36 px à frente do corpo, da cintura ao ombro
         box: { x: 40, y: -8, w: 36, h: 44 },
-        // 1 s preso: um golpe a cada 6 ticks e o chute final no tick 60
-        holdTicks: 60,
-        combo: { hits: 9, damage: 1 },
-        // o chute que arremessa: fecha em ~16%
+        // meio segundo preso (com 3 ou 4 jogadores, menos tempo exposto): um golpe a
+        // cada 6 ticks e o chute final no tick 30
+        holdTicks: 30,
+        combo: { hits: 4, damage: 2 },
+        // o chute que arremessa: fecha em 4 × 2 + 7 = 15%
         hit: { damage: 7, angle: 40, baseKnockback: 9, knockbackScale: 0.2 },
       },
     ],
