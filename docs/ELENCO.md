@@ -514,35 +514,40 @@ Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
 - **Estilo de luta:** destemida. Leve e rápida no chão, pulo bom, golpes normais um pouco mais
   fracos que a média. O jogo dela é achar a hora de fumar e, com a aura ligada, ir para cima sem
   medo de apanhar. Contraste com o Crocko: o Crocko espera o golpe para devolver; a Marília
-  simplesmente não sente o golpe.
+  aguenta o golpe e segue.
 - **Especial — Tragadinha (buff):** ela tira um cigarrinho de palha (palheiro) do bolso de trás,
   põe na boca e dá uma tragada (a ponta acende em brasa). Ao soltar, a fumaça sai verde clarinha e
-  envolve o corpo dela: vira uma aura. Com a aura, ela não toma dano por um tempo.
+  envolve o corpo dela: vira uma aura. Com a aura, ela sente bem menos os golpes por um tempo.
   - **Tempo:** startup longo (~40 ticks: ~12 tirando o palheiro, ~18 na tragada, ~10 soltando a
     fumaça), vulnerável o tempo todo: é o preço do especial, e quem estiver perto pune. Se ela
     apanhar no startup, o palheiro cai e o especial é perdido (a recarga já contou). Recovery curto
     (~12 ticks, ela joga o palheiro fora).
-  - **A aura:** liga no 1º frame ativo e dura ~120 ticks (2 s). Golpes, projéteis e agarrões passam
-    por ela, como na esquiva: sem dano, sem knockback, sem hitstun. Ela anda, pula e ataca
-    normalmente. Não salva da blast zone: sair do mapa com a aura ainda é KO.
-  - **Recarga:** longa, ~480 ticks (8 s), contada do começo, para a aura não ficar quase sempre
-    ligada.
+  - **A aura:** liga no 1º frame ativo e dura 300 ticks (5 s). Ela leva golpes, projéteis e
+    agarrões normalmente (knockback, hitstun, arremesso), mas soma só 60% do dano (no mínimo 1%).
+    Ela anda, pula e ataca normalmente. Dá para matar e agarrar com a aura ligada; como o
+    knockback usa o % acumulado, ela só demora mais para chegar no % de morrer. Até a 2ª rodada de
+    balanceamento a aura era invencível (golpes passavam por ela); ficou ligada pouco tempo e era
+    tudo ou nada.
+  - **Recarga:** 450 ticks (7,5 s), contada do começo: entre uma aura e outra há pelo menos 150
+    ticks (2,5 s) sem proteção, 40 deles parada fumando.
   - **No ar:** funciona, sem impulso; como o startup é longo e ela vai caindo, não serve de
     recuperação.
   - **Efeitos:** brasa laranja na ponta do palheiro durante a tragada; fumacinha cinza quando ela
     traga; ao soltar, uma baforada verde clarinha (`#B5F2C6`) que se espalha em volta do corpo e
     vira a aura: um contorno de luz verde clarinho colado na silhueta, com fiapos de fumaça verde
-    subindo. Golpe que passa pela aura faz um brilho verde e um "plim" (sem dano). Nos últimos 30
+    subindo. Golpe que pega com a aura ligada faz, junto do impacto, uma estrelinha verde e um "plim"
+    menores (o golpe pegou mais fraco). Nos últimos 30
     ticks a aura pisca, avisando que vai acabar.
   - **Como desenhar a aura:** no código, nunca com imagem. Ela é um brilho verde clarinho
-    (`#B5F2C6`) aplicado no boneco inteiro (o efeito Glow do Phaser no container do rig), então
-    acompanha cada pose: soco, pulo, agachada. Uma silhueta pronta ficaria parada de pé e descolada
-    do corpo nos golpes, e uma bolha redonda leria como escudo e esconderia a personagem. Se o Glow
-    não rodar no navegador, o plano B é uma cópia do boneco pintada de verde, um pouco maior, atrás
-    dela. Da folha de efeitos vêm só o palheiro, as fumacinhas cinzas, os fiapos verdes (sobem em
+    (`#B5F2C6`) atrás do boneco: um brilho macio e aditivo, do tamanho do corpo (mais alto que
+    largo), pulsando, criado uma vez e só mostrado ou escondido. Antes era o efeito Glow do Phaser
+    no container do rig, mas ele derrubava o desempenho em tela cheia (pós-processamento lendo o
+    boneco centenas de vezes por pixel), e foi trocado. Uma bolha redonda leria como escudo e
+    esconderia a personagem. Da folha de efeitos vêm só o palheiro, as fumacinhas cinzas, os fiapos verdes (sobem em
     volta dela) e a estrelinha do "plim"; a brasa é um pontinho laranja piscando, também no código.
-  - **Código novo (feito):** o bloco buff ganhou a opção `invulnerable: true` (ver "Aura" no
-    `docs/GDD.md`), em vez de um bloco novo.
+  - **Código novo (feito):** o bloco buff ganhou a opção `damageTakenPercent` (ver "Aura" no
+    `docs/GDD.md`), em vez de um bloco novo. A opção `invulnerable: true` (aura invencível) continua
+    no bloco, mas ela não usa mais.
 - **Provocação:** põe as duas mãos no rosto, arregala os olhos, balança a cabeça e grita "Gentiii!".
 - **Visual:** roupa do dia a dia. Camiseta rosa-framboesa (`#E2557F`) lisa, de manga curta, um
   pouco folgada e para fora da calça; calça jeans clara (`#8DB0D8`) de cintura alta e perna reta,
@@ -553,8 +558,8 @@ Trechos prontos para os textos do Firefly (pasta `art/gabs/`):
   (é mais forte e frio).
 - **No jogo:** jogável. Ela tira o palheiro do bolso de trás, leva à boca e traga (a brasa acende),
   solta a baforada verde no 1º frame ativo e fica zen, com o brilho verde colado no corpo e fiapos de
-  fumaça subindo; no recovery joga o palheiro fora com um peteleco. Golpe que passa pela aura faz a
-  estrelinha e o "plim". Na provocação, as mãos vão nas bochechas e ela balança a cabeça gritando.
+  fumaça subindo; no recovery joga o palheiro fora com um peteleco. Golpe que pega com a aura faz a
+  estrelinha e o "plim" junto do impacto. Na provocação, as mãos vão nas bochechas e ela balança a cabeça gritando.
   Ficha em `packages/sim/src/characters/marilia.ts`.
 - **Ideias guardadas:** se o João Frango provocar com ela na luta ("Ô Mariiiliaaa!"), ela responde
   "Gentiii!"; respawn soltando uma baforada; "Gentiii!" ao levar KO.
@@ -570,7 +575,7 @@ Outfit: raspberry pink (#E2557F) plain short-sleeve T-shirt, slightly loose, unt
 Signature details: loose shoulder-length brown hair (not below the shoulders), the pink T-shirt, a hand-rolled straw cigarette.
 Colors: primary #E2557F, secondary #8DB0D8, accent #8FD9A8.
 Face/personality: expressive, big wide eyes, dramatic "can you believe this?" look.
-Special move: "Tragadinha" — she pulls a hand-rolled straw cigarette from her back pocket, takes a drag, and exhales a light green smoke that wraps around her body as a glowing aura; while it lasts, hits pass through her.
+Special move: "Tragadinha" — she pulls a hand-rolled straw cigarette from her back pocket, takes a drag, and exhales a light green smoke that wraps around her body as a glowing aura; while it lasts, she shrugs hits off.
 Taunt: puts both hands on her cheeks, eyes wide, shakes her head and shouts her catchphrase.
 Extra parts for the parts sheet: one hand holding a thin hand-rolled cigarette between two fingers.
 Props and effects for the effects sheet: the hand-rolled straw cigarette (side view, pointing right, no hands); 1 small orange ember glow; 3 small gray smoke puffs; 4 light green smoke wisps; 1 small light green sparkle.
@@ -632,8 +637,8 @@ Trechos prontos para os textos do Firefly (pasta `art/marilia/`):
   - **Se errar:** o comando fica vermelho, com um "X" grande por cima, e treme; ele fica parado no
     recovery longo, de guarda aberta.
   - **Riscos:** se alguém (o companheiro do agarrado, no 2v2) bater nele no meio do combo, ele solta
-    o adversário e o contador some. A aura da Marília não deixa ele pegar (o comando fica vermelho,
-    como num erro). Ganha do contra-ataque do Crocko, como todo agarrão.
+    o adversário e o contador some. Na Marília com a aura ele pega normalmente, mas os golpes
+    somam menos dano. Ganha do contra-ataque do Crocko, como todo agarrão.
   - **Recarga:** ~90 ticks (1,5 s), contada do começo.
   - **No ar:** funciona, sem impulso. Se pegar no ar, os dois ficam parados no ar até o arremesso.
   - **Efeitos:** setas acendendo no startup; a cada golpe do combo, uma faísca de impacto, linhas de
@@ -749,7 +754,7 @@ Trechos prontos para os textos do Firefly (pasta `art/meia/`):
   - **No ar:** funciona igual (vira um saque viagem), sem impulso: não ajuda a voltar ao palco. A
     bola sai de mais alto, então o 1º quique fica mais longe.
   - **Interações:** a correção do Crocko devolve a bola para quem sacou, com os quiques que
-    sobraram; a aura da Marília deixa a bola passar.
+    sobraram; na Marília com a aura a bola acerta, mas dá menos dano.
   - **Efeitos:** a bola gira no ar no sentido em que anda (rotação no código, não precisa de
     quadros); na batida, um estouro de impacto na mão e um "pá!" de tapa forte; atrás da bola, um
     rastro curto até o 1º quique; a cada quique, uma poeirinha no chão e um "tum" que vai ficando

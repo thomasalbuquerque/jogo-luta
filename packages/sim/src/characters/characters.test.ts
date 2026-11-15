@@ -253,19 +253,30 @@ describe('elenco', () => {
       expect(MARILIA.blurb.length).toBeGreaterThan(0);
     });
 
-    it('com a aura, o golpe passa; quando ela acaba, volta a tomar', () => {
+    /** O soco lateral do lutador base (8%) na Marília, que está parada. */
+    const sideLight = (marilia: Fighter, foe: Fighter) => {
+      run([marilia, foe], [0, Button.ATTACK | Button.LEFT]);
+      run([marilia, foe], [0, 0], 30);
+    };
+
+    it('com a aura, leva o golpe (knockback) mas só 60% do dano; quando ela acaba, dano inteiro', () => {
       const { marilia, foe } = setup();
       run([marilia, foe], [Button.SPECIAL, 0]);
       run([marilia, foe], [0, 0], 40);
-      expect(hasAura(marilia)).toBe(true);
-      run([marilia, foe], [0, Button.ATTACK]);
-      run([marilia, foe], [0, 0], 30);
-      expect(marilia.damage).toBe(0);
-      run([marilia, foe], [0, 0], 90);
+      expect(marilia.buffTicks).toBeGreaterThan(0);
       expect(hasAura(marilia)).toBe(false);
-      run([marilia, foe], [0, Button.ATTACK]);
-      run([marilia, foe], [0, 0], 20);
-      expect(marilia.damage).toBeGreaterThan(0);
+      const x0 = marilia.x;
+      sideLight(marilia, foe);
+      // 8% × 60% = 4,8 → 4%, e foi arremessada para longe do golpe
+      expect(marilia.damage).toBe(4);
+      expect(marilia.x).toBeLessThan(x0 - px(20));
+      // a aura dura 5 s
+      run([marilia, foe], [0, 0], 300);
+      expect(marilia.buffTicks).toBe(0);
+      const before = marilia.damage;
+      foe.x = marilia.x + marilia.w / 2 + px(50) - foe.w / 2;
+      sideLight(marilia, foe);
+      expect(marilia.damage - before).toBe(8);
     });
 
     it('vulnerável no startup: apanhando, a aura não liga', () => {
@@ -274,7 +285,7 @@ describe('elenco', () => {
       run([marilia, foe], [0, Button.ATTACK]);
       run([marilia, foe], [0, 0], 60);
       expect(marilia.damage).toBeGreaterThan(0);
-      expect(hasAura(marilia)).toBe(false);
+      expect(marilia.buffTicks).toBe(0);
     });
 
     it('baixinha, leve, rápida no chão e golpes um pouco mais fracos', () => {
@@ -284,7 +295,7 @@ describe('elenco', () => {
       expect(MARILIA.stats.walkSpeed).toBeGreaterThan(base.stats.walkSpeed);
       expect(MARILIA.stats.jumpHeight).toBeGreaterThan(base.stats.jumpHeight);
       expect(MARILIA.moves.sideAir.damage).toBeLessThan(base.moves.sideAir.damage);
-      expect(MARILIA.special?.cooldownTicks).toBe(480);
+      expect(MARILIA.special?.cooldownTicks).toBe(450);
     });
   });
 
