@@ -35,11 +35,11 @@ export const SCHUMMAKI = defineCharacter({
     name: 'Arrancada',
     // Queima pneu (startup longo) e dispara na horizontal. No ar fica parado
     // queimando, sai mais curto e só 1 vez: não vira recuperação infinita. A
-    // recarga conta do começo: sobram 25 ticks sem especial depois de cada uso.
+    // recarga conta do começo: sobram 60 ticks (1 s) sem especial depois de cada uso.
     startup: 16,
     active: 14,
     recovery: 20,
-    cooldownTicks: 75,
+    cooldownTicks: 110,
     oncePerAir: true,
     hoverStartup: true,
     blocks: [
@@ -49,7 +49,7 @@ export const SCHUMMAKI = defineCharacter({
         airSpeed: 11,
         // ~84% da altura do corpo
         box: { x: 28, y: 5, w: 66, h: 94 },
-        hit: { damage: 13, angle: 32, baseKnockback: 11, knockbackScale: 0.19 },
+        hit: { damage: 12, angle: 32, baseKnockback: 11, knockbackScale: 0.19 },
       },
     ],
   },

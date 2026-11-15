@@ -258,7 +258,7 @@ Ajustes de golpe aceitos: `startup`, `active`, `recovery`, `damage`, `angle`, `b
 
 | Personagem  | Estilo    | Peso | Chão (px/tick) | Ar (px/tick) | Pulo | Pulos aéreos | Especial                                                                                                                                      |
 | ----------- | --------- | ---- | -------------- | ------------ | ---- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Schummaki   | Rusher    | 106  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 13%, 1 vez por ar, parado no ar no startup, recarga de 75                                            |
+| Schummaki   | Rusher    | 106  | 7,4            | 5,3          | 165  | 1            | **Arrancada** (investida): 16 / 14 / 20, 12%, 1 vez por ar, parado no ar no startup, recarga de 110                                           |
 | João Frango | Zoner     | 86   | 5,6            | 6,2          | 180  | 2            | **Frango assado voador** (projétil): 10 / 1 / 16, 5%, reto a 10,5 px/tick, ~570 px, recarga de 54                                             |
 | Dadazinho   | Punisher  | 84   | 7              | 6            | 180  | 1            | **Doze** (projétil): 20 / 1 / 26, 15%, tiro curto (~200 px) e forte, recarga de 100                                                           |
 | Tauba       | Fujão     | 92   | 6,8            | 6            | 178  | 1            | **Silent quit** (teleporte sorteado): 14 / 20 / 18, sem dano, 1 vez por ar, recarga de 240                                                    |
