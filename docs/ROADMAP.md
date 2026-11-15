@@ -151,7 +151,7 @@ Objetivo: dois amigos em casas diferentes jogando sem lag perceptível. Modelo: 
 - [x] Sala por código: o host cria a sala e recebe um código de 4 letras para mandar no grupo; o amigo entra com o código.
 - [x] Conexão WebRTC DataChannel sem ordenação e sem retransmissão (comportamento parecido com UDP), via PeerJS. O PeerJS só cria canal confiável (fica para o lobby); o canal dos inputs é criado direto na mesma conexão.
 - [x] Sinalização: o servidor gratuito do PeerJS para começar; um servidor próprio em Node se ele der problema (aí é só apontar as variáveis `VITE_PEER_*` para ele; `packages/server` ainda não precisou existir).
-- [x] STUN público + TURN de fallback para quem estiver atrás de NAT restritivo (comum em 4G). O TURN é o público do PeerJS (longe do Brasil: ping alto); um TURN próprio entra pelas variáveis `VITE_TURN_*`.
+- [x] STUN público + TURN de fallback para quem estiver atrás de NAT restritivo (comum em 4G). O TURN é o da Cloudflare, com credenciais temporárias entregues por um Worker (`packages/server/turn-worker.js`, `VITE_TURN_ENDPOINT`); o público do PeerJS, usado no começo, saiu do ar.
 - [x] Netcode por atraso: cada lado espera o input do outro com 2 a 3 frames de atraso. Com todos em São Paulo e na fibra, o ping deve ficar baixo o bastante para isso não ser perceptível. O rollback ficou para a Etapa 12, opcional.
 - [x] Detecção de dessincronização: trocar o hash do estado a cada N ticks e registrar quando divergir.
 - [x] Desconexão, reconexão e indicador de ping.
