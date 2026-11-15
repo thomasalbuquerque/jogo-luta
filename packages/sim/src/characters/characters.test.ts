@@ -271,8 +271,8 @@ describe('elenco', () => {
       // 8% × 60% = 4,8 → 4%, e foi arremessada para longe do golpe
       expect(marilia.damage).toBe(4);
       expect(marilia.x).toBeLessThan(x0 - px(20));
-      // a aura dura 5 s
-      run([marilia, foe], [0, 0], 300);
+      // a aura dura 350 ticks (quase 6 s)
+      run([marilia, foe], [0, 0], 350);
       expect(marilia.buffTicks).toBe(0);
       const before = marilia.damage;
       foe.x = marilia.x + marilia.w / 2 + px(50) - foe.w / 2;
