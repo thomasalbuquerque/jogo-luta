@@ -169,7 +169,11 @@ async function processPart(
   for (const poly of def.keep ?? []) clipPolygon(img, local(poly), 'keep');
   for (const poly of def.erase ?? []) clipPolygon(img, local(poly), 'erase');
   for (const p of def.paint ?? []) paintPolygon(img, local(p.poly), p.color);
-  for (const f of def.fill ?? []) fillBehind(img, local(f.poly), f.color);
+  for (const f of def.fill ?? []) {
+    fillBehind(img, local(f.poly), f.color);
+    // a área preenchida passa a aceitar contorno (`outline` só desenha onde há desenho)
+    fillBehind(before, local(f.poly), f.color);
+  }
   for (const line of def.outline ?? []) {
     if (!outline) throw new Error(`${name}: "outline" precisa de outline no manifesto`);
     strokePolyline(img, local(line), outline.width, outline.color, before);
