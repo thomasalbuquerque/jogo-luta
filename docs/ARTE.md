@@ -298,16 +298,22 @@ aceita folha sem magenta).
 ### Schummaki e João Frango (já feitos)
 
 Foram os dois primeiros, feitos com textos mais antigos. Os problemas que apareceram neles viraram
-as regras do passo 3. Por isso a pasta do Schummaki tem uma folha a mais, que **não** deve ser
-repetida:
+as regras do passo 3 (pinos nas juntas, manga grudada no tronco, mão grudada no antebraço), e eles
+precisavam de folhas extras de remendo.
 
-- `schummaki/3-pecas-bracos.png`: tronco, braços e mãos refeitos, porque o `3-pecas.png` veio com
-  pinos nas juntas, manga grudada no tronco e mão grudada no antebraço. Quadril, pernas e tênis
-  ainda saem do `3-pecas.png`.
+Depois, o `3-pecas.png` dos dois foi gerado de novo com o texto atual do passo 3, e as folhas extras
+saíram. Cabeças, efeitos, figurinha e conceito continuaram os mesmos. Só a parte visual mudou: a
+ficha (dano, velocidade, tamanho) é a mesma.
 
-O `3-pecas.png` do João Frango foi gerado de novo com o texto atual do passo 3 (avental no tronco,
-short separado, 4 mãos e as mãos em concha), e as folhas extras dele saíram. Só a parte visual
-mudou: a ficha (dano, velocidade, tamanho) é a mesma.
+- **João Frango:** avental no tronco, short separado, 4 mãos e as mãos em concha.
+- **Schummaki:** jaqueta com a manga arregaçada até o cotovelo (antebraço de pele, com o "cotovelo
+  de pele" do Darllan), bermuda separada, coxa só de pele (com a perna da bermuda pintada, como no
+  Crocko), luvas sem dedo nas 4 mãos e as mãos no volante. O texto usado:
+  `upper arm with jacket sleeve pushed up to the elbow; bare forearm without hand`, `<HIPS>` =
+  `hips (graphite cargo shorts only), separate from the torso`, `<SHOE>` =
+  `red and white sneaker`, `<EXTRA>` = `two hands gripping an invisible steering wheel`, e no fim
+  do parágrafo das peças `All hands in gray fingerless gloves.` A folha de peças tem `scale` 0.73,
+  para o tronco ficar do tamanho do antigo e combinar com as cabeças, que não mudaram.
 
 ## Cenário: a laje
 
@@ -534,7 +540,6 @@ No fim, a pasta `art/` fica assim (só as versões aprovadas):
 art/
   style/           style.png, shape.png
   <pasta>/         1-conceito.png, 2-cabecas.png, 3-pecas.png, 4-efeitos.png, 5-figurinha.png
-  schummaki/       os 5 + 3-pecas-bracos.png (exceção, ver "já feitos")
   tchula/          os 5 + 1-conceito-face-correta.png (o rosto corrigido, só referência)
   cenario-laje/    1-mapa.png, 2-ceu.png, 3-longe.png, 4-meio.png, 5-pecas.png
 ```
@@ -642,7 +647,12 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   depois do `tip`, a sobra do desenho (o volume de trás do joelho) também, e as cores perto da ponta
   são pintadas iguais às do começo da canela (claro em cima, sombra embaixo). Um `fade` do `tip` até
   o corte faz a coxa sumir aos poucos por cima da canela: o joelho fica sem linha. Na canela, o
-  contorno da ponta do joelho (escondida atrás da coxa) é pintado das mesmas cores.
+  contorno da ponta do joelho (escondida atrás da coxa) é pintado das mesmas cores. Se a coxa veio
+  com o começo da panturrilha dobrado para trás (Schummaki), o corte dessa sobra fica um pouco
+  abaixo da linha que separa as duas, para o joelho não afinar, e o pedaço dessa linha que sobra
+  na coxa é pintado com a cor da sombra; senão ele aparece como um risco atrás do joelho. Se a
+  canela ficar mais grossa que a coxa no joelho, afine a canela com `stretch` (na folha deitada, a
+  grossura é a altura).
 - **Cotovelo de pele** (manga curta, braço e antebraço à mostra, como no Darllan): o antebraço é
   desenhado sempre na frente do braço (o id do personagem entra em `FOREARM_IN_FRONT`, em
   `rig/library.ts`), dobrado ou esticado. A ponta de baixo do braço fica inteira, com o contorno: é
