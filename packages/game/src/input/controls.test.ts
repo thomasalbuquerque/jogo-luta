@@ -62,11 +62,13 @@ describe('controles', () => {
     expect(parseControls({ keys: [{ ATTACK: ['KeyK'] }] })).toEqual(DEFAULT_CONTROLS);
   });
 
-  it('Enter, Esc, M, ` e F1–F12 não podem ser usados', () => {
-    for (const code of ['Enter', 'Escape', 'KeyM', 'Backquote', 'F5', 'F12']) {
+  it('Enter, Esc, ` e F1–F12 não podem ser usados', () => {
+    for (const code of ['Enter', 'Escape', 'Backquote', 'F5', 'F12']) {
       expect(isReservedKey(code)).toBe(true);
     }
     expect(isReservedKey('KeyF')).toBe(false);
+    // o M era o mudo; o volume agora é na barra e o M fica livre
+    expect(isReservedKey('KeyM')).toBe(false);
     expect(isReservedPadButton(9)).toBe(true);
     expect(isReservedPadButton(13)).toBe(true);
     expect(isReservedPadButton(4)).toBe(false);

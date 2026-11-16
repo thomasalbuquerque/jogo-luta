@@ -10,7 +10,7 @@ import { closeOnline } from '../net/online';
 import { roomFromSearch } from '../net/roomCode';
 import { MenuList } from '../ui/MenuList';
 import { addPortrait } from '../ui/portrait';
-import { fadeIn, titleText, UI, uiText } from '../ui/theme';
+import { fadeIn, titleText, uiText } from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
 import type { FightData } from './FightScene';
 import type { OnlineData } from './OnlineScene';
@@ -150,15 +150,11 @@ export class TitleScene extends Phaser.Scene {
       stroke: '#0b0e16',
       strokeThickness: 5,
     }).setOrigin(0.5);
-    uiText(this, width / 2, height - 24, 'M liga e desliga o som', {
-      fontSize: '15px',
-      color: UI.muted,
-    }).setOrigin(0.5);
     addAudioHint(this);
 
-    // qualquer tecla (menos M, o mudo) ou clique começa
+    // qualquer tecla ou clique começa
     this.input.keyboard?.on('keydown', (e: KeyboardEvent) => {
-      if (!this.inMenu && e.code !== 'KeyM' && !e.repeat) this.openMenu();
+      if (!this.inMenu && !e.repeat) this.openMenu();
     });
     this.input.on(Phaser.Input.Events.POINTER_DOWN, () => {
       if (!this.inMenu) this.openMenu();

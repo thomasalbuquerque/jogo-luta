@@ -76,7 +76,7 @@ function playSynthVoice(scene: Phaser.Scene, text: string): void {
     gain.gain.setValueAtTime(0.0001, t);
     gain.gain.exponentialRampToValueAtTime(0.05, t + 0.015);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + note.dur);
-    // pelo nó de mudo do Phaser: com M ligado, a voz também cala
+    // pelos nós de mudo e volume do Phaser: a voz segue a barra de volume
     osc.connect(gain).connect(sound.masterMuteNode);
     osc.start(t);
     osc.stop(t + note.dur + 0.02);

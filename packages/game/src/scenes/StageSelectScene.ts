@@ -19,6 +19,7 @@ import type { OnlineSession } from '../net/session';
 import { cssColor, fadeIn, panel, teamColor, titleText, UI, uiText } from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
 import type { MatchSetup } from './FightScene';
+import { BELOW_VOLUME_Y } from './VolumeScene';
 import { VIEW } from '../render/view';
 
 /** Miniatura do mapa (16:9, como a tela). */
@@ -156,7 +157,7 @@ export class StageSelectScene extends Phaser.Scene {
     }
     if (this.hasOptions) this.optionsGfx = this.add.graphics();
     if (this.net) {
-      this.netText = uiText(this, width - 16, 14, netLabel(this.net), {
+      this.netText = uiText(this, width - 16, BELOW_VOLUME_Y, netLabel(this.net), {
         fontSize: '16px',
         fontStyle: 'bold',
         color: '#ced4da',

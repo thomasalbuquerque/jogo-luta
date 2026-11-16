@@ -19,6 +19,7 @@ import { addPortrait } from '../ui/portrait';
 import { hasTeams, teamName } from '../match/teams';
 import { cssColor, fighterColor, teamColor, UI, uiText } from '../ui/theme';
 import type { FightScene } from './FightScene';
+import { BELOW_VOLUME_Y } from './VolumeScene';
 import { VIEW } from '../render/view';
 import { getControls } from '../input/controls';
 import { readPads } from '../input/InputManager';
@@ -133,15 +134,21 @@ export class HudScene extends Phaser.Scene {
       stroke: '#0b0e16',
       strokeThickness: 6,
     }).setOrigin(0.5, 0);
-    uiText(this, width - 14, 12, this.fight.net ? 'Esc · Start: menu' : 'Esc · Start: pausa', {
-      fontSize: '14px',
-      color: '#e9ecef',
-      stroke: '#0b0e16',
-      strokeThickness: 4,
-    })
+    uiText(
+      this,
+      width - 14,
+      BELOW_VOLUME_Y,
+      this.fight.net ? 'Esc · Start: menu' : 'Esc · Start: pausa',
+      {
+        fontSize: '14px',
+        color: '#e9ecef',
+        stroke: '#0b0e16',
+        strokeThickness: 4,
+      },
+    )
       .setOrigin(1, 0)
       .setAlpha(0.75);
-    this.netText = uiText(this, width - 14, 34, '', {
+    this.netText = uiText(this, width - 14, BELOW_VOLUME_Y + 22, '', {
       fontSize: '15px',
       fontStyle: 'bold',
       stroke: '#0b0e16',

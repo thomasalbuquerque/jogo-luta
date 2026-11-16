@@ -15,6 +15,7 @@ import { SelectScene } from './scenes/SelectScene';
 import { StageSelectScene } from './scenes/StageSelectScene';
 import { TitleScene } from './scenes/TitleScene';
 import { TutorialScene } from './scenes/TutorialScene';
+import { VolumeScene } from './scenes/VolumeScene';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -51,6 +52,8 @@ const game = new Phaser.Game({
     ResultScene,
     DebugScene,
     RigViewerScene,
+    // barra de volume: começa sozinha e se mantém por cima de tudo
+    VolumeScene,
   ],
 });
 
