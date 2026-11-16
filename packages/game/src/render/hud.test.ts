@@ -19,6 +19,10 @@ describe('hud', () => {
     expect(resultText({ winner: 0, winnerTeam: 0, fighters: solo })).toBe('P1 VENCEU!');
     expect(resultText({ winner: 1, winnerTeam: 1, fighters: solo })).toBe('P2 VENCEU!');
     expect(resultText({ winner: null, winnerTeam: null, fighters: solo })).toBe('EMPATE!');
+    // com nome, o nome de quem venceu
+    const names = ['Thomas', null];
+    expect(resultText({ winner: 0, winnerTeam: 0, fighters: solo }, names)).toBe('THOMAS VENCEU!');
+    expect(resultText({ winner: 1, winnerTeam: 1, fighters: solo }, names)).toBe('P2 VENCEU!');
     const teams = createGame({ characters: ['base', 'base', 'base'], teams: [0, 1, 1] }).fighters;
     expect(resultText({ winner: 2, winnerTeam: 1, fighters: teams })).toBe('TIME AZUL VENCEU!');
   });

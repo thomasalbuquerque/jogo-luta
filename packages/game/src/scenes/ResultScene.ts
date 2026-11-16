@@ -10,7 +10,17 @@ import type { PlayerStats } from '../match/stats';
 import { resultText } from '../render/hud';
 import { MenuList, type MenuOption } from '../ui/MenuList';
 import { addPortrait } from '../ui/portrait';
-import { cssColor, fadeIn, fighterColor, panel, titleText, UI, uiText } from '../ui/theme';
+import { playerTag } from '../profile/playerName';
+import {
+  cssColor,
+  fadeIn,
+  fighterColor,
+  fitWidth,
+  panel,
+  titleText,
+  UI,
+  uiText,
+} from '../ui/theme';
 import type { FightScene, LeaveTarget } from './FightScene';
 import { VIEW } from '../render/view';
 
@@ -65,12 +75,14 @@ export class ResultScene extends Phaser.Scene {
       this,
       width / 2,
       70,
-      resultText(state),
+      resultText(state, fight.names),
       68,
       winner ? cssColor(fighterColor(state.fighters, winner.id)) : UI.text,
     );
-    title.setScale(1.6);
-    this.tweens.add({ targets: title, scale: 1, duration: 300, ease: 'Back.Out' });
+    // nome comprido: o título diminui para caber
+    const fit = Math.min(1, (width - 80) / title.width);
+    title.setScale(1.6 * fit);
+    this.tweens.add({ targets: title, scale: fit, duration: 300, ease: 'Back.Out' });
 
     state.fighters.forEach((f, i) => {
       const n = state.fighters.length;
@@ -287,10 +299,10 @@ export class ResultScene extends Phaser.Scene {
     this.fight.leave(target);
   }
 
-  /** "P2" (com "· VOCÊ" no lutador deste PC, online). */
+  /** O nome, ou "P2" sem nome (com "· VOCÊ" no lutador deste PC, online). */
   private playerTag(f: Fighter): string {
     const you = this.fight.net?.match?.local === f.id ? ' · VOCÊ' : '';
-    return `P${String(f.id + 1)}${you}`;
+    return `${playerTag(f.id, this.fight.names[f.id])}${you}`;
   }
 
   /** Números de um jogador na luta, na ordem das linhas da coluna. */
@@ -319,11 +331,14 @@ export class ResultScene extends Phaser.Scene {
     panel(g, x, COLUMN_Y, w, COLUMN_H, UI.panel, 0.95);
     g.lineStyle(won ? 6 : 3, color, 1);
     g.strokeRoundedRect(x, COLUMN_Y, w, COLUMN_H, 14);
-    uiText(this, x + 14, COLUMN_Y + 10, this.playerTag(f), {
-      fontFamily: UI.titleFont,
-      fontSize: '20px',
-      color: cssColor(color),
-    });
+    fitWidth(
+      uiText(this, x + 14, COLUMN_Y + 10, this.playerTag(f), {
+        fontFamily: UI.titleFont,
+        fontSize: '20px',
+        color: cssColor(color),
+      }),
+      w - 28,
+    );
     const portrait = addPortrait(this, f.character, cx, COLUMN_Y + 88, won ? 116 : 96);
     if (!won) portrait.setAlpha(0.7);
     if (won) {
@@ -360,11 +375,14 @@ export class ResultScene extends Phaser.Scene {
     g.strokeRoundedRect(x, COLUMN_Y, COLUMN_W, COLUMN_H, 14);
     const portrait = addPortrait(this, f.character, cx - 100, COLUMN_Y + 110, won ? 190 : 150);
     if (!won) portrait.setAlpha(0.7);
-    uiText(this, x + 16, COLUMN_Y + 12, this.playerTag(f), {
-      fontFamily: UI.titleFont,
-      fontSize: '24px',
-      color: cssColor(color),
-    });
+    fitWidth(
+      uiText(this, x + 16, COLUMN_Y + 12, this.playerTag(f), {
+        fontFamily: UI.titleFont,
+        fontSize: '24px',
+        color: cssColor(color),
+      }),
+      COLUMN_W - 32,
+    );
     if (won) {
       uiText(this, cx - 100, COLUMN_Y + 218, 'VENCEDOR', {
         fontFamily: UI.titleFont,

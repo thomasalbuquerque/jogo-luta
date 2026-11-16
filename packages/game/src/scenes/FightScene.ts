@@ -79,7 +79,8 @@ import { hitTrauma, Shake } from '../render/shake';
 import { SlowMo } from '../render/slowmo';
 import { StageView } from '../render/stageView';
 import { fighterPose } from '../rig/fighterPose';
-import { fighterColor } from '../ui/theme';
+import { cssColor, fighterColor } from '../ui/theme';
+import { getPlayerName, localNames, playerTag } from '../profile/playerName';
 import { createTutorialGame, TUTORIAL_CHARACTERS, TutorialDirector } from '../tutorial/director';
 import { DUMMY } from '../tutorial/lessons';
 import type { HudScene } from './HudScene';
@@ -163,6 +164,8 @@ export interface FightData extends Partial<MatchSetup> {
   replay?: Replay;
   /** Abre o tutorial (Crocko contra o boneco de treino) em vez de uma luta. */
   tutorial?: boolean;
+  /** Nome de quem joga com cada lutador (sem: o do navegador no P1; num replay, nenhum). */
+  names?: readonly (string | null)[];
 }
 
 /** O setup da partida online (o que a sala mandou). */
@@ -211,6 +214,8 @@ export class FightScene extends Phaser.Scene {
   /** KOs, quedas e dano de cada jogador nesta luta. */
   stats: MatchStats = createStats(0);
   setup: MatchSetup = { characters: PLAYABLE_CHARACTERS.slice(0, 2), stageId: STAGES[0]?.id ?? '' };
+  /** Nome de quem joga com cada lutador (null ou sem valor: aparece "P2"). */
+  names: (string | null)[] = [];
   /**
    * Atraso de input por jogador, para sentir o netcode por atraso sem rede
    * (`?atraso=3` na URL, ou as teclas do modo debug). Vale entre lutas.
@@ -295,6 +300,8 @@ export class FightScene extends Phaser.Scene {
   private overlayGfx!: Phaser.GameObjects.Graphics;
   private debugGfx!: Phaser.GameObjects.Graphics;
   private bubbles: Phaser.GameObjects.Text[] = [];
+  /** Nome de cada jogador em cima da cabeça, em cima do marcador. */
+  private nameTags: Phaser.GameObjects.Text[] = [];
   /** Comando e contador "N HITS" de quem tem agarrão com combo (o Meia); null nos outros. */
   private commands: (CommandView | null)[] = [];
   /** Tick até quando o agarrado dá o tranco de um golpe do combo. */
@@ -315,6 +322,14 @@ export class FightScene extends Phaser.Scene {
     this.net = this.tutorial ? null : getOnline();
     this.leaving = false;
     const replay = data.replay;
+    // online, os nomes vêm da sala a cada partida (newMatch)
+    this.names = data.names
+      ? [...data.names]
+      : replay
+        ? []
+        : this.tutorial
+          ? [getPlayerName()]
+          : localNames();
     this.setup = replay
       ? {
           characters: replay.characters,
@@ -384,6 +399,22 @@ export class FightScene extends Phaser.Scene {
           color: '#111111',
           backgroundColor: '#ffffff',
           padding: { x: 8, y: 5 },
+        })
+        .setOrigin(0.5, 1)
+        .setDepth(DEPTH.ui)
+        .setVisible(false),
+    );
+    this.nameTags = this.state.fighters.map((f) =>
+      this.add
+        .text(0, 0, '', {
+          fontFamily: 'sans-serif',
+          fontSize: '17px',
+          fontStyle: 'bold',
+          color: cssColor(fighterColor(this.state.fighters, f.id)),
+          stroke: '#0b0e16',
+          strokeThickness: 4,
+          // a câmera aproxima: texto em resolução maior para não borrar
+          resolution: 2,
         })
         .setOrigin(0.5, 1)
         .setDepth(DEPTH.ui)
@@ -524,6 +555,7 @@ export class FightScene extends Phaser.Scene {
       if (match) {
         this.matchId = match.seq;
         this.setup = matchSetup(match);
+        this.names = this.net?.matchNames() ?? [];
       }
       // a seed é sorteada fora do sim; dentro dele, tudo sai dela
       const seed = match?.seed ?? newSeed();
@@ -575,6 +607,8 @@ export class FightScene extends Phaser.Scene {
   /** Sai do replay e joga a mesma luta (personagens e mapa) de verdade. */
   playLive(): void {
     this.playback = null;
+    // replay aberto de arquivo não tem nomes: quem joga agora é quem está neste navegador
+    if (!this.net) this.names = localNames();
     this.rematch();
   }
 
@@ -1161,7 +1195,9 @@ export class FightScene extends Phaser.Scene {
       const hidden = f.state === 'ko' || isVanished(f);
       view.setVisible(!hidden);
       const command = this.commands[f.id];
+      const tag = this.nameTags[f.id];
       if (hidden) {
+        tag?.setVisible(false);
         command?.clear();
         this.looseBalls[f.id]?.setVisible(false);
         continue;
@@ -1219,6 +1255,7 @@ export class FightScene extends Phaser.Scene {
       g.lineStyle(2, 0x111111, 0.6);
       g.fillTriangle(mx - 9, my - 12, mx + 9, my - 12, mx, my);
       g.strokeTriangle(mx - 9, my - 12, mx + 9, my - 12, mx, my);
+      if (tag) this.placeNameTag(tag, f, mx, my - 14);
 
       if (!debug) continue;
       for (const box of activeHitboxes(f)) {
@@ -1232,6 +1269,21 @@ export class FightScene extends Phaser.Scene {
       d.lineStyle(2, f.invulnTicks > 0 ? HURTBOX_INVULN_COLOR : HURTBOX_COLOR, 1);
       d.strokeRect(h.x, h.y, h.w, h.h);
     }
+  }
+
+  /**
+   * Nome (ou "P2") em cima do marcador, do mesmo tamanho na tela com qualquer
+   * zoom. Some quando o balão da provocação ou o comando do agarrão ocupam o lugar.
+   */
+  private placeNameTag(tag: Phaser.GameObjects.Text, f: Fighter, x: number, y: number): void {
+    const dummy = this.tutorial !== null && f.id === DUMMY;
+    const covered =
+      this.bubbles[f.id]?.visible === true || (this.commands[f.id] && commandLook(f) !== null);
+    tag.setVisible(!dummy && !covered);
+    if (!tag.visible) return;
+    const text = playerTag(f.id, this.names[f.id]);
+    if (tag.text !== text) tag.setText(text);
+    tag.setScale(1 / this.camPos.zoom).setPosition(x, y);
   }
 
   /**

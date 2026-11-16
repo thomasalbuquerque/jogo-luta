@@ -24,7 +24,8 @@ import { clipFor } from '../rig/library';
 import { sampleClip } from '../rig/animation';
 import { gridColumns, gridMove, selectLayout, selectSlots, type SelectLayout } from '../ui/grid';
 import { addPortrait, drawSilhouette } from '../ui/portrait';
-import { cssColor, fadeIn, panel, playerColor, titleText, UI, uiText } from '../ui/theme';
+import { localNames, playerTag } from '../profile/playerName';
+import { cssColor, fadeIn, fitWidth, panel, playerColor, titleText, UI, uiText } from '../ui/theme';
 import type { MatchSetup } from './FightScene';
 import { BELOW_VOLUME_Y } from './VolumeScene';
 import { VIEW } from '../render/view';
@@ -487,6 +488,12 @@ export class SelectScene extends Phaser.Scene {
     };
   }
 
+  /** Nome de quem está no lugar `p` (online: o da sala; no mesmo PC, o do navegador é o P1). */
+  private seatName(p: number): string | null {
+    if (this.net) return this.net.seatName(p);
+    return localNames()[p] ?? null;
+  }
+
   /** Painel do jogador `p`: o lutador animado, nome, estilo, especial e barras (menos, se estreito). */
   private rebuildPanel(p: number): void {
     const state = this.panels[p];
@@ -514,11 +521,15 @@ export class SelectScene extends Phaser.Scene {
 
     const you = this.net?.local === p ? ' · VOCÊ' : '';
     box.add(
-      uiText(this, 16, 14, `P${String(p + 1)}${you}`, {
-        fontFamily: UI.titleFont,
-        fontSize: layout.compact ? '22px' : '26px',
-        color: cssColor(color),
-      }),
+      fitWidth(
+        uiText(this, 16, 14, `${playerTag(p, this.seatName(p))}${you}`, {
+          fontFamily: UI.titleFont,
+          fontSize: layout.compact ? '22px' : '26px',
+          color: cssColor(color),
+        }),
+        // no painel largo, o texto do lutador começa em x = 262
+        layout.compact ? w - 32 : 230,
+      ),
     );
     if (layout.compact) {
       this.fillCompactPanel(p, box, g, id, layout.floorY);
