@@ -861,6 +861,11 @@ O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` 
   número inteiro de elos, cortado no mesmo ponto do elo em cima e embaixo), com o `pivot`
   embaixo e o socket `top` em cima. A `plank` marca com sockets `chain*` onde a corrente dela
   acaba (cortada na mesma fase do elo), e o jogo empilha a peça dali para cima até sair da tela.
+- **Piso até o pé do chão** (oficina): a camada do meio leva `floor`, uma camada extra do
+  `recortes.json` com uma faixa do piso dela (`rect`), cortada bem numa junta horizontal das placas.
+  O jogo repete a faixa para baixo, do pé da camada até o pé do bloco do chão (onde a parede de
+  agarrar acaba); dali para baixo fica a cor `fillBelow`. Espelhar a faixa deixava as juntas
+  diagonais em zigue-zague; cortada na junta, cada cópia vira uma nova fileira de placas.
 - **Névoa** (`haze`): um véu claro por cima do fundo, quando o palco some contra ele (a passarela
   cinza na frente da bancada cinza).
 - **Decorações:** peças soltas em cima do chão, atrás dos lutadores.
