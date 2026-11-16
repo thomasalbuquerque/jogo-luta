@@ -303,6 +303,18 @@ function anchorsOf(frame: Phaser.Textures.Frame): FrameAnchors {
   };
 }
 
+/**
+ * Contorno dos lados do bloco, na linha do pé (x de fora e de dentro da linha
+ * escura, em px da peça): sockets `edgeLeft`/`edgeLeftIn` e `edgeRightIn`/`edgeRight`.
+ * Abaixo do pé, a cor e o contorno do bloco continuam desses x. Sem eles, vão da
+ * borda da caixa.
+ */
+function edgesOf(a: FrameAnchors): { left: [number, number]; right: [number, number] } | null {
+  const s = a.sockets;
+  if (!s.edgeLeft || !s.edgeLeftIn || !s.edgeRightIn || !s.edgeRight) return null;
+  return { left: [s.edgeLeft[0], s.edgeLeftIn[0]], right: [s.edgeRightIn[0], s.edgeRight[0]] };
+}
+
 interface PlacedLayer {
   art: LayerArt;
   images: Phaser.GameObjects.Image[];
@@ -475,13 +487,22 @@ export class StageView {
           const cropH = Math.min(building.height, Math.ceil(a.pivot[1] + (foot - y) / scale) + 1);
           image.setCrop(0, 0, building.width, cropH);
           const fillTop = Math.min(foot, y + (cropH - a.pivot[1]) * scale - 2);
+          // x de mundo de um ponto da peça
+          const worldX = (px: number): number => x + w / 2 + (px - a.pivot[0]) * scale;
+          const edges = edgesOf(a);
+          // o contorno da arte (quando marcado) diz onde a cor começa e acaba
+          const left = edges ? worldX(edges.left[0]) : x;
+          const right = edges ? worldX(edges.right[1]) : x + w;
           g.fillStyle(block.color ?? art.wall.color, 1);
-          g.fillRect(x, fillTop, w, 4000);
+          g.fillRect(left, fillTop, right - left, 4000);
           if (art.wall.sides) {
+            // o contorno continua da arte para baixo, no mesmo lugar e da mesma grossura
             const t = Math.max(2, Math.round(10 * scale));
+            const [l0, l1] = edges ? [left, worldX(edges.left[1])] : [x, x + t];
+            const [r0, r1] = edges ? [worldX(edges.right[0]), right] : [x + w - t, x + w];
             g.fillStyle(art.wall.outline, 1);
-            g.fillRect(x, fillTop, t, 4000);
-            g.fillRect(x + w - t, fillTop, t, 4000);
+            g.fillRect(l0, fillTop, l1 - l0, 4000);
+            g.fillRect(r0, fillTop, r1 - r0, 4000);
           }
           continue;
         }
