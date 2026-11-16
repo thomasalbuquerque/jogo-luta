@@ -7,12 +7,14 @@ import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
 import { pickReplayFile, readReplayFile } from '../match/replayFile';
 import { closeOnline } from '../net/online';
+import { getPlayerName } from '../profile/playerName';
 import { roomFromSearch } from '../net/roomCode';
 import { MenuList } from '../ui/MenuList';
 import { addPortrait } from '../ui/portrait';
 import { fadeIn, titleText, uiText } from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
 import type { FightData } from './FightScene';
+import type { NameData } from './NameScene';
 import type { OnlineData } from './OnlineScene';
 import { VIEW } from '../render/view';
 
@@ -140,10 +142,16 @@ export class TitleScene extends Phaser.Scene {
             this.go('controls');
           },
         },
+        {
+          label: 'Alterar nome',
+          onSelect: () => {
+            this.scene.start('name', {} satisfies NameData);
+          },
+        },
       ],
-      { x: width / 2, y: 372, width: 420, height: 52, fontSize: 26 },
+      { x: width / 2, y: 366, width: 420, height: 46, gap: 10, fontSize: 24 },
     );
-    this.note = uiText(this, width / 2, 318, '', {
+    this.note = uiText(this, width / 2, 316, this.greeting(), {
       fontSize: '17px',
       fontStyle: 'bold',
       color: '#ffd166',
@@ -164,7 +172,18 @@ export class TitleScene extends Phaser.Scene {
     // link de sala (`?sala=ABCD`): entra direto
     const room = roomLinkUsed ? null : roomFromSearch(window.location.search);
     roomLinkUsed = true;
-    if (room) this.scene.start('online', { code: room } satisfies OnlineData);
+    if (room) {
+      // sem nome ainda: pede antes de entrar, para os amigos verem quem chegou
+      if (getPlayerName() === null)
+        this.scene.start('name', { first: true, room } satisfies NameData);
+      else this.scene.start('online', { code: room } satisfies OnlineData);
+    }
+  }
+
+  /** "Jogando como Fulano" em cima do menu (some quando aparece outro aviso). */
+  private greeting(): string {
+    const name = getPlayerName();
+    return name ? `Jogando como ${name}` : '';
   }
 
   override update(_time: number, delta: number): void {
@@ -184,6 +203,11 @@ export class TitleScene extends Phaser.Scene {
 
   private openMenu(): void {
     playSfx(this, 'ui_confirm');
+    // 1ª vez neste navegador: pede o nome antes do menu
+    if (getPlayerName() === null) {
+      this.scene.start('name', { first: true } satisfies NameData);
+      return;
+    }
     this.showMenu(true);
     this.controls.reset();
   }
