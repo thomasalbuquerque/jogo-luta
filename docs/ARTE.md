@@ -861,11 +861,13 @@ O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` 
   número inteiro de elos, cortado no mesmo ponto do elo em cima e embaixo), com o `pivot`
   embaixo e o socket `top` em cima. A `plank` marca com sockets `chain*` onde a corrente dela
   acaba (cortada na mesma fase do elo), e o jogo empilha a peça dali para cima até sair da tela.
-- **Piso até o pé do chão** (oficina): a camada do meio leva `floor`, uma camada extra do
-  `recortes.json` com uma faixa do piso dela (`rect`), cortada bem numa junta horizontal das placas.
-  O jogo repete a faixa para baixo, do pé da camada até o pé do bloco do chão (onde a parede de
-  agarrar acaba); dali para baixo fica a cor `fillBelow`. Espelhar a faixa deixava as juntas
-  diagonais em zigue-zague; cortada na junta, cada cópia vira uma nova fileira de placas.
+- **Piso até o pé do chão** (oficina): quando a câmera desce, aparece o que fica abaixo da camada
+  do meio. A imagem dela foi estendida para baixo no Photoshop (Expansão generativa, o dobro da
+  altura: `4-meio-expandido.png`), e as duas metades saem da mesma imagem ampliada: `mid` é a de
+  cima e `floor` a de baixo, começando 8 linhas acima da emenda (`FLOOR_OVERLAP` em
+  `stageView.ts`), para encaixar sem fresta. O piso vai do pé da camada até o pé do bloco do chão
+  (onde a parede de agarrar acaba); dali para baixo fica a cor `fillBelow`. Repetir uma faixa do
+  piso original deixava as juntas das placas repetidas e artificiais; a expansão continua o desenho.
 - **Névoa** (`haze`): um véu claro por cima do fundo, quando o palco some contra ele (a passarela
   cinza na frente da bancada cinza).
 - **Decorações:** peças soltas em cima do chão, atrás dos lutadores.
