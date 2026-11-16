@@ -13,7 +13,7 @@ modelo GPT Image 1.5 (ver [Como gerar uma imagem no Firefly](ARTE.md#como-gerar-
 | [São Sebastião do Schummy e do Meia](#3-são-sebastião-do-schummy-e-do-meia) | `art/cenario-praia/`       | Areia, um vão de mar e um barco; uma prancha no alto | a fazer  |
 | [Prefeitura do Gabs](#4-prefeitura-do-gabs)                                 | `art/cenario-prefeitura/`  | Triângulo: duas baixas dos lados e uma alta no meio  | a fazer  |
 | [Quadra de vôlei do Igão](#5-quadra-de-vôlei-do-igão)                       | `art/cenario-quadra/`      | O chão mais largo, liso, só com a cadeira do juiz    | a fazer  |
-| [Confeitaria do Darllan](#6-confeitaria-do-darllan)                         | `art/cenario-confeitaria/` | Bancada com um degrau sólido (o forno) na ponta      | a fazer  |
+| [Confeitaria do Darllan](#6-confeitaria-do-darllan)                         | `art/cenario-confeitaria/` | Bancada com um degrau sólido (o forno) na ponta      | no jogo  |
 | [Concerto do Tauba](#7-concerto-do-tauba)                                   | `art/cenario-teatro/`      | Palco estreito e dois camarotes para fora dele       | a fazer  |
 
 ## O formato de cada mapa
@@ -77,18 +77,19 @@ Laje (o mapa de hoje)
 As medidas abaixo são o alvo das caixas de colisão, em px do jogo (x = 0 no meio, y = 0 no chão,
 para cima é negativo). Na hora de montar o mapa, o Claude acerta os números com a arte que saiu.
 
-| Mapa          | Chão sólido (x de … a …)                                    | Plataformas atravessáveis (x de … a …, altura)                    |
-| ------------- | ----------------------------------------------------------- | ----------------------------------------------------------------- |
-| Laje (hoje)   | −450 a 450                                                  | −380 a −150 e 150 a 380, as duas a 150 do chão                    |
-| Oficina       | −500 a 500                                                  | −190 a 190, a 150                                                 |
-| Pilates       | −450 a 450                                                  | −380 a −160, a 110; 160 a 380, a 210                              |
-| São Sebastião | −600 a 280 (areia)                                          | barco: 360 a 580, na altura da areia; prancha: −380 a −160, a 150 |
-| Prefeitura    | −460 a 460                                                  | −380 a −180 e 180 a 380, a 130; −110 a 110, a 250                 |
-| Quadra        | −575 a 575                                                  | cadeira do juiz: 350 a 480, a 150                                 |
-| Confeitaria   | bancada: −520 a 300; forno: 300 a 520, com o topo 130 acima | biscoito: −400 a −180, a 150                                      |
-| Concerto      | −400 a 400                                                  | camarotes: −640 a −440 e 440 a 640, a 110                         |
+| Mapa          | Chão sólido (x de … a …)                                   | Plataformas atravessáveis (x de … a …, altura)                    |
+| ------------- | ---------------------------------------------------------- | ----------------------------------------------------------------- |
+| Laje (hoje)   | −450 a 450                                                 | −380 a −150 e 150 a 380, as duas a 150 do chão                    |
+| Oficina       | −500 a 500                                                 | −190 a 190, a 150                                                 |
+| Pilates       | −450 a 450                                                 | −380 a −160, a 110; 160 a 380, a 210                              |
+| São Sebastião | −600 a 280 (areia)                                         | barco: 360 a 580, na altura da areia; prancha: −380 a −160, a 150 |
+| Prefeitura    | −460 a 460                                                 | −380 a −180 e 180 a 380, a 130; −110 a 110, a 250                 |
+| Quadra        | −575 a 575                                                 | cadeira do juiz: 350 a 480, a 150                                 |
+| Confeitaria   | bancada: −520 a 180; forno: 180 a 520, com o topo 65 acima | biscoito: −440 a −170, a 150                                      |
+| Concerto      | −400 a 400                                                 | camarotes: −640 a −440 e 440 a 640, a 110                         |
 
-Todas as alturas cabem no pulo de quem pula menos (Darllan: 162 px no primeiro pulo, 284 com o
+O forno da confeitaria saiu baixo (65), para subir da bancada com um pulo só. Todas as alturas
+cabem no pulo de quem pula menos (Darllan: 162 px no primeiro pulo, 284 com o
 segundo). As de até 150 saem com um pulo só; as de 210 e 250 pedem o segundo pulo ou uma plataforma
 mais baixa no caminho.
 

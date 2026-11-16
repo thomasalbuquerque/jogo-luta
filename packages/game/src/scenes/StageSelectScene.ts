@@ -42,6 +42,10 @@ const STAGE_INFO: Readonly<Record<string, { name: string; blurb: string }>> = {
     name: 'Oficina do Tchula',
     blurb: 'Oficina de caminhão: chão largo e uma passarela pendurada por correntes no meio.',
   },
+  confeitaria: {
+    name: 'Confeitaria do Darllan',
+    blurb: 'Bancada de mármore com o forno de degrau na ponta e um biscoito gigante para subir.',
+  },
 };
 
 export function stageName(id: string): string {

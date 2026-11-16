@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { OFICINA_STAGE, TEST_STAGE } from '@jogo-luta/sim';
+import { CONFEITARIA_STAGE, OFICINA_STAGE, TEST_STAGE } from '@jogo-luta/sim';
 import { cameraBounds, DEFAULT_CAMERA, frameTargets, smooth, stageFrame } from './camera';
 
 const opts = { ...DEFAULT_CAMERA, offsetY: 0 };
@@ -98,5 +98,7 @@ describe('camera', () => {
   it('o mapa vazio enquadra o chão de ponta a ponta', () => {
     expect(stageFrame(TEST_STAGE)).toEqual({ x: -450, y: -200, w: 900, h: 200 });
     expect(stageFrame(OFICINA_STAGE)).toEqual({ x: -500, y: -200, w: 1000, h: 200 });
+    // o forno é mais alto que a bancada: o quadro sobe com ele
+    expect(stageFrame(CONFEITARIA_STAGE)).toEqual({ x: -520, y: -265, w: 1040, h: 200 });
   });
 });

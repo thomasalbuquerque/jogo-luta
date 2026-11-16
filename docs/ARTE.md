@@ -874,6 +874,27 @@ O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` 
   faixa que o gerador pôs no pé. Com `wall.shadowFrom: 'foot'`, o jogo corta a arte exatamente no
   pé da caixa de colisão (a linha onde a parede de agarrar acaba, a mesma do piso do fundo), e dali
   para baixo é a cor da parede (`wall.color`, o cinza médio do concreto).
+- **Dois blocos com artes diferentes** (confeitaria): `blocks` diz a peça de cada bloco sólido do
+  `sim`, na ordem (a bancada é `building`, o forno é `oven`, cada um com `wallLeft` e `wallRight`),
+  com a cor de baixo de cada um e `behind` para o forno ficar atrás da ponta da bancada. Os dois usam
+  quase a mesma escala (a bancada 0,372 e o forno 0,378 px de mundo por px da folha ampliada), para o
+  traço ter a mesma grossura. Quando a arte acaba antes do pé da caixa, a cor do bloco começa onde
+  ela acaba, e `wall.sides` desenha o contorno dos lados nessa cor. Para o contorno de baixo
+  continuar o da arte (mesmo lugar, mesma grossura), a peça marca a linha escura na altura do pé
+  com os sockets `edgeLeft`/`edgeLeftIn` e `edgeRightIn`/`edgeRight` (os x de fora e de dentro da
+  linha); a cor do bloco também vai só de um contorno ao outro. Sem eles, vai da borda da caixa.
+- **Bancada, forno e piso da confeitaria:** a bancada saiu como a da oficina (`5-bancada-expandida.png`:
+  recortada do `5-pecas.png` acima dos pés, de x 70 a 1040 e de y 100 a 389, e esticada para baixo
+  com mais portas). O forno não cresceu com a Expansão generativa (o gerador só esticava a base e
+  punha chão), então ganhou um armário de inox embaixo, gerado à parte no Firefly
+  (`5-armario-forno.png`) e colado com um script direto na folha ampliada (`5-forno-expandido-2x.png`,
+  sem a versão 1×): o forno sai do `5-pecas-2x.png` até a linha de baixo da base, sem os pés; o
+  armário fica atrás dele, com a lateral e a frente esticadas em separado para casar com as do forno
+  e só as partes lisas das portas esticadas ou encolhidas na altura, até passar do pé da caixa (a diagonal de baixo
+  da lateral do armário fica abaixo do pé). O piso é o
+  `4-meio-expandido.png`, como na oficina; como a camada se repete espelhada, o piso também
+  (`mirror` vale para as duas). Os enfeites saem numa folha à parte do mesmo `5-pecas-2x.png` com
+  `scale` 0,75 (`DECOR_RES` em `stageView.ts`), para o atlas caber em 4096 × 2048.
 - **Névoa** (`haze`): um véu claro por cima do fundo, quando o palco some contra ele (a passarela
   cinza na frente da bancada cinza).
 - **Decorações:** peças soltas em cima do chão, atrás dos lutadores.

@@ -1,0 +1,254 @@
+{
+ "frames": {
+  "building": {
+   "frame": {
+    "x": 922,
+    "y": 4,
+    "w": 1895,
+    "h": 1195
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1895,
+    "h": 1195
+   },
+   "sourceSize": {
+    "w": 1895,
+    "h": 1195
+   },
+   "anchors": {
+    "pivot": [
+     948.5,
+     46
+    ],
+    "sockets": {
+     "wallLeft": [
+      8,
+      578
+     ],
+     "wallRight": [
+      1889,
+      578
+     ],
+     "edgeLeft": [
+      26,
+      1128
+     ],
+     "edgeLeftIn": [
+      32,
+      1128
+     ],
+     "edgeRightIn": [
+      1865,
+      1128
+     ],
+     "edgeRight": [
+      1871,
+      1128
+     ]
+    }
+   }
+  },
+  "oven": {
+   "frame": {
+    "x": 4,
+    "y": 4,
+    "w": 914,
+    "h": 1327
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 914,
+    "h": 1327
+   },
+   "sourceSize": {
+    "w": 914,
+    "h": 1327
+   },
+   "anchors": {
+    "pivot": [
+     456.5,
+     37
+    ],
+    "sockets": {
+     "wallLeft": [
+      7,
+      582
+     ],
+     "wallRight": [
+      906,
+      582
+     ],
+     "edgeLeft": [
+      6,
+      1282
+     ],
+     "edgeLeftIn": [
+      11,
+      1282
+     ],
+     "edgeRightIn": [
+      899,
+      1282
+     ],
+     "edgeRight": [
+      904,
+      1282
+     ]
+    }
+   }
+  },
+  "plank": {
+   "frame": {
+    "x": 301,
+    "y": 1335,
+    "w": 2386,
+    "h": 210
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 2386,
+    "h": 210
+   },
+   "sourceSize": {
+    "w": 2386,
+    "h": 210
+   },
+   "anchors": {
+    "pivot": [
+     13,
+     22
+    ],
+    "sockets": {
+     "right": [
+      2375,
+      22
+     ]
+    }
+   }
+  },
+  "mixer": {
+   "frame": {
+    "x": 3466,
+    "y": 4,
+    "w": 349,
+    "h": 407
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 349,
+    "h": 407
+   },
+   "sourceSize": {
+    "w": 349,
+    "h": 407
+   },
+   "anchors": {
+    "pivot": [
+     174.12,
+     403.25
+    ]
+   }
+  },
+  "jar": {
+   "frame": {
+    "x": 3176,
+    "y": 4,
+    "w": 286,
+    "h": 429
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 286,
+    "h": 429
+   },
+   "sourceSize": {
+    "w": 286,
+    "h": 429
+   },
+   "anchors": {
+    "pivot": [
+     141.87,
+     424.5
+    ]
+   }
+  },
+  "stand": {
+   "frame": {
+    "x": 2821,
+    "y": 4,
+    "w": 351,
+    "h": 432
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 351,
+    "h": 432
+   },
+   "sourceSize": {
+    "w": 351,
+    "h": 432
+   },
+   "anchors": {
+    "pivot": [
+     175.5,
+     427.5
+    ]
+   }
+  },
+  "flour": {
+   "frame": {
+    "x": 4,
+    "y": 1335,
+    "w": 293,
+    "h": 369
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 293,
+    "h": 369
+   },
+   "sourceSize": {
+    "w": 293,
+    "h": 369
+   },
+   "anchors": {
+    "pivot": [
+     145.75,
+     364.5
+    ]
+   }
+  }
+ },
+ "meta": {
+  "app": "scripts/art/build.ts",
+  "image": "confeitaria.webp",
+  "format": "RGBA8888",
+  "size": {
+   "w": 4096,
+   "h": 2048
+  },
+  "scale": "1"
+ }
+}

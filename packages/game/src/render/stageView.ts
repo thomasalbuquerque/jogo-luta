@@ -40,6 +40,15 @@ interface Decoration {
   flipX?: boolean;
 }
 
+interface BlockArt {
+  /** Peça do atlas, com `wallLeft` e `wallRight` (as paredes da caixa). */
+  frame: string;
+  /** Cor abaixo da arte (padrão: `wall.color`). */
+  color?: number;
+  /** Desenha atrás dos outros blocos (o forno atrás da ponta da bancada). */
+  behind?: boolean;
+}
+
 interface StageArt {
   atlas: string;
   /** Câmera de referência das camadas (a do começo da luta). */
@@ -57,7 +66,17 @@ interface StageArt {
      * cor da parede (`color`, a média do concreto), quando a arte desce até lá.
      */
     shadowFrom?: 'top' | 'foot';
+    /**
+     * Com `shadowFrom: 'foot'`: contorno (`outline`) dos lados da cor de baixo, para a
+     * parede não "abrir" onde a arte acaba.
+     */
+    sides?: boolean;
   };
+  /**
+   * Arte de cada bloco sólido do sim, na ordem dos blocos (padrão: `building` em
+   * todos, com a cor `wall.color`). A confeitaria tem dois: a bancada e o forno.
+   */
+  blocks?: readonly BlockArt[];
   decorations: readonly Decoration[];
   /**
    * Névoa clara por cima das camadas do fundo: separa o palco (escuro) do fundo
@@ -78,6 +97,13 @@ interface StageArt {
  * por isso.
  */
 const ART_RES = 2;
+
+/**
+ * Os enfeites da confeitaria saem da folha numa escala menor (0,75, ver o
+ * `recortes.json` dela), para o atlas caber em 4096 × 2048; a escala deles divide
+ * por isso. Na tela eles ficam menores que a arte mesmo assim.
+ */
+const DECOR_RES = 0.75;
 
 /** Linhas da textura do piso que repetem o pé da camada de cima (ver `floor`). */
 const FLOOR_OVERLAP = 8;
@@ -185,8 +211,69 @@ const OFICINA: StageArt = {
   haze: { color: 0xeae6e1, alpha: 0.25 },
 };
 
+const CONFEITARIA: StageArt = {
+  atlas: 'stages/confeitaria',
+  ref: { x: 0, y: -88 },
+  layers: [
+    {
+      key: 'back',
+      depth: 0.05,
+      anchorX: 640,
+      anchorY: 330,
+      scale: 0.85 / ART_RES,
+      originX: 0.5,
+      originY: 0.5,
+      fillBelow: 0xfacfa9,
+    },
+    {
+      key: 'far',
+      depth: 0.15,
+      anchorX: 640,
+      anchorY: 640,
+      scale: 0.6 / ART_RES,
+      originX: 0.5,
+      originY: 1,
+      fillBelow: 0xe7b083,
+      tiles: 'mirror',
+    },
+    {
+      key: 'mid',
+      depth: 0.35,
+      anchorX: 640,
+      anchorY: 500,
+      scale: 0.55 / ART_RES,
+      originX: 0.5,
+      originY: 1,
+      // a cor do pé do piso estendido (escurece embaixo)
+      fillBelow: 0x8f6742,
+      tiles: 'mirror',
+      floor: 'floor',
+    },
+  ],
+  // a bancada e o forno foram estendidos até o pé da caixa (ver docs/ARTE.md)
+  wall: {
+    color: 0xf3c59a,
+    shadow: 0x3a2618,
+    outline: 0x2e1d12,
+    shadowFrom: 'foot',
+    sides: true,
+  },
+  blocks: [{ frame: 'building' }, { frame: 'oven', color: 0xb89d85, behind: true }],
+  decorations: [
+    // em cima da bancada e do forno, atrás dos lutadores
+    { frame: 'flour', x: -478, y: -4, scale: 0.3 / ART_RES / DECOR_RES },
+    { frame: 'mixer', x: -60, y: -4, scale: 0.32 / ART_RES / DECOR_RES },
+    { frame: 'jar', x: 120, y: -4, scale: 0.28 / ART_RES / DECOR_RES },
+    { frame: 'stand', x: 470, y: -69, scale: 0.3 / ART_RES / DECOR_RES },
+  ],
+};
+
 /** Arte de cada mapa do sim, pelo id do mapa. */
-const STAGE_ART: Readonly<Record<string, StageArt>> = { test: LAJE, oficina: OFICINA };
+const STAGE_ART: Readonly<Record<string, StageArt>> = {
+  test: LAJE,
+  oficina: OFICINA,
+  confeitaria: CONFEITARIA,
+};
 
 const TEXTURE_PREFIX = 'stage-';
 
@@ -214,6 +301,18 @@ function anchorsOf(frame: Phaser.Textures.Frame): FrameAnchors {
     pivot: data.anchors?.pivot ?? [0, 0],
     sockets: data.anchors?.sockets ?? {},
   };
+}
+
+/**
+ * Contorno dos lados do bloco, na linha do pé (x de fora e de dentro da linha
+ * escura, em px da peça): sockets `edgeLeft`/`edgeLeftIn` e `edgeRightIn`/`edgeRight`.
+ * Abaixo do pé, a cor e o contorno do bloco continuam desses x. Sem eles, vão da
+ * borda da caixa.
+ */
+function edgesOf(a: FrameAnchors): { left: [number, number]; right: [number, number] } | null {
+  const s = a.sockets;
+  if (!s.edgeLeft || !s.edgeLeftIn || !s.edgeRightIn || !s.edgeRight) return null;
+  return { left: [s.edgeLeft[0], s.edgeLeftIn[0]], right: [s.edgeRightIn[0], s.edgeRight[0]] };
 }
 
 interface PlacedLayer {
@@ -304,7 +403,7 @@ export class StageView {
       let fillTop = bottom;
       if (floor) {
         const top = p.y + h * (1 - layer.originY) - FLOOR_OVERLAP * p.scale;
-        this.placeFloor(floor, p.x, top, p.scale, images.length);
+        this.placeFloor(floor, p.x, top, p.scale, images.length, layer.tiles === 'mirror');
         fillTop = Math.max(bottom, this.groundBottom);
       }
       // e a cor vai até bem abaixo da tela
@@ -314,9 +413,10 @@ export class StageView {
 
   /**
    * Piso abaixo de uma camada: fileiras da textura (que já emenda com ela mesma)
-   * do pé da camada até o pé do chão do mapa, uma coluna por cópia da camada. A
-   * última fileira é cortada no pé do chão. Imagens comuns, não TileSprite: no
-   * Phaser 3 ele redesenha um canvas do tamanho dele quando o tamanho muda.
+   * do pé da camada até o pé do chão do mapa, uma coluna por cópia da camada
+   * (espelhada como ela, com `mirror`). A última fileira é cortada no pé do chão.
+   * Imagens comuns, não TileSprite: no Phaser 3 ele redesenha um canvas do tamanho
+   * dele quando o tamanho muda.
    */
   private placeFloor(
     floor: NonNullable<PlacedLayer['floor']>,
@@ -324,6 +424,7 @@ export class StageView {
     top: number,
     scale: number,
     columns: number,
+    mirror: boolean,
   ): void {
     const source = this.scene.textures.get(floor.key).getSourceImage();
     const rowH = source.height * scale;
@@ -345,6 +446,7 @@ export class StageView {
           .setVisible(true)
           .setPosition(x + offset, top + r * rowH)
           .setScale(scale)
+          .setFlipX(mirror && c !== (columns - 1) / 2)
           .setCrop(0, 0, source.width, Math.ceil(visibleH));
       }
     }
@@ -356,31 +458,52 @@ export class StageView {
     const scene = this.scene;
     const art = this.art;
     if (!art) return;
-    const building = scene.textures.getFrame(atlas, 'building');
     const plank = scene.textures.getFrame(atlas, 'plank');
     const g = scene.add.graphics().setDepth(depth - 0.01);
+    let blockIndex = 0;
 
     for (const s of stage.solids) {
       const x = toPx(s.x);
       const y = toPx(s.y);
       const w = toPx(s.w);
       if (s.kind === 'solid') {
+        const block = art.blocks?.[blockIndex] ?? { frame: 'building' };
+        blockIndex++;
+        const building = scene.textures.getFrame(atlas, block.frame);
         const a = anchorsOf(building);
         const left = a.sockets.wallLeft ?? [0, 0];
         const right = a.sockets.wallRight ?? [building.width, 0];
         const scale = w / (right[0] - left[0]);
         // o pivô (meio do topo, onde se pisa) vai no meio do topo da caixa
         const image = scene.add
-          .image(x + w / 2, y, atlas, 'building')
+          .image(x + w / 2, y, atlas, block.frame)
           .setOrigin(a.pivot[0] / building.width, a.pivot[1] / building.height)
           .setScale(scale)
-          .setDepth(depth);
+          .setDepth(block.behind ? depth - 0.005 : depth);
         if (art.wall.shadowFrom === 'foot') {
           const foot = y + toPx(s.h);
           // a arte acaba no pé da caixa (1 px a mais some debaixo da sombra, sem fresta)
-          image.setCrop(0, 0, building.width, Math.ceil(a.pivot[1] + (foot - y) / scale) + 1);
-          g.fillStyle(art.wall.color, 1);
-          g.fillRect(x, foot, w, 4000);
+          // ou antes, se ela não chega até lá; dali para baixo é a cor do bloco
+          const cropH = Math.min(building.height, Math.ceil(a.pivot[1] + (foot - y) / scale) + 1);
+          image.setCrop(0, 0, building.width, cropH);
+          const fillTop = Math.min(foot, y + (cropH - a.pivot[1]) * scale - 2);
+          // x de mundo de um ponto da peça
+          const worldX = (px: number): number => x + w / 2 + (px - a.pivot[0]) * scale;
+          const edges = edgesOf(a);
+          // o contorno da arte (quando marcado) diz onde a cor começa e acaba
+          const left = edges ? worldX(edges.left[0]) : x;
+          const right = edges ? worldX(edges.right[1]) : x + w;
+          g.fillStyle(block.color ?? art.wall.color, 1);
+          g.fillRect(left, fillTop, right - left, 4000);
+          if (art.wall.sides) {
+            // o contorno continua da arte para baixo, no mesmo lugar e da mesma grossura
+            const t = Math.max(2, Math.round(10 * scale));
+            const [l0, l1] = edges ? [left, worldX(edges.left[1])] : [x, x + t];
+            const [r0, r1] = edges ? [worldX(edges.right[0]), right] : [x + w - t, x + w];
+            g.fillStyle(art.wall.outline, 1);
+            g.fillRect(l0, fillTop, l1 - l0, 4000);
+            g.fillRect(r0, fillTop, r1 - r0, 4000);
+          }
           continue;
         }
         // a parede continua para baixo e some na sombra

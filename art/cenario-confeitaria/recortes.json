@@ -1,0 +1,100 @@
+{
+  "out": "stages/confeitaria",
+  "scale": 1,
+  "atlasWidth": 4096,
+  "imageFormat": "webp",
+  "sheets": {
+    "pecas": {
+      "file": "5-pecas-2x.png"
+    },
+    "enfeites": {
+      "file": "5-pecas-2x.png",
+      "scale": 0.75
+    },
+    "bancada": {
+      "file": "5-bancada-expandida-2x.png"
+    },
+    "forno": {
+      "file": "5-forno-expandido-2x.png",
+      "key": false
+    }
+  },
+  "parts": {
+    "building": {
+      "sheet": "bancada",
+      "rect": [20, 22, 1898, 1192],
+      "pivot": [968.5, 68],
+      "sockets": {
+        "wallLeft": [28, 600],
+        "wallRight": [1909, 600],
+        "edgeLeft": [46, 1150],
+        "edgeLeftIn": [52, 1150],
+        "edgeRightIn": [1885, 1150],
+        "edgeRight": [1891, 1150]
+      }
+    },
+    "oven": {
+      "sheet": "forno",
+      "rect": [0, 16, 950, 1326],
+      "pivot": [477.5, 55],
+      "sockets": {
+        "wallLeft": [28, 600],
+        "wallRight": [927, 600],
+        "edgeLeft": [27, 1300],
+        "edgeLeftIn": [32, 1300],
+        "edgeRightIn": [920, 1300],
+        "edgeRight": [925, 1300]
+      }
+    },
+    "plank": {
+      "sheet": "pecas",
+      "rect": [480, 938, 2390, 212],
+      "pivot": [494, 962],
+      "sockets": {
+        "right": [2856, 962]
+      }
+    },
+    "mixer": {
+      "sheet": "enfeites",
+      "rect": [692, 1232, 466, 538],
+      "pivot": [925, 1768]
+    },
+    "jar": {
+      "sheet": "enfeites",
+      "rect": [1342, 1205, 385, 578],
+      "pivot": [1534, 1774]
+    },
+    "stand": {
+      "sheet": "enfeites",
+      "rect": [1819, 1202, 473, 581],
+      "pivot": [2055, 1774]
+    },
+    "flour": {
+      "sheet": "enfeites",
+      "rect": [2347, 1271, 394, 498],
+      "pivot": [2544, 1760]
+    }
+  },
+  "layers": {
+    "back": {
+      "file": "2-fundo-2x.png",
+      "key": false,
+      "width": 3344
+    },
+    "far": {
+      "file": "3-longe-2x.png",
+      "width": 3344
+    },
+    "mid": {
+      "file": "4-meio-expandido-2x.png",
+      "rect": [0, 0, 3344, 1882],
+      "width": 3344
+    },
+    "floor": {
+      "file": "4-meio-expandido-2x.png",
+      "key": false,
+      "rect": [0, 1874, 3344, 1890],
+      "width": 3344
+    }
+  }
+}

@@ -71,5 +71,34 @@ export const OFICINA_STAGE: Stage = {
   blastZone: { x: px(-1350), y: px(-1000), w: px(2700), h: px(1800) },
 };
 
+/**
+ * Confeitaria do Darllan: dois blocos sólidos encostados, a bancada comprida e,
+ * na ponta direita, o forno, 65 px mais alto (um degrau baixo, de um pulo só,
+ * onde também se luta). Os pés das duas caixas ficam na mesma linha. Por cima da
+ * metade esquerda da bancada, um biscoito gigante atravessável. Ver
+ * docs/CENARIOS.md.
+ */
+export const CONFEITARIA_STAGE: Stage = {
+  id: 'confeitaria',
+  solids: [
+    solid('solid', -520, 0, 700, 420),
+    solid('solid', 180, -65, 340, 485),
+    solid('platform', -440, -150, 270, 16),
+  ],
+  spawns: [
+    { x: px(-300), y: 0 },
+    { x: px(80), y: 0 },
+    { x: px(-305), y: px(-150) },
+    { x: px(350), y: px(-65) },
+  ],
+  respawns: [
+    { x: px(-100), y: px(-420) },
+    { x: px(100), y: px(-420) },
+    { x: px(-260), y: px(-420) },
+    { x: px(260), y: px(-420) },
+  ],
+  blastZone: { x: px(-1370), y: px(-1000), w: px(2740), h: px(1800) },
+};
+
 /** Mapas do jogo, na ordem da tela de seleção. */
-export const STAGES: readonly Stage[] = [TEST_STAGE, OFICINA_STAGE];
+export const STAGES: readonly Stage[] = [TEST_STAGE, OFICINA_STAGE, CONFEITARIA_STAGE];
