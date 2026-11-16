@@ -175,9 +175,11 @@ const OFICINA: StageArt = {
     shadowFrom: 'foot',
   },
   decorations: [
-    { frame: 'tires', x: -440, y: -24, scale: 0.34 / ART_RES },
-    { frame: 'drum', x: -375, y: -24, scale: 0.3 / ART_RES },
-    { frame: 'cart', x: 445, y: -24, scale: 0.3 / ART_RES },
+    // em cima da face de cima do bloco (um trapézio: a borda de trás, em y -34, é
+    // mais estreita), atrás dos lutadores
+    { frame: 'tires', x: -412, y: -8, scale: 0.34 / ART_RES },
+    { frame: 'drum', x: -358, y: -8, scale: 0.3 / ART_RES },
+    { frame: 'cart', x: 410, y: -8, scale: 0.3 / ART_RES },
   ],
   chain: 'chain',
   haze: { color: 0xeae6e1, alpha: 0.25 },
