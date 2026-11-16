@@ -868,6 +868,11 @@ O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` 
   `stageView.ts`), para encaixar sem fresta. O piso vai do pé da camada até o pé do bloco do chão
   (onde a parede de agarrar acaba); dali para baixo fica a cor `fillBelow`. Repetir uma faixa do
   piso original deixava as juntas das placas repetidas e artificiais; a expansão continua o desenho.
+- **Bloco até o pé da caixa** (oficina): a parede do bloco também foi estendida no Photoshop
+  (`5-bloco-expandido.png`: só o bloco, recortado do `5-pecas.png` acima da linha do pé, sem
+  mudar a escala, e esticado para baixo). A peça `building` sai dessa folha e é cortada antes da
+  faixa que o gerador pôs no pé. Com `wall.shadowFrom: 'foot'`, a sombra começa no pé da caixa de
+  colisão (a parede de agarrar), não 120 px abaixo do topo.
 - **Névoa** (`haze`): um véu claro por cima do fundo, quando o palco some contra ele (a passarela
   cinza na frente da bancada cinza).
 - **Decorações:** peças soltas em cima do chão, atrás dos lutadores.

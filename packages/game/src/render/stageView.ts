@@ -46,7 +46,18 @@ interface StageArt {
   ref: { x: number; y: number };
   layers: readonly LayerArt[];
   /** Parede que continua abaixo da arte do prédio e escurece. */
-  wall: { color: number; shadow: number; outline: number };
+  wall: {
+    color: number;
+    shadow: number;
+    outline: number;
+    /**
+     * Onde a sombra começa: 120 px abaixo do topo (padrão, cobre o pé da arte)
+     * ou no pé da caixa de colisão (`foot`), quando a arte desce até lá.
+     */
+    shadowFrom?: 'top' | 'foot';
+    /** Altura do degradê até a cor da sombra (px de mundo; padrão 260). */
+    shadowLength?: number;
+  };
   decorations: readonly Decoration[];
   /**
    * Névoa clara por cima das camadas do fundo: separa o palco (escuro) do fundo
@@ -156,7 +167,14 @@ const OFICINA: StageArt = {
       floor: 'floor',
     },
   ],
-  wall: { color: 0x8c827e, shadow: 0x2a2a30, outline: 0x26262b },
+  // a arte do bloco foi estendida até o pé da caixa (ver docs/ARTE.md)
+  wall: {
+    color: 0x8c827e,
+    shadow: 0x2a2a30,
+    outline: 0x26262b,
+    shadowFrom: 'foot',
+    shadowLength: 160,
+  },
   decorations: [
     { frame: 'tires', x: -440, y: -24, scale: 0.34 / ART_RES },
     { frame: 'drum', x: -375, y: -24, scale: 0.3 / ART_RES },
@@ -359,10 +377,11 @@ export class StageView {
         // a parede continua para baixo e some na sombra
         const artBottom = y + (building.height - a.pivot[1]) * scale;
         const top = artBottom - 4;
-        const shadowTop = y + 120;
+        const shadowTop = art.wall.shadowFrom === 'foot' ? y + toPx(s.h) : y + 120;
+        const shadowLength = art.wall.shadowLength ?? 260;
         const deep = 4000;
         g.fillStyle(art.wall.color, 1);
-        g.fillRect(x, top, w, shadowTop + 260 - top);
+        g.fillRect(x, top, w, Math.max(0, shadowTop + shadowLength - top));
         g.fillGradientStyle(
           art.wall.shadow,
           art.wall.shadow,
@@ -373,9 +392,9 @@ export class StageView {
           1,
           1,
         );
-        g.fillRect(x, shadowTop, w, 260);
+        g.fillRect(x, shadowTop, w, shadowLength);
         g.fillStyle(art.wall.shadow, 1);
-        g.fillRect(x, shadowTop + 259, w, deep);
+        g.fillRect(x, shadowTop + shadowLength - 1, w, deep);
         g.fillStyle(art.wall.outline, 1);
         g.fillRect(x, top, 3, deep);
         g.fillRect(x + w - 3, top, 3, deep);
