@@ -1,6 +1,7 @@
 import { newSeed } from '../match/replayFile';
 import { getPlayerName } from '../profile/playerName';
 import { loadNetConfig } from './config';
+import { startHeartbeat } from './heartbeat';
 import { PeerLink } from './peerLink';
 import { randomRoomCode } from './roomCode';
 import { OnlineSession } from './session';
@@ -14,7 +15,7 @@ export const BUILD_ID = typeof __BUILD_ID__ === 'string' ? __BUILD_ID__ : 'dev';
 const UPDATE_MS = 100;
 
 let current: OnlineSession | null = null;
-let timer: number | undefined;
+let stopTimer: (() => void) | undefined;
 
 /**
  * A sala online aberta, se houver (pode já ter acabado: ver `ended`). As cenas
@@ -36,10 +37,11 @@ function open(role: 'host' | 'guest', code: string): OnlineSession {
     name: getPlayerName(),
   });
   current = session;
-  // por timer, e não pelo quadro do jogo: continua com a aba em segundo plano
-  timer = window.setInterval(() => {
+  // por timer fora da página, e não pelo quadro do jogo: segue no mesmo ritmo com a aba
+  // em segundo plano
+  stopTimer = startHeartbeat(UPDATE_MS, () => {
     session.update();
-  }, UPDATE_MS);
+  });
   return session;
 }
 
@@ -57,6 +59,6 @@ export function joinRoom(code: string): OnlineSession {
 export function closeOnline(): void {
   current?.leave();
   current = null;
-  if (timer !== undefined) window.clearInterval(timer);
-  timer = undefined;
+  stopTimer?.();
+  stopTimer = undefined;
 }

@@ -48,6 +48,7 @@ import { Menu, type MenuMask } from '../input/menu';
 import { newSeed } from '../match/replayFile';
 import { createStats, recordEvents, type MatchStats } from '../match/stats';
 import { rulesFor } from '../match/teams';
+import { startHeartbeat } from '../net/heartbeat';
 import { closeOnline, getOnline } from '../net/online';
 import { onlineRoute } from '../net/route';
 import type { OnlineMatch, OnlineSession } from '../net/session';
@@ -205,6 +206,15 @@ function quitAlpha(f: Fighter): number {
   return back > 0 && back <= REAPPEAR_FADE ? 0.35 + 0.65 * (back / REAPPEAR_FADE) : 1;
 }
 
+/**
+ * Online: sem quadro por este tempo, a luta passa a avançar em segundo plano.
+ * Pouco mais de 2 quadros a 60 Hz: curto para não perder ticks quando o navegador
+ * só freia os quadros (1 por segundo), sem parar de vez.
+ */
+const BACKGROUND_AFTER_MS = 40;
+/** Online: de quanto em quanto tempo a luta avança em segundo plano. */
+const BACKGROUND_BEAT_MS = 8;
+
 export class FightScene extends Phaser.Scene {
   state!: GameState;
   /** Último input enviado ao sim, por jogador (para o overlay de debug). */
@@ -252,6 +262,12 @@ export class FightScene extends Phaser.Scene {
   /** Já pediu para sair da luta: não faz mais nada até a cena fechar. */
   private leaving = false;
   private readonly loop = new FixedStepLoop();
+  /** Quando foi o último quadro desenhado (`update`), em ms do relógio do navegador. */
+  private lastFrameAt = 0;
+  /** Quando a luta avançou pela última vez (num quadro ou em segundo plano). */
+  private lastAdvanceAt = 0;
+  /** Online: a luta avançou em segundo plano depois do último quadro. */
+  private ranInBackground = false;
   private controls!: InputManager;
   private pauseRequested = false;
   /** Teclas fixas (Enter, Esc, Start) no tick anterior: pausa só no aperto. */
@@ -372,7 +388,13 @@ export class FightScene extends Phaser.Scene {
     this.game.events.on(Phaser.Core.Events.BLUR, requestPause);
     this.game.events.on(Phaser.Core.Events.HIDDEN, requestPause);
     this.events.on(Phaser.Scenes.Events.RESUME, this.onResume);
+    // online a luta não pode parar deste lado (os outros esperam o input daqui): com a
+    // aba escondida, sem quadros, ela segue por um timer que o navegador não freia
+    const stopHeartbeat = this.net
+      ? startHeartbeat(BACKGROUND_BEAT_MS, this.backgroundBeat)
+      : undefined;
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      stopHeartbeat?.();
       this.controls.destroy();
       this.game.events.off(Phaser.Core.Events.BLUR, requestPause);
       this.game.events.off(Phaser.Core.Events.HIDDEN, requestPause);
@@ -455,24 +477,50 @@ export class FightScene extends Phaser.Scene {
       // online o menu abre por cima e a luta continua
       if (!this.net) return;
     }
-    const timeScale = this.slowMo.update(delta);
-    if (!this.slowMo.active) this.focus = null;
-    let alpha = this.loop.advance(delta * timeScale, () => {
-      this.tick();
-    });
-    // parado esperando o outro jogador: desenha o último tick, sem interpolar
-    if (this.stalled) {
-      alpha = 1;
-      this.stalledMs += delta;
-    } else {
-      this.stalledMs = 0;
-    }
+    const now = performance.now();
+    // o tempo que já rodou em segundo plano não conta de novo neste quadro
+    const elapsed = this.ranInBackground ? Math.min(delta, now - this.lastAdvanceAt) : delta;
+    this.ranInBackground = false;
+    this.lastFrameAt = now;
+    this.lastAdvanceAt = now;
+    const alpha = this.advance(elapsed);
     this.drawFighters(alpha);
     this.drawProjectiles(alpha);
     this.updateTaunts(alpha);
     this.updateTutorialMark(alpha);
     this.updateCamera(alpha, delta);
   }
+
+  /** Roda os ticks que cabem em `delta` ms. Devolve o alpha para interpolar o desenho. */
+  private advance(delta: number): number {
+    const timeScale = this.slowMo.update(delta);
+    if (!this.slowMo.active) this.focus = null;
+    const alpha = this.loop.advance(delta * timeScale, () => {
+      this.tick();
+    });
+    if (!this.stalled) {
+      this.stalledMs = 0;
+      return alpha;
+    }
+    // parado esperando o outro jogador: desenha o último tick, sem interpolar
+    this.stalledMs += delta;
+    return 1;
+  }
+
+  /**
+   * Online, sem quadros (aba escondida, janela coberta ou minimizada): a luta
+   * avança por aqui, sem desenhar, para os outros não ficarem esperando. O
+   * lutador deste lado fica parado (perder o foco solta as teclas).
+   */
+  private readonly backgroundBeat = (): void => {
+    if (this.leaving || !this.onlineMatch || !this.scene.isActive()) return;
+    const now = performance.now();
+    if (now - this.lastFrameAt < BACKGROUND_AFTER_MS) return;
+    const elapsed = now - this.lastAdvanceAt;
+    this.lastAdvanceAt = now;
+    this.ranInBackground = true;
+    this.advance(elapsed);
+  };
 
   /** Tutorial: "!" pulando em cima do boneco antes de ele atacar. */
   private updateTutorialMark(alpha: number): void {
