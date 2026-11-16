@@ -13,7 +13,10 @@ const TRACK_X = 52;
 const TRACK_W = 110;
 const TRACK_H = 6;
 const KNOB_R = 7;
-const ICON_W = 38;
+const ICON_W = 32;
+/** Alto-falante pequeno e cinza (a cor do "comandos" da cola), para não chamar atenção. */
+const ICON_SCALE = 0.75;
+const ICON_COLOR = 0xadb5bd;
 const PILL_W = TRACK_X + TRACK_W + 6 + ICON_W;
 const PILL_X = PILL_RIGHT - PILL_W;
 /** O alto-falante fica no mesmo lugar, fechada ou aberta. */
@@ -176,25 +179,28 @@ export class VolumeScene extends Phaser.Scene {
 
     const g = this.gfx.clear();
     const cy = PILL_H / 2;
-    const ix = ICON_CX - 4;
+    // desenho do ícone em volta de (ICON_CX - 3, meio), na escala ICON_SCALE
+    const x = (dx: number) => ICON_CX - 3 + dx * ICON_SCALE;
+    const y = (dy: number) => cy + dy * ICON_SCALE;
+    const line = 2 * ICON_SCALE;
     // alto-falante: caixinha + cone
-    g.fillStyle(0xffffff, 1);
-    g.fillRect(ix - 9, cy - 3.5, 5, 7);
-    g.fillTriangle(ix - 5, cy - 3.5, ix + 1, cy - 8, ix + 1, cy + 8);
-    g.fillTriangle(ix - 5, cy - 3.5, ix + 1, cy + 8, ix - 5, cy + 3.5);
+    g.fillStyle(ICON_COLOR, 1);
+    g.fillRect(x(-9), y(-3.5), 5 * ICON_SCALE, 7 * ICON_SCALE);
+    g.fillTriangle(x(-5), y(-3.5), x(1), y(-8), x(1), y(8));
+    g.fillTriangle(x(-5), y(-3.5), x(1), y(8), x(-5), y(3.5));
     if (v <= 0) {
       // mudo: um X vermelho
-      g.lineStyle(2, 0xe63946, 1);
-      g.lineBetween(ix + 4, cy - 4, ix + 10, cy + 4);
-      g.lineBetween(ix + 10, cy - 4, ix + 4, cy + 4);
+      g.lineStyle(line, 0xe63946, 1);
+      g.lineBetween(x(4), y(-4), x(10), y(4));
+      g.lineBetween(x(10), y(-4), x(4), y(4));
     } else {
       // ondas: 1 a 3, conforme o volume
-      g.lineStyle(2, 0xffffff, 1);
+      g.lineStyle(line, ICON_COLOR, 1);
       const waves = v < 0.34 ? 1 : v < 0.67 ? 2 : 3;
       for (let i = 0; i < waves; i++) {
-        const r = 4 + i * 3.5;
+        const r = (4 + i * 3.5) * ICON_SCALE;
         g.beginPath();
-        g.arc(ix + 1, cy, r, -0.8, 0.8);
+        g.arc(x(1), cy, r, -0.8, 0.8);
         g.strokePath();
       }
     }
