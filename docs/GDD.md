@@ -46,7 +46,7 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 
 ## Controles
 
-Padrão abaixo; dá para trocar na tela **Controles** (menu inicial), e fica salvo no navegador. Uma tecla só vale para um botão: escolher uma que já é usada troca as duas. Enter, Esc, M, ` , Tab e F1–F12 são reservadas. No controle (o mesmo mapa para todos), as direções ficam sempre no analógico e no D-pad; Select e Start são reservados. Gamepad (Gamepad API) é o recomendado.
+Padrão abaixo; dá para trocar na tela **Controles** (menu inicial), e fica salvo no navegador. Uma tecla só vale para um botão: escolher uma que já é usada troca as duas. Enter, Esc, ` , Tab e F1–F12 são reservadas. No controle (o mesmo mapa para todos), as direções ficam sempre no analógico e no D-pad; Select e Start são reservados. Gamepad (Gamepad API) é o recomendado.
 
 Nos menus, além dos controles de cada jogador, sempre valem as setas, Enter (confirma) e Esc (volta); nos menus com um cursor só (mapa, pausa, resultado), qualquer controle conectado mexe.
 
@@ -61,7 +61,7 @@ Nos menus, além dos controles de cada jogador, sempre valem as setas, Enter (co
 | Esquiva    | Shift esq. | I         | RB / RT                |
 | Provocação | R          | U         | Y                      |
 
-**M** liga e desliga o som (vale para todos; o navegador lembra).
+**Volume:** uma barra no canto de cima, à direita, em todas as telas (inclusive na luta). Clicar ou arrastar com o mouse muda o volume geral (música, efeitos e vozes), de 5 em 5%; clicar no alto-falante zera e volta ao volume de antes. Vale para todos e o navegador lembra. Não há mais tecla de mudo.
 
 **Cola de comandos na luta:** no canto de cima, à esquerda, um ícone discreto mostra **Tab** (teclado) e **Select** (controle). Apertar um deles (ou clicar no ícone) abre por 7 s um cartão com os comandos básicos: andar, pular, ataque, especial, esquiva e provocação, mais a dica da parede (deslizar e wall jump), num cartão compacto do tamanho do conteúdo. O cartão mostra as teclas ou os botões de quem apertou: Tab mostra as teclas de P1 e P2 (online, só as do P1), Select mostra o mapa do controle; clicando, vale o controle se houver um conectado. Apertar de novo fecha; os outros golpes (rasteira, para cima…) ficam no tutorial. Por isso o Select não pausa a luta (a pausa é Esc, Enter ou Start).
 
