@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { px } from './constants';
+import { createGame, stepGame } from './game';
+import { Button } from './input';
 import { overlaps } from './physics';
 import { CONFEITARIA_STAGE, STAGES } from './stage';
 
@@ -38,5 +41,28 @@ describe('mapas', () => {
     expect(forno.x).toBe(bancada.x + bancada.w);
     expect(forno.y).toBeLessThan(bancada.y);
     expect(forno.y + forno.h).toBe(bancada.y + bancada.h);
+  });
+});
+
+describe('confeitaria: o forno', () => {
+  it('o Darllan (quem pula menos) sobe da bancada no forno com um pulo só', () => {
+    const g = createGame({ characters: ['darllan', 'crocko'], stage: CONFEITARIA_STAGE });
+    const [d, other] = g.fighters;
+    const forno = CONFEITARIA_STAGE.solids[1];
+    if (!d || !other || !forno) throw new Error('mapa sem forno');
+    other.x = px(-450);
+    // parado na bancada, perto do forno
+    d.x = forno.x - px(120);
+    for (let i = 0; i < 30; i++) stepGame(g, [0, 0]);
+    expect(d.grounded).toBe(true);
+    const airJumps = d.airJumpsLeft;
+    let minAirJumps = airJumps;
+    for (let i = 0; i < 90; i++) {
+      stepGame(g, [Button.RIGHT | Button.JUMP, 0]);
+      minAirJumps = Math.min(minAirJumps, d.airJumpsLeft);
+    }
+    expect(minAirJumps).toBe(airJumps);
+    expect(d.grounded).toBe(true);
+    expect(d.y + d.h).toBe(forno.y);
   });
 });
