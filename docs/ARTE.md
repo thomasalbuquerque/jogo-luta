@@ -874,6 +874,12 @@ O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` 
   faixa que o gerador pôs no pé. Com `wall.shadowFrom: 'foot'`, o jogo corta a arte exatamente no
   pé da caixa de colisão (a linha onde a parede de agarrar acaba, a mesma do piso do fundo), e dali
   para baixo é a cor da parede (`wall.color`, o cinza médio do concreto).
+- **Dois blocos com artes diferentes** (confeitaria): `blocks` diz a peça de cada bloco sólido do
+  `sim`, na ordem (a bancada é `building`, o forno é `oven`, cada um com `wallLeft` e `wallRight`),
+  com a cor de baixo de cada um e `behind` para o forno ficar atrás da ponta da bancada. Os dois usam
+  quase a mesma escala (a bancada 0,372 e o forno 0,378 px de mundo por px da folha ampliada), para o
+  traço ter a mesma grossura. Quando a arte acaba antes do pé da caixa, a cor do bloco começa onde
+  ela acaba, e `wall.sides` desenha o contorno dos lados nessa cor.
 - **Névoa** (`haze`): um véu claro por cima do fundo, quando o palco some contra ele (a passarela
   cinza na frente da bancada cinza).
 - **Decorações:** peças soltas em cima do chão, atrás dos lutadores.

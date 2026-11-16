@@ -13,7 +13,7 @@ modelo GPT Image 1.5 (ver [Como gerar uma imagem no Firefly](ARTE.md#como-gerar-
 | [São Sebastião do Schummy e do Meia](#3-são-sebastião-do-schummy-e-do-meia) | `art/cenario-praia/`       | Areia, um vão de mar e um barco; uma prancha no alto | a fazer  |
 | [Prefeitura do Gabs](#4-prefeitura-do-gabs)                                 | `art/cenario-prefeitura/`  | Triângulo: duas baixas dos lados e uma alta no meio  | a fazer  |
 | [Quadra de vôlei do Igão](#5-quadra-de-vôlei-do-igão)                       | `art/cenario-quadra/`      | O chão mais largo, liso, só com a cadeira do juiz    | a fazer  |
-| [Confeitaria do Darllan](#6-confeitaria-do-darllan)                         | `art/cenario-confeitaria/` | Bancada com um degrau sólido (o forno) na ponta      | a fazer  |
+| [Confeitaria do Darllan](#6-confeitaria-do-darllan)                         | `art/cenario-confeitaria/` | Bancada com um degrau sólido (o forno) na ponta      | no jogo  |
 | [Concerto do Tauba](#7-concerto-do-tauba)                                   | `art/cenario-teatro/`      | Palco estreito e dois camarotes para fora dele       | a fazer  |
 
 ## O formato de cada mapa
