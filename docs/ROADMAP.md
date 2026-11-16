@@ -237,6 +237,7 @@ Objetivo: nenhum personagem domina, e o jogo roda bem em qualquer PC do grupo.
 - [ ] Página inicial com controles e "como jogar"; domínio próprio é opcional.
 - [x] Tutorial interativo ("Como jogar" no menu inicial): lições com demonstração e a vez do jogador, com o Crocko contra um boneco de treino genérico.
 - [x] Cola de comandos na luta: ícone no canto (Tab ou Select) abre por alguns segundos os comandos básicos e a parede, nas teclas ou nos botões de quem apertou.
+- [x] Nome de cada jogador: pedido na 1ª vez e salvo no navegador ("Alterar nome" no menu); aparece em cima do lutador, na seleção, no HUD, no resultado e para os outros no online.
 - [ ] Extras opcionais: ranking/ELO do grupo, modo treino, replays compartilháveis por link.
 
 **Pronto quando:** o grupo marca partidas sozinho, sem você organizar.
