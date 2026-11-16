@@ -73,22 +73,23 @@ export const OFICINA_STAGE: Stage = {
 
 /**
  * Confeitaria do Darllan: dois blocos sólidos encostados, a bancada comprida e,
- * na ponta direita, o forno, 130 px mais alto (um degrau onde também se luta). Os
- * pés das duas caixas ficam na mesma linha. Por cima da metade esquerda da
- * bancada, um biscoito gigante atravessável. Ver docs/CENARIOS.md.
+ * na ponta direita, o forno, 65 px mais alto (um degrau baixo, de um pulo só,
+ * onde também se luta). Os pés das duas caixas ficam na mesma linha. Por cima da
+ * metade esquerda da bancada, um biscoito gigante atravessável. Ver
+ * docs/CENARIOS.md.
  */
 export const CONFEITARIA_STAGE: Stage = {
   id: 'confeitaria',
   solids: [
     solid('solid', -520, 0, 700, 420),
-    solid('solid', 180, -130, 340, 550),
+    solid('solid', 180, -65, 340, 485),
     solid('platform', -440, -150, 270, 16),
   ],
   spawns: [
     { x: px(-300), y: 0 },
     { x: px(80), y: 0 },
     { x: px(-305), y: px(-150) },
-    { x: px(350), y: px(-130) },
+    { x: px(350), y: px(-65) },
   ],
   respawns: [
     { x: px(-100), y: px(-420) },

@@ -99,6 +99,6 @@ describe('camera', () => {
     expect(stageFrame(TEST_STAGE)).toEqual({ x: -450, y: -200, w: 900, h: 200 });
     expect(stageFrame(OFICINA_STAGE)).toEqual({ x: -500, y: -200, w: 1000, h: 200 });
     // o forno é mais alto que a bancada: o quadro sobe com ele
-    expect(stageFrame(CONFEITARIA_STAGE)).toEqual({ x: -520, y: -330, w: 1040, h: 200 });
+    expect(stageFrame(CONFEITARIA_STAGE)).toEqual({ x: -520, y: -265, w: 1040, h: 200 });
   });
 });
