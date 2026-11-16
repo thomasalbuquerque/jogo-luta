@@ -890,7 +890,7 @@ O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` 
   (`5-armario-forno.png`) e colado com um script direto na folha ampliada (`5-forno-expandido-2x.png`,
   sem a versão 1×): o forno sai do `5-pecas-2x.png` até a linha de baixo da base, sem os pés; o
   armário fica atrás dele, com a lateral e a frente esticadas em separado para casar com as do forno
-  e só as partes lisas das portas esticadas na altura, até passar do pé da caixa (a diagonal de baixo
+  e só as partes lisas das portas esticadas ou encolhidas na altura, até passar do pé da caixa (a diagonal de baixo
   da lateral do armário fica abaixo do pé). O piso é o
   `4-meio-expandido.png`, como na oficina; como a camada se repete espelhada, o piso também
   (`mirror` vale para as duas). Os enfeites saem numa folha à parte do mesmo `5-pecas-2x.png` com
