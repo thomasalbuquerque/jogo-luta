@@ -1,0 +1,70 @@
+{
+  "out": "stages/oficina",
+  "scale": 1,
+  "atlasWidth": 4096,
+  "imageFormat": "webp",
+  "sheets": {
+    "pecas": {
+      "file": "5-pecas-2x.png"
+    }
+  },
+  "parts": {
+    "building": {
+      "sheet": "pecas",
+      "rect": [70, 1050, 2172, 648],
+      "pivot": [1156, 1137],
+      "sockets": {
+        "wallLeft": [80, 1400],
+        "wallRight": [2231, 1400]
+      }
+    },
+    "plank": {
+      "sheet": "pecas",
+      "rect": [400, 440, 1888, 392],
+      "pivot": [407, 692],
+      "sockets": {
+        "right": [2280, 692],
+        "chainLeft": [568.5, 440],
+        "chainRight": [2122, 440]
+      }
+    },
+    "chain": {
+      "sheet": "pecas",
+      "rect": [2518, 312, 62, 296],
+      "pivot": [2548.5, 608],
+      "sockets": {
+        "top": [2548.5, 312]
+      }
+    },
+    "tires": {
+      "sheet": "pecas",
+      "rect": [2306, 910, 304, 384],
+      "pivot": [2458, 1290]
+    },
+    "cart": {
+      "sheet": "pecas",
+      "rect": [2696, 896, 314, 400],
+      "pivot": [2853, 1293]
+    },
+    "drum": {
+      "sheet": "pecas",
+      "rect": [2323, 1361, 259, 394],
+      "pivot": [2452, 1752]
+    }
+  },
+  "layers": {
+    "back": {
+      "file": "2-fundo-2x.png",
+      "key": false,
+      "width": 3344
+    },
+    "far": {
+      "file": "3-longe-2x.png",
+      "width": 3342
+    },
+    "mid": {
+      "file": "4-meio-2x.png",
+      "width": 3344
+    }
+  }
+}
