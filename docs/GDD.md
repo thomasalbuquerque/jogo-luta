@@ -61,7 +61,7 @@ Nos menus, além dos controles de cada jogador, sempre valem as setas, Enter (co
 | Esquiva    | Shift esq. | I         | RB / RT                |
 | Provocação | R          | U         | Y                      |
 
-**Volume:** uma barra no canto de cima, à direita, em todas as telas (inclusive na luta). Clicar ou arrastar com o mouse muda o volume geral (música, efeitos e vozes), de 5 em 5%; clicar no alto-falante zera e volta ao volume de antes. Vale para todos e o navegador lembra. Não há mais tecla de mudo.
+**Volume:** um alto-falante discreto no canto de cima, à direita, em todas as telas (inclusive na luta). Clicar nele abre a barra de volume; clicar ou arrastar com o mouse na barra muda o volume geral (música, efeitos e vozes), de 5 em 5%. Tirando o mouse de cima, a barra fecha e volta só o alto-falante. Com a barra aberta, clicar no alto-falante zera e volta ao volume de antes. Vale para todos e o navegador lembra. Não há mais tecla de mudo.
 
 **Cola de comandos na luta:** no canto de cima, à esquerda, um ícone discreto mostra **Tab** (teclado) e **Select** (controle). Apertar um deles (ou clicar no ícone) abre por 7 s um cartão com os comandos básicos: andar, pular, ataque, especial, esquiva e provocação, mais a dica da parede (deslizar e wall jump), num cartão compacto do tamanho do conteúdo. O cartão mostra as teclas ou os botões de quem apertou: Tab mostra as teclas de P1 e P2 (online, só as do P1), Select mostra o mapa do controle; clicando, vale o controle se houver um conectado. Apertar de novo fecha; os outros golpes (rasteira, para cima…) ficam no tutorial. Por isso o Select não pausa a luta (a pausa é Esc, Enter ou Start).
 
