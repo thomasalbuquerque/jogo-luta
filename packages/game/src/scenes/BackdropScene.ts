@@ -1,11 +1,9 @@
 import Phaser from 'phaser';
 import { getStage } from '@jogo-luta/sim';
-import { frameTargets, type Rect } from '../render/camera';
+import { frameTargets, stageFrame, type Rect } from '../render/camera';
 import { StageView } from '../render/stageView';
 import { RENDER_SCALE, VIEW } from '../render/resolution';
 
-/** Enquadramento do mapa vazio (o mesmo da luta quando ninguém está em cena). */
-const STAGE_VIEW: Rect = { x: -450, y: -200, w: 900, h: 200 };
 /** Balanço lento da câmera no fundo da tela inicial (px de mundo e ms por volta). */
 const DRIFT_PX = 140;
 const DRIFT_PERIOD_MS = 26000;
@@ -26,6 +24,8 @@ export class BackdropScene extends Phaser.Scene {
   private view!: StageView;
   private drift = false;
   private viewportScale = 1;
+  /** Enquadramento do mapa vazio (o mesmo da luta quando ninguém está em cena). */
+  private frame: Rect = { x: 0, y: 0, w: 1, h: 1 };
 
   constructor() {
     super('backdrop');
@@ -38,7 +38,9 @@ export class BackdropScene extends Phaser.Scene {
     this.viewportScale = vp.w / width;
     const r = RENDER_SCALE;
     this.cameras.main.setViewport(vp.x * r, vp.y * r, vp.w * r, vp.h * r);
-    this.view = new StageView(this, getStage(data.stageId), {
+    const stage = getStage(data.stageId);
+    this.frame = stageFrame(stage);
+    this.view = new StageView(this, stage, {
       background: -10,
       stage: 0,
       decoration: 2,
@@ -52,7 +54,7 @@ export class BackdropScene extends Phaser.Scene {
 
   private place(time: number): void {
     const { width, height } = VIEW;
-    const target = frameTargets([STAGE_VIEW], width, height);
+    const target = frameTargets([this.frame], width, height);
     const x =
       target.x + (this.drift ? Math.sin((time / DRIFT_PERIOD_MS) * Math.PI * 2) * DRIFT_PX : 0);
     const cam = this.cameras.main;
