@@ -35,15 +35,15 @@
     },
     "oven": {
       "sheet": "forno",
-      "rect": [0, 16, 950, 1496],
+      "rect": [0, 16, 950, 1326],
       "pivot": [477.5, 55],
       "sockets": {
         "wallLeft": [28, 600],
         "wallRight": [927, 600],
-        "edgeLeft": [27, 1450],
-        "edgeLeftIn": [32, 1450],
-        "edgeRightIn": [920, 1450],
-        "edgeRight": [925, 1450]
+        "edgeLeft": [27, 1300],
+        "edgeLeftIn": [32, 1300],
+        "edgeRightIn": [920, 1300],
+        "edgeRight": [925, 1300]
       }
     },
     "plank": {
