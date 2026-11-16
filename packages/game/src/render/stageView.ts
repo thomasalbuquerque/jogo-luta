@@ -54,7 +54,7 @@ interface StageArt {
      * Onde a arte acaba: `top` (padrão) escurece num degradê a partir de 120 px
      * abaixo do topo, por cima do pé da arte; `foot` corta a arte exatamente no pé
      * da caixa de colisão (onde a parede de agarrar acaba) e dali para baixo é a
-     * cor da sombra, quando a arte desce até lá.
+     * cor da parede (`color`, a média do concreto), quando a arte desce até lá.
      */
     shadowFrom?: 'top' | 'foot';
   };
@@ -169,7 +169,7 @@ const OFICINA: StageArt = {
   ],
   // a arte do bloco foi estendida até o pé da caixa (ver docs/ARTE.md)
   wall: {
-    color: 0x8c827e,
+    color: 0x8f847f,
     shadow: 0x2a2a30,
     outline: 0x26262b,
     shadowFrom: 'foot',
@@ -377,7 +377,7 @@ export class StageView {
           const foot = y + toPx(s.h);
           // a arte acaba no pé da caixa (1 px a mais some debaixo da sombra, sem fresta)
           image.setCrop(0, 0, building.width, Math.ceil(a.pivot[1] + (foot - y) / scale) + 1);
-          g.fillStyle(art.wall.shadow, 1);
+          g.fillStyle(art.wall.color, 1);
           g.fillRect(x, foot, w, 4000);
           continue;
         }
