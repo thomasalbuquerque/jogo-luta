@@ -17,8 +17,10 @@ interface LayerArt extends ParallaxLayer {
   /**
    * Camada com o piso que continua esta para baixo, repetido até o pé do chão do
    * mapa (a parede que dá para agarrar); dali para baixo fica a cor `fillBelow`.
-   * É uma faixa do piso da própria camada cortada numa junta horizontal: repetida,
-   * cada cópia vira uma nova fileira de placas.
+   * Vem da arte da camada estendida para baixo (Expansão generativa), então emenda
+   * sem linha; só se repete se a câmera pedir mais piso que a imagem tem. Começa
+   * `FLOOR_OVERLAP` px da textura acima do pé da camada (as mesmas linhas dela),
+   * e o jogo encaixa por essa sobra: sem fresta e sem degrau no desenho.
    */
   floor?: string;
   /**
@@ -65,6 +67,9 @@ interface StageArt {
  * por isso.
  */
 const ART_RES = 2;
+
+/** Linhas da textura do piso que repetem o pé da camada de cima (ver `floor`). */
+const FLOOR_OVERLAP = 8;
 
 /** Até onde a corrente sobe (px de mundo): acima do que a câmera mostra. */
 const CHAIN_TOP = -1400;
@@ -279,7 +284,8 @@ export class StageView {
       const bottom = p.y + h * (1 - layer.originY) - 2;
       let fillTop = bottom;
       if (floor) {
-        this.placeFloor(floor, p.x, bottom, p.scale, images.length);
+        const top = p.y + h * (1 - layer.originY) - FLOOR_OVERLAP * p.scale;
+        this.placeFloor(floor, p.x, top, p.scale, images.length);
         fillTop = Math.max(bottom, this.groundBottom);
       }
       // e a cor vai até bem abaixo da tela

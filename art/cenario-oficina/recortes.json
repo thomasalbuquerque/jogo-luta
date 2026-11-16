@@ -63,13 +63,14 @@
       "width": 3342
     },
     "mid": {
-      "file": "4-meio-2x.png",
+      "file": "4-meio-expandido-2x.png",
+      "rect": [0, 0, 3344, 1882],
       "width": 3344
     },
     "floor": {
-      "file": "4-meio-2x.png",
+      "file": "4-meio-expandido-2x.png",
       "key": false,
-      "rect": [0, 1750, 3344, 132],
+      "rect": [0, 1874, 3344, 1890],
       "width": 3344
     }
   }
