@@ -20,6 +20,7 @@ fim o guia de estilo (o porquê de cada regra) e o modelo de ficha.
 | Meia                                            | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | Igão                                            | As 5 imagens, pelo caminho "Personagem novo"                          | 5       | ✅ feito |
 | [Cenário: a laje](#cenário-a-laje)              | Arte do mapa, 3 camadas de fundo, peças do palco                      | 5       | ✅ feito |
+| [Cenários novos](CENARIOS.md)                   | 7 mapas, com as mesmas 5 imagens da laje cada um                      | 35      | a fazer  |
 | **[Personagem novo](#personagem-novo-firefly)** | **As mesmas 5 imagens, uma de cada**                                  | 5       | a fazer  |
 
 Para os próximos amigos, siga a seção **[Personagem novo](#personagem-novo-firefly)**. Ela já tem
@@ -320,7 +321,8 @@ ficha (dano, velocidade, tamanho) é a mesma.
 O primeiro mapa é a laje de um prédio no litoral, no fim da tarde, com vista para os morros e o mar.
 O topo do prédio é a plataforma principal da luta (as paredes dos lados servem para o wall jump), e
 as 2 plataformas finas flutuam acima dela, como no mapa de teste. Salve tudo em
-`art/cenario-laje/`. Para outro mapa, troque só a descrição do lugar.
+`art/cenario-laje/`. Para outro mapa, troque só a descrição do lugar: os 7 mapas novos, cada um com
+um formato de plataformas diferente e os textos prontos, estão em [`CENARIOS.md`](CENARIOS.md).
 
 O Firefly vai no máximo até o formato 4:3, e as camadas do fundo precisam ser bem mais largas que a
 tela. Isso se resolve depois: o Claude repete e emenda as camadas, ou o Photoshop alarga com
@@ -542,6 +544,7 @@ art/
   <pasta>/         1-conceito.png, 2-cabecas.png, 3-pecas.png, 4-efeitos.png, 5-figurinha.png
   tchula/          os 5 + 1-conceito-face-correta.png (o rosto corrigido, só referência)
   cenario-laje/    1-mapa.png, 2-ceu.png, 3-longe.png, 4-meio.png, 5-pecas.png
+  cenario-<mapa>/  1-mapa.png, 2-fundo.png, 3-longe.png, 4-meio.png, 5-pecas.png (ver CENARIOS.md)
 ```
 
 Não precisa esperar terminar tudo. Assim que tiver um personagem, diga aqui no Claude, por exemplo:
