@@ -32,6 +32,7 @@ docs/
   GDD.md    regras do jogo, controles, moveset base, formato da ficha de personagem
   ELENCO.md os 16 amigos: traços, bordão, especial, provocação, cores
   ARTE.md   guia de estilo visual (travado), prompts de imagem e o caminho do PNG até o jogo
+  CENARIOS.md  os 7 mapas novos: formato das plataformas de cada um e os prompts de imagem
 ```
 
 ## Regras de arquitetura (não quebrar)
