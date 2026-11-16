@@ -15,6 +15,13 @@ interface LayerArt extends ParallaxLayer {
   /** Cor que continua a camada para baixo (quando a câmera desce, não aparece buraco). */
   fillBelow?: number;
   /**
+   * Camada com o piso que continua esta para baixo, repetido até o pé do chão do
+   * mapa (a parede que dá para agarrar); dali para baixo fica a cor `fillBelow`.
+   * É uma faixa do piso da própria camada cortada numa junta horizontal: repetida,
+   * cada cópia vira uma nova fileira de placas.
+   */
+  floor?: string;
+  /**
    * Repete a camada dos lados (a imagem é mais estreita que o necessário):
    * `mirror` espelhada, `repeat` igual (quando o espelho deixaria a mesma peça
    * duas vezes lado a lado na emenda).
@@ -141,6 +148,7 @@ const OFICINA: StageArt = {
       originY: 1,
       fillBelow: 0x8f8d90,
       tiles: 'repeat',
+      floor: 'floor',
     },
   ],
   wall: { color: 0x8c827e, shadow: 0x2a2a30, outline: 0x26262b },
@@ -162,8 +170,11 @@ const TEXTURE_PREFIX = 'stage-';
 export function loadStages(load: Phaser.Loader.LoaderPlugin): void {
   for (const art of new Set(Object.values(STAGE_ART))) {
     load.atlas(`${TEXTURE_PREFIX}${art.atlas}`, `${art.atlas}.webp`, `${art.atlas}.json`);
-    for (const layer of art.layers) {
-      load.image(`${TEXTURE_PREFIX}${art.atlas}-${layer.key}`, `${art.atlas}-${layer.key}.webp`);
+    const keys = art.layers.flatMap((layer) =>
+      layer.floor ? [layer.key, layer.floor] : [layer.key],
+    );
+    for (const key of keys) {
+      load.image(`${TEXTURE_PREFIX}${art.atlas}-${key}`, `${art.atlas}-${key}.webp`);
     }
   }
 }
@@ -185,12 +196,16 @@ interface PlacedLayer {
   art: LayerArt;
   images: Phaser.GameObjects.Image[];
   fill: Phaser.GameObjects.Rectangle | null;
+  /** Piso repetido abaixo da camada (null = sem piso). */
+  floor: { key: string; depth: number; tiles: Phaser.GameObjects.Image[] } | null;
 }
 
 /** Desenha o cenário e reposiciona o fundo a cada frame, conforme a câmera. */
 export class StageView {
   private readonly layers: PlacedLayer[] = [];
   private readonly art: StageArt | undefined;
+  /** Pé do chão sólido do mapa (px de mundo): até onde vai o piso das camadas. */
+  private readonly groundBottom: number;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -198,6 +213,10 @@ export class StageView {
     depths: { background: number; stage: number; decoration: number },
   ) {
     this.art = STAGE_ART[stage.id];
+    this.groundBottom = Math.max(
+      0,
+      ...stage.solids.filter((s) => s.kind === 'solid').map((s) => toPx(s.y + s.h)),
+    );
     const art = this.art;
     if (!art) {
       this.drawPlaceholder(stage, depths.stage);
@@ -219,7 +238,10 @@ export class StageView {
       const fill = layer.fillBelow
         ? scene.add.rectangle(0, 0, 1, 1, layer.fillBelow).setOrigin(0.5, 0).setDepth(depth)
         : null;
-      this.layers.push({ art: layer, images, fill });
+      const floor = layer.floor
+        ? { key: `${TEXTURE_PREFIX}${art.atlas}-${layer.floor}`, depth: depth + 0.005, tiles: [] }
+        : null;
+      this.layers.push({ art: layer, images, fill, floor });
     });
     if (art.haze) {
       // presa na tela e bem maior que ela: cobre o fundo com qualquer zoom
@@ -244,7 +266,7 @@ export class StageView {
   update(cam: CameraView): void {
     const art = this.art;
     if (!art) return;
-    for (const { art: layer, images, fill } of this.layers) {
+    for (const { art: layer, images, fill, floor } of this.layers) {
       const p = placeLayer(layer, cam, art.ref);
       const first = images[0];
       const w = first ? first.width * p.scale : 0;
@@ -253,12 +275,55 @@ export class StageView {
         const offset = images.length > 1 ? (i - 1) * w : 0;
         img.setPosition(p.x + offset, p.y).setScale(p.scale);
       });
-      if (fill) {
-        // começa um pouco antes do pé da camada (sem fresta) e vai até bem abaixo da tela
-        const bottom = p.y + h * (1 - layer.originY) - 2;
-        fill.setPosition(p.x, bottom).setSize(w * images.length, cam.height / cam.zoom + 4000);
+      // começa um pouco antes do pé da camada (sem fresta)
+      const bottom = p.y + h * (1 - layer.originY) - 2;
+      let fillTop = bottom;
+      if (floor) {
+        this.placeFloor(floor, p.x, bottom, p.scale, images.length);
+        fillTop = Math.max(bottom, this.groundBottom);
+      }
+      // e a cor vai até bem abaixo da tela
+      fill?.setPosition(p.x, fillTop).setSize(w * images.length, cam.height / cam.zoom + 4000);
+    }
+  }
+
+  /**
+   * Piso abaixo de uma camada: fileiras da textura (que já emenda com ela mesma)
+   * do pé da camada até o pé do chão do mapa, uma coluna por cópia da camada. A
+   * última fileira é cortada no pé do chão. Imagens comuns, não TileSprite: no
+   * Phaser 3 ele redesenha um canvas do tamanho dele quando o tamanho muda.
+   */
+  private placeFloor(
+    floor: NonNullable<PlacedLayer['floor']>,
+    x: number,
+    top: number,
+    scale: number,
+    columns: number,
+  ): void {
+    const source = this.scene.textures.get(floor.key).getSourceImage();
+    const rowH = source.height * scale;
+    const colW = source.width * scale;
+    const floorH = Math.max(0, this.groundBottom - top);
+    const rows = Math.ceil(floorH / rowH);
+    let n = 0;
+    for (let r = 0; r < rows; r++) {
+      const visibleH = Math.min(rowH, floorH - r * rowH) / scale;
+      for (let c = 0; c < columns; c++) {
+        let tile = floor.tiles[n];
+        if (!tile) {
+          tile = this.scene.add.image(0, 0, floor.key).setOrigin(0.5, 0).setDepth(floor.depth);
+          floor.tiles.push(tile);
+        }
+        n++;
+        const offset = columns > 1 ? (c - (columns - 1) / 2) * colW : 0;
+        tile
+          .setVisible(true)
+          .setPosition(x + offset, top + r * rowH)
+          .setScale(scale)
+          .setCrop(0, 0, source.width, Math.ceil(visibleH));
       }
     }
+    for (let i = n; i < floor.tiles.length; i++) floor.tiles[i]?.setVisible(false);
   }
 
   /** Prédio por cima da plataforma principal; tábuas por cima das plataformas finas. */
