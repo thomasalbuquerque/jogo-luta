@@ -1,0 +1,222 @@
+{
+ "frames": {
+  "building": {
+   "frame": {
+    "x": 1779,
+    "y": 4,
+    "w": 1895,
+    "h": 559
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1895,
+    "h": 559
+   },
+   "sourceSize": {
+    "w": 1895,
+    "h": 559
+   },
+   "anchors": {
+    "pivot": [
+     948.5,
+     46
+    ],
+    "sockets": {
+     "wallLeft": [
+      8,
+      378
+     ],
+     "wallRight": [
+      1889,
+      378
+     ]
+    }
+   }
+  },
+  "oven": {
+   "frame": {
+    "x": 4,
+    "y": 4,
+    "w": 914,
+    "h": 715
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 914,
+    "h": 715
+   },
+   "sourceSize": {
+    "w": 914,
+    "h": 715
+   },
+   "anchors": {
+    "pivot": [
+     456.5,
+     37
+    ],
+    "sockets": {
+     "wallLeft": [
+      7,
+      542
+     ],
+     "wallRight": [
+      906,
+      542
+     ]
+    }
+   }
+  },
+  "plank": {
+   "frame": {
+    "x": 867,
+    "y": 723,
+    "w": 2386,
+    "h": 210
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 2386,
+    "h": 210
+   },
+   "sourceSize": {
+    "w": 2386,
+    "h": 210
+   },
+   "anchors": {
+    "pivot": [
+     13,
+     22
+    ],
+    "sockets": {
+     "right": [
+      2375,
+      22
+     ]
+    }
+   }
+  },
+  "mixer": {
+   "frame": {
+    "x": 4,
+    "y": 723,
+    "w": 465,
+    "h": 542
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 465,
+    "h": 542
+   },
+   "sourceSize": {
+    "w": 465,
+    "h": 542
+   },
+   "anchors": {
+    "pivot": [
+     232,
+     537
+    ]
+   }
+  },
+  "jar": {
+   "frame": {
+    "x": 1394,
+    "y": 4,
+    "w": 381,
+    "h": 572
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 381,
+    "h": 572
+   },
+   "sourceSize": {
+    "w": 381,
+    "h": 572
+   },
+   "anchors": {
+    "pivot": [
+     189,
+     566
+    ]
+   }
+  },
+  "stand": {
+   "frame": {
+    "x": 922,
+    "y": 4,
+    "w": 468,
+    "h": 576
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 468,
+    "h": 576
+   },
+   "sourceSize": {
+    "w": 468,
+    "h": 576
+   },
+   "anchors": {
+    "pivot": [
+     234,
+     570
+    ]
+   }
+  },
+  "flour": {
+   "frame": {
+    "x": 473,
+    "y": 723,
+    "w": 390,
+    "h": 492
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 390,
+    "h": 492
+   },
+   "sourceSize": {
+    "w": 390,
+    "h": 492
+   },
+   "anchors": {
+    "pivot": [
+     194,
+     486
+    ]
+   }
+  }
+ },
+ "meta": {
+  "app": "scripts/art/build.ts",
+  "image": "confeitaria.webp",
+  "format": "RGBA8888",
+  "size": {
+   "w": 4096,
+   "h": 2048
+  },
+  "scale": "1"
+ }
+}

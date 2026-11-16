@@ -1,0 +1,74 @@
+{
+  "out": "stages/confeitaria",
+  "scale": 1,
+  "atlasWidth": 4096,
+  "imageFormat": "webp",
+  "sheets": {
+    "pecas": {
+      "file": "5-pecas-2x.png"
+    }
+  },
+  "parts": {
+    "building": {
+      "sheet": "pecas",
+      "rect": [160, 222, 1898, 556],
+      "pivot": [1108.5, 268],
+      "sockets": {
+        "wallLeft": [168, 600],
+        "wallRight": [2049, 600]
+      }
+    },
+    "oven": {
+      "sheet": "pecas",
+      "rect": [2270, 56, 916, 714],
+      "pivot": [2727.5, 95],
+      "sockets": {
+        "wallLeft": [2278, 600],
+        "wallRight": [3177, 600]
+      }
+    },
+    "plank": {
+      "sheet": "pecas",
+      "rect": [480, 938, 2390, 212],
+      "pivot": [494, 962],
+      "sockets": {
+        "right": [2856, 962]
+      }
+    },
+    "mixer": {
+      "sheet": "pecas",
+      "rect": [690, 1228, 470, 548],
+      "pivot": [925, 1768]
+    },
+    "jar": {
+      "sheet": "pecas",
+      "rect": [1342, 1205, 385, 578],
+      "pivot": [1534, 1774]
+    },
+    "stand": {
+      "sheet": "pecas",
+      "rect": [1819, 1202, 473, 581],
+      "pivot": [2055, 1774]
+    },
+    "flour": {
+      "sheet": "pecas",
+      "rect": [2347, 1271, 394, 498],
+      "pivot": [2544, 1760]
+    }
+  },
+  "layers": {
+    "back": {
+      "file": "2-fundo-2x.png",
+      "key": false,
+      "width": 3344
+    },
+    "far": {
+      "file": "3-longe-2x.png",
+      "width": 3344
+    },
+    "mid": {
+      "file": "4-meio-2x.png",
+      "width": 3344
+    }
+  }
+}
