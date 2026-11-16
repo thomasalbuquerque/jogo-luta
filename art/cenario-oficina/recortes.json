@@ -65,6 +65,12 @@
     "mid": {
       "file": "4-meio-2x.png",
       "width": 3344
+    },
+    "floor": {
+      "file": "4-meio-2x.png",
+      "key": false,
+      "rect": [0, 1750, 3344, 132],
+      "width": 3344
     }
   }
 }
