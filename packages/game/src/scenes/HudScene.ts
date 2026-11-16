@@ -17,7 +17,7 @@ import { UNSTABLE_MS } from '../net/session';
 import type { EdgePoint } from '../render/koEdge';
 import { addPortrait } from '../ui/portrait';
 import { hasTeams, teamName } from '../match/teams';
-import { cssColor, fighterColor, fitWidth, teamColor, UI, uiText } from '../ui/theme';
+import { cssColor, fighterColor, teamColor, UI, uiText } from '../ui/theme';
 import type { FightScene } from './FightScene';
 import { BELOW_VOLUME_Y } from './VolumeScene';
 import { VIEW } from '../render/view';
@@ -270,25 +270,28 @@ export class HudScene extends Phaser.Scene {
       backgroundColor: cssColor(color),
       padding: { x: 6, y: 0 },
     }).setOrigin(0.5, 1);
-    // em cima: o nome de quem joga (na cor dele) e o lutador; sem nome, só o lutador
+    // em cima, na mesma linha e do mesmo tamanho: o lutador (na cor do jogador)
+    // e o nome de quem joga (cinza); não cabendo, os dois diminuem juntos
     const nameX = x + PORTRAIT + 22;
     const nameW = x + PANEL_W - 14 - nameX;
+    const nameY = y + 19;
     const player = this.fight.names[f.id];
-    const top = uiText(this, nameX, y + 10, (player ?? c.name).toUpperCase(), {
-      fontSize: '16px',
-      fontStyle: 'bold',
+    const style = { fontSize: '16px', fontStyle: 'bold' };
+    const fighterName = uiText(this, nameX, nameY, c.name.toUpperCase(), {
+      ...style,
       color: cssColor(color),
-    });
-    fitWidth(top, nameW);
-    if (player) {
-      const fighter = uiText(this, nameX + top.displayWidth + 8, y + 12, c.name.toUpperCase(), {
-        fontSize: '13px',
-        fontStyle: 'bold',
-        color: UI.muted,
-      });
-      // sem espaço para o lutador ao lado do nome: fica só o nome
-      if (fighter.x + fighter.width > nameX + nameW) fighter.destroy();
-    }
+    }).setOrigin(0, 0.5);
+    const playerName = player
+      ? uiText(this, nameX, nameY, player.toUpperCase(), { ...style, color: UI.muted }).setOrigin(
+          0,
+          0.5,
+        )
+      : null;
+    const gap = 8;
+    const lineW = fighterName.width + (playerName ? gap + playerName.width : 0);
+    const scale = lineW > nameW ? nameW / lineW : 1;
+    fighterName.setScale(scale);
+    playerName?.setScale(scale).setX(nameX + (fighterName.width + gap) * scale);
     // na base do painel, embaixo dos stocks e do % (que fica por cima quando pula)
     const bar = specialBar(f);
     const special: SpecialGauge | null = bar && {
