@@ -282,10 +282,7 @@ export class HudScene extends Phaser.Scene {
       color: cssColor(color),
     }).setOrigin(0, 0.5);
     const playerName = player
-      ? uiText(this, nameX, nameY, player.toUpperCase(), { ...style, color: UI.muted }).setOrigin(
-          0,
-          0.5,
-        )
+      ? uiText(this, nameX, nameY, player, { ...style, color: UI.muted }).setOrigin(0, 0.5)
       : null;
     const gap = 8;
     const lineW = fighterName.width + (playerName ? gap + playerName.width : 0);
