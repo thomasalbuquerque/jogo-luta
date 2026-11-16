@@ -8,7 +8,7 @@ modelo GPT Image 1.5 (ver [Como gerar uma imagem no Firefly](ARTE.md#como-gerar-
 
 | Mapa                                                                        | Pasta                      | Formato                                              | Situação |
 | --------------------------------------------------------------------------- | -------------------------- | ---------------------------------------------------- | -------- |
-| [Oficina do Tchula](#1-oficina-do-tchula)                                   | `art/cenario-oficina/`     | Chão largo e uma passarela larga no meio             | a fazer  |
+| [Oficina do Tchula](#1-oficina-do-tchula)                                   | `art/cenario-oficina/`     | Chão largo e uma passarela larga no meio             | no jogo  |
 | [Pilates do Crocko](#2-pilates-do-crocko)                                   | `art/cenario-pilates/`     | Dois degraus: barra baixa à esquerda, alta à direita | a fazer  |
 | [São Sebastião do Schummy e do Meia](#3-são-sebastião-do-schummy-e-do-meia) | `art/cenario-praia/`       | Areia, um vão de mar e um barco; uma prancha no alto | a fazer  |
 | [Prefeitura do Gabs](#4-prefeitura-do-gabs)                                 | `art/cenario-prefeitura/`  | Triângulo: duas baixas dos lados e uma alta no meio  | a fazer  |
