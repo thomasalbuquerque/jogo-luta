@@ -11,6 +11,11 @@ describe('waitingLabel', () => {
     expect(waitingLabel(4, [1, 3])).toBe('Esperando o P2 e o P4…');
     expect(waitingLabel(4, [0, 1, 3])).toBe('Esperando o P1, o P2 e o P4…');
   });
+
+  it('quem tem nome aparece pelo nome', () => {
+    expect(waitingLabel(2, [1], ['Thomas', 'Bia'])).toBe('Esperando Bia…');
+    expect(waitingLabel(4, [1, 3], ['Thomas', 'Bia', null, null])).toBe('Esperando Bia e o P4…');
+  });
 });
 
 describe('rematchLabel', () => {

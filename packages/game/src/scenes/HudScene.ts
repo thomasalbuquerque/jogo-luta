@@ -416,7 +416,7 @@ export class HudScene extends Phaser.Scene {
     } else if (!net.ended && match && !fight.ended) {
       if (net.silentMs > UNSTABLE_MS) banner = 'Conexão instável…';
       else if (fight.stalledMs > WAITING_NOTICE_MS) {
-        banner = waitingLabel(match.characters.length, match.lockstep.waiting());
+        banner = waitingLabel(match.characters.length, match.lockstep.waiting(), net.matchNames());
       }
     }
     // quem entrou ou saiu da sala, quando não há aviso de conexão

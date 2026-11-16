@@ -1,4 +1,5 @@
 import { newSeed } from '../match/replayFile';
+import { getPlayerName } from '../profile/playerName';
 import { loadNetConfig } from './config';
 import { PeerLink } from './peerLink';
 import { randomRoomCode } from './roomCode';
@@ -32,6 +33,7 @@ function open(role: 'host' | 'guest', code: string): OnlineSession {
     build: BUILD_ID,
     clock: () => performance.now(),
     newSeed,
+    name: getPlayerName(),
   });
   current = session;
   // por timer, e não pelo quadro do jogo: continua com a aba em segundo plano

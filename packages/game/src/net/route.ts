@@ -43,11 +43,17 @@ export function onlineRoute(net: OnlineSession, here: OnlineSceneKey): OnlineRou
  * Aviso de luta parada esperando input: "Esperando o outro jogador…" no 1x1;
  * com mais gente, quem está faltando ("Esperando o P3…", "Esperando o P2 e o P4…").
  */
-export function waitingLabel(players: number, waiting: readonly number[]): string {
-  if (players <= 2 || waiting.length === 0) return 'Esperando o outro jogador…';
-  const names = waiting.map((p) => `o P${String(p + 1)}`);
-  const last = names.pop() ?? '';
-  return `Esperando ${names.length > 0 ? `${names.join(', ')} e ${last}` : last}…`;
+export function waitingLabel(
+  players: number,
+  waiting: readonly number[],
+  names: readonly (string | null)[] = [],
+): string {
+  if (waiting.length === 0) return 'Esperando o outro jogador…';
+  const who = waiting.map(
+    (p) => names[p] ?? (players <= 2 ? 'o outro jogador' : `o P${String(p + 1)}`),
+  );
+  const last = who.pop() ?? '';
+  return `Esperando ${who.length > 0 ? `${who.join(', ')} e ${last}` : last}…`;
 }
 
 /** Votos de revanche no resultado ('' = ninguém votou ainda). */
