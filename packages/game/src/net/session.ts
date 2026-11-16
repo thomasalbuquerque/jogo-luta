@@ -1,4 +1,5 @@
 import { fitTeams, FREE_FOR_ALL, keepTeams, type TeamSetup } from '../match/teams';
+import { cleanName, playerTag } from '../profile/playerName';
 import { DesyncDetector, type Desync } from './desync';
 import { Lockstep } from './lockstep';
 import { delayForPing, PingMeter, starPing } from './ping';
@@ -71,6 +72,8 @@ export interface SessionOptions {
   clock: () => number;
   /** Sorteio de 32 bits (seed de cada partida e id de cada um na sala). */
   newSeed: () => number;
+  /** Nome de quem joga deste lado (vai para os outros; sem nome, aparece "P2"). */
+  name?: string | null;
 }
 
 /**
@@ -155,6 +158,8 @@ export class OnlineSession {
   private hostVotes = 0;
   /** Host: lutadores da partida que saíram da sala (ficam parados até ela acabar). */
   private readonly absent = new Set<number>();
+  /** Nome de cada um que passou pela sala, pelo id (quem saiu continua aqui). */
+  private readonly names = new Map<string, string>();
   private noticeText = '';
   private noticeAt = -Infinity;
   private seq = 0;
@@ -168,6 +173,7 @@ export class OnlineSession {
     this.newSeed = options.newSeed;
     this.client = options.newSeed().toString(36);
     this.clients = this.role === 'host' ? [this.client] : [];
+    this.setName(this.client, options.name ?? '');
     if (this.role === 'guest') this.peers.set(HOST_PEER, newPeer(HOST_PEER, 'connecting'));
     this.link.onReady = () => {
       this.roomReady = true;
@@ -265,10 +271,42 @@ export class OnlineSession {
     this.noticeAt = this.clock();
   }
 
-  /** "P3": o número de quem está (ou estava) no lugar `seat`; na luta, o do lutador. */
+  /** Nome de quem está no lugar `seat` da sala (null = sem nome). */
+  seatName(seat: number): string | null {
+    const client = this.clients[seat];
+    return client === undefined ? null : this.nameOf(client);
+  }
+
+  /** Nome de quem joga com cada lutador da partida atual (null = sem nome). */
+  matchNames(): (string | null)[] {
+    return this.match?.clients.map((client) => this.nameOf(client)) ?? [];
+  }
+
+  private nameOf(client: string): string | null {
+    return this.names.get(client) ?? null;
+  }
+
+  private setName(client: string, raw: string): void {
+    const name = cleanName(raw);
+    if (name === '') this.names.delete(client);
+    else this.names.set(client, name);
+  }
+
+  private rosterMessage(): ControlMessage {
+    return {
+      t: 'roster',
+      clients: [...this.clients],
+      names: this.clients.map((client) => this.nameOf(client) ?? ''),
+    };
+  }
+
+  /**
+   * Como aparece quem está (ou estava) no lugar `seat`: o nome, ou "P3" (na
+   * luta, o número do lutador).
+   */
   private playerLabel(client: string, seat: number): string {
     const fighter = this.match?.clients.indexOf(client) ?? -1;
-    return `P${String((fighter >= 0 ? fighter : seat) + 1)}`;
+    return playerTag(fighter >= 0 ? fighter : seat, this.nameOf(client));
   }
 
   /** Conexão nova (a 1ª ou uma reconexão). */
@@ -292,7 +330,13 @@ export class OnlineSession {
     const host = this.peers.get(HOST_PEER);
     if (this.role === 'host' || !host) return;
     this.replaceTransport(host, transport);
-    transport.sendControl({ t: 'hello', v: NET_VERSION, build: this.build, client: this.client });
+    transport.sendControl({
+      t: 'hello',
+      v: NET_VERSION,
+      build: this.build,
+      client: this.client,
+      name: this.nameOf(this.client) ?? '',
+    });
   }
 
   private peerOf(transport: Transport): Peer | null {
@@ -331,7 +375,7 @@ export class OnlineSession {
     const send = (message: ControlMessage): void => {
       peer.transport?.sendControl(message);
     };
-    send({ t: 'roster', clients: [...this.clients] });
+    send(this.rosterMessage());
     const screen = this.screen;
     if (!screen) return;
     send({ t: 'screen', screen });
@@ -379,7 +423,7 @@ export class OnlineSession {
         this.end(message.reason);
         break;
       case 'roster':
-        this.setRoster(message.clients);
+        this.setRoster(message.clients, message.names);
         break;
       case 'screen':
         if (message.screen.seq !== this.screen?.seq) {
@@ -472,14 +516,15 @@ export class OnlineSession {
       peer = newPeer(hello.client, 'connecting');
       this.peers.set(hello.client, peer);
       this.clients.push(hello.client);
-      this.announce(`P${String(this.clients.length)} entrou na sala.`);
+      this.setName(hello.client, hello.name);
+      this.announce(`${this.playerLabel(hello.client, this.clients.length - 1)} entrou na sala.`);
     }
     this.replaceTransport(peer, from);
     from.sendControl({ t: 'welcome' });
     this.onConnected(peer);
     if (joining) {
       // os outros veem o lugar novo (na seleção, com a tabela de seleções do tamanho certo)
-      this.broadcast({ t: 'roster', clients: [...this.clients] });
+      this.broadcast(this.rosterMessage());
       this.broadcastSels();
     }
   }
@@ -491,7 +536,10 @@ export class OnlineSession {
   }
 
   /** Quem entra: a lista da sala que o host mandou (avisa quem entrou e quem saiu). */
-  private setRoster(clients: readonly string[]): void {
+  private setRoster(clients: readonly string[], names: readonly string[]): void {
+    clients.forEach((client, seat) => {
+      this.setName(client, names[seat] ?? '');
+    });
     const old = this.clients;
     if (old.length > 0) {
       old.forEach((client, seat) => {
@@ -499,7 +547,9 @@ export class OnlineSession {
           this.announce(`${this.playerLabel(client, seat)} saiu da sala.`);
       });
       clients.forEach((client, seat) => {
-        if (!old.includes(client)) this.announce(`P${String(seat + 1)} entrou na sala.`);
+        if (!old.includes(client)) {
+          this.announce(`${playerTag(seat, this.nameOf(client))} entrou na sala.`);
+        }
       });
     }
     this.clients = [...clients];
@@ -527,7 +577,7 @@ export class OnlineSession {
       this.end(reason === 'quit' ? 'left' : 'lost');
       return;
     }
-    this.broadcast({ t: 'roster', clients: [...this.clients] });
+    this.broadcast(this.rosterMessage());
     switch (this.screen?.name) {
       case 'select':
         this.broadcastSels();

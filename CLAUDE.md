@@ -22,6 +22,7 @@ packages/
             src/rig: esqueleto único e animações (dados); public/assets: atlas gerados pelo pnpm art
             src/audio: sons, música e vozes provisórias gerados em código; src/render: efeitos (game feel)
             src/net: online de 2 a 4 (sala por código, estrela no host, lockstep por atraso, PeerJS/WebRTC); ver "Online" no GDD
+            src/profile: nome do jogador, salvo no localStorage; ver "Nome do jogador" no GDD
   server/   (Etapa 8+) sinalização do online, se precisar; relay só na Etapa 12 (opcional).
 art/        PNGs gerados por IA + recortes.json (onde está cada peça e as juntas)
 audio/      áudios gravados (vozes dos amigos, música, efeitos): entram sozinhos no jogo (LEIAME.md)

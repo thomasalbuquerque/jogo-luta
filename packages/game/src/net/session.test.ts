@@ -38,14 +38,19 @@ function fakeLink(): Link & { closed: boolean } {
  * Uma sala numa rede de mentira, com relógio próprio: o host e `guests` que vão
  * entrar (cada um só se conecta ao host). `builds[0]` é o build do host.
  */
-function setup(options: LoopbackOptions = {}, builds: string[] = [], guests = 1) {
+function setup(
+  options: LoopbackOptions = {},
+  builds: string[] = [],
+  guests = 1,
+  names: (string | null)[] = [],
+) {
   const rng = { rng: 1234 };
   const random = (): number => nextRng(rng) / 0x100000000;
   const net = new LoopbackNetwork({ random, ...options });
   let now = 1000;
   let seed = 1;
   const sessions: OnlineSession[] = [];
-  const make = (role: 'host' | 'guest', build = 'b1') => {
+  const make = (role: 'host' | 'guest', build = 'b1', name: string | null = null) => {
     const link = fakeLink();
     const session = new OnlineSession({
       role,
@@ -54,12 +59,13 @@ function setup(options: LoopbackOptions = {}, builds: string[] = [], guests = 1)
       build,
       clock: () => now,
       newSeed: () => seed++ * 7919,
+      name,
     });
     sessions.push(session);
     return { link, session };
   };
-  const h = make('host', builds[0]);
-  const gs = Array.from({ length: guests }, (_, i) => make('guest', builds[i + 1]));
+  const h = make('host', builds[0], names[0]);
+  const gs = Array.from({ length: guests }, (_, i) => make('guest', builds[i + 1], names[i + 1]));
   /** Anda a rede e o relógio `n` passos. */
   const run = (n = 10): void => {
     for (let i = 0; i < n; i++) {
@@ -83,7 +89,7 @@ function setup(options: LoopbackOptions = {}, builds: string[] = [], guests = 1)
       return ends;
     });
   /** Mais alguém que chega depois. */
-  const newcomer = (build = 'b1') => make('guest', build);
+  const newcomer = (build = 'b1', name: string | null = null) => make('guest', build, name);
   const wait = (ms: number): void => {
     now += ms;
   };
@@ -289,6 +295,33 @@ describe('OnlineSession: sala', () => {
     expect(p3?.selection(2)).toEqual({ cursor: 6, ready: false });
     s.wait(NOTICE_MS);
     expect(s.host.notice).toBe('');
+  });
+
+  it('o nome de cada um chega a todos (sem nome, aparece o número)', () => {
+    const s = setup({}, [], 2, ['Thomas', '  Bia  ', null]);
+    s.connectAll();
+    const [bia, semNome] = s.guests;
+    for (const side of [s.host, bia, semNome]) {
+      expect([0, 1, 2].map((seat) => side?.seatName(seat))).toEqual(['Thomas', 'Bia', null]);
+    }
+    expect(s.host.notice).toBe('P3 entrou na sala.');
+    expect(bia?.notice).toBe('P3 entrou na sala.');
+    const ze = s.newcomer('b1', 'Zé');
+    s.connect(ze.session);
+    s.run();
+    expect(s.host.notice).toBe('Zé entrou na sala.');
+    expect(semNome?.notice).toBe('Zé entrou na sala.');
+    expect(ze.session.seatName(0)).toBe('Thomas');
+    // na partida, o nome de quem joga com cada lutador
+    s.host.openSelect();
+    s.run();
+    s.host.startMatch([A, B, A, B], STAGE);
+    s.run();
+    expect(bia?.matchNames()).toEqual(['Thomas', 'Bia', null, 'Zé']);
+    bia?.leave();
+    s.run();
+    expect(s.host.notice).toBe('Bia saiu da sala.');
+    expect(ze.session.notice).toBe('Bia saiu da sala.');
   });
 
   it('falha do Link acaba com a sala', () => {

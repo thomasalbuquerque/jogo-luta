@@ -58,6 +58,12 @@ export function uiText(
   return scene.add.text(x, y, value, { fontFamily: UI.font, color: UI.text, ...style });
 }
 
+/** Diminui o texto (escala) até caber em `maxWidth`; se já cabe, fica como está. */
+export function fitWidth<T extends Phaser.GameObjects.Text>(text: T, maxWidth: number): T {
+  const w = text.width;
+  return text.setScale(w > maxWidth && w > 0 ? maxWidth / w : 1);
+}
+
 /** Título grande com contorno. */
 export function titleText(
   scene: Phaser.Scene,

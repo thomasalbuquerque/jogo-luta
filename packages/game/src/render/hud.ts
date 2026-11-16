@@ -6,6 +6,7 @@ import {
   type GameState,
 } from '@jogo-luta/sim';
 import { hasTeams, teamName } from '../match/teams';
+import { playerTag } from '../profile/playerName';
 
 /** Tempo restante em m:ss (arredonda para cima: 0:01 até o último tick). */
 export function formatClock(ticks: number): string {
@@ -15,13 +16,19 @@ export function formatClock(ticks: number): string {
   return `${String(m)}:${String(s).padStart(2, '0')}`;
 }
 
-/** Texto do resultado da luta ("P2 VENCEU!", ou "TIME AZUL VENCEU!" com times). */
-export function resultText(state: Pick<GameState, 'winner' | 'winnerTeam' | 'fighters'>): string {
+/**
+ * Texto do resultado da luta ("THOMAS VENCEU!", "P2 VENCEU!" para quem não tem
+ * nome, ou "TIME AZUL VENCEU!" com times). `names`: o de quem joga com cada lutador.
+ */
+export function resultText(
+  state: Pick<GameState, 'winner' | 'winnerTeam' | 'fighters'>,
+  names: readonly (string | null)[] = [],
+): string {
   if (state.winner === null) return 'EMPATE!';
   if (hasTeams(state.fighters) && state.winnerTeam !== null) {
     return `${teamName(state.winnerTeam)} VENCEU!`;
   }
-  return `P${String(state.winner + 1)} VENCEU!`;
+  return `${playerTag(state.winner, names[state.winner]).toUpperCase()} VENCEU!`;
 }
 
 /** Cor do % por faixa de dano: branco → amarelo → laranja → vermelho → vinho. */

@@ -6,7 +6,7 @@ import { MAX_PACKET_INPUTS, type InputBatch, type InputRun } from './lockstep';
  * Versão do protocolo do online. Muda quando uma mensagem muda de formato: os
  * lados precisam da mesma (e do mesmo build do jogo, para a luta ser igual).
  */
-export const NET_VERSION = 3;
+export const NET_VERSION = 4;
 
 /** Jogadores numa sala online, no máximo (o host e mais 3). */
 export const MAX_ROOM_PLAYERS = 4;
@@ -22,6 +22,8 @@ const stageId = z.string().refine((id) => STAGES.some((s) => s.id === id), {
 
 /** Id de cada um na sala (sorteado ao abrir; serve para reconhecer a reconexão). */
 const clientId = z.string().min(1).max(40);
+/** Nome de quem joga, como veio (o host limpa antes de usar; '' = sem nome). */
+const playerName = z.string().max(40);
 /** Time de cada lugar (0 ou 1; null = todos contra todos). */
 const teams = z.array(z.number().int().min(0).max(1)).min(2).max(MAX_ROOM_PLAYERS).nullable();
 const sameSize = (s: { characters: string[]; teams: number[] | null }) =>
@@ -73,17 +75,24 @@ export type FightScreen = Extract<Screen, { name: 'fight' }>;
 
 /** Mensagens do canal confiável (lobby e controle da partida). */
 const ControlSchema = z.discriminatedUnion('t', [
-  /** Quem entrou se apresenta: versão, build e um id para poder reconectar. */
+  /** Quem entrou se apresenta: versão, build, um id para poder reconectar e o nome. */
   z.object({
     t: z.literal('hello'),
     v: z.number().int(),
     build: z.string().max(80),
     client: clientId,
+    name: playerName,
   }),
   z.object({ t: z.literal('welcome') }),
   z.object({ t: z.literal('refuse'), reason: z.enum(['full', 'version', 'busy']) }),
-  /** Host: quem está na sala, na ordem dos lugares (o 1º é o host). */
-  z.object({ t: z.literal('roster'), clients: z.array(clientId).min(1).max(MAX_ROOM_PLAYERS) }),
+  /** Host: quem está na sala, na ordem dos lugares (o 1º é o host), e o nome de cada um. */
+  z
+    .object({
+      t: z.literal('roster'),
+      clients: z.array(clientId).min(1).max(MAX_ROOM_PLAYERS),
+      names: z.array(playerName).max(MAX_ROOM_PLAYERS),
+    })
+    .refine((r) => r.names.length === r.clients.length, { error: 'nomes não batem com a sala' }),
   z.object({ t: z.literal('screen'), screen: ScreenSchema }),
   /** Seleção de personagem de quem mandou (para o host): onde está o cursor e se confirmou. */
   z.object({ t: z.literal('sel'), seq: uint32, ...SelectionSchema.shape }),
