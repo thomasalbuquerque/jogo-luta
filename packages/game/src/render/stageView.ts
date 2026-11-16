@@ -40,6 +40,15 @@ interface Decoration {
   flipX?: boolean;
 }
 
+interface BlockArt {
+  /** Peça do atlas, com `wallLeft` e `wallRight` (as paredes da caixa). */
+  frame: string;
+  /** Cor abaixo da arte (padrão: `wall.color`). */
+  color?: number;
+  /** Desenha atrás dos outros blocos (o forno atrás da ponta da bancada). */
+  behind?: boolean;
+}
+
 interface StageArt {
   atlas: string;
   /** Câmera de referência das camadas (a do começo da luta). */
@@ -57,7 +66,17 @@ interface StageArt {
      * cor da parede (`color`, a média do concreto), quando a arte desce até lá.
      */
     shadowFrom?: 'top' | 'foot';
+    /**
+     * Com `shadowFrom: 'foot'`: contorno (`outline`) dos lados da cor de baixo, para a
+     * parede não "abrir" onde a arte acaba.
+     */
+    sides?: boolean;
   };
+  /**
+   * Arte de cada bloco sólido do sim, na ordem dos blocos (padrão: `building` em
+   * todos, com a cor `wall.color`). A confeitaria tem dois: a bancada e o forno.
+   */
+  blocks?: readonly BlockArt[];
   decorations: readonly Decoration[];
   /**
    * Névoa clara por cima das camadas do fundo: separa o palco (escuro) do fundo
@@ -185,8 +204,66 @@ const OFICINA: StageArt = {
   haze: { color: 0xeae6e1, alpha: 0.25 },
 };
 
+const CONFEITARIA: StageArt = {
+  atlas: 'stages/confeitaria',
+  ref: { x: 0, y: -88 },
+  layers: [
+    {
+      key: 'back',
+      depth: 0.05,
+      anchorX: 640,
+      anchorY: 330,
+      scale: 0.85 / ART_RES,
+      originX: 0.5,
+      originY: 0.5,
+      fillBelow: 0xfacfa9,
+    },
+    {
+      key: 'far',
+      depth: 0.15,
+      anchorX: 640,
+      anchorY: 640,
+      scale: 0.6 / ART_RES,
+      originX: 0.5,
+      originY: 1,
+      fillBelow: 0xe7b083,
+      tiles: 'mirror',
+    },
+    {
+      key: 'mid',
+      depth: 0.35,
+      anchorX: 640,
+      anchorY: 500,
+      scale: 0.55 / ART_RES,
+      originX: 0.5,
+      originY: 1,
+      fillBelow: 0xe4ad7d,
+      tiles: 'mirror',
+    },
+  ],
+  wall: {
+    color: 0xf4c79c,
+    shadow: 0x3a2618,
+    outline: 0x2e1d12,
+    shadowFrom: 'foot',
+    sides: true,
+  },
+  blocks: [{ frame: 'building' }, { frame: 'oven', color: 0xa98670, behind: true }],
+  decorations: [
+    // em cima da bancada e do forno, atrás dos lutadores
+    { frame: 'flour', x: -478, y: -4, scale: 0.3 / ART_RES },
+    { frame: 'mixer', x: -60, y: -4, scale: 0.32 / ART_RES },
+    { frame: 'jar', x: 120, y: -4, scale: 0.28 / ART_RES },
+    { frame: 'stand', x: 470, y: -134, scale: 0.3 / ART_RES },
+  ],
+};
+
 /** Arte de cada mapa do sim, pelo id do mapa. */
-const STAGE_ART: Readonly<Record<string, StageArt>> = { test: LAJE, oficina: OFICINA };
+const STAGE_ART: Readonly<Record<string, StageArt>> = {
+  test: LAJE,
+  oficina: OFICINA,
+  confeitaria: CONFEITARIA,
+};
 
 const TEXTURE_PREFIX = 'stage-';
 
@@ -356,31 +433,43 @@ export class StageView {
     const scene = this.scene;
     const art = this.art;
     if (!art) return;
-    const building = scene.textures.getFrame(atlas, 'building');
     const plank = scene.textures.getFrame(atlas, 'plank');
     const g = scene.add.graphics().setDepth(depth - 0.01);
+    let blockIndex = 0;
 
     for (const s of stage.solids) {
       const x = toPx(s.x);
       const y = toPx(s.y);
       const w = toPx(s.w);
       if (s.kind === 'solid') {
+        const block = art.blocks?.[blockIndex] ?? { frame: 'building' };
+        blockIndex++;
+        const building = scene.textures.getFrame(atlas, block.frame);
         const a = anchorsOf(building);
         const left = a.sockets.wallLeft ?? [0, 0];
         const right = a.sockets.wallRight ?? [building.width, 0];
         const scale = w / (right[0] - left[0]);
         // o pivô (meio do topo, onde se pisa) vai no meio do topo da caixa
         const image = scene.add
-          .image(x + w / 2, y, atlas, 'building')
+          .image(x + w / 2, y, atlas, block.frame)
           .setOrigin(a.pivot[0] / building.width, a.pivot[1] / building.height)
           .setScale(scale)
-          .setDepth(depth);
+          .setDepth(block.behind ? depth - 0.005 : depth);
         if (art.wall.shadowFrom === 'foot') {
           const foot = y + toPx(s.h);
           // a arte acaba no pé da caixa (1 px a mais some debaixo da sombra, sem fresta)
-          image.setCrop(0, 0, building.width, Math.ceil(a.pivot[1] + (foot - y) / scale) + 1);
-          g.fillStyle(art.wall.color, 1);
-          g.fillRect(x, foot, w, 4000);
+          // ou antes, se ela não chega até lá; dali para baixo é a cor do bloco
+          const cropH = Math.min(building.height, Math.ceil(a.pivot[1] + (foot - y) / scale) + 1);
+          image.setCrop(0, 0, building.width, cropH);
+          const fillTop = Math.min(foot, y + (cropH - a.pivot[1]) * scale - 2);
+          g.fillStyle(block.color ?? art.wall.color, 1);
+          g.fillRect(x, fillTop, w, 4000);
+          if (art.wall.sides) {
+            const t = Math.max(2, Math.round(10 * scale));
+            g.fillStyle(art.wall.outline, 1);
+            g.fillRect(x, fillTop, t, 4000);
+            g.fillRect(x + w - t, fillTop, t, 4000);
+          }
           continue;
         }
         // a parede continua para baixo e some na sombra
