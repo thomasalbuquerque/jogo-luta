@@ -26,6 +26,7 @@ import { gridColumns, gridMove, selectLayout, selectSlots, type SelectLayout } f
 import { addPortrait, drawSilhouette } from '../ui/portrait';
 import { cssColor, fadeIn, panel, playerColor, titleText, UI, uiText } from '../ui/theme';
 import type { MatchSetup } from './FightScene';
+import { BELOW_VOLUME_Y } from './VolumeScene';
 import { VIEW } from '../render/view';
 
 const PANEL_W = 580;
@@ -131,7 +132,7 @@ export class SelectScene extends Phaser.Scene {
     this.panels = [];
 
     if (this.net) {
-      this.netText = uiText(this, width - 16, 14, netLabel(this.net), {
+      this.netText = uiText(this, width - 16, BELOW_VOLUME_Y, netLabel(this.net), {
         fontSize: '16px',
         fontStyle: 'bold',
         color: '#ced4da',
