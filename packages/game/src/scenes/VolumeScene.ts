@@ -7,15 +7,19 @@ import { UI, uiText } from '../ui/theme';
 const PILL_H = 30;
 const PILL_Y = 12;
 const PILL_RIGHT = VIEW.width - 14;
-/** Dentro da pílula: ícone do alto-falante, barra e o "%". */
-const ICON_CX = 20;
-const TRACK_X = 40;
+/** Aberta, da esquerda para a direita: o "%", a barra e o alto-falante (na ponta). */
+const LABEL_X = 12;
+const TRACK_X = 52;
 const TRACK_W = 110;
 const TRACK_H = 6;
 const KNOB_R = 7;
-const LABEL_X = TRACK_X + TRACK_W + 12;
-const PILL_W = LABEL_X + 38;
+const ICON_W = 38;
+const PILL_W = TRACK_X + TRACK_W + 6 + ICON_W;
 const PILL_X = PILL_RIGHT - PILL_W;
+/** O alto-falante fica no mesmo lugar, fechada ou aberta. */
+const ICON_CX = PILL_W - ICON_W / 2;
+/** Folga em volta da pílula aberta antes de o mouse "sair" dela. */
+const HOVER_MARGIN = 8;
 /** Parada: meio apagada, para não chamar atenção na luta. */
 const IDLE_ALPHA = 0.7;
 const DARK = 0x0b0e16;
@@ -24,15 +28,20 @@ const DARK = 0x0b0e16;
 export const BELOW_VOLUME_Y = PILL_Y + PILL_H + 8;
 
 /**
- * Barra de volume no canto de cima à direita, por cima de todas as telas.
- * Clicar ou arrastar na barra muda o volume; clicar no alto-falante zera e
- * volta ao volume de antes. O volume fica salvo no navegador (ver unlock.ts).
+ * Volume no canto de cima à direita, por cima de todas as telas. Fica só o
+ * alto-falante; clicando nele abre a barra (clicar ou arrastar muda o volume),
+ * que fecha de novo quando o mouse sai de cima. Com a barra aberta, clicar no
+ * alto-falante zera e volta ao volume de antes. O volume fica salvo no
+ * navegador (ver unlock.ts).
  */
 export class VolumeScene extends Phaser.Scene {
+  private bg!: Phaser.GameObjects.Graphics;
   private gfx!: Phaser.GameObjects.Graphics;
   private label!: Phaser.GameObjects.Text;
   private root!: Phaser.GameObjects.Container;
-  private hovering = false;
+  private track!: Phaser.GameObjects.Zone;
+  private expanded = false;
+  private hoveringIcon = false;
   private dragging = false;
   /** Volume para voltar ao clicar no alto-falante de novo. */
   private beforeMute = DEFAULT_VOLUME;
@@ -43,22 +52,25 @@ export class VolumeScene extends Phaser.Scene {
   }
 
   create(): void {
-    const bg = this.add.graphics();
-    bg.fillStyle(DARK, 0.6).fillRoundedRect(0, 0, PILL_W, PILL_H, PILL_H / 2);
+    this.bg = this.add.graphics();
     this.gfx = this.add.graphics();
     this.label = uiText(this, LABEL_X, PILL_H / 2, '', {
       fontSize: '13px',
       fontStyle: 'bold',
       color: UI.text,
     }).setOrigin(0, 0.5);
-    this.root = this.add.container(PILL_X, PILL_Y, [bg, this.gfx, this.label]).setAlpha(IDLE_ALPHA);
+    this.root = this.add.container(PILL_X, PILL_Y, [this.bg, this.gfx, this.label]);
 
-    // alto-falante: liga e desliga o som
+    // alto-falante: fechada, abre a barra; aberta, liga e desliga o som
     const icon = this.add
-      .zone(PILL_X, PILL_Y, TRACK_X - 6, PILL_H)
+      .zone(PILL_X + PILL_W - ICON_W, PILL_Y, ICON_W, PILL_H)
       .setOrigin(0)
       .setInteractive({ useHandCursor: true });
     icon.on(Phaser.Input.Events.POINTER_DOWN, () => {
+      if (!this.expanded) {
+        this.setExpanded(true);
+        return;
+      }
       const v = getVolume();
       if (v > 0) {
         this.beforeMute = v;
@@ -67,46 +79,53 @@ export class VolumeScene extends Phaser.Scene {
         setVolume(this.game, this.beforeMute);
       }
     });
+    icon.on(Phaser.Input.Events.POINTER_OVER, () => {
+      this.hoveringIcon = true;
+      this.refresh();
+    });
+    icon.on(Phaser.Input.Events.POINTER_OUT, () => {
+      this.hoveringIcon = false;
+      this.refresh();
+    });
 
     // barra: clicar pula para o ponto, arrastar acompanha o mouse
-    const track = this.add
-      .zone(PILL_X + TRACK_X - 6, PILL_Y, TRACK_W + 12, PILL_H)
+    this.track = this.add
+      .zone(PILL_X + TRACK_X - 8, PILL_Y, TRACK_W + 14, PILL_H)
       .setOrigin(0)
       .setInteractive({ useHandCursor: true, draggable: true });
     const follow = (pointer: Phaser.Input.Pointer) => {
-      const p = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
-      setVolume(this.game, volumeAt(p.x, PILL_X + TRACK_X, TRACK_W));
+      setVolume(this.game, volumeAt(this.worldX(pointer), PILL_X + TRACK_X, TRACK_W));
     };
-    track.on(Phaser.Input.Events.POINTER_DOWN, follow);
-    track.on(Phaser.Input.Events.GAMEOBJECT_DRAG, follow);
-    track.on(Phaser.Input.Events.GAMEOBJECT_DRAG_START, () => {
+    this.track.on(Phaser.Input.Events.POINTER_DOWN, follow);
+    this.track.on(Phaser.Input.Events.GAMEOBJECT_DRAG, follow);
+    this.track.on(Phaser.Input.Events.GAMEOBJECT_DRAG_START, () => {
       this.dragging = true;
-      this.refreshAlpha();
     });
-    track.on(Phaser.Input.Events.GAMEOBJECT_DRAG_END, () => {
+    this.track.on(Phaser.Input.Events.GAMEOBJECT_DRAG_END, (pointer: Phaser.Input.Pointer) => {
       this.dragging = false;
-      this.refreshAlpha();
+      // soltou longe da barra: fecha
+      if (!this.isOver(pointer)) this.setExpanded(false);
     });
 
-    for (const zone of [icon, track]) {
-      zone.on(Phaser.Input.Events.POINTER_OVER, () => {
-        this.hovering = true;
-        this.refreshAlpha();
-      });
-      zone.on(Phaser.Input.Events.POINTER_OUT, () => {
-        this.hovering = false;
-        this.refreshAlpha();
-      });
-    }
+    // mouse saiu de cima (ou toque fora dela): fecha
+    this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
+      if (this.expanded && !this.dragging && !this.isOver(pointer)) this.setExpanded(false);
+    });
+    this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
+      if (this.expanded && !this.isOver(pointer)) this.setExpanded(false);
+    });
+    this.input.on(Phaser.Input.Events.GAME_OUT, () => {
+      if (!this.dragging) this.setExpanded(false);
+    });
 
     const redraw = () => {
       this.draw(getVolume());
     };
-    redraw();
     this.game.events.on(VOLUME_CHANGED, redraw);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.game.events.off(VOLUME_CHANGED, redraw);
     });
+    this.setExpanded(false);
   }
 
   override update(): void {
@@ -119,23 +138,55 @@ export class VolumeScene extends Phaser.Scene {
     this.input.enabled = !hidden;
   }
 
-  private refreshAlpha(): void {
-    this.root.setAlpha(this.hovering || this.dragging ? 1 : IDLE_ALPHA);
+  private setExpanded(expanded: boolean): void {
+    this.expanded = expanded;
+    if (this.track.input) this.track.input.enabled = expanded;
+    if (!expanded) this.dragging = false;
+    this.refresh();
+  }
+
+  private refresh(): void {
+    this.root.setAlpha(this.expanded || this.hoveringIcon ? 1 : IDLE_ALPHA);
+    this.label.setVisible(this.expanded);
+    this.draw(getVolume());
+  }
+
+  private worldX(pointer: Phaser.Input.Pointer): number {
+    return (pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2).x;
+  }
+
+  /** O ponteiro está em cima da pílula aberta (com uma folga)? */
+  private isOver(pointer: Phaser.Input.Pointer): boolean {
+    const p = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
+    return (
+      p.x >= PILL_X - HOVER_MARGIN &&
+      p.x <= PILL_RIGHT + HOVER_MARGIN &&
+      p.y >= PILL_Y - HOVER_MARGIN &&
+      p.y <= PILL_Y + PILL_H + HOVER_MARGIN
+    );
   }
 
   private draw(v: number): void {
+    // fundo: só o círculo do alto-falante, ou a pílula inteira
+    const left = this.expanded ? 0 : PILL_W - ICON_W;
+    this.bg
+      .clear()
+      .fillStyle(DARK, 0.6)
+      .fillRoundedRect(left, 0, PILL_W - left, PILL_H, PILL_H / 2);
+
     const g = this.gfx.clear();
     const cy = PILL_H / 2;
+    const ix = ICON_CX - 4;
     // alto-falante: caixinha + cone
     g.fillStyle(0xffffff, 1);
-    g.fillRect(ICON_CX - 9, cy - 3.5, 5, 7);
-    g.fillTriangle(ICON_CX - 5, cy - 3.5, ICON_CX + 1, cy - 8, ICON_CX + 1, cy + 8);
-    g.fillTriangle(ICON_CX - 5, cy - 3.5, ICON_CX + 1, cy + 8, ICON_CX - 5, cy + 3.5);
+    g.fillRect(ix - 9, cy - 3.5, 5, 7);
+    g.fillTriangle(ix - 5, cy - 3.5, ix + 1, cy - 8, ix + 1, cy + 8);
+    g.fillTriangle(ix - 5, cy - 3.5, ix + 1, cy + 8, ix - 5, cy + 3.5);
     if (v <= 0) {
       // mudo: um X vermelho
       g.lineStyle(2, 0xe63946, 1);
-      g.lineBetween(ICON_CX + 4, cy - 4, ICON_CX + 10, cy + 4);
-      g.lineBetween(ICON_CX + 10, cy - 4, ICON_CX + 4, cy + 4);
+      g.lineBetween(ix + 4, cy - 4, ix + 10, cy + 4);
+      g.lineBetween(ix + 10, cy - 4, ix + 4, cy + 4);
     } else {
       // ondas: 1 a 3, conforme o volume
       g.lineStyle(2, 0xffffff, 1);
@@ -143,10 +194,12 @@ export class VolumeScene extends Phaser.Scene {
       for (let i = 0; i < waves; i++) {
         const r = 4 + i * 3.5;
         g.beginPath();
-        g.arc(ICON_CX + 1, cy, r, -0.8, 0.8);
+        g.arc(ix + 1, cy, r, -0.8, 0.8);
         g.strokePath();
       }
     }
+    this.label.setText(volumeLabel(v));
+    if (!this.expanded) return;
 
     // barra: trilho, parte cheia e o botão
     const ty = cy - TRACK_H / 2;
@@ -163,7 +216,5 @@ export class VolumeScene extends Phaser.Scene {
     }
     g.fillStyle(0xffffff, 1).fillCircle(TRACK_X + fill, cy, KNOB_R);
     g.lineStyle(2, DARK, 0.8).strokeCircle(TRACK_X + fill, cy, KNOB_R);
-
-    this.label.setText(volumeLabel(v));
   }
 }
