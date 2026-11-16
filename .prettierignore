@@ -3,3 +3,5 @@ coverage
 pnpm-lock.yaml
 # gerados pelo pnpm art
 packages/game/public/assets
+# notas para o WhatsApp: *negrito* do WhatsApp, o Prettier trocaria por _itálico_
+release-notes-*.md
