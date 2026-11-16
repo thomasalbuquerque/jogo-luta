@@ -32,6 +32,22 @@
      "wallRight": [
       1889,
       578
+     ],
+     "edgeLeft": [
+      26,
+      1128
+     ],
+     "edgeLeftIn": [
+      32,
+      1128
+     ],
+     "edgeRightIn": [
+      1865,
+      1128
+     ],
+     "edgeRight": [
+      1871,
+      1128
      ]
     }
    }
@@ -68,6 +84,22 @@
      "wallRight": [
       906,
       582
+     ],
+     "edgeLeft": [
+      6,
+      1432
+     ],
+     "edgeLeftIn": [
+      11,
+      1432
+     ],
+     "edgeRightIn": [
+      899,
+      1432
+     ],
+     "edgeRight": [
+      904,
+      1432
      ]
     }
    }

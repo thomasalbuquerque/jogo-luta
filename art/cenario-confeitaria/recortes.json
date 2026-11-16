@@ -26,7 +26,11 @@
       "pivot": [968.5, 68],
       "sockets": {
         "wallLeft": [28, 600],
-        "wallRight": [1909, 600]
+        "wallRight": [1909, 600],
+        "edgeLeft": [46, 1150],
+        "edgeLeftIn": [52, 1150],
+        "edgeRightIn": [1885, 1150],
+        "edgeRight": [1891, 1150]
       }
     },
     "oven": {
@@ -35,7 +39,11 @@
       "pivot": [477.5, 55],
       "sockets": {
         "wallLeft": [28, 600],
-        "wallRight": [927, 600]
+        "wallRight": [927, 600],
+        "edgeLeft": [27, 1450],
+        "edgeLeftIn": [32, 1450],
+        "edgeRightIn": [920, 1450],
+        "edgeRight": [925, 1450]
       }
     },
     "plank": {
