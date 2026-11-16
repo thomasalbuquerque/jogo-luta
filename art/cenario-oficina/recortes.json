@@ -6,16 +6,19 @@
   "sheets": {
     "pecas": {
       "file": "5-pecas-2x.png"
+    },
+    "bloco": {
+      "file": "5-bloco-expandido-2x.png"
     }
   },
   "parts": {
     "building": {
-      "sheet": "pecas",
-      "rect": [70, 1050, 2172, 648],
-      "pivot": [1156, 1137],
+      "sheet": "bloco",
+      "rect": [24, 26, 2178, 1034],
+      "pivot": [1112, 112],
       "sockets": {
-        "wallLeft": [80, 1400],
-        "wallRight": [2231, 1400]
+        "wallLeft": [38, 600],
+        "wallRight": [2186, 600]
       }
     },
     "plank": {
