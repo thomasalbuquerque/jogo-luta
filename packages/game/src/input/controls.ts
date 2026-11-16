@@ -24,12 +24,11 @@ export const DEFAULT_CONTROLS: Controls = { keys: [P1_KEYS, P2_KEYS], pad: DEFAU
 
 const STORAGE_KEY = 'jogo-luta:controles';
 
-/** Teclas fixas: Enter e Esc (menus e pausa), M (mudo), ` (debug), Tab e F1–F12 (navegador). */
+/** Teclas fixas: Enter e Esc (menus e pausa), ` (debug), Tab e F1–F12 (navegador). */
 const RESERVED_KEYS = new Set([
   'Enter',
   'NumpadEnter',
   'Escape',
-  'KeyM',
   'Backquote',
   'Tab',
   'MetaLeft',
