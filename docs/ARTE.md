@@ -871,8 +871,9 @@ O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` 
 - **Bloco até o pé da caixa** (oficina): a parede do bloco também foi estendida no Photoshop
   (`5-bloco-expandido.png`: só o bloco, recortado do `5-pecas.png` acima da linha do pé, sem
   mudar a escala, e esticado para baixo). A peça `building` sai dessa folha e é cortada antes da
-  faixa que o gerador pôs no pé. Com `wall.shadowFrom: 'foot'`, a sombra começa no pé da caixa de
-  colisão (a parede de agarrar), não 120 px abaixo do topo.
+  faixa que o gerador pôs no pé. Com `wall.shadowFrom: 'foot'`, o jogo corta a arte exatamente no
+  pé da caixa de colisão (a linha onde a parede de agarrar acaba, a mesma do piso do fundo), e dali
+  para baixo é a cor da sombra.
 - **Névoa** (`haze`): um véu claro por cima do fundo, quando o palco some contra ele (a passarela
   cinza na frente da bancada cinza).
 - **Decorações:** peças soltas em cima do chão, atrás dos lutadores.
