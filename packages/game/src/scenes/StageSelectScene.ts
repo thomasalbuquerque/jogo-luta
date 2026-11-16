@@ -38,6 +38,10 @@ const STAGE_INFO: Readonly<Record<string, { name: string; blurb: string }>> = {
     name: 'Laje',
     blurb: 'Laje no fim de tarde, com 2 tábuas para subir. Caiu do prédio, perdeu a vida.',
   },
+  oficina: {
+    name: 'Oficina do Tchula',
+    blurb: 'Oficina de caminhão: chão largo e uma passarela pendurada por correntes no meio.',
+  },
 };
 
 export function stageName(id: string): string {
