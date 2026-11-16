@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { cameraBounds, DEFAULT_CAMERA, frameTargets, smooth } from './camera';
+import { OFICINA_STAGE, TEST_STAGE } from '@jogo-luta/sim';
+import { cameraBounds, DEFAULT_CAMERA, frameTargets, smooth, stageFrame } from './camera';
 
 const opts = { ...DEFAULT_CAMERA, offsetY: 0 };
 
@@ -92,5 +93,10 @@ describe('camera', () => {
     for (let i = 0; i < 120; i++) v = smooth(v, 100, 6, 16.67);
     expect(v).toBeGreaterThan(99);
     expect(v).toBeLessThanOrEqual(100);
+  });
+
+  it('o mapa vazio enquadra o chão de ponta a ponta', () => {
+    expect(stageFrame(TEST_STAGE)).toEqual({ x: -450, y: -200, w: 900, h: 200 });
+    expect(stageFrame(OFICINA_STAGE)).toEqual({ x: -500, y: -200, w: 1000, h: 200 });
   });
 });

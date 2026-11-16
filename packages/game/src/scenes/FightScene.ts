@@ -57,6 +57,7 @@ import {
   DEFAULT_CAMERA,
   frameTargets,
   smooth,
+  stageFrame,
   type CameraOptions,
   type Rect,
 } from '../render/camera';
@@ -127,8 +128,6 @@ const HASH_EVERY_TICKS = 30;
  * ou 4, ocupam a largura toda embaixo).
  */
 const FIGHT_CAMERA: CameraOptions = { ...DEFAULT_CAMERA, insetBottom: 110 };
-/** Enquadramento da câmera quando ninguém está em cena. */
-const STAGE_VIEW: Rect = { x: -450, y: -200, w: 900, h: 200 };
 
 /** Camadas de desenho (depth do Phaser). */
 const DEPTH = {
@@ -2450,7 +2449,8 @@ export class FightScene extends Phaser.Scene {
   }
 
   private cameraTarget(alpha: number): { x: number; y: number; zoom: number } {
-    const b = getStage(this.state.stageId).blastZone;
+    const stage = getStage(this.state.stageId);
+    const b = stage.blastZone;
     const bounds = cameraBounds({ x: toPx(b.x), y: toPx(b.y), w: toPx(b.w), h: toPx(b.h) });
     const focused = this.focus !== null ? this.state.fighters[this.focus] : undefined;
     if (focused && focused.state !== 'ko') {
@@ -2466,7 +2466,7 @@ export class FightScene extends Phaser.Scene {
       .filter((f) => f.state !== 'ko' && !isVanished(f))
       .map((f) => this.renderRect(f, alpha));
     return frameTargets(
-      rects.length > 0 ? rects : [STAGE_VIEW],
+      rects.length > 0 ? rects : [stageFrame(stage)],
       VIEW.width,
       VIEW.height,
       FIGHT_CAMERA,

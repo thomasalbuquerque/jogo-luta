@@ -49,5 +49,27 @@ export const TEST_STAGE: Stage = {
   blastZone: { x: px(-1300), y: px(-1000), w: px(2600), h: px(1800) },
 };
 
+/**
+ * Oficina do Tchula: chão mais largo que o da laje e uma passarela larga só, no
+ * meio (pendurada por correntes, na arte). Ver docs/CENARIOS.md.
+ */
+export const OFICINA_STAGE: Stage = {
+  id: 'oficina',
+  solids: [solid('solid', -500, 0, 1000, 420), solid('platform', -190, -150, 380, 16)],
+  spawns: [
+    { x: px(-240), y: 0 },
+    { x: px(240), y: 0 },
+    { x: px(-110), y: px(-150) },
+    { x: px(110), y: px(-150) },
+  ],
+  respawns: [
+    { x: px(-100), y: px(-420) },
+    { x: px(100), y: px(-420) },
+    { x: px(-260), y: px(-420) },
+    { x: px(260), y: px(-420) },
+  ],
+  blastZone: { x: px(-1350), y: px(-1000), w: px(2700), h: px(1800) },
+};
+
 /** Mapas do jogo, na ordem da tela de seleção. */
-export const STAGES: readonly Stage[] = [TEST_STAGE];
+export const STAGES: readonly Stage[] = [TEST_STAGE, OFICINA_STAGE];

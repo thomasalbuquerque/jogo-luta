@@ -211,7 +211,8 @@ Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da 
         ganhou quiques (`bounces`, `bounceKeep`). Falta o OK do concept pelo amigo, a voz gravada
         e as 5 lutas de teste.
 - [ ] Mapas novos com tema de piadas internas do grupo: 7 planejados, com o formato das plataformas
-      e os textos do Firefly em `docs/CENARIOS.md`. Falta gerar a arte e montar cada um.
+      e os textos do Firefly em `docs/CENARIOS.md`. Montado: Oficina do Tchula. Falta gerar a arte
+      e montar os outros 6.
 
 Checklist de cada personagem:
 

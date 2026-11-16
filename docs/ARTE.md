@@ -850,14 +850,26 @@ de cada um, C troca o personagem, Espaço pausa.
 
 O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` e `wallRight`,
 `plank` com `right`, para o jogo encaixar a arte nas caixas de colisão) e as camadas do fundo
-(`layers`: céu, longe, meio). A posição e a velocidade de cada camada ficam em
-`packages/game/src/render/stageView.ts`.
+(`layers`: céu ou parede, longe, meio). A posição e a velocidade de cada camada ficam em
+`packages/game/src/render/stageView.ts`, numa ficha por mapa (`STAGE_ART`, pelo id do mapa no
+`sim`). O resto da ficha:
+
+- **Camada mais estreita que a tela:** `tiles: 'mirror'` repete espelhada dos lados (laje);
+  `tiles: 'repeat'` repete igual, quando o espelho deixaria a mesma peça duas vezes encostada na
+  emenda (os guindastes da oficina).
+- **Corrente até o teto** (oficina): a peça `chain` é um pedaço que emenda com ele mesmo (um
+  número inteiro de elos, cortado no mesmo ponto do elo em cima e embaixo), com o `pivot`
+  embaixo e o socket `top` em cima. A `plank` marca com sockets `chain*` onde a corrente dela
+  acaba (cortada na mesma fase do elo), e o jogo empilha a peça dali para cima até sair da tela.
+- **Névoa** (`haze`): um véu claro por cima do fundo, quando o palco some contra ele (a passarela
+  cinza na frente da bancada cinza).
+- **Decorações:** peças soltas em cima do chão, atrás dos lutadores.
 
 As imagens do cenário vêm do gerador em 1536 px de largura, pouco para uma tela grande (o fundo
 fica embaçado). Antes do `pnpm art`, elas são ampliadas 2× com o Real-ESRGAN, e os arquivos
 ampliados ficam ao lado dos originais com `-2x` no nome (`2-ceu-2x.png`...). O `recortes.json` usa os
 ampliados, com as coordenadas em px deles (o dobro das do original). Em `stageView.ts`, as escalas
-das camadas e das decorações dividem por `LAJE_ART_RES` (2). Comando, com o
+das camadas e das decorações dividem por `ART_RES` (2). Comando, com o
 [realesrgan-ncnn-vulkan](https://github.com/xinntao/Real-ESRGAN/releases) (usa a placa de vídeo):
 
 ```text

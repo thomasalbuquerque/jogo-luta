@@ -3,9 +3,9 @@ import { toPx, type Stage } from '@jogo-luta/sim';
 import { placeLayer, type CameraView, type ParallaxLayer } from './parallax';
 
 /**
- * Arte do cenário (Etapa 4): céu, morros e lajes vizinhas com parallax atrás; o
- * prédio e as tábuas por cima das caixas de colisão do sim. Gerado pelo
- * `pnpm art` a partir de `art/cenario-laje/`.
+ * Arte do cenário (Etapa 4): camadas do fundo com parallax atrás; o chão (prédio)
+ * e as plataformas (tábuas) por cima das caixas de colisão do sim. Gerado pelo
+ * `pnpm art` a partir de `art/cenario-<mapa>/`.
  */
 
 interface LayerArt extends ParallaxLayer {
@@ -14,8 +14,12 @@ interface LayerArt extends ParallaxLayer {
   originY: number;
   /** Cor que continua a camada para baixo (quando a câmera desce, não aparece buraco). */
   fillBelow?: number;
-  /** Repete a camada espelhada dos lados (a imagem é mais estreita que o necessário). */
-  mirrorTiles?: boolean;
+  /**
+   * Repete a camada dos lados (a imagem é mais estreita que o necessário):
+   * `mirror` espelhada, `repeat` igual (quando o espelho deixaria a mesma peça
+   * duas vezes lado a lado na emenda).
+   */
+  tiles?: 'mirror' | 'repeat';
 }
 
 interface Decoration {
@@ -35,13 +39,28 @@ interface StageArt {
   /** Parede que continua abaixo da arte do prédio e escurece. */
   wall: { color: number; shadow: number; outline: number };
   decorations: readonly Decoration[];
+  /**
+   * Névoa clara por cima das camadas do fundo: separa o palco (escuro) do fundo
+   * quando os dois têm as mesmas cores (a passarela na frente da bancada).
+   */
+  haze?: { color: number; alpha: number };
+  /**
+   * Peça repetida para cima a partir de cada socket `chain*` da plataforma,
+   * até sair da tela (a corrente que pendura a passarela da oficina). A peça tem
+   * o pivô embaixo e o socket `top` em cima, no mesmo ponto da corrente.
+   */
+  chain?: string;
 }
 
 /**
- * Px da arte por px de mundo nas peças e camadas da laje: a arte foi ampliada 2×
- * (Real-ESRGAN, ver docs/ARTE.md), então as escalas abaixo dividem por isso.
+ * Px da arte por px de mundo nas peças e camadas dos cenários: a arte foi
+ * ampliada 2× (Real-ESRGAN, ver docs/ARTE.md), então as escalas abaixo dividem
+ * por isso.
  */
-const LAJE_ART_RES = 2;
+const ART_RES = 2;
+
+/** Até onde a corrente sobe (px de mundo): acima do que a câmera mostra. */
+const CHAIN_TOP = -1400;
 
 const LAJE: StageArt = {
   atlas: 'stages/laje',
@@ -52,7 +71,7 @@ const LAJE: StageArt = {
       depth: 0,
       anchorX: 640,
       anchorY: 360,
-      scale: 0.9 / LAJE_ART_RES,
+      scale: 0.9 / ART_RES,
       originX: 0.5,
       originY: 0.5,
     },
@@ -61,7 +80,7 @@ const LAJE: StageArt = {
       depth: 0.12,
       anchorX: 640,
       anchorY: 620,
-      scale: 1.1 / LAJE_ART_RES,
+      scale: 1.1 / ART_RES,
       originX: 0.5,
       originY: 1,
       fillBelow: 0x8d6a86,
@@ -71,24 +90,71 @@ const LAJE: StageArt = {
       depth: 0.32,
       anchorX: 640,
       anchorY: -215,
-      scale: 1 / LAJE_ART_RES,
+      scale: 1 / ART_RES,
       originX: 0.5,
       originY: 0,
       fillBelow: 0x424b26,
-      mirrorTiles: true,
+      tiles: 'mirror',
     },
   ],
   wall: { color: 0x8a6a64, shadow: 0x2b2230, outline: 0x2b1a22 },
   decorations: [
-    { frame: 'tank', x: -250, y: -16, scale: 0.36 / LAJE_ART_RES },
-    { frame: 'grill', x: -360, y: -6, scale: 0.34 / LAJE_ART_RES },
-    { frame: 'chair', x: 300, y: -10, scale: 0.34 / LAJE_ART_RES, flipX: true },
-    { frame: 'cooler', x: 365, y: -6, scale: 0.34 / LAJE_ART_RES },
+    { frame: 'tank', x: -250, y: -16, scale: 0.36 / ART_RES },
+    { frame: 'grill', x: -360, y: -6, scale: 0.34 / ART_RES },
+    { frame: 'chair', x: 300, y: -10, scale: 0.34 / ART_RES, flipX: true },
+    { frame: 'cooler', x: 365, y: -6, scale: 0.34 / ART_RES },
   ],
 };
 
+const OFICINA: StageArt = {
+  atlas: 'stages/oficina',
+  ref: { x: 0, y: -88 },
+  layers: [
+    {
+      key: 'back',
+      depth: 0.05,
+      anchorX: 640,
+      anchorY: 330,
+      scale: 0.85 / ART_RES,
+      originX: 0.5,
+      originY: 0.5,
+      fillBelow: 0x8f8a8d,
+    },
+    {
+      key: 'far',
+      depth: 0.15,
+      anchorX: 640,
+      anchorY: 640,
+      scale: 0.6 / ART_RES,
+      originX: 0.5,
+      originY: 1,
+      fillBelow: 0x8c8b8f,
+      tiles: 'repeat',
+    },
+    {
+      key: 'mid',
+      depth: 0.35,
+      anchorX: 640,
+      anchorY: 470,
+      scale: 0.5 / ART_RES,
+      originX: 0.5,
+      originY: 1,
+      fillBelow: 0x8f8d90,
+      tiles: 'repeat',
+    },
+  ],
+  wall: { color: 0x8c827e, shadow: 0x2a2a30, outline: 0x26262b },
+  decorations: [
+    { frame: 'tires', x: -440, y: -24, scale: 0.34 / ART_RES },
+    { frame: 'drum', x: -375, y: -24, scale: 0.3 / ART_RES },
+    { frame: 'cart', x: 445, y: -24, scale: 0.3 / ART_RES },
+  ],
+  chain: 'chain',
+  haze: { color: 0xeae6e1, alpha: 0.25 },
+};
+
 /** Arte de cada mapa do sim, pelo id do mapa. */
-const STAGE_ART: Readonly<Record<string, StageArt>> = { test: LAJE };
+const STAGE_ART: Readonly<Record<string, StageArt>> = { test: LAJE, oficina: OFICINA };
 
 const TEXTURE_PREFIX = 'stage-';
 
@@ -142,12 +208,12 @@ export class StageView {
     art.layers.forEach((layer, i) => {
       const key = `${TEXTURE_PREFIX}${art.atlas}-${layer.key}`;
       const depth = depths.background + i * 0.1;
-      const copies = layer.mirrorTiles ? [-1, 0, 1] : [0];
+      const copies = layer.tiles ? [-1, 0, 1] : [0];
       const images = copies.map((c) =>
         scene.add
           .image(0, 0, key)
           .setOrigin(layer.originX, layer.originY)
-          .setFlipX(c !== 0)
+          .setFlipX(c !== 0 && layer.tiles === 'mirror')
           .setDepth(depth + 0.01),
       );
       const fill = layer.fillBelow
@@ -155,6 +221,13 @@ export class StageView {
         : null;
       this.layers.push({ art: layer, images, fill });
     });
+    if (art.haze) {
+      // presa na tela e bem maior que ela: cobre o fundo com qualquer zoom
+      scene.add
+        .rectangle(0, 0, 40000, 40000, art.haze.color, art.haze.alpha)
+        .setScrollFactor(0)
+        .setDepth(depths.background + art.layers.length * 0.1);
+    }
 
     this.drawBuilding(stage, atlas, depths.stage);
     for (const d of art.decorations) {
@@ -244,10 +317,46 @@ export class StageView {
           .setOrigin(a.pivot[0] / plank.width, a.pivot[1] / plank.height)
           .setScale(scale)
           .setDepth(depth);
+        if (art.chain) {
+          for (const [name, p] of Object.entries(a.sockets)) {
+            if (!name.startsWith('chain')) continue;
+            this.drawChain(
+              atlas,
+              art.chain,
+              x + (p[0] - a.pivot[0]) * scale,
+              y + (p[1] - a.pivot[1]) * scale,
+              scale,
+              depth - 0.02,
+            );
+          }
+        }
       }
     }
     // a sombra cobre o pé da arte do prédio, para não aparecer a emenda
     g.setDepth(depth + 0.01);
+  }
+
+  /** Corrente repetida do ponto (x, y) para cima, até sair da tela. */
+  private drawChain(
+    atlas: string,
+    frame: string,
+    x: number,
+    y: number,
+    scale: number,
+    depth: number,
+  ): void {
+    const f = this.scene.textures.getFrame(atlas, frame);
+    const a = anchorsOf(f);
+    const top = a.sockets.top ?? [a.pivot[0], 0];
+    const step = (a.pivot[1] - top[1]) * scale;
+    if (step <= 0) return;
+    for (let bottom = y; bottom > CHAIN_TOP; bottom -= step) {
+      this.scene.add
+        .image(x, bottom, atlas, frame)
+        .setOrigin(a.pivot[0] / f.width, a.pivot[1] / f.height)
+        .setScale(scale)
+        .setDepth(depth);
+    }
   }
 
   /** Mapa sem arte: as caixas de colisão em cinza (como na Etapa 1). */

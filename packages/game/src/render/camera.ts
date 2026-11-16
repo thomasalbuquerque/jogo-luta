@@ -1,3 +1,5 @@
+import { toPx, type Stage } from '@jogo-luta/sim';
+
 /** Retângulo em px de mundo. */
 export interface Rect {
   x: number;
@@ -38,6 +40,18 @@ export const DEFAULT_CAMERA: CameraOptions = {
   offsetY: -40,
   insetBottom: 0,
 };
+
+/**
+ * Enquadramento do mapa vazio (quando ninguém está em cena): o chão sólido de
+ * ponta a ponta e 200 px acima dele.
+ */
+export function stageFrame(stage: Stage): Rect {
+  const floors = stage.solids.filter((s) => s.kind === 'solid');
+  const left = Math.min(...floors.map((s) => toPx(s.x)));
+  const right = Math.max(...floors.map((s) => toPx(s.x + s.w)));
+  const top = Math.min(...floors.map((s) => toPx(s.y)));
+  return { x: left, y: top - 200, w: right - left, h: 200 };
+}
 
 /** Quanto os limites da câmera ficam para dentro da blast zone (px de mundo). */
 export const CAMERA_BOUNDS_MARGIN = 150;
