@@ -6,24 +6,24 @@ veja `docs/GDD.md`.
 
 **Autorização:** marque ✅ quando o amigo aceitar ter a imagem (e a voz) no jogo.
 
-| #   | Apelido     | Traço mais caricato                                                           | Bordão                       | Especial (bloco)                      | Provocação                                   | Cores                                    | Autorizou |
-| --- | ----------- | ----------------------------------------------------------------------------- | ---------------------------- | ------------------------------------- | -------------------------------------------- | ---------------------------------------- | --------- |
-| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral          | "Vem com o Schummy, mermão!" | **Arrancada** (investida)             | Gira um volante imaginário e grita o bordão  | Vermelho, branco, grafite                |           |
-| 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango          | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil)   | Mãos em concha, gritando o bordão            | Branco (avental), laranja, amarelo-milho |           |
-| 3   | Dadazinho   | Óculos preto, cavanhaque, estatura média e magro, guitarrista, jogador de CS  | "sexo"                       | **Doze** (projétil)                   | Air guitar, depois solta "sexo" na seca      | Verde, verde-oliva, preto                |           |
-| 4   | Tauba       | Careca, barbudo, baixinho, dev frontend, trompetista, some do Discord do nada | "🎵🎶" (toca o trompete)     | **Silent quit** (teleporte)           | Toca um trechinho clássico no trompete       | Preto, branco, dourado                   |           |
-| 5   | Tchula      | Mecânico de macacão, olho verde, joga de scout no CS                          | "Nooola!"                    | **Scout** (projétil)                  | Gira a chave de boca na mão e grita o bordão | Cinza, amarelo, preto                    |           |
-| 6   | Crocko      | Alto, óculos preto, barba, professor de pilates e fisioterapeuta              | (a definir)                  | **Correção postural** (contra-ataque) | Alonga e aponta a postura                    | Turquesa, branco, preto                  |           |
-| 7   | Darllan     | Confeiteiro de biscoitos, alto, moreno e grandão                              | "Darllan!"                   | **Rolo na bancada** (área)            | Morde um biscoito e grita o bordão           | Marrom-chocolate, creme, rosa-glacê      |           |
-| 8   | Gabs        | Servidor público da prefeitura (crachá no pescoço), gamer                     | (a definir)                  | **Controle na mão** (área)            | Aperta o controle e comemora: "GG!"          | Azul-royal, roxo, cinza-claro            |           |
-| 9   | Marília     | Baixinha (1,64 m), cabelo castanho, puxa um palheiro do nada                  | "Gentiii!"                   | **Tragadinha** (buff)                 | Mãos no rosto, gritando o bordão             | Rosa-framboesa, jeans claro, verde-menta |           |
-| 10  | Meia        | Óculos grandes pretos e quadrados, magro, pro player de jogo de luta          | (a definir)                  | **Comando** (agarrão)                 | Ajeita os óculos e chama com a mão           | Branco, ciano-elétrico, jeans            |           |
-| 11  | Igão        | Jogador de vôlei, alto (1,90 m), cabelo castanho curto                        | "Cê tá miolo né nê?"         | **Saque** (projétil)                  | Quica a bola, aponta e solta o bordão        | Roxo-violeta, verde-limão, roxo-escuro   |           |
-| 12  |             |                                                                               |                              |                                       |                                              |                                          |           |
-| 13  |             |                                                                               |                              |                                       |                                              |                                          |           |
-| 14  |             |                                                                               |                              |                                       |                                              |                                          |           |
-| 15  |             |                                                                               |                              |                                       |                                              |                                          |           |
-| 16  |             |                                                                               |                              |                                       |                                              |                                          |           |
+| #   | Apelido     | Traço mais caricato                                                           | Bordão                       | Especial (bloco)                      | Provocação                                       | Cores                                    | Autorizou |
+| --- | ----------- | ----------------------------------------------------------------------------- | ---------------------------- | ------------------------------------- | ------------------------------------------------ | ---------------------------------------- | --------- |
+| 1   | Schummaki   | Cara de piloto de corrida, apaixonado por carros, caiçara do litoral          | "Vem com o Schummy, mermão!" | **Arrancada** (investida)             | Gira um volante imaginário e grita o bordão      | Vermelho, branco, grafite                |           |
+| 2   | João Frango | "Tem clone dele no mundo todo", dono de restaurante, traço de frango          | "Ô Mariiiliaaa!"             | **Frango assado voador** (projétil)   | Mãos em concha, gritando o bordão                | Branco (avental), laranja, amarelo-milho |           |
+| 3   | Dadazinho   | Óculos preto, cavanhaque, estatura média e magro, guitarrista, jogador de CS  | "sexo"                       | **Doze** (projétil)                   | Air guitar, depois solta "sexo" na seca          | Verde, verde-oliva, preto                |           |
+| 4   | Tauba       | Careca, barbudo, baixinho, dev frontend, trompetista, some do Discord do nada | "🎵🎶" (toca o trompete)     | **Silent quit** (teleporte)           | Toca um trechinho clássico no trompete           | Preto, branco, dourado                   |           |
+| 5   | Tchula      | Mecânico de macacão, olho verde, joga de scout no CS                          | "Nooola!"                    | **Scout** (projétil)                  | Gira a chave de boca na mão e grita o bordão     | Cinza, amarelo, preto                    |           |
+| 6   | Crocko      | Alto, óculos preto, barba, professor de pilates e fisioterapeuta              | (a definir)                  | **Correção postural** (contra-ataque) | Alonga e aponta a postura                        | Turquesa, branco, preto                  |           |
+| 7   | Darllan     | Confeiteiro de biscoitos, alto, moreno e grandão                              | "Darllan!"                   | **Rolo na bancada** (área)            | Morde um biscoito e grita o bordão               | Marrom-chocolate, creme, rosa-glacê      |           |
+| 8   | Gabs        | Servidor público da prefeitura (crachá no pescoço), gamer                     | (a definir)                  | **Controle na mão** (área)            | Aperta o controle e comemora: "GG!"              | Azul-royal, roxo, cinza-claro            |           |
+| 9   | Marília     | Baixinha (1,64 m), cabelo castanho, puxa um palheiro do nada                  | "Gentiii!"                   | **Tragadinha** (buff)                 | Mãos no rosto, gritando o bordão                 | Rosa-framboesa, jeans claro, verde-menta |           |
+| 10  | Meia        | Óculos grandes pretos e quadrados, magro, pro player de jogo de luta          | (a definir)                  | **Comando** (agarrão)                 | Ajeita os óculos e chama com a mão               | Branco, ciano-elétrico, jeans            |           |
+| 11  | Igão        | Jogador de vôlei, alto (1,90 m), cabelo castanho curto                        | "Cê tá miolo né nê?"         | **Saque** (projétil)                  | Quica a bola, aponta e solta o bordão            | Roxo-violeta, verde-limão, roxo-escuro   |           |
+| 12  | Thom4o      | Alto (1,80 m), magro, dev, relógio preto no pulso                             | "É o Turbas!"                | **Tá plantada!** (agarrão + bomba)    | Confere o relógio, aponta e grita o bordão       | Amarelo-alerta, preto, vermelho-LED      |           |
+| 13  | Arquelau    | Loiro de olho verde, dev de moletom com capuz, imita a voz de todo mundo      | Imita o do adversário        | **Dublagem** (projétil + cópia)       | Microfone na boca, repete o bordão do adversário | Bordô, areia, âmbar                      |           |
+| 14  |             |                                                                               |                              |                                       |                                                  |                                          |           |
+| 15  |             |                                                                               |                              |                                       |                                                  |                                          |           |
+| 16  |             |                                                                               |                              |                                       |                                                  |                                          |           |
 
 ## Os primeiros
 
@@ -839,6 +839,342 @@ Trechos prontos para os textos do Firefly (pasta `art/igao/`):
   `Edit the attached parts sheet: draw the black knee pad only at the top of the shin, not on the thigh. Keep every other part exactly the same.`
 - **Camisa (passo 1):** se vier com número ou nome nas costas ou no peito, anexe o conceito e mande
   `Edit the attached image: remove any number, letter or name from the jersey. Keep everything else the same.`
+
+### 12. Thom4o
+
+- **Quem é:** desenvolvedor de software. Alto (1,80 m, a mesma altura do Crocko e do Darllan),
+  magro, sem óculos, com um relógio preto no pulso. Idade a confirmar. Cabelo, pele e barba: seguir
+  as fotos.
+- **Bordão:** "É o Turbas!"
+- **Estilo de luta:** bate e corre. Leve e rápido no chão e no ar, pulo bom, golpes base normais.
+  O preço: é alto e leve, então é fácil de acertar e voa longe. O jogo dele tem dois tempos: entrar
+  colado para plantar a bomba e, plantada, fugir (ou manter o adversário longe) até ela estourar.
+  Contraste com o Meia: os dois precisam chegar colados, mas o Meia pega e resolve na hora (15%); o
+  Thom4o planta e a briga dos 5 segundos seguintes decide quem leva.
+- **Especial — Tá plantada! (agarrão + bomba):** de perto, ele tira uma C4 de trás das costas e
+  cola no peito do adversário. A bomba tem um relógio, que todo mundo vê. Quem está com ela passa
+  para outro lutador acertando um golpe nele: é uma batata quente. Quando o relógio zera, ela
+  estoura em quem estiver com ela e machuca quem estiver em volta.
+  - **Colar:** é um agarrão curto. Alcance de uns 40 px à frente do corpo, da cintura ao ombro
+    (o do Meia tem 36): precisa estar colado. Startup 7, active 5; se errar, recovery de 28 com a
+    bomba na mão e a guarda aberta. Se pegar, ele segura o adversário 14 ticks (o tempo de colar, com
+    o "bip-bip" de armada) e solta com um empurrão fraco: 3% de dano, sem força para matar, que
+    afasta os dois uns 60 a 160 px conforme o %. Como todo agarrão, ganha do contra-ataque do Crocko
+    e pega a Marília com a aura.
+  - **O relógio:** 300 ticks (5 s), contados a partir do empurrão. Aparece grande em cima da cabeça
+    de quem está com a bomba, com um bipe que vai acelerando.
+  - **Passar:** quem está com a bomba passa para qualquer lutador em quem acertar um **golpe de
+    corpo**: golpes base, investida, área, agarrão ou o golpe devolvido do contra-ataque. **Projétil
+    não passa** (frango, doze, scout, bola, microfone): a bomba está colada no corpo, tem que
+    encostar. O golpe dá o dano e o arremesso normais, e a bomba vai junto. Golpe de quem **não**
+    está com a bomba não muda nada: o Thom4o pode bater no portador à vontade.
+  - **Pode voltar para o Thom4o? Sim.** Sem isso, no 1 contra 1 o adversário não teria o que fazer
+    além de esperar a explosão. Com isso, plantar é um risco calculado, e é daí que vem a graça.
+    Duas regras deixam a volta justa:
+    - **Trava de devolução (60 ticks, 1 s):** quem acabou de passar a bomba (ou de plantar) não
+      recebe essa bomba de volta por 60 ticks. O golpe acerta normalmente, mas a bomba fica onde
+      está. Quem acabou de levar a bomba do Thom4o não devolve na hora com um tapa: o Thom4o sai do
+      empurrão com 1 s de vantagem (até uns 400 px correndo). Vale igual para todos: se o adversário
+      passar para o Thom4o, também fica 1 s protegido. Com 3 ou 4 jogadores, a trava vale só para
+      quem passou; os outros podem receber.
+    - **Piso do relógio (120 ticks, 2 s):** se a bomba passar com menos de 120 ticks no relógio, o
+      relógio volta para 120. Ninguém recebe uma bomba a 1 tick de estourar: sobra pelo menos 1 s
+      depois da trava para tentar devolver. O relógio nunca volta para 300.
+  - **Conta no 1 contra 1:** plantou no tick 0; até o 60 o adversário não consegue devolver; do 60
+    ao 300 ele tem 4 s para acertar o Thom4o. O Thom4o anda a 7,0 px/tick (a média é 6,5), então
+    fugir funciona, mas o palco tem 900 px: não dá para só correr. Bater no portador também defende
+    (em hitstun ele não passa nada).
+  - **Explosão em quem está com a bomba:** 18% de dano e arremesso forte para cima (ângulo 90°,
+    força 11, escala 0,18). Pela conta do GDD, mata por cima a partir de uns 140% num peso médio; em
+    % baixo levanta o alvo e abre um combo aéreo. Não dá para esquivar: está colada. Nem a esquiva
+    aérea nem o contra-ataque salvam o portador; a aura da Marília reduz o dano, como sempre.
+  - **Explosão em volta:** 10% de dano e arremesso médio para longe do portador (ângulo 45°, força
+    8, escala 0,13; não mata antes de uns 230%). A área é uma caixa de **220 × 180 px** centrada no
+    corpo do portador: 110 px para cada lado (a largura do Rolo do Darllan) e 90 px para cima e para
+    baixo. Pega quem estiver a menos de uns dois corpos de distância. Quem está em volta pode
+    esquivar (a invencibilidade da esquiva aérea e do respawn vale).
+  - **Por que danos diferentes:** quem ficou com a bomba teve 5 s para passar e não passou, então
+    leva o golpe cheio (18%, o mesmo dano da Scout do Tchula). Quem só estava perto leva pouco mais
+    da metade (10%, como a onda do ground pound): dói o bastante para ninguém ficar colado no
+    portador, sem punir demais quem não tinha nada com isso.
+  - **Quem a área acerta:** todo mundo em volta, **inclusive o próprio Thom4o**. Ele pode bater no
+    portador durante a contagem, mas tem que sair de perto no fim. Com times e fogo amigo desligado,
+    a área poupa só os companheiros do Thom4o; quem está com a bomba leva sempre, de qualquer time.
+  - **Se quem está com a bomba perder a vida:** a bomba some com ele, sem explodir.
+  - **Recarga:** só existe 1 bomba dele por vez; com a bomba em jogo, o botão do especial não faz
+    nada. Quando ela estoura ou some, a recarga é de 150 ticks (2,5 s). Errando o agarrão, 90 ticks
+    contados do começo. Dá no máximo 1 bomba a cada 7,5 s.
+  - **No ar:** funciona, sem impulso. Se pegar no ar, os dois ficam parados no ar até o empurrão.
+  - **Interações:** o Meia passa a bomba no 1º golpe do Comando e fica 30 ticks segurando alguém
+    com uma bomba (risco dele). O Crocko com a bomba passa quando o contra-ataque pega. A Arrancada
+    do Schummaki, o Rolo do Darllan e o bonequinho do Gabs passam de mais longe. Quem depende de
+    projétil (João Frango, Dadazinho, Tchula, Igão) tem que passar no braço. Um lutador só carrega 1
+    bomba: com dois Thom4os, o agarrão do segundo pega mas não cola.
+  - **Efeitos:** a C4 aparece na mão com uma fumacinha; colada, fica presa no peito de quem está
+    com ela, com a luz vermelha piscando no ritmo do bipe. O relógio (segundos com 1 casa) é
+    desenhado no código, em cima da cabeça, e fica vermelho no último segundo. Quem está travado
+    mostra um cadeado pequeno em cima da cabeça. No último segundo, um anel fino no chão mostra o
+    tamanho da área, para quem está perto saber de onde sair. Na passagem, um "tlec" e a bomba pula
+    de um corpo para o outro. Na explosão: clarão laranja, anel de onda de choque, fumaça escura,
+    tremor de câmera e um "bum" grave (sons gerados em código).
+  - **A animação:** 1 clipe de especial: a mão de trás traz a bomba de trás das costas, o braço da
+    frente estica e bate a bomba no peito do adversário, e ele recua com um passo. Se errar, fica
+    com a bomba na mão olhando para ela. O adversário usa a pose de agarrado que já existe. A bomba
+    no peito é uma peça solta presa ao tronco do esqueleto (o esqueleto é o mesmo para todos).
+  - **Precisa de código novo (médio):** o bloco agarrão ganha uma opção `bomb` (relógio, trava,
+    piso, o golpe do portador e a caixa e o golpe da área), em vez de um bloco novo. O estado da
+    luta ganha a lista de bombas em jogo (dono, quem está com ela, ticks que faltam, quem passou por
+    último e a trava), que entra no snapshot e no hash. No combate, golpe de corpo do portador que
+    acerta alguém sem trava e sem bomba troca o portador. Eventos novos para o jogo desenhar e tocar:
+    plantou, passou, explodiu. Tudo com inteiros, sem RNG: replay e online continuam iguais.
+  - **Se precisar ajustar:** relógio (300), trava (60), piso (120), área (220 × 180), danos
+    (18 / 10) e alcance do agarrão (40 px). Se quem depende de projétil sofrer demais para passar,
+    liberar o passe por projétil só a curta distância.
+- **Números da ficha (proposta):**
+
+  | Campo        | Valor      | Comparação                                        |
+  | ------------ | ---------- | ------------------------------------------------- |
+  | `weight`     | 92         | Leve (Meia 88, Tauba 92; médio 100)               |
+  | `walkSpeed`  | 7,0        | Rápido (Schummaki 7,4, Meia 7,3; médio 6,5)       |
+  | `airSpeed`   | 6,0        | Bom no ar (Dadazinho e Tauba 6,0; médio 5,5)      |
+  | `jumpHeight` | 182        | Pulo bom (Marília 185; médio 175)                 |
+  | `dashSpeed`  | 14         | Como o Dadazinho                                  |
+  | `hurtbox`    | 46 × 104   | 1,80 m (como Crocko e Darllan), magro             |
+  | Queda        | rápida     | `fastFallSpeed` 19, como a maioria                |
+  | Golpes base  | padrão     | Sem ajustes                                       |
+  | Especial     | 7 / 5 / 28 | Agarrão de 40 px, segura 14 ticks, empurrão de 3% |
+  | Recarga      | 90 / 150   | Errou (do começo) / depois que a bomba estoura    |
+
+- **A bomba:** pacote de explosivo com um teclado pequeno, um visor e fios coloridos, como a C4 do
+  CS. A arte é genérica, inspirada nela: nada de nomes, emblemas ou logos do CS, e o visor vem sem
+  números (o relógio é desenhado no código, porque muda a cada tick e o jogo espelha o personagem).
+- **Provocação:** levanta o pulso, confere o relógio como quem conta o tempo da bomba, aponta para
+  o adversário e grita "É o Turbas!".
+- **Visual:** roupa comum do dia a dia. Camiseta amarelo-alerta (`#F7C81E`) lisa, de manga curta,
+  gola redonda, para fora da calça; calça preta (`#1F2023`) de perna reta; tênis preto com duas
+  listras brancas na lateral e sola branca (listras genéricas, sem imitar marca de verdade);
+  relógio preto no pulso. Sem óculos. Corpo alto e magro, braços e pernas compridos. Cores:
+  amarelo-alerta, preto e vermelho-LED (`#E5352B`, a luz da bomba e o relógio). Amarelo com preto é
+  a faixa de perigo, e ninguém tem amarelo como cor principal: o do Tchula é só a faixa do macacão
+  e o do João Frango é o boné. A camiseta clara também segura a leitura nos menus escuros, já que a
+  calça e o tênis são pretos.
+- **No jogo:** ainda não está (só esta ficha). A ficha do `sim` vai em
+  `packages/sim/src/characters/thom4o.ts`.
+- **Ideias guardadas:** "Tá plantada!" como fala ao colar a bomba; respawn conferindo o relógio;
+  KO dele com um "bip" comprido; se a própria bomba estourar nele, o balão mostra "É o Turbas...".
+
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Thom4o — software developer, tall and slim, always checking his black wristwatch; sticks a time bomb on his opponents and runs.
+Fighting style: hit-and-run bomber — light and fast, low ready-to-sprint stance, one hand behind his back hiding the bomb.
+Body: based on the photos; tall, slim build, long arms and legs.
+Outfit: plain hazard yellow (#F7C81E) short-sleeve crew-neck T-shirt, untucked; black (#1F2023) straight pants; black sneakers with two plain white side stripes and white soles; black wristwatch.
+Signature details: no glasses, the yellow T-shirt, the black wristwatch; hair and facial hair as in the photos.
+Colors: primary #F7C81E, secondary #1F2023, accent #E5352B.
+Face/personality: mischievous grin, like someone who knows the clock is ticking.
+Special move: "Tá plantada!" — up close, he slaps a time bomb with a blinking red light onto the opponent's chest and runs; the bomb jumps to whoever the carrier hits and explodes on whoever holds it when the timer ends.
+Taunt: checks his wristwatch, then points at the opponent and shouts his catchphrase.
+Extra parts for the parts sheet: one hand pointing with the index finger; one open hand holding the flat time bomb.
+Props and effects for the effects sheet: 1 time bomb (a flat pack of tan explosive blocks taped together, with a small dark keypad, a blank dark display and colored wires, front view, no hands); 1 black wristwatch; 1 big orange-yellow explosion burst; 1 thin ring-shaped shock wave; 3 dark gray smoke puffs; 1 small red light glow.
+Avoid: text, numbers or logos on the clothes, the watch and the bomb; digits on the bomb display; game emblems; real shoe brands (no three-stripe design); glasses.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/thom4o/`):
+
+- `<EXPRESSION>`: `mischievous grin`
+- `<CHARACTER>`:
+  `Thom4o, software developer, tall, slim, no glasses, mischievous grin. Hazard yellow (#F7C81E) plain short-sleeve T-shirt, untucked; black (#1F2023) straight pants; black sneakers with two plain white side stripes and white soles; black wristwatch on one wrist.`
+- `<LEGWEAR>`: `black pants`
+- `<SHOE>`: `black sneaker with two white side stripes and a white sole`
+- `<EXTRA>`: `one pointing hand, one open hand holding a flat time bomb`
+- `<ITEMS>`:
+  `1 time bomb: a flat pack of tan explosive blocks taped together, with a small dark keypad, a blank dark display and colored wires, front view, no hands; 1 black wristwatch, side view; 1 big orange-yellow explosion burst; 1 thin ring-shaped shock wave; 3 dark gray smoke puffs; 1 small red light glow`
+- **Relógio (passo 3):** o braço de trás usa a mesma peça do antebraço da frente, então relógio
+  desenhado no antebraço aparece nos dois pulsos. Por isso ele vai na folha de efeitos, como peça
+  solta, e o jogo prende só no pulso da frente. Se o antebraço vier com relógio, anexe a folha de
+  peças e mande
+  `Edit the attached parts sheet: remove the wristwatch from the forearm. Keep every other part exactly the same.`
+- **Tênis e calça (passo 3):** os dois são pretos; as listras e a sola brancas é que separam o
+  tênis da canela. Se o tênis vier todo preto, peça as listras e a sola de novo.
+- **Listras (passo 1):** se vierem três listras inclinadas (cara de marca de verdade), anexe o
+  conceito e mande
+  `Edit the attached image: make the sneaker stripes two plain horizontal white stripes, not a brand design. Keep everything else the same.`
+
+### 13. Arquelau
+
+- **Quem é:** desenvolvedor de software. Alto (1,80 m, como o Thom4o, o Crocko e o Darllan), loiro
+  de olho verde, nem magro nem gordo. Quase sempre de moletom com capuz e zíper, calça e tênis. Na
+  vida real ele imita a voz de todo mundo do grupo: o especial vem daí. Idade a confirmar. Rosto e
+  barba: seguir as fotos.
+- **Bordão:** não tem um só dele: ele imita. Na provocação repete o bordão do adversário mais
+  perto; se estiver com a cabeça de alguém (ver o especial), repete o dessa pessoa. Quando não há
+  quem imitar (Arquelau contra Arquelau), vale o bordão fixo da ficha: a escolher entre os dos
+  outros (sugestão: "Ô Mariiiliaaa!", do João Frango).
+- **Estilo de luta:** imitador. Tudo na média: peso, chão, ar e pulo, golpes base sem ajuste. Ele
+  não tem um golpe forte próprio: a força dele é a dos outros. Sem cópia, joga só com os golpes
+  base e um microfone que quase não machuca; com cópia, tem o especial do adversário enquanto o
+  dono fica sem. Ser mediano em tudo é o que deixa qualquer especial roubado servir nele. Contraste
+  com o Crocko: o Crocko devolve o golpe que recebe; o Arquelau toma o especial para ele.
+- **Especial — Dublagem (projétil + cópia):** ele gira um microfone pelo cabo, como um laço, e
+  joga reto para a frente. Se acertar alguém, "grava" a voz da pessoa: o especial dela entra em
+  recarga e o Arquelau fica com uma cópia para usar **uma vez**. A cabeça dele vira a cabeça do
+  dono do especial até a cópia ser usada.
+  - **Por que microfone:** é a ferramenta de quem imita voz, e o cabo faz o papel do laço. A
+    alternativa de dev, guardada: um cabo USB que "copia e cola" (Ctrl+C, Ctrl+V).
+  - **O arremesso:** startup de 14 ticks (o microfone girando em cima da cabeça é o aviso), active
+    de 1, recovery de 22 (puxando o cabo de volta). O microfone sai reto a 16 px/tick e vive 17
+    ticks: chega a uns 300 px do centro dele, um terço do palco. É mais longe que a Doze (~250 px)
+    e bem mais curto que o Frango (570 px). Caixa pequena, de 30 × 24 px, na altura do peito: dá
+    para pular por cima ou esquivar.
+  - **O acerto:** 4% de dano e um tranco fraco (ângulo 30°, força 5, escala 0,03): não mata nem
+    abre combo. O valor do golpe é o roubo.
+  - **O que acontece com quem levou:** o especial dele entra em recarga como se tivesse acabado de
+    usar: a recarga dele mesmo, contada do zero, com **teto de 150 ticks (2,5 s)**. Se ele já
+    estava numa recarga maior, fica a maior. Efeito que já estava ligado continua (a aura da
+    Marília, uma bomba do Thom4o em jogo, um projétil no ar). O teto existe por causa do Tauba
+    (recarga de 300, e o especial é a recuperação dele) e da Marília (450): sem teto, ficariam 5 s
+    e 7,5 s sem especial por um golpe de 4%.
+  - **A cópia:** enquanto está com ela, o botão do especial solta o especial do dono, com todos os
+    números da ficha dele (tempos, dano, força, alcance, 1 vez por ar), saindo do corpo do
+    Arquelau. A cópia vale **1 uso** e some depois de **600 ticks (10 s)** sem usar, ou se ele
+    perder uma vida. Com a cópia guardada ele não joga o microfone: não dá para acumular duas.
+  - **Recarga:** errou o microfone, 120 ticks (2 s) contados do começo. Roubou, a recarga da
+    Dublagem só começa quando a cópia é usada ou some: 180 ticks (3 s).
+  - **Por que esses tempos:** depois de um roubo, o microfone seguinte só pode acertar uns 200
+    ticks depois, no melhor caso (o resto do recovery, 180 de recarga e 14 de startup). Como a
+    trava de quem levou é de no máximo 150, **todo mundo fica pelo menos uns 50 ticks (quase 1 s)
+    com o especial de volta** antes de poder ser roubado de novo, e na maioria dos casos bem mais.
+    Ninguém fica travado para sempre.
+  - **A trava em cada um** (a recarga do dono, até o teto) e o que o Arquelau leva:
+
+    | Dono        | Trava (ticks)           | O que o Arquelau ganha                         |
+    | ----------- | ----------------------- | ---------------------------------------------- |
+    | Schummaki   | 110                     | Uma Arrancada                                  |
+    | João Frango | 54                      | Um frango                                      |
+    | Dadazinho   | 100                     | Um tiro de doze                                |
+    | Tauba       | 150 (teto; a dele: 300) | Um Silent quit (serve de recuperação)          |
+    | Tchula      | 150                     | Um tiro de scout                               |
+    | Crocko      | 120                     | Uma janela de contra-ataque                    |
+    | Darllan     | 100                     | Uma pancada de rolo                            |
+    | Gabs        | 60                      | Um golpe do bonequinho                         |
+    | Marília     | 150 (teto; a dela: 450) | Uma aura de 5 s                                |
+    | Meia        | 90                      | Um Comando (agarrão com combo)                 |
+    | Igão        | 90                      | Um saque                                       |
+    | Thom4o      | 90                      | Uma bomba para plantar (a bomba é do Arquelau) |
+
+  - **A cabeça:** ao roubar, a cabeça do Arquelau troca pela do dono com um "puf"; o corpo
+    continua o dele (moletom bordô), então dá para saber quem é quem mesmo com o dono na luta. A
+    cabeça roubada usa as 4 expressões do dono (normal, golpe levado, provocação e KO). No último
+    segundo da cópia ela pisca; ao usar ou perder a cópia, volta a dele com outro "puf".
+  - **A voz:** ao soltar o especial copiado, toca o bordão do dono em tom de imitação. É a piada
+    do personagem.
+  - **No ar:** o microfone funciona, sem impulso: não ajuda a voltar ao palco. O especial copiado
+    segue as regras do dono (a Arrancada e o Silent quit ajudam a voltar, 1 vez por ar).
+  - **Interações:** o contra-ataque do Crocko devolve o microfone: o Arquelau leva os 4% e fica
+    sem a Dublagem pela recarga cheia (180). Na Marília com a aura o microfone acerta e rouba
+    normalmente (só o dano é menor). Com 3 ou 4 jogadores, pega o primeiro em quem encostar. Com
+    times e fogo amigo desligado, atravessa o companheiro; ligado, dá para copiar o especial do
+    companheiro, mas ele também fica na recarga. Contra outro Arquelau: se o outro estiver com uma
+    cópia, rouba a cópia; se não estiver, só dá o dano e põe a Dublagem dele em recarga. O
+    microfone é projétil: não passa a bomba do Thom4o.
+  - **Efeitos:** no startup o microfone gira em cima da cabeça com um "vuu-vuu"; no voo, o cabo é
+    uma linha da mão até o microfone, desenhada no código (estica na ida e encolhe na volta). Ao
+    acertar, ondas de voz em âmbar (`#FFC94D`) saem de quem levou e correm pelo cabo até ele, com
+    um chiado de gravação; em cima da cabeça de quem levou aparece um ícone de especial riscado
+    enquanto a trava dura. Com a cópia, um ícone pequeno de microfone fica em cima do Arquelau com
+    um anel que esvazia nos 10 s.
+  - **A animação:** 1 clipe de especial dele (girar, arremessar, puxar). O especial copiado toca o
+    clipe de especial do dono no corpo do Arquelau, com os objetos e os efeitos do dono (o
+    esqueleto é o mesmo para todos, e a arte do dono já está carregada porque ele está na luta).
+    As mãos especiais vêm da folha do dono, como estão. Nenhuma arte nova por personagem copiado.
+  - **Precisa de código novo (médio no `sim`, maior no `game`):** o bloco projétil ganha uma opção
+    `steal` (teto da trava, duração da cópia e recarga depois da cópia), em vez de um bloco novo.
+    O lutador ganha "cópia guardada" (de quem e quantos ticks faltam), que entra no snapshot e no
+    hash; com ela, o botão do especial usa a ficha do dono (personagem é dado, então é só apontar
+    para outra ficha). Eventos novos: roubou, usou a cópia, perdeu a cópia. Sem RNG e só com
+    inteiros: replay e online continuam iguais. No `game`: trocar a cabeça, tocar o clipe e os
+    efeitos do dono no corpo dele, o cabo, os ícones e a voz de imitação.
+  - **Se precisar ajustar:** alcance do microfone (velocidade 16 × 17 ticks), startup (14), teto
+    da trava (150), duração da cópia (600) e recarga depois da cópia (180). Se a cópia ficar forte
+    demais com algum especial (o tiro de scout é o candidato), o primeiro ajuste é dar 80% do dano
+    na cópia.
+- **Números da ficha (proposta):**
+
+  | Campo        | Valor       | Comparação                                           |
+  | ------------ | ----------- | ---------------------------------------------------- |
+  | `weight`     | 100         | Médio                                                |
+  | `walkSpeed`  | 6,6         | Média (6,5)                                          |
+  | `airSpeed`   | 5,6         | Média (5,5)                                          |
+  | `jumpHeight` | 176         | Média (175)                                          |
+  | `dashSpeed`  | 13,2        | Média (13)                                           |
+  | `hurtbox`    | 50 × 104    | 1,80 m, corpo médio (a mesma do Crocko)              |
+  | Queda        | rápida      | `fastFallSpeed` 19, como a maioria                   |
+  | Golpes base  | padrão      | Sem ajustes                                          |
+  | Especial     | 14 / 1 / 22 | Microfone a 16 px/tick por 17 ticks, 30 × 24 px, 4%  |
+  | Recarga      | 120 / 180   | Errou (do começo) / depois de usar ou perder a cópia |
+
+- **Provocação:** leva o microfone à boca, faz cara de deboche e repete o bordão do adversário
+  mais perto, imitando a voz dele. O balão mostra o bordão do imitado (para quem ainda não tem
+  bordão, o texto do balão dele: "Olha essa postura...", "GG!", "Vem!"; para o Tauba, as notas
+  🎵🎶, com ele imitando o trompete com a boca). O som é o áudio do bordão do imitado tocado em
+  outro tom, até o Arquelau gravar as próprias imitações (`audio/vozes/arquelau_imita_<id>`, uma
+  por amigo: é a voz dele de verdade fazendo o que ele faz na vida real).
+- **Visual:** moletom bordô (`#8E2440`) com zíper, fechado, até o quadril, de manga comprida, com
+  o capuz **caído nas costas** (nunca na cabeça: a cabeça troca no especial, e o capuz tem que
+  ficar no tronco) e dois cordões curtos cor de areia; calça areia (`#D9C49A`) de perna reta;
+  tênis off-white (`#F6F0E4`) com detalhes bordô. Cabelo loiro, olhos verdes (bem visíveis na
+  cabeça). Corpo alto, de largura média. Cores: bordô, areia e âmbar (`#FFC94D`, as ondas de voz).
+  O bordô é bem mais escuro e fechado que o vermelho do Schummaki e mais vermelho que o rosa da
+  Marília, e ninguém tem calça clara cor de areia: a calça e o cabelo loiro seguram a leitura nos
+  menus escuros.
+- **O microfone:** de mão, genérico, com a cabeça de tela metálica e o corpo escuro, sem marca.
+- **No jogo:** ainda não está (só esta ficha). A ficha do `sim` vai em
+  `packages/sim/src/characters/arquelau.ts`.
+- **Ideias guardadas:** louro é loiro e também é papagaio, o bicho que imita voz: um papagaio no
+  ombro ou no fundo de um mapa; a fala de vitória imitando o bordão de quem perdeu; KO dele com um
+  chiado de microfone (microfonia); a figurinha da seleção trocando de rosto de vez em quando.
+
+#### Ficha de arte
+
+```text
+CHARACTER SHEET
+Name: Arquelau — software developer, blond with green eyes, the impersonator of the group: he can copy anyone's voice.
+Fighting style: copycat all-rounder — average build and speed, relaxed stance, spinning a microphone by its cable like a lasso.
+Body: based on the photos; tall, average build (neither slim nor heavy).
+Outfit: wine red (#8E2440) zip-up hoodie, zipped, hip-length, long sleeves, with the hood down resting behind the neck and two short sand-colored drawstrings; sand (#D9C49A) straight pants; off-white (#F6F0E4) sneakers with wine red details.
+Signature details: blond hair, green eyes, the wine red hoodie with the hood down.
+Colors: primary #8E2440, secondary #D9C49A, accent #FFC94D.
+Face/personality: playful smirk, one eyebrow raised, as if about to do an impression of someone.
+Special move: "Dublagem" — he spins a microphone by its cable and throws it straight forward like a lasso; if it hits, he steals the opponent's voice and special move, and his head turns into the opponent's head until he uses it.
+Taunt: holds the microphone to his mouth and repeats the opponent's catchphrase, mocking them.
+Extra parts for the parts sheet: one hand holding a microphone up to the mouth; one fist gripping a cable.
+Props and effects for the effects sheet: 1 handheld microphone (side view, head pointing right, no hands); 3 curved amber sound-wave arcs in different sizes; 1 small amber sparkle; 3 small gray smoke puffs.
+Avoid: text or logos on the clothes; the hood over the head; brand logos on the microphone; hoodie below the hips.
+```
+
+Trechos prontos para os textos do Firefly (pasta `art/arquelau/`):
+
+- `<EXPRESSION>`: `playful smirk, one eyebrow raised`
+- `<CHARACTER>`:
+  `Arquelau, software developer, tall, average build, blond hair, green eyes, playful smirk. Wine red (#8E2440) zip-up hoodie, zipped, hip-length, long sleeves, hood down behind the neck; sand (#D9C49A) straight pants; off-white sneakers with wine red details.`
+- `<LEGWEAR>`: `sand-colored pants`
+- `<SHOE>`: `off-white sneaker with wine red details`
+- `<EXTRA>`: `one hand holding a microphone, one fist gripping a cable`
+- Manga comprida até o punho: no passo 3, troque `upper arm with sleeve; forearm without hand` por
+  `upper arm with sleeve; forearm with sleeve, without hand`.
+- `<ITEMS>`:
+  `1 handheld microphone with a metal mesh head and a dark body, side view with the head pointing right, no hands, no logo; 3 curved amber (#FFC94D) sound-wave arcs in different sizes; 1 small amber sparkle; 3 small gray smoke puffs`
+
+  O cabo não entra na folha: é desenhado no código, porque estica e encolhe.
+
+- **Cabeças (passo 2):** acrescente `No hood on the heads.` antes de `Bold`. O capuz fica no
+  tronco; se vier na cabeça, some quando a cabeça troca pela de outro personagem.
+- **Peças (passo 3):** o tronco tem que vir com o capuz caído atrás do pescoço e o zíper fechado.
+  Se o capuz faltar, use a linha "Faltou uma peça" da
+  [tabela de correções](ARTE.md#se-der-errado-no-firefly) pedindo
+  `the hood down, resting behind the neck, on the torso`.
 
 ### Arte
 
