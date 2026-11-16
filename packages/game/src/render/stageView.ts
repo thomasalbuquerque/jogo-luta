@@ -98,6 +98,13 @@ interface StageArt {
  */
 const ART_RES = 2;
 
+/**
+ * Os enfeites da confeitaria saem da folha numa escala menor (0,75, ver o
+ * `recortes.json` dela), para o atlas caber em 4096 × 2048; a escala deles divide
+ * por isso. Na tela eles ficam menores que a arte mesmo assim.
+ */
+const DECOR_RES = 0.75;
+
 /** Linhas da textura do piso que repetem o pé da camada de cima (ver `floor`). */
 const FLOOR_OVERLAP = 8;
 
@@ -237,24 +244,27 @@ const CONFEITARIA: StageArt = {
       scale: 0.55 / ART_RES,
       originX: 0.5,
       originY: 1,
-      fillBelow: 0xe4ad7d,
+      // a cor do pé do piso estendido (escurece embaixo)
+      fillBelow: 0x8f6742,
       tiles: 'mirror',
+      floor: 'floor',
     },
   ],
+  // a bancada e o forno foram estendidos até o pé da caixa (ver docs/ARTE.md)
   wall: {
-    color: 0xf4c79c,
+    color: 0xf3c59a,
     shadow: 0x3a2618,
     outline: 0x2e1d12,
     shadowFrom: 'foot',
     sides: true,
   },
-  blocks: [{ frame: 'building' }, { frame: 'oven', color: 0xa98670, behind: true }],
+  blocks: [{ frame: 'building' }, { frame: 'oven', color: 0xb89d85, behind: true }],
   decorations: [
     // em cima da bancada e do forno, atrás dos lutadores
-    { frame: 'flour', x: -478, y: -4, scale: 0.3 / ART_RES },
-    { frame: 'mixer', x: -60, y: -4, scale: 0.32 / ART_RES },
-    { frame: 'jar', x: 120, y: -4, scale: 0.28 / ART_RES },
-    { frame: 'stand', x: 470, y: -134, scale: 0.3 / ART_RES },
+    { frame: 'flour', x: -478, y: -4, scale: 0.3 / ART_RES / DECOR_RES },
+    { frame: 'mixer', x: -60, y: -4, scale: 0.32 / ART_RES / DECOR_RES },
+    { frame: 'jar', x: 120, y: -4, scale: 0.28 / ART_RES / DECOR_RES },
+    { frame: 'stand', x: 470, y: -134, scale: 0.3 / ART_RES / DECOR_RES },
   ],
 };
 
@@ -381,7 +391,7 @@ export class StageView {
       let fillTop = bottom;
       if (floor) {
         const top = p.y + h * (1 - layer.originY) - FLOOR_OVERLAP * p.scale;
-        this.placeFloor(floor, p.x, top, p.scale, images.length);
+        this.placeFloor(floor, p.x, top, p.scale, images.length, layer.tiles === 'mirror');
         fillTop = Math.max(bottom, this.groundBottom);
       }
       // e a cor vai até bem abaixo da tela
@@ -391,9 +401,10 @@ export class StageView {
 
   /**
    * Piso abaixo de uma camada: fileiras da textura (que já emenda com ela mesma)
-   * do pé da camada até o pé do chão do mapa, uma coluna por cópia da camada. A
-   * última fileira é cortada no pé do chão. Imagens comuns, não TileSprite: no
-   * Phaser 3 ele redesenha um canvas do tamanho dele quando o tamanho muda.
+   * do pé da camada até o pé do chão do mapa, uma coluna por cópia da camada
+   * (espelhada como ela, com `mirror`). A última fileira é cortada no pé do chão.
+   * Imagens comuns, não TileSprite: no Phaser 3 ele redesenha um canvas do tamanho
+   * dele quando o tamanho muda.
    */
   private placeFloor(
     floor: NonNullable<PlacedLayer['floor']>,
@@ -401,6 +412,7 @@ export class StageView {
     top: number,
     scale: number,
     columns: number,
+    mirror: boolean,
   ): void {
     const source = this.scene.textures.get(floor.key).getSourceImage();
     const rowH = source.height * scale;
@@ -422,6 +434,7 @@ export class StageView {
           .setVisible(true)
           .setPosition(x + offset, top + r * rowH)
           .setScale(scale)
+          .setFlipX(mirror && c !== (columns - 1) / 2)
           .setCrop(0, 0, source.width, Math.ceil(visibleH));
       }
     }
