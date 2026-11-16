@@ -6,25 +6,36 @@
   "sheets": {
     "pecas": {
       "file": "5-pecas-2x.png"
+    },
+    "enfeites": {
+      "file": "5-pecas-2x.png",
+      "scale": 0.75
+    },
+    "bancada": {
+      "file": "5-bancada-expandida-2x.png"
+    },
+    "forno": {
+      "file": "5-forno-expandido-2x.png",
+      "key": false
     }
   },
   "parts": {
     "building": {
-      "sheet": "pecas",
-      "rect": [160, 222, 1898, 556],
-      "pivot": [1108.5, 268],
+      "sheet": "bancada",
+      "rect": [20, 22, 1898, 1192],
+      "pivot": [968.5, 68],
       "sockets": {
-        "wallLeft": [168, 600],
-        "wallRight": [2049, 600]
+        "wallLeft": [28, 600],
+        "wallRight": [1909, 600]
       }
     },
     "oven": {
-      "sheet": "pecas",
-      "rect": [2270, 56, 916, 714],
-      "pivot": [2727.5, 95],
+      "sheet": "forno",
+      "rect": [0, 16, 950, 1496],
+      "pivot": [477.5, 55],
       "sockets": {
-        "wallLeft": [2278, 600],
-        "wallRight": [3177, 600]
+        "wallLeft": [28, 600],
+        "wallRight": [927, 600]
       }
     },
     "plank": {
@@ -36,22 +47,22 @@
       }
     },
     "mixer": {
-      "sheet": "pecas",
-      "rect": [690, 1228, 470, 548],
+      "sheet": "enfeites",
+      "rect": [692, 1232, 466, 538],
       "pivot": [925, 1768]
     },
     "jar": {
-      "sheet": "pecas",
+      "sheet": "enfeites",
       "rect": [1342, 1205, 385, 578],
       "pivot": [1534, 1774]
     },
     "stand": {
-      "sheet": "pecas",
+      "sheet": "enfeites",
       "rect": [1819, 1202, 473, 581],
       "pivot": [2055, 1774]
     },
     "flour": {
-      "sheet": "pecas",
+      "sheet": "enfeites",
       "rect": [2347, 1271, 394, 498],
       "pivot": [2544, 1760]
     }
@@ -67,7 +78,14 @@
       "width": 3344
     },
     "mid": {
-      "file": "4-meio-2x.png",
+      "file": "4-meio-expandido-2x.png",
+      "rect": [0, 0, 3344, 1882],
+      "width": 3344
+    },
+    "floor": {
+      "file": "4-meio-expandido-2x.png",
+      "key": false,
+      "rect": [0, 1874, 3344, 1890],
       "width": 3344
     }
   }
