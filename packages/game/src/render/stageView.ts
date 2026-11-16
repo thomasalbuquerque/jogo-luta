@@ -51,12 +51,12 @@ interface StageArt {
     shadow: number;
     outline: number;
     /**
-     * Onde a sombra começa: 120 px abaixo do topo (padrão, cobre o pé da arte)
-     * ou no pé da caixa de colisão (`foot`), quando a arte desce até lá.
+     * Onde a arte acaba: `top` (padrão) escurece num degradê a partir de 120 px
+     * abaixo do topo, por cima do pé da arte; `foot` corta a arte exatamente no pé
+     * da caixa de colisão (onde a parede de agarrar acaba) e dali para baixo é a
+     * cor da sombra, quando a arte desce até lá.
      */
     shadowFrom?: 'top' | 'foot';
-    /** Altura do degradê até a cor da sombra (px de mundo; padrão 260). */
-    shadowLength?: number;
   };
   decorations: readonly Decoration[];
   /**
@@ -173,7 +173,6 @@ const OFICINA: StageArt = {
     shadow: 0x2a2a30,
     outline: 0x26262b,
     shadowFrom: 'foot',
-    shadowLength: 160,
   },
   decorations: [
     { frame: 'tires', x: -440, y: -24, scale: 0.34 / ART_RES },
@@ -369,19 +368,26 @@ export class StageView {
         const right = a.sockets.wallRight ?? [building.width, 0];
         const scale = w / (right[0] - left[0]);
         // o pivô (meio do topo, onde se pisa) vai no meio do topo da caixa
-        scene.add
+        const image = scene.add
           .image(x + w / 2, y, atlas, 'building')
           .setOrigin(a.pivot[0] / building.width, a.pivot[1] / building.height)
           .setScale(scale)
           .setDepth(depth);
+        if (art.wall.shadowFrom === 'foot') {
+          const foot = y + toPx(s.h);
+          // a arte acaba no pé da caixa (1 px a mais some debaixo da sombra, sem fresta)
+          image.setCrop(0, 0, building.width, Math.ceil(a.pivot[1] + (foot - y) / scale) + 1);
+          g.fillStyle(art.wall.shadow, 1);
+          g.fillRect(x, foot, w, 4000);
+          continue;
+        }
         // a parede continua para baixo e some na sombra
         const artBottom = y + (building.height - a.pivot[1]) * scale;
         const top = artBottom - 4;
-        const shadowTop = art.wall.shadowFrom === 'foot' ? y + toPx(s.h) : y + 120;
-        const shadowLength = art.wall.shadowLength ?? 260;
+        const shadowTop = y + 120;
         const deep = 4000;
         g.fillStyle(art.wall.color, 1);
-        g.fillRect(x, top, w, Math.max(0, shadowTop + shadowLength - top));
+        g.fillRect(x, top, w, shadowTop + 260 - top);
         g.fillGradientStyle(
           art.wall.shadow,
           art.wall.shadow,
@@ -392,9 +398,9 @@ export class StageView {
           1,
           1,
         );
-        g.fillRect(x, shadowTop, w, shadowLength);
+        g.fillRect(x, shadowTop, w, 260);
         g.fillStyle(art.wall.shadow, 1);
-        g.fillRect(x, shadowTop + shadowLength - 1, w, deep);
+        g.fillRect(x, shadowTop + 259, w, deep);
         g.fillStyle(art.wall.outline, 1);
         g.fillRect(x, top, 3, deep);
         g.fillRect(x + w - 3, top, 3, deep);
