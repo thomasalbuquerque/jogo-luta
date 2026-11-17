@@ -471,7 +471,8 @@ trecho `played by small low-detail musicians in black` por
 Quando as 5 imagens de um mapa estiverem na pasta, diga, por exemplo: _"as imagens da oficina estão
 em `art/cenario-oficina/`, monta o mapa"_. O Claude amplia as imagens 2×, escreve o `recortes.json`,
 cria o mapa no `sim` com as caixas da tabela lá de cima, encaixa a arte e põe o mapa na tela de
-seleção (ver [Cenário](ARTE.md#4-cenário) no `ARTE.md`).
+seleção (ver [Cenário](ARTE.md#4-cenário) no `ARTE.md`). As camadas do fundo saem na largura da regra de
+"Peso das camadas" do `ARTE.md`, e o fundo ganha um `tone` quando disputa com os lutadores.
 
 O jogo hoje só conhece o formato da laje (um prédio e tábuas iguais). O que cada mapa novo pede a
 mais no código:

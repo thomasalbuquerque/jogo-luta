@@ -895,15 +895,24 @@ O `recortes.json` do cenário tem as peças do palco (`building` com `wallLeft` 
   `4-meio-expandido.png`, como na oficina; como a camada se repete espelhada, o piso também
   (`mirror` vale para as duas). Os enfeites saem numa folha à parte do mesmo `5-pecas-2x.png` com
   `scale` 0,75 (`DECOR_RES` em `stageView.ts`), para o atlas caber em 4096 × 2048.
-- **Névoa** (`haze`): um véu claro por cima do fundo, quando o palco some contra ele (a passarela
-  cinza na frente da bancada cinza).
+- **Tom do fundo** (`tone` no `recortes.json`, em cada camada de `layers` ou numa folha de
+  `sheets`): `saturation` (1 deixa como está, 0 vira cinza) e `haze` (`color` e `amount` de 0 a
+  1: mistura as cores com a cor da névoa). Serve para o fundo não disputar com os lutadores e para
+  separar o palco do fundo quando os dois têm as mesmas cores. Fica na arte, não no jogo: um véu
+  por cima da tela custaria uma tela inteira de desenho por quadro. Na oficina, as 4 camadas têm a
+  névoa `#eae6e1` a 25% (a passarela cinza some na frente da bancada cinza sem ela). Na
+  confeitaria, o fundo era colorido demais: parede 0,6 de saturação e 35% de névoa `#f8e2cc`,
+  longe 0,6 e 32%, meio e piso 0,65 e 25%, enfeites da bancada 0,8 e 12% (mais perto, menos
+  apagado). `mid` e `floor` levam o mesmo tom, senão a emenda aparece. Mudou o tom de uma camada
+  com `fillBelow`? A cor de `fillBelow` em `stageView.ts` leva a mesma conta.
 - **Decorações:** peças soltas em cima do chão, atrás dos lutadores.
 
 As imagens do cenário vêm do gerador em 1536 px de largura, pouco para uma tela grande (o fundo
 fica embaçado). Antes do `pnpm art`, elas são ampliadas 2× com o Real-ESRGAN, e os arquivos
 ampliados ficam ao lado dos originais com `-2x` no nome (`2-ceu-2x.png`...). O `recortes.json` usa os
 ampliados, com as coordenadas em px deles (o dobro das do original). Em `stageView.ts`, as escalas
-das camadas e das decorações dividem por `ART_RES` (2). Comando, com o
+das decorações dividem por `ART_RES` (2); as camadas do fundo não dependem do tamanho da textura
+(ver "Peso das camadas" abaixo). Comando, com o
 [realesrgan-ncnn-vulkan](https://github.com/xinntao/Real-ESRGAN/releases) (usa a placa de vídeo):
 
 ```text
@@ -914,6 +923,25 @@ O modelo `realesr-animevideov3` é o que mais respeita o desenho. O `realesrgan-
 a textura da pintura. Nos personagens não precisa ampliar: as folhas deles já são bem maiores
 que o atlas.
 
+**Peso das camadas.** O que pesa num mapa é a textura das camadas do fundo, não a quantidade de
+peças. Três regras, todas no `pnpm art`:
+
+- **Largura (`width` em `layers`):** o bastante para a camada aparecer 1:1 num canvas de
+  2560 × 1440, ou seja, 2 × a largura dela na tela (o `width` da camada em `stageView.ts`, em px
+  da tela de 1280). Uma camada com `width: 1003` no jogo sai com `"width": 2006`. Mais que isso a
+  placa de vídeo só lê a textura pulando pixels: gasta memória e tempo sem ganhar nitidez. A
+  oficina e a confeitaria saíam com 3344 px em todas as camadas; com a largura certa, a memória das
+  camadas de cada uma caiu de uns 100 MB para uns 35 MB e o tempo de desenho do cenário, 35%.
+- **Vazio de cima:** o `pnpm art` corta as linhas transparentes do topo de cada camada (o céu
+  acima dos prédios, a parede acima das mesas). Pixel transparente custa o mesmo que pixel cheio.
+  O tamanho inteiro da camada e o quanto foi cortado vão no JSON do atlas (`layers`), e o jogo
+  posiciona por eles.
+- **Nada de véu no jogo:** névoa e cor apagada vão na arte (`tone`, acima).
+
+O jogo posiciona cada camada pela largura na tela, então trocar o `"width"` do `recortes.json`
+não muda o enquadramento. Para medir um mapa: tempo de GPU por quadro com a extensão
+`EXT_disjoint_timer_query` (a mediana, com o jogo visível), comparando com a laje.
+
 ### 5. Qualidade da imagem no jogo
 
 - **Resolução:** o layout é em 1280×720 (`VIEW`), mas o canvas tem o tamanho da tela em tela cheia
@@ -922,8 +950,8 @@ que o atlas.
   imagem. `?resolucao=1` na URL volta ao jeito antigo, para comparar.
 - **Mipmaps:** o `pnpm art` grava os atlas com lados em potência de 2 (1024×512, 4096×1024...), com
   4 px entre as peças, e o jogo liga mipmaps neles. Imagem reduzida na tela (objeto, câmera afastada)
-  fica lisa, sem serrilhado. As camadas do fundo não têm mipmap: na tela elas quase nunca ficam
-  menores que a imagem.
+  fica lisa, sem serrilhado. As camadas do fundo não têm mipmap: elas saem do `pnpm art` no
+  tamanho em que aparecem num canvas de 2560 × 1440 (ver "Peso das camadas").
 - **Retrato em dois tamanhos:** a peça `portrait` sai como `portrait` (400 px de altura, para a
   seleção e o resultado) e `portrait_small` (96 px, para os ícones de vida do HUD), seja qual for a
   escala da folha. O `addPortrait` escolhe o pequeno quando ele basta.
