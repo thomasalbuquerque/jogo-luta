@@ -917,6 +917,112 @@ const BALL_POINT: Rot = {
   handFar: 0,
 };
 
+/**
+ * Thom4o buscando a bomba atrás das costas: o braço da frente vai para trás, a mão
+ * aberta na altura do quadril; o corpo já gira para a frente.
+ */
+const BOMB_REACH: Rot = {
+  ...STANCE,
+  torso: 2,
+  head: -4,
+  upperArmNear: 38,
+  forearmNear: -64,
+  handNear: 10,
+};
+
+/** A bomba saindo: o braço da frente sobe armado, com a bomba perto do ombro. */
+const BOMB_COCK: Rot = {
+  ...STANCE,
+  torso: -6,
+  head: -6,
+  upperArmNear: -30,
+  forearmNear: -118,
+  handNear: -10,
+};
+
+/**
+ * Colando a bomba: o braço da frente esticado na altura do peito do adversário, a mão
+ * segurando a bomba de frente, e um passo para a frente com a perna de trás.
+ */
+const BOMB_SLAP: Rot = {
+  ...STANCE,
+  torso: 16,
+  head: -8,
+  upperArmNear: -80,
+  forearmNear: -8,
+  handNear: 0,
+  upperArmFar: -20,
+  forearmFar: -100,
+  thighFar: -40,
+  shinFar: 32,
+};
+
+/** A bomba na mão, de frente para o rosto (ele confere, de cara feia, que errou). */
+const BOMB_LOOK: Rot = {
+  ...STANDING,
+  torso: 2,
+  head: 14,
+  upperArmNear: -46,
+  forearmNear: -58,
+  handNear: -10,
+  upperArmFar: 10,
+  forearmFar: -24,
+};
+
+/** O empurrão: a mão aberta empurra o adversário (a bomba já ficou no peito dele). */
+const BOMB_PUSH: Rot = {
+  ...STANCE,
+  torso: 12,
+  head: -6,
+  upperArmNear: -86,
+  forearmNear: 0,
+  handNear: -6,
+  upperArmFar: -16,
+  forearmFar: -104,
+  thighFar: -30,
+  shinFar: 26,
+};
+
+/** Recuando do adversário: corpo para trás, pronto para correr. */
+const BOMB_BACK: Rot = {
+  ...STANCE,
+  torso: -4,
+  head: -8,
+  upperArmNear: -14,
+  forearmNear: -112,
+};
+
+/**
+ * Thom4o conferindo o relógio: o antebraço da frente deitado na frente do peito, com o
+ * relógio para fora, e a cabeça baixa olhando para ele.
+ */
+function watchCheck(look: number): Rot {
+  return {
+    ...STANDING,
+    torso: 2,
+    head: 12 + look,
+    upperArmNear: -16,
+    forearmNear: -84,
+    handNear: 10,
+    upperArmFar: 8,
+    forearmFar: -22,
+    handFar: 6,
+  };
+}
+
+/** Apontando para o adversário com a mão da frente, o braço todo esticado. */
+const WATCH_POINT: Rot = {
+  ...STANDING,
+  torso: -4,
+  head: -10,
+  upperArmNear: -86,
+  forearmNear: -4,
+  handNear: 0,
+  upperArmFar: 18,
+  forearmFar: -40,
+  handFar: 6,
+};
+
 export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
   // Arrancada: queima pneu agarrado ao volante e sai disparado, inclinado.
   schummaki_special: {
@@ -1637,6 +1743,69 @@ export const CHARACTER_CLIPS: Readonly<Record<string, Clip>> = {
       { t: 98, rot: BALL_POINT, expression: 'normal', handFar: 'open', ease: 'inOut' },
       { t: 102, rot: dribble(0), prop: null },
       { t: 110, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
+    ],
+  },
+  // Tá plantada!: a mão da frente busca a bomba atrás das costas, sobe armada e bate a
+  // bomba no peito do adversário no 1º frame ativo (a janela do agarrão). Se errou,
+  // fica com a bomba na mão olhando para ela no recovery. Se pegou, o jogo troca para o
+  // `thom4o_special_combo`.
+  thom4o_special: {
+    timing: 'move',
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 0.4, rot: BOMB_REACH, handNear: 'open', ease: 'out' },
+      { t: 0.65, rot: BOMB_COCK, handNear: 'grab', prop: 'fx_c4', ease: 'inOut' },
+      { t: 1, rot: BOMB_SLAP, x: 4, ease: 'in' },
+      { t: 2, rot: BOMB_SLAP, x: 4 },
+      { t: 2.3, rot: BOMB_LOOK, x: 1, ease: 'out' },
+      { t: 2.85, rot: { ...BOMB_LOOK, head: 16 } },
+      { t: 3, rot: STANCE, handNear: 'fist', prop: null, ease: 'inOut' },
+    ],
+  },
+  // Pegou (em ticks desde que pegou, ver `fighterClip`): aperta a bomba no peito do
+  // adversário duas vezes (o bip-bip de armada) durante os 14 ticks do agarrão, solta e
+  // empurra no arremesso (a bomba fica no peito dele, desenhada pelo FightScene) e recua
+  // nos 28 ticks do recovery.
+  thom4o_special_combo: {
+    timing: 'once',
+    length: 42,
+    keys: [
+      { t: 0, rot: BOMB_SLAP, x: 4, handNear: 'grab', prop: 'fx_c4' },
+      { t: 3, rot: { ...BOMB_SLAP, torso: 20 }, x: 5, ease: 'out' },
+      { t: 7, rot: BOMB_SLAP, x: 4, ease: 'inOut' },
+      { t: 10, rot: { ...BOMB_SLAP, torso: 20 }, x: 5, ease: 'out' },
+      { t: 13, rot: BOMB_SLAP, x: 4, ease: 'inOut' },
+      {
+        t: 15,
+        rot: BOMB_PUSH,
+        x: 5,
+        handNear: 'open',
+        prop: null,
+        expression: 'taunt',
+        ease: 'out',
+      },
+      { t: 22, rot: BOMB_BACK, x: 0, handNear: 'fist', ease: 'out' },
+      { t: 32, rot: { ...BOMB_BACK, head: -4 }, expression: 'normal' },
+      { t: 42, rot: STANCE, ease: 'inOut' },
+    ],
+  },
+  // Levanta o pulso e confere o relógio (como quem conta o tempo da bomba), aponta para o
+  // adversário e grita "É o Turbas!" (voz no `voiceAt` da ficha, 42).
+  thom4o_taunt: {
+    timing: 'once',
+    length: 84,
+    ground: true,
+    keys: [
+      { t: 0, rot: STANCE },
+      { t: 10, rot: watchCheck(0), handFar: 'open', ease: 'out' },
+      { t: 18, rot: watchCheck(4), ease: 'inOut' },
+      { t: 24, rot: watchCheck(-2), ease: 'inOut' },
+      { t: 32, rot: watchCheck(4), ease: 'inOut' },
+      { t: 40, rot: WATCH_POINT, handNear: 'taunt', ease: 'out' },
+      { t: 42, rot: { ...WATCH_POINT, head: -14, torso: -6 }, expression: 'taunt' },
+      { t: 72, rot: { ...WATCH_POINT, head: -12, torso: -5 }, ease: 'inOut' },
+      { t: 76, rot: WATCH_POINT, expression: 'normal' },
+      { t: 84, rot: STANCE, handNear: 'fist', handFar: 'fist', ease: 'inOut' },
     ],
   },
 };

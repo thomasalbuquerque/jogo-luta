@@ -17,7 +17,7 @@ import { CHARACTER_CLIPS } from './characterClips';
 export const COUNTER_KEY = 'counter';
 
 /**
- * Agarrão com combo que pegou alguém (o combo do Meia): toca o clipe
+ * Agarrão com combo ou bomba que pegou alguém (o combo do Meia, a bomba do Thom4o): toca o clipe
  * `<id do especial>_combo` em ticks, do começo do agarrão até o fim do recovery (ver
  * `fighterClip`), em vez do frame do golpe, que fica parado enquanto ele segura.
  */
