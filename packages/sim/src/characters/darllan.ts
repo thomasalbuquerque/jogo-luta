@@ -38,7 +38,7 @@ export const DARLLAN = defineCharacter({
     name: 'Rolo na bancada',
     // O rolo subindo é o aviso (startup longo); a pancada é curta e ele fica
     // agachado com o rolo no chão (recovery longo): quem esquivar pune.
-    startup: 24,
+    startup: 22,
     active: 5,
     recovery: 26,
     // contada do começo: sobram 45 ticks sem rolo depois de cada uso
