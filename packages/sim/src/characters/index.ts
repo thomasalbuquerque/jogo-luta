@@ -11,6 +11,7 @@ import { MEIA } from './meia';
 import { SCHUMMAKI } from './schummaki';
 import { TAUBA } from './tauba';
 import { TCHULA } from './tchula';
+import { THOM4O } from './thom4o';
 
 const REGISTRY = new Map<string, Character>();
 
@@ -32,6 +33,7 @@ for (const c of [
   MARILIA,
   MEIA,
   IGAO,
+  THOM4O,
 ])
   registerCharacter(c);
 
@@ -51,6 +53,7 @@ export const PLAYABLE_CHARACTERS: readonly string[] = [
   MARILIA.id,
   MEIA.id,
   IGAO.id,
+  THOM4O.id,
 ];
 
 export function hasCharacter(id: string): boolean {

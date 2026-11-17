@@ -14,7 +14,7 @@ if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA || !CROCKO || !DARLLAN)
   throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs, Marília, Meia e Igão, cada um com especial e provocação', () => {
+  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs, Marília, Meia, Igão e Thom4o, cada um com especial e provocação', () => {
     expect(PLAYABLE_CHARACTERS).toEqual([
       'schummaki',
       'joao-frango',
@@ -27,6 +27,7 @@ describe('elenco', () => {
       'marilia',
       'meia',
       'igao',
+      'thom4o',
     ]);
     for (const c of [
       SCHUMMAKI,
@@ -40,6 +41,7 @@ describe('elenco', () => {
       getCharacter('marilia'),
       getCharacter('meia'),
       getCharacter('igao'),
+      getCharacter('thom4o'),
     ]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
