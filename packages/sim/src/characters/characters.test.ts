@@ -70,7 +70,8 @@ describe('elenco', () => {
     expect(shot.speed * shot.lifetimeTicks).toBeLessThan(
       (chicken.speed * chicken.lifetimeTicks) / 2,
     );
-    expect(shot.hit.damage).toBeGreaterThan(chicken.hit.damage * 2);
+    // forte: bem mais que o frango (que subiu para 8%, na 2ª rodada de balanceamento)
+    expect(shot.hit.damage).toBeGreaterThan(chicken.hit.damage * 1.5);
     expect(DADA.special?.move.startup).toBeGreaterThan(JOAO.special?.move.startup ?? 0);
     expect(DADA.special?.cooldownTicks).toBeGreaterThan(JOAO.special?.cooldownTicks ?? 0);
     expect(DADA.stats.weight).toBeLessThan(100);
