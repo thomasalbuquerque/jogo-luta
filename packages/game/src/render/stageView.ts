@@ -8,8 +8,13 @@ import { placeLayer, type CameraView, type ParallaxLayer } from './parallax';
  * `pnpm art` a partir de `art/cenario-<mapa>/`.
  */
 
-interface LayerArt extends ParallaxLayer {
+interface LayerArt extends Omit<ParallaxLayer, 'scale'> {
   key: string;
+  /**
+   * Largura da camada na tela (px), com a câmera de referência e zoom 1. A escala
+   * sai daqui e do tamanho da textura: a arte pode ser gravada em qualquer resolução.
+   */
+  width: number;
   originX: number;
   originY: number;
   /** Cor que continua a camada para baixo (quando a câmera desce, não aparece buraco). */
@@ -79,11 +84,6 @@ interface StageArt {
   blocks?: readonly BlockArt[];
   decorations: readonly Decoration[];
   /**
-   * Névoa clara por cima das camadas do fundo: separa o palco (escuro) do fundo
-   * quando os dois têm as mesmas cores (a passarela na frente da bancada).
-   */
-  haze?: { color: number; alpha: number };
-  /**
    * Peça repetida para cima a partir de cada socket `chain*` da plataforma,
    * até sair da tela (a corrente que pendura a passarela da oficina). A peça tem
    * o pivô embaixo e o socket `top` em cima, no mesmo ponto da corrente.
@@ -92,9 +92,8 @@ interface StageArt {
 }
 
 /**
- * Px da arte por px de mundo nas peças e camadas dos cenários: a arte foi
- * ampliada 2× (Real-ESRGAN, ver docs/ARTE.md), então as escalas abaixo dividem
- * por isso.
+ * Px da arte por px de mundo nas peças dos cenários: a arte foi ampliada 2×
+ * (Real-ESRGAN, ver docs/ARTE.md), então as escalas das decorações dividem por isso.
  */
 const ART_RES = 2;
 
@@ -105,7 +104,7 @@ const ART_RES = 2;
  */
 const DECOR_RES = 0.75;
 
-/** Linhas da textura do piso que repetem o pé da camada de cima (ver `floor`). */
+/** Linhas da folha (ampliada) que o piso repete do pé da camada de cima (ver `floor`). */
 const FLOOR_OVERLAP = 8;
 
 /** Até onde a corrente sobe (px de mundo): acima do que a câmera mostra. */
@@ -120,7 +119,7 @@ const LAJE: StageArt = {
       depth: 0,
       anchorX: 640,
       anchorY: 360,
-      scale: 0.9 / ART_RES,
+      width: 1382.4,
       originX: 0.5,
       originY: 0.5,
     },
@@ -129,7 +128,7 @@ const LAJE: StageArt = {
       depth: 0.12,
       anchorX: 640,
       anchorY: 620,
-      scale: 1.1 / ART_RES,
+      width: 1689.6,
       originX: 0.5,
       originY: 1,
       fillBelow: 0x8d6a86,
@@ -139,7 +138,7 @@ const LAJE: StageArt = {
       depth: 0.32,
       anchorX: 640,
       anchorY: -215,
-      scale: 1 / ART_RES,
+      width: 1536,
       originX: 0.5,
       originY: 0,
       fillBelow: 0x424b26,
@@ -164,20 +163,20 @@ const OFICINA: StageArt = {
       depth: 0.05,
       anchorX: 640,
       anchorY: 330,
-      scale: 0.85 / ART_RES,
+      width: 1421.2,
       originX: 0.5,
       originY: 0.5,
-      fillBelow: 0x8f8a8d,
+      fillBelow: 0xa6a1a2,
     },
     {
       key: 'far',
       depth: 0.15,
       anchorX: 640,
       anchorY: 640,
-      scale: 0.6 / ART_RES,
+      width: 1002.6,
       originX: 0.5,
       originY: 1,
-      fillBelow: 0x8c8b8f,
+      fillBelow: 0xa4a2a4,
       tiles: 'repeat',
     },
     {
@@ -185,10 +184,10 @@ const OFICINA: StageArt = {
       depth: 0.35,
       anchorX: 640,
       anchorY: 470,
-      scale: 0.5 / ART_RES,
+      width: 836,
       originX: 0.5,
       originY: 1,
-      fillBelow: 0x8f8d90,
+      fillBelow: 0xa6a3a4,
       tiles: 'repeat',
       floor: 'floor',
     },
@@ -208,7 +207,6 @@ const OFICINA: StageArt = {
     { frame: 'cart', x: 410, y: -8, scale: 0.3 / ART_RES },
   ],
   chain: 'chain',
-  haze: { color: 0xeae6e1, alpha: 0.25 },
 };
 
 const CONFEITARIA: StageArt = {
@@ -220,7 +218,7 @@ const CONFEITARIA: StageArt = {
       depth: 0.05,
       anchorX: 640,
       anchorY: 330,
-      scale: 0.85 / ART_RES,
+      width: 1421.2,
       originX: 0.5,
       originY: 0.5,
       fillBelow: 0xfacfa9,
@@ -230,7 +228,7 @@ const CONFEITARIA: StageArt = {
       depth: 0.15,
       anchorX: 640,
       anchorY: 640,
-      scale: 0.6 / ART_RES,
+      width: 1003.2,
       originX: 0.5,
       originY: 1,
       fillBelow: 0xe7b083,
@@ -241,7 +239,7 @@ const CONFEITARIA: StageArt = {
       depth: 0.35,
       anchorX: 640,
       anchorY: 500,
-      scale: 0.55 / ART_RES,
+      width: 919.6,
       originX: 0.5,
       originY: 1,
       // a cor do pé do piso estendido (escurece embaixo)
@@ -315,12 +313,46 @@ function edgesOf(a: FrameAnchors): { left: [number, number]; right: [number, num
   return { left: [s.edgeLeft[0], s.edgeLeftIn[0]], right: [s.edgeRightIn[0], s.edgeRight[0]] };
 }
 
+/** Tamanho e corte de uma camada gravada (o `layers` do JSON do atlas, do `pnpm art`). */
+interface LayerInfo {
+  /** Tamanho da camada inteira, em px da textura (antes de cortar o vazio de cima). */
+  w: number;
+  h: number;
+  /** Linhas vazias cortadas de cima: a textura tem `h - top` de altura. */
+  top: number;
+  /** px da textura por px da folha. */
+  scale: number;
+}
+
+function layerInfo(scene: Phaser.Scene, atlas: string, name: string, key: string): LayerInfo {
+  const data = scene.textures.get(atlas).customData as {
+    layers?: Record<string, Partial<LayerInfo>>;
+  };
+  const info = data.layers?.[name];
+  const source = scene.textures.get(key).getSourceImage();
+  return {
+    w: info?.w ?? source.width,
+    h: info?.h ?? source.height,
+    top: info?.top ?? 0,
+    scale: info?.scale ?? 1,
+  };
+}
+
 interface PlacedLayer {
   art: LayerArt;
+  /** A camada para o parallax, com a escala da textura dela. */
+  place: ParallaxLayer;
+  info: LayerInfo;
   images: Phaser.GameObjects.Image[];
   fill: Phaser.GameObjects.Rectangle | null;
   /** Piso repetido abaixo da camada (null = sem piso). */
-  floor: { key: string; depth: number; tiles: Phaser.GameObjects.Image[] } | null;
+  floor: {
+    key: string;
+    depth: number;
+    /** Linhas da textura do piso que repetem o pé da camada. */
+    overlap: number;
+    tiles: Phaser.GameObjects.Image[];
+  } | null;
 }
 
 /** Desenha o cenário e reposiciona o fundo a cada frame, conforme a câmera. */
@@ -349,30 +381,25 @@ export class StageView {
 
     art.layers.forEach((layer, i) => {
       const key = `${TEXTURE_PREFIX}${art.atlas}-${layer.key}`;
+      const info = layerInfo(scene, atlas, layer.key, key);
       const depth = depths.background + i * 0.1;
       const copies = layer.tiles ? [-1, 0, 1] : [0];
+      // a textura não tem o vazio de cima da camada: a origem conta a partir dele
+      const originY = (layer.originY * info.h - info.top) / (info.h - info.top);
       const images = copies.map((c) =>
         scene.add
           .image(0, 0, key)
-          .setOrigin(layer.originX, layer.originY)
+          .setOrigin(layer.originX, originY)
           .setFlipX(c !== 0 && layer.tiles === 'mirror')
           .setDepth(depth + 0.01),
       );
       const fill = layer.fillBelow
         ? scene.add.rectangle(0, 0, 1, 1, layer.fillBelow).setOrigin(0.5, 0).setDepth(depth)
         : null;
-      const floor = layer.floor
-        ? { key: `${TEXTURE_PREFIX}${art.atlas}-${layer.floor}`, depth: depth + 0.005, tiles: [] }
-        : null;
-      this.layers.push({ art: layer, images, fill, floor });
+      const floor = layer.floor ? this.floorOf(atlas, layer.floor, depth + 0.005) : null;
+      const place = { ...layer, scale: layer.width / info.w };
+      this.layers.push({ art: layer, place, info, images, fill, floor });
     });
-    if (art.haze) {
-      // presa na tela e bem maior que ela: cobre o fundo com qualquer zoom
-      scene.add
-        .rectangle(0, 0, 40000, 40000, art.haze.color, art.haze.alpha)
-        .setScrollFactor(0)
-        .setDepth(depths.background + art.layers.length * 0.1);
-    }
 
     this.drawBuilding(stage, atlas, depths.stage);
     for (const d of art.decorations) {
@@ -385,15 +412,20 @@ export class StageView {
     }
   }
 
+  private floorOf(atlas: string, name: string, depth: number): NonNullable<PlacedLayer['floor']> {
+    const key = `${atlas}-${name}`;
+    const overlap = FLOOR_OVERLAP * layerInfo(this.scene, atlas, name, key).scale;
+    return { key, depth, overlap, tiles: [] };
+  }
+
   /** Reposiciona as camadas do fundo para a câmera atual. */
   update(cam: CameraView): void {
     const art = this.art;
     if (!art) return;
-    for (const { art: layer, images, fill, floor } of this.layers) {
-      const p = placeLayer(layer, cam, art.ref);
-      const first = images[0];
-      const w = first ? first.width * p.scale : 0;
-      const h = first ? first.height * p.scale : 0;
+    for (const { art: layer, place, info, images, fill, floor } of this.layers) {
+      const p = placeLayer(place, cam, art.ref);
+      const w = info.w * p.scale;
+      const h = info.h * p.scale;
       images.forEach((img, i) => {
         const offset = images.length > 1 ? (i - 1) * w : 0;
         img.setPosition(p.x + offset, p.y).setScale(p.scale);
@@ -402,8 +434,8 @@ export class StageView {
       const bottom = p.y + h * (1 - layer.originY) - 2;
       let fillTop = bottom;
       if (floor) {
-        const top = p.y + h * (1 - layer.originY) - FLOOR_OVERLAP * p.scale;
-        this.placeFloor(floor, p.x, top, p.scale, images.length, layer.tiles === 'mirror');
+        const foot = p.y + h * (1 - layer.originY);
+        this.placeFloor(floor, p.x, foot, w, images.length, layer.tiles === 'mirror');
         fillTop = Math.max(bottom, this.groundBottom);
       }
       // e a cor vai até bem abaixo da tela
@@ -421,14 +453,16 @@ export class StageView {
   private placeFloor(
     floor: NonNullable<PlacedLayer['floor']>,
     x: number,
-    top: number,
-    scale: number,
+    layerFoot: number,
+    colW: number,
     columns: number,
     mirror: boolean,
   ): void {
     const source = this.scene.textures.get(floor.key).getSourceImage();
+    // cada coluna do piso tem a largura da camada, seja qual for a resolução da textura
+    const scale = colW / source.width;
     const rowH = source.height * scale;
-    const colW = source.width * scale;
+    const top = layerFoot - floor.overlap * scale;
     const floorH = Math.max(0, this.groundBottom - top);
     const rows = Math.ceil(floorH / rowH);
     let n = 0;

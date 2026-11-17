@@ -17,6 +17,7 @@ import {
   clipPolygon,
   createImage,
   crop,
+  emptyRowsAbove,
   fadeAlong,
   fillBehind,
   flipX,
@@ -26,10 +27,12 @@ import {
   paintPolygon,
   removeSpecks,
   strokePolyline,
+  tone,
   type Image,
   type Point,
   type Polygon,
   type Rect,
+  type Tone,
 } from './image.ts';
 
 const ROOT = resolve(import.meta.dirname, '../..');
@@ -61,6 +64,8 @@ interface SheetDef {
    * Roupa roxa (o Igão) fica perto do magenta e, com a faixa padrão, sairia meio transparente.
    */
   keyRange?: readonly [opaqueBelow: number, clearAbove: number];
+  /** Ajuste de cor de todas as peças da folha (enfeites do cenário mais apagados). */
+  tone?: Tone;
 }
 
 interface PartDef {
@@ -102,9 +107,25 @@ interface PartDef {
 interface LayerDef {
   file: string;
   key?: boolean;
-  /** Largura final em px. */
+  /**
+   * Largura final em px. O bastante para a camada aparecer 1:1 num canvas de
+   * 2560 × 1440: mais que isso só gasta memória e placa de vídeo (ver docs/ARTE.md).
+   */
   width: number;
   rect?: Rect;
+  /** Ajuste de cor (fundo mais apagado que o palco; a névoa do mapa). */
+  tone?: Tone;
+}
+
+/** O que o jogo precisa saber de uma camada gravada (vai no JSON do atlas, em `layers`). */
+interface LayerInfo {
+  /** Tamanho da camada inteira, em px da textura (antes de cortar o vazio de cima). */
+  w: number;
+  h: number;
+  /** Linhas vazias cortadas de cima: a imagem gravada tem `h - top` de altura. */
+  top: number;
+  /** px da textura por px da folha. */
+  scale: number;
 }
 
 interface Manifest {
@@ -153,6 +174,7 @@ async function resize(img: Image, w: number, h: number): Promise<Image> {
 }
 
 const round2 = (v: number) => Math.round(v * 100) / 100;
+const round4 = (v: number) => Math.round(v * 10000) / 10000;
 
 async function processPart(
   name: string,
@@ -218,15 +240,28 @@ async function writeWebp(img: Image, file: string): Promise<void> {
   await toSharp(img).webp({ quality: 88, alphaQuality: 90, effort: 6 }).toFile(file);
 }
 
-async function processLayer(dir: string, name: string, def: LayerDef, outBase: string) {
+async function processLayer(
+  dir: string,
+  name: string,
+  def: LayerDef,
+  outBase: string,
+): Promise<LayerInfo> {
   let img = await readImage(join(dir, def.file));
   if (def.key !== false) img = chromaKey(img);
   if (def.rect) img = crop(img, def.rect);
+  if (def.tone) tone(img, def.tone);
   const h = Math.round((img.h * def.width) / img.w);
-  const out = await resize(img, def.width, h);
+  const full = await resize(img, def.width, h);
+  // o vazio de cima (céu, parede) não vai para a textura: desenhar pixel
+  // transparente custa o mesmo que desenhar pixel cheio
+  const top = Math.min(emptyRowsAbove(full), full.h - 1);
+  const out = top > 0 ? crop(full, [0, top, full.w, full.h - top]) : full;
   const file = `${outBase}-${name}.webp`;
   await writeWebp(out, file);
-  console.log(`  camada ${name}: ${String(out.w)}x${String(out.h)} → ${file}`);
+  console.log(
+    `  camada ${name}: ${String(out.w)}x${String(out.h)} (${String(top)} linhas vazias fora) → ${file}`,
+  );
+  return { w: full.w, h: full.h, top, scale: round4(full.w / img.w) };
 }
 
 function debugOverlay(frames: Record<string, { x: number; y: number; anchors: Anchors }>) {
@@ -253,7 +288,9 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
   for (const [key, s] of Object.entries(manifest.sheets)) {
     const raw = await readImage(join(dir, s.file));
     const [opaqueBelow, clearAbove] = s.keyRange ?? [undefined, undefined];
-    sheets.set(key, s.key === false ? raw : chromaKey(raw, opaqueBelow, clearAbove));
+    const sheet = s.key === false ? raw : chromaKey(raw, opaqueBelow, clearAbove);
+    if (s.tone) tone(sheet, s.tone);
+    sheets.set(key, sheet);
   }
 
   // o retrato sai em vários tamanhos, cada um um frame
@@ -308,8 +345,14 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
   const image = `${outBase}.${format}`;
   if (format === 'webp') await writeWebp(atlas, image);
   else await toSharp(atlas).png({ compressionLevel: 9, palette: false }).toFile(image);
+  const layers: Record<string, LayerInfo> = {};
+  for (const [name, def] of Object.entries(manifest.layers ?? {})) {
+    layers[name] = await processLayer(dir, name, def, outBase);
+  }
   const json = {
     frames,
+    // tamanho e corte de cada camada do fundo (o jogo lê em `texture.customData`)
+    ...(manifest.layers ? { layers } : {}),
     meta: {
       app: 'scripts/art/build.ts',
       image: `${manifest.out.split('/').at(-1) ?? ''}.${format}`,
@@ -322,10 +365,6 @@ async function build(folder: string, debugDir: string | null): Promise<void> {
   console.log(
     `  atlas: ${String(names.length)} peças, ${String(atlasW)}x${String(atlasH)} → ${image}`,
   );
-
-  for (const [name, def] of Object.entries(manifest.layers ?? {})) {
-    await processLayer(dir, name, def, outBase);
-  }
 
   if (debugDir) {
     mkdirSync(debugDir, { recursive: true });

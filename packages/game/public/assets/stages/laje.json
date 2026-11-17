@@ -173,6 +173,26 @@
    }
   }
  },
+ "layers": {
+  "sky": {
+   "w": 3072,
+   "h": 1728,
+   "top": 0,
+   "scale": 1
+  },
+  "far": {
+   "w": 3072,
+   "h": 1728,
+   "top": 902,
+   "scale": 1
+  },
+  "mid": {
+   "w": 3072,
+   "h": 1728,
+   "top": 601,
+   "scale": 1
+  }
+ },
  "meta": {
   "app": "scripts/art/build.ts",
   "image": "laje.webp",

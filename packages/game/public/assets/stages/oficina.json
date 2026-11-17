@@ -187,6 +187,32 @@
    }
   }
  },
+ "layers": {
+  "back": {
+   "w": 2842,
+   "h": 1599,
+   "top": 0,
+   "scale": 0.8499
+  },
+  "far": {
+   "w": 2006,
+   "h": 1130,
+   "top": 301,
+   "scale": 0.6002
+  },
+  "mid": {
+   "w": 1672,
+   "h": 941,
+   "top": 470,
+   "scale": 0.5
+  },
+  "floor": {
+   "w": 1672,
+   "h": 945,
+   "top": 0,
+   "scale": 0.5
+  }
+ },
  "meta": {
   "app": "scripts/art/build.ts",
   "image": "oficina.webp",

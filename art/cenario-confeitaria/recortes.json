@@ -79,22 +79,22 @@
     "back": {
       "file": "2-fundo-2x.png",
       "key": false,
-      "width": 3344
+      "width": 2842
     },
     "far": {
       "file": "3-longe-2x.png",
-      "width": 3344
+      "width": 2006
     },
     "mid": {
       "file": "4-meio-expandido-2x.png",
       "rect": [0, 0, 3344, 1882],
-      "width": 3344
+      "width": 1840
     },
     "floor": {
       "file": "4-meio-expandido-2x.png",
       "key": false,
       "rect": [0, 1874, 3344, 1890],
-      "width": 3344
+      "width": 1840
     }
   }
 }

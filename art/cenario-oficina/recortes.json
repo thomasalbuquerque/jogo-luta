@@ -59,22 +59,46 @@
     "back": {
       "file": "2-fundo-2x.png",
       "key": false,
-      "width": 3344
+      "width": 2842,
+      "tone": {
+        "haze": {
+          "color": "#eae6e1",
+          "amount": 0.25
+        }
+      }
     },
     "far": {
       "file": "3-longe-2x.png",
-      "width": 3342
+      "width": 2006,
+      "tone": {
+        "haze": {
+          "color": "#eae6e1",
+          "amount": 0.25
+        }
+      }
     },
     "mid": {
       "file": "4-meio-expandido-2x.png",
       "rect": [0, 0, 3344, 1882],
-      "width": 3344
+      "width": 1672,
+      "tone": {
+        "haze": {
+          "color": "#eae6e1",
+          "amount": 0.25
+        }
+      }
     },
     "floor": {
       "file": "4-meio-expandido-2x.png",
       "key": false,
       "rect": [0, 1874, 3344, 1890],
-      "width": 3344
+      "width": 1672,
+      "tone": {
+        "haze": {
+          "color": "#eae6e1",
+          "amount": 0.25
+        }
+      }
     }
   }
 }
