@@ -141,20 +141,30 @@ function tickBombs(world: BombWorld, events: GameEvent[]): void {
     if (!owner || !carrier || !def) continue;
     if (carrier.state === 'ko') {
       events.push(bombEvent('vanish', b, carrier));
-      owner.specialCooldown = Math.max(owner.specialCooldown, def.cooldownTicks);
+      holdCooldown(owner, def.cooldownTicks);
       continue;
     }
     if (b.lockTicks > 0 && --b.lockTicks === 0) b.locked = -1;
     if (b.ticksLeft > 0) b.ticksLeft--;
     if (b.ticksLeft === 0) {
       explode(world, b, def, owner, carrier, events);
-      owner.specialCooldown = Math.max(owner.specialCooldown, def.cooldownTicks);
+      holdCooldown(owner, def.cooldownTicks);
       continue;
     }
-    owner.specialCooldown = Math.max(owner.specialCooldown, def.cooldownTicks);
+    holdCooldown(owner, def.cooldownTicks);
     world.bombs[alive++] = b;
   }
   world.bombs.length = alive;
+}
+
+/**
+ * Segura a recarga do especial do dono em `ticks` (enquanto a bomba está em jogo e no
+ * tick em que ela sai): a recarga e o tamanho dela, que a barra do especial usa.
+ */
+function holdCooldown(owner: Fighter, ticks: number): void {
+  if (owner.specialCooldown >= ticks) return;
+  owner.specialCooldown = ticks;
+  owner.specialCooldownTotal = ticks;
 }
 
 /** Área da explosão: a caixa `areaW × areaH` centrada no corpo de quem está com a bomba. */

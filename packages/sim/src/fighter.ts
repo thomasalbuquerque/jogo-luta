@@ -127,6 +127,11 @@ export interface Fighter extends Body {
   hitstop: number;
   /** Ticks até poder usar o especial de novo. */
   specialCooldown: number;
+  /**
+   * Tamanho da recarga em andamento, em ticks (a barra do especial enche por ele): a da
+   * ficha, ou a da bomba do Thom4o, bem maior, depois que ela sai de jogo. 0 = nenhuma.
+   */
+  specialCooldownTotal: number;
   /** Especial "1 vez por ar" já usado neste ar. */
   specialUsed: boolean;
   /** Buff temporário (bloco `buff`): ticks restantes e percentuais (100 = normal). */
@@ -204,6 +209,7 @@ export function createFighter(
     ledgeCooldown: 0,
     hitstop: 0,
     specialCooldown: 0,
+    specialCooldownTotal: 0,
     specialUsed: false,
     buffTicks: 0,
     buffDamage: 100,
@@ -245,6 +251,7 @@ export function placeAtSpawn(f: Fighter, spawn: Spawn): void {
   f.ledgeCooldown = 0;
   f.hitstop = 0;
   f.specialCooldown = 0;
+  f.specialCooldownTotal = 0;
   clearBuff(f);
   f.grabbedBy = -1;
   f.grabTicks = 0;
@@ -373,6 +380,7 @@ export function startMove(f: Fighter, id: MoveId, input: InputMask): void {
   if (id === 'special') {
     const special = characterOf(f).special;
     f.specialCooldown = special?.cooldownTicks ?? 0;
+    f.specialCooldownTotal = f.specialCooldown;
     if (special?.oncePerAir && !f.grounded) f.specialUsed = true;
   }
   f.cues |= Cue.SWING;

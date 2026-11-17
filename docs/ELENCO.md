@@ -902,8 +902,8 @@ Trechos prontos para os textos do Firefly (pasta `art/igao/`):
     a área poupa só os companheiros do Thom4o; quem está com a bomba leva sempre, de qualquer time.
   - **Se quem está com a bomba perder a vida:** a bomba some com ele, sem explodir.
   - **Recarga:** só existe 1 bomba dele por vez; com a bomba em jogo, o botão do especial não faz
-    nada. Quando ela estoura ou some, a recarga é de 150 ticks (2,5 s). Errando o agarrão, 90 ticks
-    contados do começo. Dá no máximo 1 bomba a cada 7,5 s.
+    nada. Quando ela estoura ou some, a recarga é de 600 ticks (10 s). Errando o agarrão, 120 ticks
+    (2 s) contados do começo. Dá no máximo 1 bomba a cada 15 s; errar custa pouco.
   - **No ar:** funciona, sem impulso. Se pegar no ar, os dois ficam parados no ar até o empurrão.
   - **Interações:** o Meia passa a bomba no 1º golpe do Comando e fica 30 ticks segurando alguém
     com uma bomba (risco dele). O Crocko com a bomba passa quando o contra-ataque pega. A Arrancada
@@ -945,7 +945,7 @@ Trechos prontos para os textos do Firefly (pasta `art/igao/`):
   | Queda        | rápida     | `fastFallSpeed` 19, como a maioria                |
   | Golpes base  | padrão     | Sem ajustes                                       |
   | Especial     | 7 / 5 / 28 | Agarrão de 40 px, segura 14 ticks, empurrão de 3% |
-  | Recarga      | 90 / 150   | Errou (do começo) / depois que a bomba estoura    |
+  | Recarga      | 120 / 600  | Errou (do começo) / depois que a bomba estoura    |
 
 - **A bomba:** pacote de explosivo com um teclado pequeno, um visor e fios coloridos, como a C4 do
   CS. A arte é genérica, inspirada nela: nada de nomes, emblemas ou logos do CS, e o visor vem sem

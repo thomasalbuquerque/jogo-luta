@@ -88,18 +88,19 @@ describe('bomba do Thom4o', () => {
     expect(b.ticksLeft).toBeGreaterThan(DEF.fuseTicks - 40);
   });
 
-  it('de longe erra: nada de bomba, recarga de 90', () => {
+  it('de longe erra: nada de bomba, só a recarga curta da ficha', () => {
     const { g, thom } = setup(['thom4o', 'base'], [120]);
     stepGame(g, inputs(g, 0, Button.SPECIAL));
     const { bombs } = run(g, 40);
     expect(bombs).toEqual([]);
     expect(g.bombs).toEqual([]);
-    expect(thom.specialCooldown).toBe(90 - 40);
+    expect(thom.specialCooldown).toBe((THOM4O.special?.cooldownTicks ?? 0) - 40);
+    expect(thom.specialCooldownTotal).toBe(THOM4O.special?.cooldownTicks);
   });
 
-  it('com a bomba em jogo, o especial não sai; depois que ela estoura, recarga de 150', () => {
+  it('com a bomba em jogo, o especial não sai; depois que ela estoura, a recarga longa da bomba', () => {
     const { g, thom } = plant();
-    expect(thom.specialCooldown).toBeGreaterThan(90);
+    expect(thom.specialCooldown).toBeGreaterThan(THOM4O.special?.cooldownTicks ?? 0);
     run(g, 40);
     expect(thom.state).not.toBe('attack');
     stepGame(g, inputs(g, 0, Button.SPECIAL));
@@ -108,6 +109,7 @@ describe('bomba do Thom4o', () => {
     run(g, bomb(g).ticksLeft);
     expect(g.bombs).toEqual([]);
     expect(thom.specialCooldown).toBe(DEF.cooldownTicks);
+    expect(thom.specialCooldownTotal).toBe(DEF.cooldownTicks);
   });
 
   it('o relógio zera: estoura em quem está com ela, 18% e para cima', () => {
