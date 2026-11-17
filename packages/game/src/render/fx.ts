@@ -181,7 +181,8 @@ export interface CharacterFx {
   /**
    * Bomba com relógio (o Thom4o, bloco `grab` com `bomb`; desenhada pelo `BombView`):
    * a peça `frame` presa no peito de quem está com ela, com a luz `led` piscando no
-   * ritmo do bipe (`beepSound`, cada vez mais rápido). Ao colar, o bip-bip de armada
+   * ritmo do bipe (`beepSound`, cada vez mais rápido) e, a cada bipe, um clarão vermelho atrás
+   * do boneco todo (como a aura da Marília), para todo mundo ver de longe quem está com ela. Ao colar, o bip-bip de armada
    * (`armSound`); na passagem, o "tlec" (`passSound`) e a bomba pulando de um corpo
    * para o outro; na explosão, o clarão `blast`, o anel `ring`, a fumaça `smoke`, o
    * tremor e o "bum" (`blastSound`).

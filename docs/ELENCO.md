@@ -911,7 +911,9 @@ Trechos prontos para os textos do Firefly (pasta `art/igao/`):
     projétil (João Frango, Dadazinho, Tchula, Igão) tem que passar no braço. Um lutador só carrega 1
     bomba: com dois Thom4os, o agarrão do segundo pega mas não cola.
   - **Efeitos:** a C4 aparece na mão com uma fumacinha; colada, fica presa no peito de quem está
-    com ela, com a luz vermelha piscando no ritmo do bipe. O relógio (segundos com 1 casa) é
+    com ela, com a luz vermelha piscando no ritmo do bipe. A cada bipe, o corpo todo de quem está com ela
+    acende num brilho vermelho que some aos poucos (como a aura da Marília): dá para ver de longe
+    quem está com a bomba. O relógio (segundos com 1 casa) é
     desenhado no código, em cima da cabeça, e fica vermelho no último segundo. Quem está travado
     mostra um cadeado pequeno em cima da cabeça. No último segundo, um anel fino no chão mostra o
     tamanho da área, para quem está perto saber de onde sair. Na passagem, um "tlec" e a bomba pula

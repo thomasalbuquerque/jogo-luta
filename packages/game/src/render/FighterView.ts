@@ -113,6 +113,8 @@ export class FighterView {
    * e depois só mostrada ou escondida.
    */
   private auraGlow: Phaser.GameObjects.Image | null = null;
+  /** Brilho de alerta (a bomba do Thom4o piscando), criado no 1º uso. */
+  private alarmGlow: Phaser.GameObjects.Image | null = null;
   private readonly skin: Skin;
   private readonly fit: RigFit;
   private readonly textureKey: string;
@@ -370,6 +372,33 @@ export class FighterView {
       .setAlpha(0.55 + 0.3 * pulse)
       .setPosition(0, -h * 0.5)
       .setScale((h * 0.95 * grow) / GLOW_TEXTURE_SIZE, (h * 1.45 * grow) / GLOW_TEXTURE_SIZE);
+    return this;
+  }
+
+  /**
+   * Brilho de alerta atrás do boneco (a luz da bomba do Thom4o piscando em quem está com
+   * ela), do mesmo tipo da aura e separado dela (a Marília pode estar com a aura e a
+   * bomba). `level` de 0 a 1 é a força do clarão; `null` (ou 0) esconde.
+   */
+  setAlarmGlow(color: number, level: number | null): this {
+    if (level === null || level <= 0) {
+      this.alarmGlow?.setVisible(false);
+      return this;
+    }
+    if (!this.alarmGlow) {
+      const img = this.container.scene.add.image(0, 0, FX_TEXTURE.glow);
+      img.setBlendMode(Phaser.BlendModes.ADD);
+      this.container.addAt(img, 0);
+      this.alarmGlow = img;
+    }
+    const h = this.fit.height;
+    const grow = 0.9 + 0.25 * level;
+    this.alarmGlow
+      .setVisible(true)
+      .setTint(color)
+      .setAlpha(0.95 * level)
+      .setPosition(0, -h * 0.55)
+      .setScale((h * 1.05 * grow) / GLOW_TEXTURE_SIZE, (h * 1.5 * grow) / GLOW_TEXTURE_SIZE);
     return this;
   }
 

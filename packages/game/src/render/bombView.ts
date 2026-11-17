@@ -22,6 +22,12 @@ const CHEST_HEIGHT = 0.26;
 const PASS_TICKS = 8;
 /** Ticks em que a luz fica acesa depois de cada bipe. */
 const LED_TICKS = 4;
+/**
+ * Ticks que o clarão vermelho atrás de quem está com a bomba leva para sumir depois de
+ * cada bipe (o corpo todo acende junto com a luz da bomba: dá para ver de longe quem está
+ * com ela).
+ */
+const ALARM_FADE_TICKS = 14;
 /** Tremor da câmera na explosão. */
 const BLAST_TRAUMA = 0.6;
 
@@ -130,11 +136,13 @@ export class BombView {
       const view = views[f.id];
       if (!view) continue;
       const flying = look ? this.passProgress(state, look, alpha) < 1 : false;
+      const carrying = b !== undefined && look !== undefined && !flying && f.state !== 'ko';
       view.setChestBadge(
-        look && !flying && f.state !== 'ko'
+        carrying
           ? { texture: look.texture, frame: look.fx.frame, height: toPx(f.h) * CHEST_HEIGHT }
           : null,
       );
+      view.setAlarmGlow(RED, carrying ? alarmLevel(look.lastBeep - b.ticksLeft + alpha) : null);
     }
     for (const b of state.bombs) {
       const look = this.looks.get(b.owner);
@@ -379,6 +387,12 @@ export class BombView {
     this.shake.add(BLAST_TRAUMA);
     if (fx.blastSound) playSfx(this.scene, fx.blastSound);
   }
+}
+
+/** Força do clarão de alerta `since` ticks depois do bipe: acende cheio e some aos poucos. */
+function alarmLevel(since: number): number {
+  const u = Math.min(1, Math.max(0, since / ALARM_FADE_TICKS));
+  return (1 - u) * (1 - u);
 }
 
 /** Cadeado pequeno (quem está travado não recebe a bomba de volta), centrado em (x, y). */
