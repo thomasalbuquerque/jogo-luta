@@ -793,13 +793,19 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
 - **Cabeças em folhas separadas e de tamanhos diferentes** (Thom4o: `2-cabecas-1.png` normal,
   `2-cabecas-2.png` provocação, `2-cabecas-3.png` golpe levado e KO): uma folha (`sheets`) para cada
   arquivo, com a escala que deixa os rostos do mesmo tamanho (mede do alto do cabelo até os olhos).
-  Depois de jogar, a cabeça foi aumentada 15% (0,391 nas folhas grandes, 0,759 na de golpe/KO), para
-  ficar do tamanho das do Igão e do Meia; o corte do pescoço foi refeito com a escala nova.
+  Depois de jogar, a cabeça foi aumentada duas vezes (15% e mais 10%: 0,43 nas folhas grandes, 0,835
+  na de golpe/KO); o corte do pescoço é refeito com a escala nova.
 - **Pescoço cortado na gola** (Thom4o: o toco de pescoço das cabeças descia por cima da camiseta e a
   borda de baixo aparecia como uma linha diagonal no peito): o `neck` do tronco fica dentro da gola e
   cada cabeça leva um `erase` abaixo da curva da gola da frente (os pontos da gola no tronco, levados
   para a folha da cabeça pela escala e pelo `pivot`). O pescoço termina em cima da linha da gola,
-  como se entrasse na camiseta. Refaça a conta se mudar o `pivot`, a escala ou o `neck`.
+  como se entrasse na camiseta. Depois da gola, o corte segue a linha de cima dos ombros (um corte
+  reto deixava um vão entre a garganta e o ombro no soco). Refaça a conta se mudar o `pivot`, a
+  escala ou o `neck`.
+- **Punho com um pedaço de antebraço** (Thom4o: os dois punhos vieram com o começo do antebraço):
+  com o `pivot` no fim desse pedaço, a mão dobrava longe do pulso e a quina do pedaço aparecia na
+  guarda. O `pivot` vai na dobra do pulso, o pedaço sai com `erase` uns 12 px depois, e um `fade`
+  curto apaga a emenda (a pele da mão é mais clara que a do antebraço).
 - **Relógio no pulso** (Thom4o): o antebraço é a mesma peça nos dois braços, então o relógio não vai
   desenhado nele. A peça `wristwatch` (recortada da folha de efeitos, só a caixa e um pedaço da
   pulseira, numa escala em que a caixa tem a largura do pulso) vai no socket `watch` do antebraço,
