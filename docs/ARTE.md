@@ -793,6 +793,8 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
 - **Cabeças em folhas separadas e de tamanhos diferentes** (Thom4o: `2-cabecas-1.png` normal,
   `2-cabecas-2.png` provocação, `2-cabecas-3.png` golpe levado e KO): uma folha (`sheets`) para cada
   arquivo, com a escala que deixa os rostos do mesmo tamanho (mede do alto do cabelo até os olhos).
+  Depois de jogar, a cabeça foi aumentada 15% (0,391 nas folhas grandes, 0,759 na de golpe/KO), para
+  ficar do tamanho das do Igão e do Meia; o corte do pescoço foi refeito com a escala nova.
 - **Pescoço cortado na gola** (Thom4o: o toco de pescoço das cabeças descia por cima da camiseta e a
   borda de baixo aparecia como uma linha diagonal no peito): o `neck` do tronco fica dentro da gola e
   cada cabeça leva um `erase` abaixo da curva da gola da frente (os pontos da gola no tronco, levados
