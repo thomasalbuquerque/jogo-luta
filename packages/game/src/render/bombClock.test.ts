@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { beepInterval, clockText } from './bombView';
+import { beepInterval, clockText } from './bombClock';
 
 describe('bomba na tela', () => {
   it('relógio em segundos com 1 casa e vírgula, sem mostrar 0,0 antes do fim', () => {

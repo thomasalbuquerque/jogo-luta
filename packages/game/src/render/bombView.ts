@@ -8,6 +8,7 @@ import {
   type GameState,
 } from '@jogo-luta/sim';
 import { playSfx } from '../audio/sfx';
+import { beepInterval, clockText, LAST_SECOND_TICKS } from './bombClock';
 import { characterTextureKey, type FighterView } from './FighterView';
 import { CHARACTER_FX, type CharacterFx, type FxLayer } from './fx';
 import { FX_TEXTURE } from './fxTextures';
@@ -19,28 +20,12 @@ type BombFx = NonNullable<CharacterFx['bomb']>;
 const CHEST_HEIGHT = 0.26;
 /** Ticks que a bomba leva pulando de um corpo para o outro na passagem. */
 const PASS_TICKS = 8;
-/** Último segundo (ticks): o relógio fica vermelho e o anel da área aparece no chão. */
-export const LAST_SECOND_TICKS = 60;
 /** Ticks em que a luz fica acesa depois de cada bipe. */
 const LED_TICKS = 4;
 /** Tremor da câmera na explosão. */
 const BLAST_TRAUMA = 0.6;
 
 const RED = 0xff3b30;
-
-/**
- * Ticks entre um bipe e outro, com `ticksLeft` no relógio: começa devagar (uns 0,7 s)
- * e acelera até quase colar no fim.
- */
-export function beepInterval(ticksLeft: number): number {
-  return Math.max(5, Math.min(42, Math.round(ticksLeft / 6)));
-}
-
-/** Relógio em segundos com 1 casa, com vírgula ("4,9"); nunca mostra "0,0" antes do fim. */
-export function clockText(ticksLeft: number): string {
-  const tenths = Math.max(1, Math.ceil(ticksLeft / 6));
-  return `${String(Math.floor(tenths / 10))},${String(tenths % 10)}`;
-}
 
 /** Peças e estado de desenho de uma bomba em jogo (pelo id do dono). */
 interface BombLook {
