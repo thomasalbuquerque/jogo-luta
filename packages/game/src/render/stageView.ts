@@ -221,7 +221,7 @@ const CONFEITARIA: StageArt = {
       width: 1421.2,
       originX: 0.5,
       originY: 0.5,
-      fillBelow: 0xfacfa9,
+      fillBelow: 0xf0d8c1,
     },
     {
       key: 'far',
@@ -231,7 +231,7 @@ const CONFEITARIA: StageArt = {
       width: 1003.2,
       originX: 0.5,
       originY: 1,
-      fillBelow: 0xe7b083,
+      fillBelow: 0xe1c3aa,
       tiles: 'mirror',
     },
     {
@@ -242,8 +242,8 @@ const CONFEITARIA: StageArt = {
       width: 919.6,
       originX: 0.5,
       originY: 1,
-      // a cor do pé do piso estendido (escurece embaixo)
-      fillBelow: 0x8f6742,
+      // a cor do pé do piso estendido (escurece embaixo), já com o tom da camada
+      fillBelow: 0xa18870,
       tiles: 'mirror',
       floor: 'floor',
     },

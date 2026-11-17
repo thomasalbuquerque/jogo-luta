@@ -9,7 +9,14 @@
     },
     "enfeites": {
       "file": "5-pecas-2x.png",
-      "scale": 0.75
+      "scale": 0.75,
+      "tone": {
+        "saturation": 0.8,
+        "haze": {
+          "color": "#f8e2cc",
+          "amount": 0.12
+        }
+      }
     },
     "bancada": {
       "file": "5-bancada-expandida-2x.png"
@@ -79,22 +86,50 @@
     "back": {
       "file": "2-fundo-2x.png",
       "key": false,
-      "width": 2842
+      "width": 2842,
+      "tone": {
+        "saturation": 0.6,
+        "haze": {
+          "color": "#f8e2cc",
+          "amount": 0.35
+        }
+      }
     },
     "far": {
       "file": "3-longe-2x.png",
-      "width": 2006
+      "width": 2006,
+      "tone": {
+        "saturation": 0.6,
+        "haze": {
+          "color": "#f8e2cc",
+          "amount": 0.32
+        }
+      }
     },
     "mid": {
       "file": "4-meio-expandido-2x.png",
       "rect": [0, 0, 3344, 1882],
-      "width": 1840
+      "width": 1840,
+      "tone": {
+        "saturation": 0.65,
+        "haze": {
+          "color": "#f8e2cc",
+          "amount": 0.25
+        }
+      }
     },
     "floor": {
       "file": "4-meio-expandido-2x.png",
       "key": false,
       "rect": [0, 1874, 3344, 1890],
-      "width": 1840
+      "width": 1840,
+      "tone": {
+        "saturation": 0.65,
+        "haze": {
+          "color": "#f8e2cc",
+          "amount": 0.25
+        }
+      }
     }
   }
 }
