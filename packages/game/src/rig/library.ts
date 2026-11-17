@@ -17,7 +17,7 @@ import { CHARACTER_CLIPS } from './characterClips';
 export const COUNTER_KEY = 'counter';
 
 /**
- * Agarrão com combo que pegou alguém (o combo do Meia): toca o clipe
+ * Agarrão com combo ou bomba que pegou alguém (o combo do Meia, a bomba do Thom4o): toca o clipe
  * `<id do especial>_combo` em ticks, do começo do agarrão até o fim do recovery (ver
  * `fighterClip`), em vez do frame do golpe, que fica parado enquanto ele segura.
  */
@@ -64,6 +64,7 @@ export const FOREARM_IN_FRONT: ReadonlySet<string> = new Set([
   'tchula',
   'joao-frango',
   'schummaki',
+  'thom4o',
 ]);
 
 /**
@@ -76,7 +77,7 @@ export const SHIN_IN_FRONT: ReadonlySet<string> = new Set(['igao']);
  * Personagens de calça comprida que cai por cima do tênis (o Dadazinho): o pé é desenhado
  * atrás da canela (`drawOrder`), e a barra da calça cobre o cano do tênis.
  */
-export const FOOT_BEHIND: ReadonlySet<string> = new Set(['dadazinho']);
+export const FOOT_BEHIND: ReadonlySet<string> = new Set(['dadazinho', 'thom4o']);
 
 /** Nomes dos clipes, na ordem do visualizador. */
 export function clipNames(): string[] {

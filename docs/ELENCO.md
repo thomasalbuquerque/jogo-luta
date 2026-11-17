@@ -958,8 +958,10 @@ Trechos prontos para os textos do Firefly (pasta `art/igao/`):
   a faixa de perigo, e ninguém tem amarelo como cor principal: o do Tchula é só a faixa do macacão
   e o do João Frango é o boné. A camiseta clara também segura a leitura nos menus escuros, já que a
   calça e o tênis são pretos.
-- **No jogo:** ainda não está (só esta ficha). A ficha do `sim` vai em
-  `packages/sim/src/characters/thom4o.ts`.
+- **No jogo:** jogável (`packages/sim/src/characters/thom4o.ts`, bomba em
+  `packages/sim/src/bomb.ts`). A arte (`art/thom4o/`) veio com óculos de aro fino prateado e a C4
+  dos efeitos; a bomba redonda que veio na mão, na folha de peças, ficou sem uso. O relógio é uma
+  peça solta presa só no pulso da frente.
 - **Ideias guardadas:** "Tá plantada!" como fala ao colar a bomba; respawn conferindo o relógio;
   KO dele com um "bip" comprido; se a própria bomba estourar nele, o balão mostra "É o Turbas...".
 

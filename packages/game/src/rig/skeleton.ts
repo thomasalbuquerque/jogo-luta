@@ -135,7 +135,7 @@ export function drawOrder(
 }
 
 export type Expression = 'normal' | 'hurt' | 'taunt' | 'ko';
-export type HandPose = 'fist' | 'open' | 'taunt';
+export type HandPose = 'fist' | 'open' | 'taunt' | 'grab';
 
 /** Pontos de uma peça no atlas, em px da textura (gerados pelo `pnpm art`). */
 export interface FrameAnchors {

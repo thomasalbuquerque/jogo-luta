@@ -62,6 +62,7 @@ import {
   type Rect,
 } from '../render/camera';
 import { commandLook } from '../render/command';
+import { BombView } from '../render/bombView';
 import { CommandView } from '../render/CommandView';
 import { isDecisiveHit } from '../render/decisive';
 import { characterOfFighter, colorValue } from '../render/fighterLook';
@@ -290,6 +291,10 @@ export class FightScene extends Phaser.Scene {
   private views: FighterView[] = [];
   private fx!: FxLayer;
   private backFx!: FxLayer;
+  /** A bomba do Thom4o: no peito, relógio, cadeado, passagem e explosão. */
+  private bombView!: BombView;
+  /** Marcador em cima da cabeça de cada lutador no último frame (px), ou null se sumido. */
+  private markers: ({ x: number; y: number } | null)[] = [];
   private readonly shake = new Shake();
   private readonly slowMo = new SlowMo();
   /** Câmera sem o tremor (o tremor é somado só na hora de posicionar). */
@@ -375,6 +380,7 @@ export class FightScene extends Phaser.Scene {
     this.summons = [];
     this.fx = new FxLayer(this, DEPTH.fx);
     this.backFx = new FxLayer(this, DEPTH.backFx);
+    this.bombView = new BombView(this, DEPTH.ui, this.fx, this.shake);
     this.newMatch();
     this.controls = new InputManager();
     this.pauseRequested = false;
@@ -631,6 +637,7 @@ export class FightScene extends Phaser.Scene {
     this.lastGrabbing = this.state.fighters.map(() => false);
     this.commandMissed = this.state.fighters.map(() => false);
     for (const c of this.commands) c?.clear();
+    this.bombView.clear();
     this.overTicks = 0;
     this.loop.reset();
     this.fx.clear();
@@ -766,6 +773,7 @@ export class FightScene extends Phaser.Scene {
     this.checkHash();
     recordEvents(this.stats, this.state.events);
     this.handleEvents();
+    this.bombView.step(this.state);
     this.spawnTrails();
     this.spawnFx();
     this.lateTauntVoices();
@@ -864,6 +872,7 @@ export class FightScene extends Phaser.Scene {
           break;
         case 'grab':
           playSfx(this, 'grab');
+          this.bombView.onGrab(this.state, e.attacker);
           break;
         case 'aura':
           this.onAuraPass(e);
@@ -873,6 +882,9 @@ export class FightScene extends Phaser.Scene {
           break;
         case 'reflect':
           this.onReflect(e);
+          break;
+        case 'bomb':
+          this.bombView.onEvent(this.state, e, this.views);
           break;
       }
     }
@@ -1247,6 +1259,7 @@ export class FightScene extends Phaser.Scene {
         tag?.setVisible(false);
         command?.clear();
         this.looseBalls[f.id]?.setVisible(false);
+        this.markers[f.id] = null;
         continue;
       }
       const r = this.renderRect(f, alpha);
@@ -1303,6 +1316,7 @@ export class FightScene extends Phaser.Scene {
       g.fillTriangle(mx - 9, my - 12, mx + 9, my - 12, mx, my);
       g.strokeTriangle(mx - 9, my - 12, mx + 9, my - 12, mx, my);
       if (tag) this.placeNameTag(tag, f, mx, my - 14);
+      this.markers[f.id] = { x: mx, y: my };
 
       if (!debug) continue;
       for (const box of activeHitboxes(f)) {
@@ -1316,6 +1330,14 @@ export class FightScene extends Phaser.Scene {
       d.lineStyle(2, f.invulnTicks > 0 ? HURTBOX_INVULN_COLOR : HURTBOX_COLOR, 1);
       d.strokeRect(h.x, h.y, h.w, h.h);
     }
+    this.bombView.draw(
+      this.state,
+      this.views,
+      (id) => this.markers[id] ?? null,
+      g,
+      alpha,
+      this.camPos.zoom,
+    );
   }
 
   /**

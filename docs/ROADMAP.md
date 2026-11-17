@@ -210,6 +210,12 @@ Objetivo: os 14 personagens restantes, em lotes de 3 ou 4, usando o pipeline da 
         poeirinha, "pá!" e "tum", provocação quicando a bola e apontando, retrato). O bloco projétil
         ganhou quiques (`bounces`, `bounceKeep`). Falta o OK do concept pelo amigo, a voz gravada
         e as 5 lutas de teste.
+  - [x] Thom4o: jogável (ficha, arte no esqueleto com o relógio preso no pulso da frente, especial
+        Tá plantada! com a bomba que passa no golpe de corpo, trava, piso do relógio e explosão,
+        provocação conferindo o relógio e apontando, bomba no peito de quem está com ela, relógio
+        em cima da cabeça, cadeado, anel do último segundo, bipes, "tlec" e "bum", retrato). O
+        bloco agarrão ganhou a bomba (`bomb`) e o estado da luta, a lista de bombas. Falta o OK
+        do concept pelo amigo, a voz gravada e as 5 lutas de teste.
 - [ ] Mapas novos com tema de piadas internas do grupo: 7 planejados, com o formato das plataformas
       e os textos do Firefly em `docs/CENARIOS.md`. Montado: Oficina do Tchula e Confeitaria do Darllan. Falta
       gerar a arte e montar os outros 5.

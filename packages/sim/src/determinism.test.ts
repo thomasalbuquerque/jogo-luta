@@ -47,8 +47,8 @@ describe('determinismo', () => {
   it('a luta do teste tem de tudo: golpes, KOs e projéteis', () => {
     // A luta é caótica: mudar um número de ficha muda quem morre. Se um ajuste de
     // balanceamento quebrar este teste, troque a seed (quase toda seed serve).
-    const game = newGame(7);
-    const inputs = new RandomInputs(7);
+    const game = newGame(8);
+    const inputs = new RandomInputs(8);
     const seen = new Set<string>();
     let projectiles = 0;
     for (let t = 0; t < TICKS; t++) {

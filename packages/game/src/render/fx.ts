@@ -178,6 +178,25 @@ export interface CharacterFx {
     finishSound?: SfxName;
     missSound?: SfxName;
   };
+  /**
+   * Bomba com relógio (o Thom4o, bloco `grab` com `bomb`; desenhada pelo `BombView`):
+   * a peça `frame` presa no peito de quem está com ela, com a luz `led` piscando no
+   * ritmo do bipe (`beepSound`, cada vez mais rápido). Ao colar, o bip-bip de armada
+   * (`armSound`); na passagem, o "tlec" (`passSound`) e a bomba pulando de um corpo
+   * para o outro; na explosão, o clarão `blast`, o anel `ring`, a fumaça `smoke`, o
+   * tremor e o "bum" (`blastSound`).
+   */
+  bomb?: {
+    frame: string;
+    led: string;
+    blast: string;
+    ring: string;
+    smoke: readonly string[];
+    armSound?: SfxName;
+    beepSound?: SfxName;
+    passSound?: SfxName;
+    blastSound?: SfxName;
+  };
 }
 
 export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
@@ -294,6 +313,21 @@ export const CHARACTER_FX: Readonly<Record<string, CharacterFx>> = {
       ],
       sound: 'ball_bounce',
       dust: ['fx_dust2', 'fx_dust3'],
+    },
+  },
+  thom4o: {
+    // fumacinha quando a bomba aparece na mão e quando ela sai (colada no peito)
+    propPuffs: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
+    bomb: {
+      frame: 'fx_c4',
+      led: 'fx_led',
+      blast: 'fx_boom',
+      ring: 'fx_ring',
+      smoke: ['fx_smoke1', 'fx_smoke2', 'fx_smoke3'],
+      armSound: 'bomb_arm',
+      beepSound: 'bomb_beep',
+      passSound: 'bomb_pass',
+      blastSound: 'bomb_boom',
     },
   },
   'joao-frango': {

@@ -12,10 +12,11 @@ export function fighterClip(f: Fighter): { key: string; t: number } {
     case 'attack': {
       const move = currentMove(f);
       if (!move || !f.move) return { key: 'idle', t: f.stateTicks };
-      // agarrão com combo que pegou: o combo em ticks desde que pegou e, depois do
-      // arremesso, o recovery na sequência (o frame do golpe fica parado enquanto segura)
+      // agarrão com combo (o Meia) ou bomba (o Thom4o) que pegou: o clipe em ticks desde
+      // que pegou e, depois do arremesso, o recovery na sequência (o frame do golpe fica
+      // parado enquanto segura)
       const grab = move.grab;
-      if (f.move === 'special' && grab?.combo && f.moveHits !== 0) {
+      if (f.move === 'special' && (grab?.combo || grab?.bomb) && f.moveHits !== 0) {
         const t =
           f.grabTicks > 0
             ? grab.holdTicks - f.grabTicks

@@ -14,7 +14,7 @@ if (!SCHUMMAKI || !JOAO || !DADA || !TAUBA || !TCHULA || !CROCKO || !DARLLAN)
   throw new Error('elenco incompleto');
 
 describe('elenco', () => {
-  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs, Marília, Meia e Igão, cada um com especial e provocação', () => {
+  it('Schummaki, João Frango, Dadazinho, Tauba, Tchula, Crocko, Darllan, Gabs, Marília, Meia, Igão e Thom4o, cada um com especial e provocação', () => {
     expect(PLAYABLE_CHARACTERS).toEqual([
       'schummaki',
       'joao-frango',
@@ -27,6 +27,7 @@ describe('elenco', () => {
       'marilia',
       'meia',
       'igao',
+      'thom4o',
     ]);
     for (const c of [
       SCHUMMAKI,
@@ -40,6 +41,7 @@ describe('elenco', () => {
       getCharacter('marilia'),
       getCharacter('meia'),
       getCharacter('igao'),
+      getCharacter('thom4o'),
     ]) {
       expect(c.special).not.toBeNull();
       expect(c.taunt.text.length).toBeGreaterThan(0);
@@ -70,7 +72,8 @@ describe('elenco', () => {
     expect(shot.speed * shot.lifetimeTicks).toBeLessThan(
       (chicken.speed * chicken.lifetimeTicks) / 2,
     );
-    expect(shot.hit.damage).toBeGreaterThan(chicken.hit.damage * 2);
+    // forte: bem mais que o frango (que subiu para 8%, na 2ª rodada de balanceamento)
+    expect(shot.hit.damage).toBeGreaterThan(chicken.hit.damage * 1.5);
     expect(DADA.special?.move.startup).toBeGreaterThan(JOAO.special?.move.startup ?? 0);
     expect(DADA.special?.cooldownTicks).toBeGreaterThan(JOAO.special?.cooldownTicks ?? 0);
     expect(DADA.stats.weight).toBeLessThan(100);
