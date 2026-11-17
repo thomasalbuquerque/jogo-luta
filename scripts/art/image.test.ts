@@ -4,6 +4,7 @@ import {
   clipPolygon,
   colorAround,
   createImage,
+  emptyRowsAbove,
   fadeAlong,
   fillBehind,
   flipX,
@@ -11,6 +12,8 @@ import {
   nextPowerOfTwo,
   packShelves,
   removeSpecks,
+  tone,
+  toneColor,
   type Image,
 } from './image.ts';
 
@@ -177,5 +180,47 @@ describe('nextPowerOfTwo', () => {
     expect(nextPowerOfTwo(269)).toBe(512);
     expect(nextPowerOfTwo(1024)).toBe(1024);
     expect(nextPowerOfTwo(1948)).toBe(2048);
+  });
+});
+
+describe('tone', () => {
+  it('sem ajuste, a cor fica igual', () => {
+    expect(toneColor([200, 100, 50], {})).toEqual([200, 100, 50]);
+  });
+
+  it('saturação 0 vira o cinza da luminância', () => {
+    const [r, g, b] = toneColor([255, 0, 0], { saturation: 0 });
+    expect(r).toBeCloseTo(76.245);
+    expect(g).toBeCloseTo(r);
+    expect(b).toBeCloseTo(r);
+  });
+
+  it('a névoa mistura com a cor dela, como um véu por cima', () => {
+    // véu #ffffff com alfa 0,25 por cima de (100, 60, 20)
+    const haze = { color: '#ffffff', amount: 0.25 };
+    expect(toneColor([100, 60, 20], { haze })).toEqual([138.75, 108.75, 78.75]);
+  });
+
+  it('muda a cor e deixa o alfa (pixel transparente não muda)', () => {
+    const img = createImage(2, 1);
+    img.data.set([100, 60, 20, 128, 9, 9, 9, 0]);
+    tone(img, { haze: { color: '#ffffff', amount: 0.25 } });
+    expect(pixel(img, 0, 0)).toEqual([139, 109, 79, 128]);
+    expect(pixel(img, 1, 0)).toEqual([9, 9, 9, 0]);
+  });
+});
+
+describe('emptyRowsAbove', () => {
+  it('conta as linhas vazias de cima', () => {
+    const img = createImage(4, 6);
+    fill(img, [10, 10, 10, 1], 2, 3, 1, 1);
+    expect(emptyRowsAbove(img)).toBe(3);
+  });
+
+  it('imagem cheia: 0; imagem vazia: a altura', () => {
+    const full = createImage(2, 2);
+    fill(full, [1, 2, 3, 255]);
+    expect(emptyRowsAbove(full)).toBe(0);
+    expect(emptyRowsAbove(createImage(2, 5))).toBe(5);
   });
 });

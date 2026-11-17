@@ -337,3 +337,54 @@ export function packShelves(
   }
   return { positions, w: width, h: y + shelfH + gap };
 }
+
+/** Ajuste de cor de uma camada do fundo ou de uma folha (ver `tone`). */
+export interface Tone {
+  /** Saturação: 1 deixa como está, 0 vira cinza. */
+  saturation?: number;
+  /** Névoa: mistura cada cor com `color` (#rrggbb); `amount` de 0 (nada) a 1 (só a névoa). */
+  haze?: { color: string; amount: number };
+}
+
+/** Uma cor [r, g, b] com o ajuste de `tone` (sem arredondar). */
+export function toneColor(
+  rgb: readonly [number, number, number],
+  t: Tone,
+): [number, number, number] {
+  const sat = t.saturation ?? 1;
+  const luma = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+  const haze = t.haze ? parseHex(t.haze.color) : rgb;
+  const amount = t.haze?.amount ?? 0;
+  const mix = (c: number, h: number) => {
+    const s = luma + (c - luma) * sat;
+    return s + (h - s) * amount;
+  };
+  return [mix(rgb[0], haze[0]), mix(rgb[1], haze[1]), mix(rgb[2], haze[2])];
+}
+
+/**
+ * Apaga o fundo do cenário para ele não disputar com os lutadores: tira saturação e
+ * puxa as cores para a cor da névoa (perspectiva atmosférica). O alfa não muda. Vai
+ * na arte, no `pnpm art`: no jogo não custa nada (um véu por cima da tela custaria
+ * uma tela inteira de desenho por quadro).
+ */
+export function tone(img: Image, t: Tone): void {
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    if ((d[i + 3] ?? 0) === 0) continue;
+    const [r, g, b] = toneColor([d[i] ?? 0, d[i + 1] ?? 0, d[i + 2] ?? 0], t);
+    d[i] = Math.round(r);
+    d[i + 1] = Math.round(g);
+    d[i + 2] = Math.round(b);
+  }
+}
+
+/** Quantas linhas de cima são todas transparentes (a imagem vazia devolve a altura). */
+export function emptyRowsAbove(img: Image): number {
+  for (let y = 0; y < img.h; y++) {
+    for (let x = 0; x < img.w; x++) {
+      if ((img.data[(y * img.w + x) * 4 + 3] ?? 0) !== 0) return y;
+    }
+  }
+  return img.h;
+}
