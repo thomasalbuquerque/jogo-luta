@@ -31,7 +31,9 @@ const game = new Phaser.Game({
   },
   // mipmaps nas texturas de lado potência de 2 (os atlas do pnpm art): imagem
   // reduzida na tela (retrato, objeto, câmera afastada) fica lisa, sem serrilhado
-  render: { mipmapFilter: 'LINEAR_MIPMAP_LINEAR' },
+  // powerPreference: em notebook com duas placas, pede a dedicada (o navegador
+  // costuma dar a integrada, que não segura o canvas na resolução da tela)
+  render: { mipmapFilter: 'LINEAR_MIPMAP_LINEAR', powerPreference: 'high-performance' },
   plugins: {
     scene: [{ key: 'renderScale', plugin: RenderScalePlugin, mapping: 'renderScale' }],
   },
