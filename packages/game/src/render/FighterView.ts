@@ -46,6 +46,20 @@ function lowestFoot(skin: Skin, placed: readonly PlacedBone[]): number {
 export const WRIST_FRAME = 'wristwatch';
 const WRIST_SOCKET = 'watch';
 
+/** Peça presa no peito (`FighterView.setChestBadge`): textura, quadro e altura em px de mundo. */
+export interface ChestBadge {
+  texture: string;
+  frame: string;
+  height: number;
+}
+
+/**
+ * Onde fica o meio da peça do peito no tronco: a fração do caminho do quadril
+ * (`pivot`) ao pescoço (`neck`) e o quanto vai para a frente, em fração da largura.
+ */
+const CHEST_ALONG = 0.6;
+const CHEST_FORWARD = 0.02;
+
 /** Arte um pouco mais alta que a hurtbox: o cabelo e o boné passam do topo. */
 const ART_HEIGHT_FACTOR = 1.12;
 
@@ -82,6 +96,10 @@ export class FighterView {
   private readonly propImage: Phaser.GameObjects.Image;
   /** Acessório do pulso da frente (`WRIST_FRAME`), se a skin tiver. */
   private readonly wristImage: Phaser.GameObjects.Image | null;
+  /** Peça presa no peito (a bomba do Thom4o), criada no 1º uso. */
+  private badgeImage: Phaser.GameObjects.Image | null = null;
+  /** Tronco na última pose (onde a peça do peito vai). */
+  private placedTorso: { placed: PlacedBone; lift: number } | null = null;
   /** Onde a peça segurada foi desenhada por último (px da textura, sem o lift). */
   private placedProp: { placed: PlacedBone; lift: number } | null = null;
   /** Mão da frente na última pose (para saber onde a peça aparece e some). */
@@ -171,6 +189,9 @@ export class FighterView {
       this.propImage.setRotation(prop.rotation);
     }
     this.placeWrist(placed, lift);
+    const torso = placed.find((p) => p.bone === 'torso');
+    this.placedTorso = torso ? { placed: torso, lift } : null;
+    this.placeBadge();
     const order = drawOrder(pose, this.orderOptions);
     const key = order.join();
     if (key !== this.order) {
@@ -180,6 +201,8 @@ export class FighterView {
         if (img) this.container.bringToTop(img);
         // o relógio fica logo na frente do antebraço (e atrás da mão)
         if (bone === 'forearmNear' && this.wristImage) this.container.bringToTop(this.wristImage);
+        // a peça do peito, na frente do tronco e da cabeça, atrás do braço da frente
+        if (bone === 'head' && this.badgeImage) this.container.bringToTop(this.badgeImage);
       }
     }
     // a peça fica atrás da mão que segura, na frente do resto (inclusive da outra mão,
@@ -191,6 +214,64 @@ export class FighterView {
     const unit = this.height / 100;
     this.container.setPosition(x + pose.x * unit * facing, y + pose.y * unit);
     this.container.setScale(this.scale * facing, this.scale);
+  }
+
+  /**
+   * Prende uma peça no peito (a bomba do Thom4o em quem está com ela), com `height` px de
+   * mundo de altura, girando junto com o tronco; `null` tira.
+   */
+  setChestBadge(badge: ChestBadge | null): this {
+    if (!badge) {
+      this.badgeImage?.setVisible(false);
+      return this;
+    }
+    let img = this.badgeImage;
+    if (!img) {
+      img = this.container.scene.add.image(0, 0, badge.texture, badge.frame);
+      this.container.add(img);
+      this.badgeImage = img;
+      // reordena na próxima pose, para a peça entrar no lugar certo
+      this.order = '';
+    }
+    if (img.texture.key !== badge.texture || img.frame.name !== badge.frame) {
+      img.setTexture(badge.texture, badge.frame);
+    }
+    img.setVisible(true).setScale(badge.height / (img.frame.height * this.scale));
+    this.placeBadge();
+    return this;
+  }
+
+  /**
+   * O meio da peça do peito em px de mundo, a rotação dela no tronco (radianos, antes do
+   * espelho), o lado para onde o lutador olha e quantos px de mundo vale 1 px da textura
+   * dela. Sem peça: null.
+   */
+  chestBadge(): { x: number; y: number; rotation: number; facing: -1 | 1; scale: number } | null {
+    const img = this.badgeImage;
+    const t = this.placedTorso;
+    if (!img?.visible || !t) return null;
+    return {
+      ...this.toWorld([img.x, img.y + this.fit.groundY - t.lift], t.lift),
+      rotation: img.rotation,
+      facing: this.container.scaleX < 0 ? -1 : 1,
+      scale: img.scaleX * this.scale,
+    };
+  }
+
+  private placeBadge(): void {
+    const img = this.badgeImage;
+    const t = this.placedTorso;
+    const a = t && this.skin.get(t.placed.frame);
+    if (!img?.visible || !t || !a) return;
+    const neck = a.sockets.neck ?? a.tip;
+    const local: readonly [number, number] = [
+      (neck[0] - a.pivot[0]) * CHEST_ALONG + a.w * CHEST_FORWARD,
+      (neck[1] - a.pivot[1]) * CHEST_ALONG,
+    ];
+    const r = t.placed.rotation;
+    const x = t.placed.x + local[0] * Math.cos(r) - local[1] * Math.sin(r);
+    const y = t.placed.y + local[0] * Math.sin(r) + local[1] * Math.cos(r);
+    img.setPosition(x, y - this.fit.groundY + t.lift).setRotation(r);
   }
 
   /** Põe o acessório do pulso no socket do antebraço da frente, atravessado nele. */
@@ -328,6 +409,7 @@ export class FighterView {
   private allImages(): Phaser.GameObjects.Image[] {
     const all = [...this.images.values(), this.propImage];
     if (this.wristImage) all.push(this.wristImage);
+    if (this.badgeImage) all.push(this.badgeImage);
     return all;
   }
 
