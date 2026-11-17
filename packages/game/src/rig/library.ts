@@ -64,6 +64,7 @@ export const FOREARM_IN_FRONT: ReadonlySet<string> = new Set([
   'tchula',
   'joao-frango',
   'schummaki',
+  'thom4o',
 ]);
 
 /**
@@ -76,7 +77,7 @@ export const SHIN_IN_FRONT: ReadonlySet<string> = new Set(['igao']);
  * Personagens de calça comprida que cai por cima do tênis (o Dadazinho): o pé é desenhado
  * atrás da canela (`drawOrder`), e a barra da calça cobre o cano do tênis.
  */
-export const FOOT_BEHIND: ReadonlySet<string> = new Set(['dadazinho']);
+export const FOOT_BEHIND: ReadonlySet<string> = new Set(['dadazinho', 'thom4o']);
 
 /** Nomes dos clipes, na ordem do visualizador. */
 export function clipNames(): string[] {
