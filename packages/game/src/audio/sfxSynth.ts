@@ -47,6 +47,10 @@ export const SFX_NAMES = [
   'command_miss',
   'serve_spike',
   'ball_bounce',
+  'bomb_arm',
+  'bomb_beep',
+  'bomb_pass',
+  'bomb_boom',
   'count',
   'go',
   'ui_move',
@@ -536,6 +540,53 @@ function ballBounce(sr: number): Float32Array<ArrayBuffer> {
 }
 
 /**
+ * "Tlec" da bomba do Thom4o pulando de um corpo para o outro: um estalo de plástico
+ * seco, com um toque metálico curto por cima.
+ */
+function bombPass(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(79);
+  const click = new BandPass(sr);
+  const ping = new Osc(sr);
+  return render(
+    sr,
+    0.14,
+    (t) => {
+      const tl = click.process(r() * 2 - 1, 3200, 4) * adEnv(t, 0.0005, 0.006) * 2.2;
+      const ec = click.process(r() * 2 - 1, 1800, 3) * adEnv(t - 0.035, 0.0005, 0.01) * 1.6;
+      const metal = ping.sine(2400) * adEnv(t - 0.035, 0.001, 0.03) * 0.25;
+      return tl + ec + metal;
+    },
+    0.75,
+  );
+}
+
+/**
+ * "Bum" da bomba do Thom4o: um estrondo grave e comprido que afunda, o estalo da
+ * explosão na frente e o chiado do ar e dos destroços sumindo devagar.
+ */
+function bombBoom(sr: number): Float32Array<ArrayBuffer> {
+  const r = rng(83);
+  const crack = new OnePole(sr);
+  const rumble = new OnePole(sr);
+  const debris = new BandPass(sr);
+  const boom = new Osc(sr);
+  return render(
+    sr,
+    1.1,
+    (t) => {
+      const n = r() * 2 - 1;
+      const c = crack.highpass(n, 1800) * decay(t, 0.012) * 1.2;
+      const low = boom.sine(sweep(t, 120, 32, 0.25)) * adEnv(t, 0.003, 0.35) * 1.5;
+      const roar = rumble.lowpass(n, 380) * adEnv(t, 0.004, 0.45) * 2.2;
+      const hiss =
+        debris.process(n, 2600 - 1800 * Math.min(1, t), 0.8) * adEnv(t, 0.02, 0.3) * 0.35;
+      return drive(c + low + roar + hiss, 2.8);
+    },
+    0.95,
+  );
+}
+
+/**
  * "Buzz" de comando errado (o Comando do Meia que não pegou): zumbido grave de onda
  * quadrada, duas notas desafinadas batendo, como o erro de input dos jogos de luta.
  */
@@ -630,6 +681,14 @@ export function renderSfx(name: SfxName, sampleRate: number): Float32Array<Array
       return serveSpike(sampleRate);
     case 'ball_bounce':
       return ballBounce(sampleRate);
+    case 'bomb_arm':
+      return blips(sampleRate, [93, 98], 0.09, 0.03, 'square');
+    case 'bomb_beep':
+      return blips(sampleRate, [98], 0, 0.022, 'square');
+    case 'bomb_pass':
+      return bombPass(sampleRate);
+    case 'bomb_boom':
+      return bombBoom(sampleRate);
   }
 }
 
