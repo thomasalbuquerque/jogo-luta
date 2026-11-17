@@ -392,11 +392,11 @@ export class FighterView {
       this.alarmGlow = img;
     }
     const h = this.fit.height;
-    const grow = 0.9 + 0.25 * level;
+    const grow = 0.9 + 1.05 * level;
     this.alarmGlow
       .setVisible(true)
       .setTint(color)
-      .setAlpha(0.95 * level)
+      .setAlpha(2.95 * level)
       .setPosition(0, -h * 0.55)
       .setScale((h * 1.05 * grow) / GLOW_TEXTURE_SIZE, (h * 1.5 * grow) / GLOW_TEXTURE_SIZE);
     return this;
