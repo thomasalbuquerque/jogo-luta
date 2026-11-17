@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import {
+  artAngle,
   DRAW_ORDER,
   drawOrder,
   fitRig,
@@ -37,6 +38,14 @@ function lowestFoot(skin: Skin, placed: readonly PlacedBone[]): number {
   return poseBounds(skin, feet).maxY;
 }
 
+/**
+ * Acessório preso no pulso da frente (o relógio do Thom4o): a peça `wristwatch` vai no
+ * socket `watch` do antebraço, atravessada nele, só no braço da frente (o antebraço é
+ * a mesma peça nos dois braços).
+ */
+export const WRIST_FRAME = 'wristwatch';
+const WRIST_SOCKET = 'watch';
+
 /** Arte um pouco mais alta que a hurtbox: o cabelo e o boné passam do topo. */
 const ART_HEIGHT_FACTOR = 1.12;
 
@@ -71,6 +80,8 @@ export class FighterView {
   private readonly images = new Map<BoneId, Phaser.GameObjects.Image>();
   /** Peça segurada na mão da frente (a arma do especial), escondida sem peça. */
   private readonly propImage: Phaser.GameObjects.Image;
+  /** Acessório do pulso da frente (`WRIST_FRAME`), se a skin tiver. */
+  private readonly wristImage: Phaser.GameObjects.Image | null;
   /** Onde a peça segurada foi desenhada por último (px da textura, sem o lift). */
   private placedProp: { placed: PlacedBone; lift: number } | null = null;
   /** Mão da frente na última pose (para saber onde a peça aparece e some). */
@@ -88,7 +99,7 @@ export class FighterView {
   private readonly fit: RigFit;
   private readonly textureKey: string;
   /** Ordem de desenho atual (muda quando o cotovelo dobra). */
-  private order = DRAW_ORDER.join();
+  private order = '';
   /**
    * Trocas fixas na ordem de desenho do personagem: antebraço sempre na frente do braço
    * (`FOREARM_IN_FRONT`), canela na frente da coxa (`SHIN_IN_FRONT`), pé atrás da canela
@@ -116,6 +127,15 @@ export class FighterView {
     }
     this.propImage = scene.add.image(0, 0, this.textureKey).setVisible(false);
     this.container.add(this.propImage);
+    const wrist = skin.get(WRIST_FRAME);
+    const forearm = skin.get('forearm');
+    this.wristImage =
+      wrist && forearm?.sockets[WRIST_SOCKET]
+        ? scene.add
+            .image(0, 0, this.textureKey, WRIST_FRAME)
+            .setOrigin(wrist.pivot[0] / wrist.w, wrist.pivot[1] / wrist.h)
+        : null;
+    if (this.wristImage) this.container.add(this.wristImage);
     this.setTint(0xffffff);
   }
 
@@ -150,6 +170,7 @@ export class FighterView {
       this.propImage.setPosition(prop.x, prop.y - this.fit.groundY + lift);
       this.propImage.setRotation(prop.rotation);
     }
+    this.placeWrist(placed, lift);
     const order = drawOrder(pose, this.orderOptions);
     const key = order.join();
     if (key !== this.order) {
@@ -157,6 +178,8 @@ export class FighterView {
       for (const bone of order) {
         const img = this.images.get(bone);
         if (img) this.container.bringToTop(img);
+        // o relógio fica logo na frente do antebraço (e atrás da mão)
+        if (bone === 'forearmNear' && this.wristImage) this.container.bringToTop(this.wristImage);
       }
     }
     // a peça fica atrás da mão que segura, na frente do resto (inclusive da outra mão,
@@ -168,6 +191,20 @@ export class FighterView {
     const unit = this.height / 100;
     this.container.setPosition(x + pose.x * unit * facing, y + pose.y * unit);
     this.container.setScale(this.scale * facing, this.scale);
+  }
+
+  /** Põe o acessório do pulso no socket do antebraço da frente, atravessado nele. */
+  private placeWrist(placed: readonly PlacedBone[], lift: number): void {
+    const img = this.wristImage;
+    const forearm = placed.find((p) => p.bone === 'forearmNear');
+    const anchors = forearm && this.skin.get(forearm.frame);
+    const wrist = this.skin.get(WRIST_FRAME);
+    if (!img || !forearm || !anchors || !wrist) return;
+    const [x, y] = placedPoint(anchors, forearm, WRIST_SOCKET);
+    img.setPosition(x, y - this.fit.groundY + lift);
+    // direção do antebraço na tela, girada 90°: a pulseira dá a volta no pulso
+    const deg = (forearm.rotation * 180) / Math.PI + artAngle(anchors) - 90 - artAngle(wrist);
+    img.setRotation((deg * Math.PI) / 180);
   }
 
   /**
@@ -275,7 +312,7 @@ export class FighterView {
    * trás ficam na cor original da arte, sem sombra extra.
    */
   setTint(color: number): this {
-    for (const img of [...this.images.values(), this.propImage]) {
+    for (const img of this.allImages()) {
       if (color === 0xffffff) img.clearTint();
       else img.setTint(color);
     }
@@ -284,8 +321,14 @@ export class FighterView {
 
   /** Clarão do impacto: pinta as peças inteiras de `color` (desfaz com `setTint`). */
   setFlash(color = 0xffffff): this {
-    for (const img of [...this.images.values(), this.propImage]) img.setTintFill(color);
+    for (const img of this.allImages()) img.setTintFill(color);
     return this;
+  }
+
+  private allImages(): Phaser.GameObjects.Image[] {
+    const all = [...this.images.values(), this.propImage];
+    if (this.wristImage) all.push(this.wristImage);
+    return all;
   }
 
   setDepth(depth: number): this {
