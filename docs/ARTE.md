@@ -782,6 +782,31 @@ desenha o antebraço na frente da manga, senão a barra da manga cobre o antebra
   nesses trechos (`prop: null`). A bola na mão (segurando antes de quicar e ao apontar) é a mesma
   peça como `prop`, com o `pivot` no meio. A pose da batida (`SPIKE_HIT`) foi achada com o
   `solvePose`: a mão logo atrás e acima do ponto onde a bola nasce.
+- **Camiseta de frente** (Thom4o: o tronco veio como uma camiseta vista de frente, com as duas
+  mangas): as duas mangas saem com `erase`, num corte que sai da linha de cima do ombro em curva e
+  desce pela lateral do corpo até a axila, com `outline`; os braços (com a manga deles) cobrem os
+  ombros.
+- **Braços inteiros na folha** (Thom4o: as duas peças de braço vieram do ombro ao pulso, uma com a
+  manga e outra só de pele): o `upperArm` é a de manga, cortada uns 45 px depois do cotovelo num
+  arco com `outline` (a ponta redonda do cotovelo); o `forearm` é a metade de baixo da outra, com
+  o `rect` começando uns 50 px acima do cotovelo e o `fade` do cotovelo até lá.
+- **Cabeças em folhas separadas e de tamanhos diferentes** (Thom4o: `2-cabecas-1.png` normal,
+  `2-cabecas-2.png` provocação, `2-cabecas-3.png` golpe levado e KO): uma folha (`sheets`) para cada
+  arquivo, com a escala que deixa os rostos do mesmo tamanho (mede do alto do cabelo até os olhos).
+- **Pescoço cortado na gola** (Thom4o: o toco de pescoço das cabeças descia por cima da camiseta e a
+  borda de baixo aparecia como uma linha diagonal no peito): o `neck` do tronco fica dentro da gola e
+  cada cabeça leva um `erase` abaixo da curva da gola da frente (os pontos da gola no tronco, levados
+  para a folha da cabeça pela escala e pelo `pivot`). O pescoço termina em cima da linha da gola,
+  como se entrasse na camiseta. Refaça a conta se mudar o `pivot`, a escala ou o `neck`.
+- **Relógio no pulso** (Thom4o): o antebraço é a mesma peça nos dois braços, então o relógio não vai
+  desenhado nele. A peça `wristwatch` (recortada da folha de efeitos, só a caixa e um pedaço da
+  pulseira, numa escala em que a caixa tem a largura do pulso) vai no socket `watch` do antebraço,
+  atravessada nele, só no braço da frente (`FighterView`, `WRIST_FRAME`).
+- **Mão segurando uma placa pela borda** (a C4 do Thom4o): a mão é a `hand_grab` (da folha
+  `3-pecas-maos-segurando.png`, a mão em garra; `handNear: 'grab'` no clipe) e a bomba é a peça
+  `fx_c4`, como `prop`. O `pivot` da bomba fica fora dela, à esquerda: a bomba começa nos dedos e
+  segue para a frente, em pé, em vez de sumir atrás da mão. A mesma peça vai no peito de quem está com
+  a bomba (`FighterView.setChestBadge`), com a luz piscando no socket `led`.
 
 ### 2. Esqueleto e animação: `packages/game/src/rig`
 
