@@ -93,7 +93,8 @@ export function specialBar(f: Fighter): SpecialBar | null {
   const special = getCharacter(f.character).special;
   if (!special) return null;
   if (canUseSpecial(f)) return { fill: 1, status: 'ready' };
-  const total = special.cooldownTicks;
+  // a recarga em andamento pode ser maior que a da ficha (a da bomba do Thom4o)
+  const total = f.specialCooldownTotal > 0 ? f.specialCooldownTotal : special.cooldownTicks;
   const fill = total > 0 ? Math.min(1, Math.max(0, 1 - f.specialCooldown / total)) : 1;
   return { fill, status: fill >= 1 ? 'spent' : 'charging' };
 }

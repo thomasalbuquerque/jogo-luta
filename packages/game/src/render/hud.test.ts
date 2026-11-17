@@ -67,6 +67,15 @@ describe('hud', () => {
       expect(specialBar(f)).toEqual({ fill: 0.75, status: 'charging' });
     });
 
+    it('enche pelo tamanho da recarga em andamento (a da bomba do Thom4o é maior)', () => {
+      const f = createFighter(0, spawn, 'thom4o');
+      f.specialCooldownTotal = 600;
+      f.specialCooldown = 300;
+      expect(specialBar(f)).toEqual({ fill: 0.5, status: 'charging' });
+      f.specialCooldown = 60;
+      expect(specialBar(f)).toEqual({ fill: 0.9, status: 'charging' });
+    });
+
     it('recarregado mas gasto no ar espera tocar o chão', () => {
       const f = createFighter(0, spawn, 'tauba');
       f.grounded = false;
