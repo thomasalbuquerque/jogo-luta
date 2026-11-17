@@ -11,17 +11,19 @@ export type GameEvent =
   | RespawnEvent
   | ActionEvent
   | BounceEvent
-  | ReflectEvent;
+  | ReflectEvent
+  | BombEvent;
 
 /**
  * Alguém levou um golpe. `hit`: golpe normal; `counter`: devolvido pelo
  * contra-ataque (`attacker` é quem contra-atacou); `throw`: arremesso do
  * agarrão; `combo`: golpe do combo durante o agarrão (sem knockback, o alvo
- * continua preso); `projectile`: projétil (`attacker` é o dono).
+ * continua preso); `projectile`: projétil (`attacker` é o dono); `bomb`: a explosão
+ * da bomba (`attacker` é o dono da bomba).
  */
 export interface HitEvent {
   type: 'hit';
-  kind: 'hit' | 'counter' | 'throw' | 'combo' | 'projectile';
+  kind: 'hit' | 'counter' | 'throw' | 'combo' | 'projectile' | 'bomb';
   /**
    * Agarrão com combo: nº do golpe, a partir de 1, no `combo` e no `throw` (o
    * arremesso é o último: golpes do combo + 1).
@@ -59,6 +61,23 @@ export interface AuraEvent {
 export interface ReflectEvent {
   type: 'reflect';
   fighter: number;
+  from: number;
+  x: number;
+  y: number;
+}
+
+/**
+ * A bomba do Thom4o (`bomb.ts`): `plant` colou em `carrier`; `pass` pulou de `from`
+ * para `carrier`; `explode` estourou em `carrier` (os golpes saem como `HitEvent`
+ * `bomb`); `vanish` sumiu com `carrier`, que perdeu a vida. `x`/`y`: centro do corpo
+ * de `carrier`, em subpx.
+ */
+export interface BombEvent {
+  type: 'bomb';
+  action: 'plant' | 'pass' | 'explode' | 'vanish';
+  owner: number;
+  carrier: number;
+  /** Quem estava com a bomba antes (no `plant`, o dono). */
   from: number;
   x: number;
   y: number;

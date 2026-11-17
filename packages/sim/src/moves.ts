@@ -139,9 +139,32 @@ export interface MoveDef extends HitProps {
   /**
    * Agarrão: a hitbox segura o alvo por `holdTicks` e depois arremessa com o
    * HitProps do golpe. `combo`: `hits` golpes de `damage`% sem knockback durante
-   * o agarrão, espalhados por igual (`comboHitIndex`, em `combat.ts`).
+   * o agarrão, espalhados por igual (`comboHitIndex`, em `combat.ts`). `bomb`: o
+   * arremesso cola uma bomba com relógio no alvo (o Thom4o; ver `bomb.ts`).
    */
-  grab?: { holdTicks: number; combo?: { hits: number; damage: number } };
+  grab?: { holdTicks: number; combo?: { hits: number; damage: number }; bomb?: BombDef };
+}
+
+/**
+ * Bomba colada pelo agarrão (bloco `grab` com `bomb`): passa para quem o portador
+ * acertar com um golpe de corpo e estoura em quem estiver com ela quando o relógio zera.
+ */
+export interface BombDef {
+  /** Relógio, em ticks, contado do arremesso. */
+  fuseTicks: number;
+  /** Quem acabou de passar (ou de plantar) não recebe a bomba de volta por estes ticks. */
+  lockTicks: number;
+  /** Ao passar com menos que isto no relógio, o relógio volta para este valor. */
+  floorTicks: number;
+  /** Recarga do especial do dono depois que a bomba estoura ou some. */
+  cooldownTicks: number;
+  /** O golpe em quem está com a bomba. */
+  carrierHit: HitProps;
+  /** Área em volta do portador (subpx), centrada no corpo dele. */
+  areaW: number;
+  areaH: number;
+  /** O golpe em quem está na área (para longe do portador). */
+  areaHit: HitProps;
 }
 
 function box(x: number, y: number, w: number, h: number): HitboxDef {

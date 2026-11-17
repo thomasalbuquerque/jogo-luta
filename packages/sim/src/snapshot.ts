@@ -19,6 +19,7 @@ export function cloneState(state: GameState): GameState {
     rules: { ...state.rules },
     fighters: state.fighters.map((f) => ({ ...f })),
     projectiles: state.projectiles.map((p) => ({ ...p, hit: { ...p.hit } })),
+    bombs: state.bombs.map((b) => ({ ...b })),
     events: state.events.map((e) => ({ ...e })),
   };
 }

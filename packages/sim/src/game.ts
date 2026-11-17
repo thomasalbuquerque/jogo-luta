@@ -1,3 +1,4 @@
+import { stepBombs, type Bomb } from './bomb';
 import { BASE_CHARACTER_ID } from './characters';
 import { resolveHits, resolveProjectileHits, stepGrabs } from './combat';
 import { TICK_RATE } from './constants';
@@ -67,6 +68,8 @@ export interface GameState {
   fighters: Fighter[];
   /** Projéteis em voo (especiais). */
   projectiles: Projectile[];
+  /** Bombas com relógio em jogo (o especial do Thom4o, `bomb.ts`). */
+  bombs: Bomb[];
   /** O que aconteceu no último tick (som e efeitos); nenhuma regra lê. */
   events: GameEvent[];
 }
@@ -117,6 +120,7 @@ export function createGame(setup: GameSetup = {}): GameState {
     winnerTeam: null,
     fighters,
     projectiles: [],
+    bombs: [],
     events: [],
   };
 }
@@ -193,6 +197,7 @@ export function stepGame(state: GameState, inputs: readonly InputMask[]): void {
     knockOut(f, RESPAWN_DELAY_TICKS);
     events.push({ type: 'ko', fighter: f.id, x, y, stocksLeft: f.stocks });
   }
+  stepBombs({ fighters: state.fighters, bombs: state.bombs, friendlyFire }, events);
   checkLastStanding(state);
   if (counting) stepCountdown(state);
   else stepClock(state, stage);

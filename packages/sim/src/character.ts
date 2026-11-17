@@ -200,6 +200,27 @@ const GrabBlock = z.strictObject({
   combo: z.strictObject({ hits: int(1, 30), damage: int(0, 10) }).optional(),
   /** O arremesso, ao soltar. */
   hit: HitSchema,
+  /**
+   * Bomba (o Thom4o): o arremesso cola uma bomba com relógio no alvo. Quem está com
+   * ela passa para quem acertar com um golpe de corpo (projétil não passa); quando o
+   * relógio zera, estoura em quem estiver com ela e machuca quem estiver em volta.
+   */
+  bomb: z
+    .strictObject({
+      /** Relógio, em ticks, contado do arremesso. */
+      fuseTicks: int(30, 1200),
+      /** Trava de devolução: quem passou não recebe de volta por estes ticks. */
+      lockTicks: int(0, 300),
+      /** Piso do relógio ao passar. */
+      floorTicks: int(0, 600),
+      /** Recarga do especial depois que a bomba estoura ou some. */
+      cooldownTicks: int(0, 600),
+      carrierHit: HitSchema,
+      /** Área em px, centrada no corpo de quem está com a bomba. */
+      area: z.strictObject({ w: num(1, 600), h: num(1, 600) }),
+      areaHit: HitSchema,
+    })
+    .optional(),
 });
 
 const BlockSchema = z.discriminatedUnion('type', [
@@ -249,6 +270,13 @@ const SpecialSchema = z
           code: 'custom',
           path: ['blocks'],
           message: 'o combo precisa de menos golpes que ticks de agarrão',
+        });
+      }
+      if (b.type === 'grab' && b.bomb && b.bomb.floorTicks > b.bomb.fuseTicks) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['blocks'],
+          message: 'o piso do relógio da bomba não pode passar do relógio',
         });
       }
     }
@@ -493,6 +521,18 @@ function compileSpecial(s: ParsedSpecial): Special {
         Object.assign(move, hitProps(b.hit, 'facing'), { hitboxes: window(b.box) });
         move.grab = { holdTicks: b.holdTicks };
         if (b.combo) move.grab.combo = { hits: b.combo.hits, damage: b.combo.damage };
+        if (b.bomb) {
+          move.grab.bomb = {
+            fuseTicks: b.bomb.fuseTicks,
+            lockTicks: b.bomb.lockTicks,
+            floorTicks: b.bomb.floorTicks,
+            cooldownTicks: b.bomb.cooldownTicks,
+            carrierHit: hitProps(b.bomb.carrierHit, 'facing'),
+            areaW: px(b.bomb.area.w),
+            areaH: px(b.bomb.area.h),
+            areaHit: hitProps(b.bomb.areaHit, 'away'),
+          };
+        }
         break;
       case 'projectile':
         move.projectile = {
