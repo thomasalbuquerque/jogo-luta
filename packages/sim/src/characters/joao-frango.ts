@@ -46,7 +46,7 @@ export const JOAO_FRANGO = defineCharacter({
         lifetimeTicks: 54,
         size: { w: 34, h: 22 },
         offset: { x: 30, y: -12 },
-        hit: { damage: 5, angle: 25, baseKnockback: 6, knockbackScale: 0.05 },
+        hit: { damage: 8, angle: 25, baseKnockback: 6, knockbackScale: 0.05 },
       },
     ],
   },
