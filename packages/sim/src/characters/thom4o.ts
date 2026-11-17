@@ -32,8 +32,8 @@ export const THOM4O = defineCharacter({
     startup: 7,
     active: 5,
     recovery: 28,
-    // errando: 90 ticks do começo (com a bomba em jogo, nem dá para usar)
-    cooldownTicks: 90,
+    // errando: 120 ticks do começo (com a bomba em jogo, nem dá para usar)
+    cooldownTicks: 120,
     blocks: [
       {
         type: 'grab',
@@ -47,7 +47,7 @@ export const THOM4O = defineCharacter({
           fuseTicks: 300,
           lockTicks: 60,
           floorTicks: 120,
-          cooldownTicks: 150,
+          cooldownTicks: 600,
           carrierHit: { damage: 18, angle: 90, baseKnockback: 11, knockbackScale: 0.18 },
           area: { w: 220, h: 180 },
           areaHit: { damage: 10, angle: 45, baseKnockback: 8, knockbackScale: 0.13 },
