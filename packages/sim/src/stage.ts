@@ -101,5 +101,4 @@ export const CONFEITARIA_STAGE: Stage = {
 };
 
 /** Mapas do jogo, na ordem da tela de seleção. */
-// provisório: removi a confeitaria do Darllan, que falta a melhoria de objetos do fundo).
-export const STAGES: readonly Stage[] = [TEST_STAGE, OFICINA_STAGE];
+export const STAGES: readonly Stage[] = [TEST_STAGE, OFICINA_STAGE, CONFEITARIA_STAGE];
