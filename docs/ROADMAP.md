@@ -22,6 +22,7 @@ Cada fase só começa quando o marco da anterior foi atingido.
 | 3. Online           | 7 Determinismo · 8 Online 1x1 · 9 Online 2x2                  | 10 partidas online sem dessincronizar          |
 | 4. Conteúdo         | 10 Elenco completo · 11 Balanceamento e deploy                | 16 jogáveis e o grupo joga sem explicação      |
 | 5. Opcional         | 12 Online avançado (rollback, relay)                          | Só se o online por atraso incomodar ou falhar  |
+| 6. Jogar sozinho    | 13 Luta contra o bot                                          | Dá para treinar e se divertir sem ninguém      |
 
 ## Regra de commits (vale para todas as etapas)
 
@@ -258,6 +259,28 @@ Objetivo: resolver problemas do online que de fato apareceram. Só entra se o on
 - [ ] Servidor relay pequeno em Node com WebSocket (se a conexão P2P falhar por NAT/4G ou ficar instável com 4 jogadores): substitui o host e o TURN, e só repassa inputs.
 
 **Pronto quando:** o problema que motivou o item sumiu nas partidas do grupo.
+
+## Etapa 13 — Luta contra o bot
+
+Objetivo: jogar sozinho contra o computador. O bot tem que parecer gente: hesita, erra a distância, se defende às vezes, provoca depois de tirar uma vida. Perfeito e chato, não.
+
+O bot é um "controle" a mais: lê o estado da luta e devolve a bitmask de botões do tick, igual a um jogador. O `sim` não muda e não sabe quem é bot; replay e determinismo continuam valendo.
+
+- [ ] Cérebro do bot no `sim` (`packages/sim/src/bot/`): sem Phaser, determinístico (RNG próprio com seed, fora do estado da luta), roda em teste.
+- [ ] Percepção humana: vê os adversários com atraso (tempo de reação), decide de tempos em tempos e segura o plano por alguns ticks; aperta e solta os botões como uma pessoa. Nunca lê o input do jogador, só o que aparece na tela.
+- [ ] Neutro: chegar perto, se afastar, esperar, subir e descer das plataformas, dash, pulo curto, queda rápida. Escolhe o golpe pelo alcance real das hitboxes de cada golpe (base e especial) e pelo % do adversário (golpe de KO quando o % está alto).
+- [ ] Defesa: esquiva no ar, pular ou fugir de golpe e projétil que vêm, punir quem errou o golpe. Bomba do Thom4o: foge de quem está com ela e corre atrás de alguém para passar quando está com ela.
+- [ ] Volta ao palco: simula à frente com uma cópia do próprio lutador para escolher entre pulo aéreo, golpe de recuperação, esquiva e especial (investida, teleporte), gastando o mínimo. Agarra a borda e sai dela de jeitos diferentes.
+- [ ] Especial de cada um pelo tipo de bloco: projétil de longe e alinhado, investida e área quando o alcance bate, agarrão de perto, contra-ataque quando vem golpe ou projétil, buff quando está seguro, teleporte para voltar ao palco.
+- [ ] Jeito de gente: erros de distância e de golpe, distração de vez em quando, pressão na borda (médio e difícil), provocação depois de tirar uma vida (com o adversário longe).
+- [ ] 3 níveis (Fácil, Médio, Difícil): mudam o tempo de reação, a precisão, a agressividade, a defesa, a punição e a volta ao palco.
+- [ ] Testes: bot contra bot em todos os mapas, com todos os personagens, sem cair sozinho no difícil; o difícil ganha do fácil na maioria; mesma seed, mesma luta.
+- [ ] Menu **Jogar contra o bot**: o jogador escolhe o próprio lutador e depois o do bot na tela de seleção; o nível fica nas opções da tela de mapa e o navegador lembra.
+- [ ] Na luta: o bot aparece como "CPU Médio" (no HUD, em cima do lutador e no resultado); qualquer teclado ou controle mexe o jogador; revanche, recomeçar e trocar lutador mantêm o bot; o replay grava os inputs do bot.
+- [ ] Debug: o plano atual do bot no overlay, para ajustar o comportamento.
+- [ ] Opcional: mais de um bot (1 contra 2, 2 contra 2 com bots), bot com 2 jogadores no mesmo PC, bot no online.
+
+**Pronto quando:** alguém do grupo joga sozinho e ganha do Fácil sem esforço, sua para ganhar do Médio e perde (às vezes ganha) do Difícil, e nenhum dos três parece um robô.
 
 ## Riscos principais
 
