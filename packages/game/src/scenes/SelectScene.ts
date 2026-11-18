@@ -15,6 +15,7 @@ import {
 } from '../input/localSeats';
 import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
+import { hasBots, type BotSlots } from '../match/bots';
 import { getOnline } from '../net/online';
 import { netLabel, onlineRoute } from '../net/route';
 import type { OnlineSession } from '../net/session';
@@ -86,6 +87,12 @@ export class SelectScene extends Phaser.Scene {
   private extras: number[] = [];
   /** Local: como entrar com mais controles. */
   private joinText: Phaser.GameObjects.Text | null = null;
+  /**
+   * Contra o bot: o nível de cada lugar (null = gente). Quem joga escolhe o próprio
+   * lutador e depois o do bot, com os mesmos controles. null = sem bot.
+   */
+  private bots: BotSlots | null = null;
+  private title!: Phaser.GameObjects.Text;
 
   constructor() {
     super('select');
@@ -96,8 +103,14 @@ export class SelectScene extends Phaser.Scene {
     this.slots = selectSlots(PLAYABLE_CHARACTERS);
     this.layout = selectLayout(this.slots.length);
     this.net = getOnline();
-    this.extras = this.net ? [] : keepExtras(extrasFromPads(data.pads), readPads().length);
-    const seats = this.net ? Math.max(2, this.net.players) : FIXED_SEATS + this.extras.length;
+    this.bots = !this.net && hasBots(data.bots) ? data.bots : null;
+    this.extras =
+      this.net || this.bots ? [] : keepExtras(extrasFromPads(data.pads), readPads().length);
+    const seats = this.net
+      ? Math.max(2, this.net.players)
+      : this.bots
+        ? this.bots.length
+        : FIXED_SEATS + this.extras.length;
     this.cursors = Array.from({ length: seats }, (_, i) => {
       const index = this.slots.indexOf(data.characters?.[i] ?? '');
       return index >= 0 ? index : i % PLAYABLE_CHARACTERS.length;
@@ -125,7 +138,7 @@ export class SelectScene extends Phaser.Scene {
       music.warm(this, 'luta');
     });
     const { width, height } = VIEW;
-    titleText(this, width / 2, 46, 'ESCOLHA O LUTADOR', 38);
+    this.title = titleText(this, width / 2, 46, 'ESCOLHA O LUTADOR', 38);
 
     this.tiles = this.slots.map((id, i) => this.drawTile(id, i));
     this.cursorGfx = this.add.graphics();
@@ -172,7 +185,7 @@ export class SelectScene extends Phaser.Scene {
       state.container.destroy();
     }
     this.tags = this.cursors.map((_, p) =>
-      uiText(this, 0, 0, `P${String(p + 1)}`, {
+      uiText(this, 0, 0, this.bots?.[p] ? 'CPU' : `P${String(p + 1)}`, {
         fontSize: '16px',
         fontStyle: 'bold',
         color: '#0b0e16',
@@ -234,12 +247,16 @@ export class SelectScene extends Phaser.Scene {
       this.backToTitle();
       return;
     }
-    if (!net && this.updateSeats(frame.pads)) return;
     const count = this.slots.length;
     const cols = gridColumns(count);
+    if (this.bots) {
+      // contra o bot: qualquer controle escolhe, um lugar de cada vez
+      const all = [...frame.players, ...frame.pads].reduce((a, b) => a | b, 0);
+      if (this.stepVsBot(all, cols, count)) return;
+    } else if (!net && this.updateSeats(frame.pads)) return;
     // online: este PC só mexe no próprio cursor, com qualquer um dos controles
     const mine = frame.players.reduce((a, b) => a | b, 0);
-    for (let p = 0; p < this.cursors.length; p++) {
+    for (let p = 0; p < this.cursors.length && !this.bots; p++) {
       if (net && p !== net.local) {
         this.followRemote(p, net);
         continue;
@@ -278,6 +295,7 @@ export class SelectScene extends Phaser.Scene {
           this.scene.start('stage', {
             characters,
             pads: seatPads(this.extras),
+            ...(this.bots ? { bots: this.bots } : {}),
           } satisfies Partial<MatchSetup>);
           return;
         }
@@ -292,6 +310,39 @@ export class SelectScene extends Phaser.Scene {
     }
     this.animatePanels(delta);
     this.refresh();
+  }
+
+  /** Contra o bot: o lugar que está sendo escolhido agora (-1 = todos prontos). */
+  private get picking(): number {
+    return this.ready.findIndex((r) => !r);
+  }
+
+  /**
+   * Contra o bot: quem joga escolhe o próprio lutador e depois o do bot. Especial
+   * desfaz o último escolhido (sem nada escolhido, volta ao menu). Devolve true
+   * quando saiu da tela.
+   */
+  private stepVsBot(actions: number, cols: number, count: number): boolean {
+    const p = this.picking;
+    if (actions & Menu.BACK) {
+      if (p === 0) {
+        this.backToTitle();
+        return true;
+      }
+      this.setReady(p === -1 ? this.cursors.length - 1 : p - 1, false);
+      this.refresh();
+      return false;
+    }
+    if (p === -1) return false;
+    const cursor = this.cursors[p] ?? 0;
+    const next = gridMove(cursor, actions, cols, count);
+    if (next !== cursor) {
+      this.cursors[p] = next;
+      playSfx(this, 'ui_move');
+      this.rebuildPanel(p);
+    }
+    if (actions & Menu.CONFIRM) this.confirm(p);
+    return false;
   }
 
   /**
@@ -491,6 +542,7 @@ export class SelectScene extends Phaser.Scene {
   /** Nome de quem está no lugar `p` (online: o da sala; no mesmo PC, o do navegador é o P1). */
   private seatName(p: number): string | null {
     if (this.net) return this.net.seatName(p);
+    if (this.bots?.[p]) return 'CPU';
     return localNames()[p] ?? null;
   }
 
@@ -683,7 +735,16 @@ export class SelectScene extends Phaser.Scene {
   private refresh(): void {
     const g = this.cursorGfx;
     g.clear();
+    const picking = this.bots ? this.picking : -1;
+    if (this.bots) {
+      const bot = picking >= 0 && this.bots[picking] !== null;
+      this.title.setText(bot ? 'ESCOLHA O ADVERSÁRIO' : 'ESCOLHA O SEU LUTADOR');
+    }
     for (const [p, cursor] of this.cursors.entries()) {
+      // contra o bot: o cursor do bot só aparece na vez dele
+      const waiting = this.bots?.[p] && !this.ready[p] && picking !== p;
+      this.tags[p]?.setVisible(!waiting);
+      if (waiting) continue;
       const color = playerColor(p);
       const x = this.tileX(cursor);
       const y = this.tileY(cursor);
@@ -711,6 +772,9 @@ export class SelectScene extends Phaser.Scene {
 
   /** Rodapé com as teclas atuais de cada jogador. */
   private hintText(): string {
+    if (this.bots) {
+      return 'Qualquer teclado ou controle: direções escolhem · Ataque ou Pulo confirma · Especial desfaz      Esc volta';
+    }
     const [p1, p2] = getControls().keys;
     const hint = (label: string, k: typeof p1) =>
       k
