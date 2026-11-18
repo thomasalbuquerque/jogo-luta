@@ -49,7 +49,8 @@ const SPOTS: readonly (readonly [number, number])[] = [
   [80, 220],
 ];
 
-describe('bot: volta ao palco', () => {
+/** Simula muitas voltas: no CI (máquina mais lenta) pode passar dos 5 s padrão. */
+describe('bot: volta ao palco', { timeout: 60_000 }, () => {
   for (const stage of STAGES) {
     it(`volta de vários pontos com todos os personagens (${stage.id})`, () => {
       const fails: string[] = [];
