@@ -122,6 +122,20 @@ describe('bot: luta', () => {
     expect(a.ticks).toBe(b.ticks);
   });
 
+  it('só olha: pensar não muda o estado da luta (o replay continua igual)', () => {
+    const state = createGame({ characters: [cast(3), cast(11)], stage: getStage('confeitaria') });
+    const bots = [
+      new Bot({ id: 0, level: 'hard', seed: 1 }),
+      new Bot({ id: 1, level: 'easy', seed: 2 }),
+    ];
+    for (let t = 0; t < 2500; t++) {
+      const before = hashState(state);
+      const inputs = bots.map((b) => b.next(state));
+      expect(hashState(state)).toBe(before);
+      stepGame(state, inputs);
+    }
+  });
+
   it('não aperta nada na contagem', () => {
     const state = createGame({ characters: [cast(0), cast(1)], rules: MATCH_RULES });
     const bot = new Bot({ id: 0, level: 'hard', seed: 1 });
