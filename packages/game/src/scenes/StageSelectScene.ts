@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getCharacter, STAGES } from '@jogo-luta/sim';
+import { BOT_LEVEL_NAMES, BOT_LEVELS, getCharacter, STAGES, type BotLevel } from '@jogo-luta/sim';
 import { playSfx } from '../audio/sfx';
 import { addAudioHint } from '../audio/unlock';
 import { Menu } from '../input/menu';
@@ -13,10 +13,21 @@ import {
   teamSplits,
   type TeamSetup,
 } from '../match/teams';
+import { hasBots, type BotSlots } from '../match/bots';
 import { getOnline } from '../net/online';
+import { getBotLevel, setBotLevel } from '../profile/botLevel';
 import { netLabel, onlineRoute } from '../net/route';
 import type { OnlineSession } from '../net/session';
-import { cssColor, fadeIn, panel, teamColor, titleText, UI, uiText } from '../ui/theme';
+import {
+  cssColor,
+  fadeIn,
+  panel,
+  playerColor,
+  teamColor,
+  titleText,
+  UI,
+  uiText,
+} from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
 import type { MatchSetup } from './FightScene';
 import { BELOW_VOLUME_Y } from './VolumeScene';
@@ -53,7 +64,14 @@ export function stageName(id: string): string {
 }
 
 /** Linhas do painel de opções (só as que valem agora). */
-type OptionRow = 'stage' | 'mode' | 'split' | 'friendlyFire';
+type OptionRow = 'stage' | 'mode' | 'split' | 'friendlyFire' | 'level';
+
+/** Como joga cada nível do bot (embaixo da linha do nível). */
+const LEVEL_INFO: Readonly<Record<BotLevel, string>> = {
+  easy: 'Demora para reagir, erra bastante e quase não se defende. Bom para aprender.',
+  medium: 'Reage como gente, pune alguns erros e se defende às vezes.',
+  hard: 'Reage rápido, pune quase todo erro e pressiona na borda. Mas não é perfeito.',
+};
 
 /**
  * Seleção de mapa: um cursor só, qualquer jogador mexe. ←/→ troca (quando houver
@@ -80,6 +98,10 @@ export class StageSelectScene extends Phaser.Scene {
   /** Sala online (null = jogo local). */
   private net: OnlineSession | null = null;
   private netText: Phaser.GameObjects.Text | null = null;
+  /** Contra o bot: o nível de cada lugar (null = sem bot). */
+  private bots: BotSlots | null = null;
+  /** Nível dos bots escolhido aqui (vale para todos os lugares de bot). */
+  private level: BotLevel = getBotLevel();
 
   constructor() {
     super('stage');
@@ -103,14 +125,16 @@ export class StageSelectScene extends Phaser.Scene {
     this.split = Math.max(0, this.team.teams ? splitIndex(this.team.teams) : 0);
     this.row = 0;
     this.net = getOnline();
+    this.bots = !this.net && hasBots(data.bots) ? data.bots : null;
+    this.level = getBotLevel();
     this.netText = null;
     this.optionsGfx = null;
     this.optionTexts = [];
   }
 
-  /** Tem opções de time: 3 ou 4 jogadores. */
+  /** Tem painel de opções: times (3 ou 4 jogadores) ou o nível do bot. */
   private get hasOptions(): boolean {
-    return this.setup.characters.length >= MIN_TEAM_PLAYERS;
+    return this.setup.characters.length >= MIN_TEAM_PLAYERS || this.bots !== null;
   }
 
   /** Este lado escolhe (local, ou o host online). */
@@ -213,9 +237,15 @@ export class StageSelectScene extends Phaser.Scene {
     }
   }
 
-  /** O que foi escolhido aqui: personagens, mapa e times. */
+  /** O que foi escolhido aqui: personagens, mapa, times e o nível do bot. */
   private fullSetup(): MatchSetup {
-    return { ...this.setup, teams: this.team.teams, friendlyFire: this.team.friendlyFire };
+    const bots = this.bots?.map((b) => (b ? this.level : null));
+    return {
+      ...this.setup,
+      teams: this.team.teams,
+      friendlyFire: this.team.friendlyFire,
+      ...(bots ? { bots } : {}),
+    };
   }
 
   /** Online: o host trocou o mapa ou as opções: mostra o mesmo aqui. */
@@ -241,6 +271,10 @@ export class StageSelectScene extends Phaser.Scene {
   private rows(): OptionRow[] {
     const rows: OptionRow[] = [];
     if (STAGES.length > 1) rows.push('stage');
+    if (this.bots) {
+      rows.push('level');
+      return rows;
+    }
     rows.push('mode');
     if (this.team.teams) rows.push('split', 'friendlyFire');
     return rows;
@@ -260,6 +294,17 @@ export class StageSelectScene extends Phaser.Scene {
     const row = rows[this.row];
     if (row === 'stage') {
       this.changeStage(step);
+      return;
+    }
+    if (row === 'level') {
+      const n = BOT_LEVELS.length;
+      const next = BOT_LEVELS[(BOT_LEVELS.indexOf(this.level) + step + n) % n];
+      if (next) {
+        this.level = next;
+        setBotLevel(next);
+      }
+      playSfx(this, 'ui_move');
+      this.drawOptions();
       return;
     }
     const players = this.setup.characters.length;
@@ -344,12 +389,14 @@ export class StageSelectScene extends Phaser.Scene {
         mode: 'Modo',
         split: 'Times',
         friendlyFire: 'Fogo amigo',
+        level: 'Nível do bot',
       }[row];
       const value = {
         stage: stageName(this.setup.stageId),
         mode: teams ? (players === 4 ? '2 contra 2' : '2 contra 1') : 'Todos contra todos',
         split: `Divisão ${String(this.split + 1)} de ${String(teamSplits(players).length)}`,
         friendlyFire: this.team.friendlyFire ? 'Ligado' : 'Desligado',
+        level: BOT_LEVEL_NAMES[this.level],
       }[row];
       const mid = y + (ROW_H - 8) / 2;
       text(x + 26, mid, label, { fontSize: '18px', color: UI.muted }).setOrigin(0, 0.5);
@@ -360,8 +407,28 @@ export class StageSelectScene extends Phaser.Scene {
       y += ROW_H;
     }
 
-    // quem está em cada time (ou a lista de todos, cada um por si)
+    // contra o bot: como ele joga, e quem luta com quem
     y += 10;
+    if (this.bots) {
+      text(x + 26, y, LEVEL_INFO[this.level], {
+        fontSize: '16px',
+        color: '#ced4da',
+        wordWrap: { width: OPTIONS_W - 52 },
+      });
+      y += 70;
+      for (const [p, id] of this.setup.characters.entries()) {
+        const bot = this.bots[p] !== null;
+        g.fillStyle(playerColor(p), 1);
+        g.fillCircle(x + 34, y + 11, 6);
+        text(x + 48, y, `${bot ? 'CPU' : 'Você'}  ${id ? getCharacter(id).name : ''}`, {
+          fontSize: '17px',
+          fontStyle: 'bold',
+        });
+        y += 26;
+      }
+      return;
+    }
+    // quem está em cada time (ou a lista de todos, cada um por si)
     if (!teams) {
       text(x + 26, y, 'Cada um por si: o último de pé vence.', {
         fontSize: '16px',

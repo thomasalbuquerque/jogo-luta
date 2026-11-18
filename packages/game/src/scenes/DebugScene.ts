@@ -158,7 +158,10 @@ export class DebugScene extends Phaser.Scene {
         // clipe que está tocando e o tempo dele (golpe: 0-1 startup, 1-2 active, 2-3 recovery)
         const clip = fighterClip(f);
         const anim = `${clip.key} ${clip.t.toFixed(f.state === 'attack' ? 2 : 0)}`;
-        return `P${String(f.id + 1)} ${c.name.padEnd(12)} ${stateLabel(f).padEnd(18)} ${anim.padEnd(26)} vx ${vx} vy ${vy}  ${flags}  [${inputLabel(fight.lastInputs[f.id] ?? 0)}]`;
+        // bot: o que ele está tentando fazer (para ajustar o comportamento)
+        const bot = fight.botDoing(f.id);
+        const doing = bot === null ? '' : `  bot: ${bot}`;
+        return `P${String(f.id + 1)} ${c.name.padEnd(12)} ${stateLabel(f).padEnd(18)} ${anim.padEnd(26)} vx ${vx} vy ${vy}  ${flags}  [${inputLabel(fight.lastInputs[f.id] ?? 0)}]${doing}`;
       }),
       'P1: WASD, Espaço pula, V ataque, B especial, Shift esq. esquiva, R provoca',
       'P2: setas, J pula, K ataque, L especial, I esquiva, U provoca     ` debug',

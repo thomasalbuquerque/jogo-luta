@@ -1,4 +1,5 @@
 export * from './bomb';
+export * from './bot';
 export * from './character';
 export * from './characters';
 export * from './combat';
