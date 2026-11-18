@@ -45,6 +45,7 @@ import { playKoVoice, playVoice } from '../audio/voice';
 import { delaysFromSearch } from '../input/delay';
 import { InputManager } from '../input/InputManager';
 import { Menu, type MenuMask } from '../input/menu';
+import { BotPlayers, hasBots, humanInputs, seatNames, type BotSlots } from '../match/bots';
 import { newSeed } from '../match/replayFile';
 import { createStats, recordEvents, type MatchStats } from '../match/stats';
 import { rulesFor } from '../match/teams';
@@ -158,6 +159,8 @@ export interface MatchSetup {
   friendlyFire?: boolean;
   /** Local: o controle de cada jogador (sem isso, o de mesmo índice). */
   pads?: readonly number[];
+  /** Local: o nível do bot de cada lugar (sem valor ou null: todos são gente). */
+  bots?: BotSlots | null;
 }
 
 /** Dados para abrir a luta: o que foi escolhido nos menus, ou um replay para assistir. */
@@ -243,6 +246,8 @@ export class FightScene extends Phaser.Scene {
   stalledMs = 0;
   /** Tutorial em andamento (null = luta de verdade ou replay). */
   tutorial: TutorialDirector | null = null;
+  /** Bots da luta local (null = só gente, ou assistindo a um replay). */
+  botPlayers: BotPlayers | null = null;
   /** Tutorial: o "!" em cima do boneco quando ele vai atacar. */
   private tutorialMark: Phaser.GameObjects.Text | null = null;
   /** Tutorial: o último tick ainda foi na escolha de teclado ou controle. */
@@ -342,6 +347,8 @@ export class FightScene extends Phaser.Scene {
     this.net = this.tutorial ? null : getOnline();
     this.leaving = false;
     const replay = data.replay;
+    // contra o bot (só no mesmo PC): o bot é o lugar com nível
+    const bots = !replay && !this.tutorial && !this.net && hasBots(data.bots) ? data.bots : null;
     // online, os nomes vêm da sala a cada partida (newMatch)
     this.names = data.names
       ? [...data.names]
@@ -349,7 +356,9 @@ export class FightScene extends Phaser.Scene {
         ? []
         : this.tutorial
           ? [getPlayerName()]
-          : localNames();
+          : bots
+            ? seatNames(bots, localNames())
+            : localNames();
     this.setup = replay
       ? {
           characters: replay.characters,
@@ -365,6 +374,7 @@ export class FightScene extends Phaser.Scene {
           teams: data.teams ?? null,
           friendlyFire: data.friendlyFire === true,
           ...(data.pads ? { pads: data.pads } : {}),
+          ...(bots ? { bots } : {}),
         };
   }
 
@@ -617,6 +627,12 @@ export class FightScene extends Phaser.Scene {
       this.recording = createReplay({ ...this.setup, teams, rules, seed });
       this.state = replayGame(this.recording);
     }
+    // bots novos a cada luta (num replay, os inputs gravados já são os deles)
+    const bots = this.setup.bots;
+    this.botPlayers =
+      !this.playback && !this.tutorial && !this.net && hasBots(bots)
+        ? new BotPlayers(bots, this.seed)
+        : null;
     this.recorded = false;
     this.replayOk = null;
     this.inputDelay.reset();
@@ -662,7 +678,8 @@ export class FightScene extends Phaser.Scene {
   playLive(): void {
     this.playback = null;
     // replay aberto de arquivo não tem nomes: quem joga agora é quem está neste navegador
-    if (!this.net) this.names = localNames();
+    const bots = this.setup.bots;
+    if (!this.net) this.names = hasBots(bots) ? seatNames(bots, localNames()) : localNames();
     this.rematch();
   }
 
@@ -796,7 +813,7 @@ export class FightScene extends Phaser.Scene {
     }
     const net = this.net;
     const match = net?.match;
-    if (!net || !match) return this.inputDelay.push(sampled);
+    if (!net || !match) return this.localInputs(sampled);
     // os inputs que faltam para o outro lado continuam indo, mesmo depois do fim
     if (this.state.phase === 'over') {
       net.sendInputs();
@@ -810,6 +827,24 @@ export class FightScene extends Phaser.Scene {
     match.lockstep.addLocal(mine);
     net.sendInputs();
     return match.lockstep.ready() ? match.lockstep.step() : null;
+  }
+
+  /**
+   * Jogo local: os inputs de cada um (com o atraso de teste, se houver). Contra o
+   * bot, qualquer controle mexe em quem é gente, e o bot decide o dele olhando o
+   * estado (sem atraso: ele já reage com o tempo dele).
+   */
+  private localInputs(sampled: readonly InputMask[]): InputMask[] {
+    const bots = this.botPlayers;
+    const slots: BotSlots | null | undefined = this.setup.bots;
+    if (!bots || !slots) return this.inputDelay.push(sampled);
+    const delayed = this.inputDelay.push(humanInputs(sampled, slots));
+    return bots.apply(this.state, delayed);
+  }
+
+  /** O que o bot do lutador `id` está fazendo (overlay de debug; null = não é bot). */
+  botDoing(id: number): string | null {
+    return this.botPlayers?.doing(id) ?? null;
   }
 
   /** Online: de tempos em tempos (e no fim da luta), manda o hash do estado para comparar. */
