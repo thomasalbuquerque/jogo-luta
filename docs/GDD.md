@@ -153,7 +153,7 @@ Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 
 ## Seleção
 
-- **Fluxo:** tela inicial (qualquer tecla) → modo (mesmo PC; como jogar; online; ver replay; controles; alterar nome) → personagem → mapa → luta → resultado → revanche.
+- **Fluxo:** tela inicial (qualquer tecla) → modo (como jogar; contra o bot; mesmo PC; online; ver replay; controles; alterar nome) → personagem → mapa → luta → resultado → revanche. Contra o bot, ver [Bot](#bot-cpu).
 - **Nome do jogador:** na 1ª vez que alguém abre o jogo no navegador (ou entra por um link de sala), o jogo pede o nome antes do menu. Fica salvo no `localStorage` (`jogo-luta:nome`), então não pede de novo; **Alterar nome** no menu troca (Enter salva, Esc volta sem mudar). Até 12 letras (acento e emoji contam uma); espaços das pontas saem. O menu mostra "Jogando como Fulano". O nome aparece em cima do lutador (acima do marcador, na cor do jogador; some enquanto o balão da provocação ou o comando do agarrão estão no lugar), no painel da seleção, no HUD (o lutador na cor do jogador e, ao lado, o nome em cinza, escrito como o jogador digitou, do mesmo tamanho e na mesma linha; não cabendo, os dois diminuem juntos), no resultado ("THOMAS VENCEU!") e nos avisos da sala online. No mesmo PC, o nome do navegador é o do P1; os outros aparecem como P2, P3, P4. Online, cada um aparece com o próprio nome. Quem não tem nome (replay aberto de arquivo, por exemplo) aparece como P1, P2… Nome comprido diminui para caber.
 - **Personagem:** grade de 7 casas (os que existem e silhuetas "em breve"; cresce aos poucos). Até 8, numa linha; com mais, duas linhas de 8 casas mais baixas, e os painéis dos jogadores ficam um pouco menores. Cada jogador anda com as próprias direções, confirma com Ataque ou Pulo e desfaz com Especial; Especial com ninguém pronto (ou Esc) volta ao menu. O painel de cada um mostra o lutador, estilo, especial, barras e bordão. Pode repetir personagem: o contorno e o marcador em cima da cabeça têm a cor do jogador.
 - **Mais jogadores no mesmo PC:** com 3 ou 4 controles conectados, aparece "Mais gente? Controle 3: aperte A para entrar" e cada um que entra ganha um painel (os painéis ficam lado a lado, mais estreitos). Ver [Controles](#controles).
@@ -171,6 +171,31 @@ Como pôr os áudios gravados: [`audio/LEIAME.md`](../audio/LEIAME.md).
 - **Lições:** andar; pulo e pulo duplo; queda rápida; descer da plataforma; ataque comum; ataque para o lado; rasteira; ataque para cima; ataques no ar; esquiva; pisão (ground pound); deslizar e pular na parede; agarrar a borda; nocaute (o boneco com 150%); o especial do Crocko (o boneco ataca com um "!" antes, e é preciso contra-atacar); provocação. No fim, treino livre com o boneco.
 - **Pausa** (Esc, ou Start no controle; no tutorial o Select é o "ver de novo"): continuar, ver a demonstração de novo, pular a lição, recomeçar o tutorial ou voltar ao menu.
 - **Código:** `packages/game/src/tutorial`. As lições (`lessons.ts`) são dados: o texto (com os botões como `{ATTACK}`, trocados pela tecla ou pelo botão em `prompts.ts`), arrumar o palco, os inputs da demonstração, o comportamento do boneco e a condição de "conseguiu", que lê o estado e os eventos do `sim`. O roteiro (`director.ts`) escolhe os inputs de cada tick e muda de fase. Roda em teste sem Phaser: cada demonstração precisa cumprir a própria lição.
+
+## Bot (CPU)
+
+**Jogar contra o bot**, no menu inicial, é uma luta 1 contra 1 com o computador, no mesmo PC (não existe no online).
+
+- **Seleção:** primeiro você escolhe o seu lutador ("ESCOLHA O SEU LUTADOR"), depois o do bot ("ESCOLHA O ADVERSÁRIO"); o cursor do CPU só aparece na vez dele. Qualquer teclado ou controle escolhe; Especial desfaz o último escolhido e, sem nada escolhido, volta ao menu. Pode repetir personagem.
+- **Nível:** no painel **Opções da luta** da tela de mapa, a linha **Nível do bot** (Fácil, Médio ou Difícil, ←/→), com uma frase de como ele joga. O navegador lembra o último (`jogo-luta:bot-nivel`; começa no Médio).
+- **Na luta:** qualquer teclado ou controle mexe em você. O bot aparece como "CPU Médio" (HUD, em cima do lutador e resultado: "CPU MÉDIO VENCEU!"). Revanche, recomeçar, trocar lutador e trocar mapa continuam contra o bot. O replay grava os inputs do bot como os de um jogador. Com o debug ligado, a linha do bot mostra o que ele está tentando fazer.
+- **Como funciona:** o bot é um controle a mais. A cada tick ele lê o estado da luta e devolve a bitmask de botões do lutador dele; o `sim` não sabe quem é bot. Nunca lê o input de ninguém, só o que aparece na tela. Tem RNG próprio com seed (fora do estado da luta), e pensar não muda o estado: a mesma luta dá os mesmos inputs, e o replay e o hash continuam valendo.
+- **Para parecer gente, e não um robô perfeito:**
+  - **Tempo de reação:** vê os adversários com atraso e só prevê parte do movimento deles. Golpe rápido demais para o tempo de reação dele, ele não vê chegando.
+  - **Planos:** de tempos em tempos escolhe o que fazer (aproximar, esperar na distância, recuar, entrar pulando, atirar de longe, voltar ao meio, pressionar na borda, seguir o combo, distrair-se) e segura o plano por alguns ticks. Aperta e solta os botões como uma pessoa, com pulo curto, queda rápida e dash às vezes.
+  - **Golpe certo pelo alcance:** testa cada golpe numa cópia do próprio lutador (o mesmo `stepFighter` da luta) contra o caminho previsto do adversário. Assim acerta a distância de qualquer personagem e do especial (projétil, investida, área, agarrão) sem número escrito à mão. Com o % do adversário alto, prefere golpe forte. Hesita, às vezes escolhe um golpe pior ou ataca no vento. Não ataca quem está invencível nem quem está no contra-ataque (quando percebe), e só joga golpe que não o leva para fora do palco.
+  - **Defesa:** cada golpe ou projétil que vem na direção dele sorteia uma vez se ele se defende: esquiva no ar, pula, dá dash para longe ou, com o Crocko, contra-ataca. O tempo da esquiva tem erro.
+  - **Punição:** o adversário no fim do golpe (exposto) aumenta a chance de atacar.
+  - **Volta ao palco:** antes de gastar o pulo aéreo, o especial (investida ou teleporte), a esquiva ou a recuperação, simula a volta com uma cópia do lutador e gasta o mais barato que ainda funciona. Pendurado na borda, espera um pouco e sobe ou pula (pula mais com o adversário esperando em cima).
+  - **Jeito:** provoca depois de tirar uma vida (com o adversário longe), pressiona na borda quem está voltando, vai atrás depois de acertar (combo), se distrai de vez em quando. Bomba do Thom4o: com ela, corre atrás de alguém para passar; com o adversário, foge dele.
+
+| Nível   | Reação       | Prevê | Pensa a cada | Ataca quando alcança | Pune | Defende | Erra | Pressiona na borda | Erra a volta |
+| ------- | ------------ | ----- | ------------ | -------------------- | ---- | ------- | ---- | ------------------ | ------------ |
+| Fácil   | 26 ± 6 ticks | 0%    | 16–30 ticks  | 30%                  | 20%  | 12%     | 35%  | nunca              | 25%          |
+| Médio   | 18 ± 4 ticks | 40%   | 9–17 ticks   | 55%                  | 50%  | 40%     | 14%  | 35%                | 6%           |
+| Difícil | 13 ± 3 ticks | 80%   | 5–10 ticks   | 75%                  | 85%  | 65%     | 5%   | 70%                | nunca        |
+
+- **Código:** `packages/sim/src/bot` (`bot.ts` o cérebro, `levels.ts` os números de cada nível, `lookahead.ts` a cópia do lutador para testar golpes, `recovery.ts` a volta ao palco, `terrain.ts` as bordas do mapa, `match.ts` uma luta só de bots). No jogo, `match/bots.ts` (quem é bot, nomes e a troca dos inputs) e `profile/botLevel.ts` (o nível salvo). Os testes jogam bot contra bot: o Difícil ganha do Médio e o Médio do Fácil quase sempre, ninguém cai sozinho no Difícil, e todos voltam ao palco com qualquer personagem em qualquer mapa.
 
 ## Determinismo e replays
 
