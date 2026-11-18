@@ -7,13 +7,14 @@ import { Menu } from '../input/menu';
 import { MenuInput } from '../input/menuInput';
 import { pickReplayFile, readReplayFile } from '../match/replayFile';
 import { closeOnline } from '../net/online';
+import { getBotLevel } from '../profile/botLevel';
 import { getPlayerName } from '../profile/playerName';
 import { roomFromSearch } from '../net/roomCode';
 import { MenuList } from '../ui/MenuList';
 import { addPortrait } from '../ui/portrait';
 import { fadeIn, titleText, uiText } from '../ui/theme';
 import type { BackdropData } from './BackdropScene';
-import type { FightData } from './FightScene';
+import type { FightData, MatchSetup } from './FightScene';
 import type { NameData } from './NameScene';
 import type { OnlineData } from './OnlineScene';
 import { VIEW } from '../render/view';
@@ -116,6 +117,15 @@ export class TitleScene extends Phaser.Scene {
           },
         },
         {
+          label: 'Jogar contra o bot',
+          onSelect: () => {
+            // você é o P1 e o bot o P2; o nível fica nas opções da tela de mapa
+            this.scene.start('select', {
+              bots: [null, getBotLevel()],
+            } satisfies Partial<MatchSetup>);
+          },
+        },
+        {
           label: 'Jogar no mesmo PC',
           onSelect: () => {
             this.go('select');
@@ -149,7 +159,8 @@ export class TitleScene extends Phaser.Scene {
           },
         },
       ],
-      { x: width / 2, y: 366, width: 420, height: 46, gap: 10, fontSize: 24 },
+      // 7 opções: um pouco mais baixas para caber acima da borda da tela
+      { x: width / 2, y: 362, width: 420, height: 42, gap: 8, fontSize: 23 },
     );
     this.note = uiText(this, width / 2, 316, this.greeting(), {
       fontSize: '17px',
