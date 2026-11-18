@@ -13,6 +13,9 @@ import { isOffstage, terrainOf } from './terrain';
 
 const N = PLAYABLE_CHARACTERS.length;
 
+/** Lutas inteiras entre bots demoram: no CI (máquina mais lenta) passam dos 5 s padrão. */
+const SLOW = { timeout: 60_000 };
+
 /** Personagem de número `i` (dá a volta no elenco). */
 function cast(i: number): string {
   return PLAYABLE_CHARACTERS[((i % N) + N) % N] ?? '';
@@ -86,7 +89,7 @@ describe('bot: testando golpes com a cópia do lutador', () => {
   });
 });
 
-describe('bot: níveis', () => {
+describe('bot: níveis', SLOW, () => {
   it('quanto mais difícil, mais rápido reage e menos erra', () => {
     const [easy, medium, hard] = BOT_LEVELS.map((l) => BOT_PROFILES[l]);
     if (!easy || !medium || !hard) throw new Error('faltam níveis');
@@ -107,7 +110,7 @@ describe('bot: níveis', () => {
   });
 });
 
-describe('bot: luta', () => {
+describe('bot: luta', SLOW, () => {
   it('mesma seed, mesma luta', () => {
     const setup = {
       characters: [cast(2), cast(7)],
