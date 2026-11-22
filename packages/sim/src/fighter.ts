@@ -1142,8 +1142,8 @@ function integrate(f: Fighter, input: InputMask, solids: readonly Solid[]): void
   if (result.hitCeiling) f.canCutJump = false;
 
   f.grounded = result.landed;
-  // rampa também se atravessa com ↓, como a plataforma
-  f.onPlatform = result.floorKind === 'platform' || result.floorKind === 'ramp';
+  // só a plataforma se atravessa com ↓ (a rampa não)
+  f.onPlatform = result.floorKind === 'platform';
   if (f.grounded) {
     refreshAirOptions(f);
     f.fastFalling = false;

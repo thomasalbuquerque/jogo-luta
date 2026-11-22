@@ -101,13 +101,18 @@ describe('confeitaria: a rampa de biscoito', () => {
     expect(f.y + f.h).toBe(0);
   });
 
-  it('↓ em cima dela desce para a bancada', () => {
+  it('↓ em cima dela não desce para a bancada', () => {
     const { g, f } = setup(-150);
     while (f.x < px(60)) stepGame(g, [Button.RIGHT, 0]);
-    expect(f.y + f.h).toBeLessThan(0);
+    // parado em cima dela
+    for (let i = 0; i < 30; i++) stepGame(g, [0, 0]);
+    const feet = f.y + f.h;
+    expect(feet).toBeLessThan(0);
     stepGame(g, [Button.DOWN, 0]);
-    for (let i = 0; i < 40; i++) stepGame(g, [0, 0]);
-    expect(f.grounded).toBe(true);
-    expect(f.y + f.h).toBe(0);
+    for (let i = 0; i < 40; i++) {
+      stepGame(g, [Button.DOWN, 0]);
+      expect(f.grounded, `tick ${String(i)}`).toBe(true);
+    }
+    expect(f.y + f.h).toBe(feet);
   });
 });

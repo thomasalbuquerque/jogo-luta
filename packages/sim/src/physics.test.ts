@@ -143,14 +143,18 @@ describe('rampa', () => {
     expect(b.y + b.h).toBe(surfaceAt(ramp, 610));
   });
 
-  it('deixa passar quem pula de baixo e quem desce com dropThrough', () => {
+  it('deixa passar quem pula de baixo', () => {
     const subindo = body(560, 950, 0, -80);
     expect(moveAndCollide(subindo, world, false).hitCeiling).toBe(false);
     expect(subindo.y).toBe(870);
+  });
 
+  it('não se atravessa por cima, nem com dropThrough', () => {
     const y = surfaceAt(ramp, 610) - 100;
-    const descendo = body(560, y, 0, 10);
-    expect(moveAndCollide(descendo, world, true, true).landed).toBe(false);
-    expect(descendo.y).toBe(y + 10);
+    const b = body(560, y, 0, 10);
+    const r = moveAndCollide(b, world, true, true);
+    expect(r.landed).toBe(true);
+    expect(r.floorKind).toBe('ramp');
+    expect(b.y).toBe(y);
   });
 });

@@ -13,8 +13,8 @@ export interface Box {
 /**
  * `solid`: bloqueia de todos os lados (chão, paredes, teto).
  * `platform`: atravessável; só segura quem cai por cima.
- * `ramp`: chão inclinado atravessável como a plataforma (de baixo, dos lados e
- * com ↓), na diagonal da caixa: sobe da quina de baixo de um lado até a quina de
+ * `ramp`: chão inclinado atravessável de baixo e dos lados, mas que não se
+ * atravessa por cima (↓ não desce, nem com `dropThrough`), na diagonal da caixa: sobe da quina de baixo de um lado até a quina de
  * cima do outro (`up`). Quem está nela sobe e desce andando, sem pular.
  */
 export type SolidKind = 'solid' | 'platform' | 'ramp';
@@ -92,7 +92,7 @@ export function moveAndCollide(
     // seguinte (no fim da rampa) não virar parede. Vale também para quem entra
     // nela pela ponta, vindo de um chão na mesma altura (fora da largura dela, a
     // altura é a da ponta mais perto).
-    if (grounded && body.vy >= 0 && !dropThrough) {
+    if (grounded && body.vy >= 0) {
       const feet = body.y + body.h;
       for (const s of solids) {
         if (s.kind !== 'ramp' || surfaceUnder(s, body) !== feet) continue;
@@ -126,7 +126,7 @@ export function moveAndCollide(
     let floor: number | null = null;
     for (const s of solids) {
       if (!overlapsX(body, s)) continue;
-      if (s.kind !== 'solid' && dropThrough) continue;
+      if (s.kind === 'platform' && dropThrough) continue;
       const top = surfaceUnder(s, body);
       const reach = feet + Math.max(body.vy, snap);
       if (feet > top || reach <= top) continue;
