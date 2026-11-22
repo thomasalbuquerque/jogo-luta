@@ -2,7 +2,7 @@ import type { GameEvent } from './events';
 import type { Fighter } from './fighter';
 import { idiv } from './math';
 import type { HitProps, ProjectileDef } from './moves';
-import { overlaps, type Box, type Solid } from './physics';
+import { overlaps, surfaceUnder, type Box, type Solid } from './physics';
 import { cosDeg, sinDeg, TRIG_ONE } from './trig';
 
 /** Projétil em voo (bloco `projectile`). Só dados: faz parte do estado da luta. */
@@ -94,8 +94,9 @@ function bounce(
   let top: number | null = null;
   for (const s of solids) {
     if (p.x >= s.x + s.w || p.x + p.w <= s.x) continue;
-    if (bottom > s.y || p.y + p.h <= s.y) continue;
-    if (top === null || s.y < top) top = s.y;
+    const y = surfaceUnder(s, p);
+    if (bottom > y || p.y + p.h <= y) continue;
+    if (top === null || y < top) top = y;
   }
   if (top === null) return;
   p.y = top - p.h;
