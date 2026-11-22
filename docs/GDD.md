@@ -39,6 +39,7 @@ Os números são ponto de partida e serão ajustados nas Etapas 1–3 e 11.
 - **Fast fall:** ↓ no ar, depois do ápice, acelera a queda.
 - **Velocidade de descida por personagem:** descer mais rápido é vantagem, e cada personagem está numa de 3 faixas (`fastFallSpeed` 19 / 17 / 15, com gravidade e queda máxima acompanhando). Descer da plataforma até o chão leva 8, 9 ou 10 ticks. Rápida: Schummaki, Dadazinho, Tchula, Crocko, Darllan, Gabs, Marília, Igão e Thom4o; média: Tauba e Meia; lenta: João Frango.
 - **Plataformas atravessáveis:** passa por baixo pulando; ↓ em cima delas para descer.
+- **Rampas:** chão inclinado atravessável como a plataforma (por baixo, pelos lados e com ↓). Quem está nela sobe e desce andando, colado, sem decolar nem bater na quina do chão em que ela encosta. A altura vale a do lado alto do corpo. Ficam de fora do teleporte sorteado; a bola que quica nela sobe reto. Hoje só na confeitaria (o biscoito do forno).
 - **Esquiva:** no chão é um dash curto (9 ticks, recarga de 18; pulo cancela o dash). No ar é um dodge em qualquer das 8 direções (ou parado), sem gravidade, com 12 ticks de invencibilidade, 1 por vez no ar.
 - **Tolerâncias:** pulo até 5 ticks depois de sair da borda (coyote time) e pulo apertado até 6 ticks antes de poder pular fica guardado (buffer).
 - **Unidades no `sim`:** inteiros em subpixel (1 px = 100 subpx), para o resultado ser igual em todo navegador.
