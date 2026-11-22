@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { launch } from './combat';
 import { px } from './constants';
 import { createGame, stepGame } from './game';
 import { Button } from './input';
-import { overlaps } from './physics';
+import { overlaps, surfaceUnder } from './physics';
 import { CONFEITARIA_STAGE, STAGES } from './stage';
 
 describe('mapas', () => {
@@ -114,5 +115,47 @@ describe('confeitaria: a rampa de biscoito', () => {
       expect(f.grounded, `tick ${String(i)}`).toBe(true);
     }
     expect(f.y + f.h).toBe(feet);
+  });
+
+  it('arremessado de cima dela, para qualquer lado e com qualquer força, nunca passa para baixo', () => {
+    const ramp = CONFEITARIA_STAGE.solids.find((s) => s.kind === 'ramp');
+    if (!ramp) throw new Error('mapa sem rampa');
+    const fails: string[] = [];
+    for (const x of [60, 120, 160]) {
+      for (let angle = 0; angle < 360; angle += 15) {
+        for (const damage of [0, 80, 150]) {
+          for (const side of [-1, 1] as const) {
+            const { g, f } = setup(x);
+            // em cima dela, parado
+            f.y = surfaceUnder(ramp, f) - f.h - px(100);
+            for (let i = 0; i < 30; i++) stepGame(g, [0, 0]);
+            f.damage = damage;
+            launch(
+              f,
+              {
+                damage: 10,
+                angle,
+                baseKnockback: px(8),
+                knockbackScale: px(0.08),
+                knockbackDir: 'facing',
+              },
+              side,
+              10,
+            );
+            for (let t = 0; t < 120 && f.state !== 'ko'; t++) {
+              stepGame(g, [0, 0]);
+              const over = f.x > ramp.x && f.x + f.w < ramp.x + ramp.w;
+              if (over && f.y + f.h > surfaceUnder(ramp, f)) {
+                fails.push(
+                  `x ${String(x)}, ${String(angle)}°, ${String(damage)}%, lado ${String(side)}`,
+                );
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+    expect(fails).toEqual([]);
   });
 });

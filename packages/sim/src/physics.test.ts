@@ -149,6 +149,23 @@ describe('rampa', () => {
     expect(subindo.y).toBe(870);
   });
 
+  it('quem estava nela e é jogado para o lado alto, mais deitado que ela, fica nela', () => {
+    // em pé na rampa (o pé do lado alto na linha)
+    const b = body(560, surfaceAt(ramp, 610) - 100, 60, -10);
+    const r = moveAndCollide(b, world, false);
+    expect(r.landed).toBe(true);
+    expect(r.floorKind).toBe('ramp');
+    expect(b.y + b.h).toBe(surfaceAt(ramp, 670));
+  });
+
+  it('quem é posto com o meio do pé acima da linha e anda fica nela', () => {
+    // o meio do pé (x 585) acima da linha, o lado alto (x 610) abaixo
+    const b = body(560, surfaceAt(ramp, 585) - 100, 30, 0);
+    const r = moveAndCollide(b, world, false);
+    expect(r.landed).toBe(true);
+    expect(b.y + b.h).toBe(surfaceAt(ramp, 640));
+  });
+
   it('não se atravessa por cima, nem com dropThrough', () => {
     const y = surfaceAt(ramp, 610) - 100;
     const b = body(560, y, 0, 10);

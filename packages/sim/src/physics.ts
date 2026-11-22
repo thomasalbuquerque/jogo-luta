@@ -84,6 +84,8 @@ export function moveAndCollide(
 ): MoveResult {
   const result: MoveResult = { landed: false, floorKind: null, hitCeiling: false, hitWall: 0 };
   const startX = body.x;
+  const startVy = body.vy;
+  const { strict, loose } = aboveRamps(body, solids);
 
   // Eixo X: só sólidos bloqueiam.
   if (body.vx !== 0) {
@@ -124,12 +126,16 @@ export function moveAndCollide(
   if (body.vy > 0 || (snap > 0 && body.vy >= 0)) {
     const feet = body.y + body.h;
     let floor: number | null = null;
-    for (const s of solids) {
-      if (!overlapsX(body, s)) continue;
+    for (let i = 0; i < solids.length; i++) {
+      const s = solids[i];
+      if (!s || !overlapsX(body, s)) continue;
       if (s.kind === 'platform' && dropThrough) continue;
       const top = surfaceUnder(s, body);
       const reach = feet + Math.max(body.vy, snap);
-      if (feet > top || reach <= top) continue;
+      // na rampa vale quem estava em cima dela antes de andar, mesmo que o passo
+      // na horizontal o tenha levado para baixo da linha
+      if (s.kind === 'ramp' ? !isBit(loose, i) : feet > top) continue;
+      if (reach <= top) continue;
       if (floor === null || top < floor) {
         floor = top;
         result.floorKind = s.kind;
@@ -157,7 +163,59 @@ export function moveAndCollide(
     if (result.hitCeiling) body.vy = 0;
   }
 
+  // Quem estava em cima de uma rampa nunca acaba embaixo dela: arremessado para o
+  // lado alto mais deitado que ela (ou subindo devagar), fica nela.
+  if (!result.landed) catchOnRamp(body, solids, startVy < 0 ? strict : loose, result);
+
   return result;
+}
+
+/** Bit `i` ligado na máscara. */
+function isBit(mask: number, i: number): boolean {
+  return ((mask >> i) & 1) === 1;
+}
+
+/**
+ * Rampas (bit = índice em `solids`) que o corpo tem embaixo, antes de mover:
+ * `strict` com o pé do lado alto na linha ou acima dela (quem está em pé nela);
+ * `loose` com o meio do pé acima da linha (quem já passou da metade dela, caindo
+ * ou posto em cima, como o agarrado na frente de quem o segura).
+ */
+function aboveRamps(body: Box, solids: readonly Solid[]): { strict: number; loose: number } {
+  let strict = 0;
+  let loose = 0;
+  const feet = body.y + body.h;
+  const cx = body.x + Math.trunc(body.w / 2);
+  for (let i = 0; i < solids.length && i < 31; i++) {
+    const s = solids[i];
+    if (s?.kind !== 'ramp') continue;
+    if (feet <= surfaceUnder(s, body)) strict |= 1 << i;
+    if (feet <= surfaceAt(s, cx)) loose |= 1 << i;
+  }
+  return { strict, loose };
+}
+
+/** Põe na rampa (das marcadas em `above`) que o corpo atravessou para baixo. */
+function catchOnRamp(
+  body: Body,
+  solids: readonly Solid[],
+  above: number,
+  result: MoveResult,
+): void {
+  if (above === 0) return;
+  const feet = body.y + body.h;
+  let floor: number | null = null;
+  for (let i = 0; i < solids.length && i < 31; i++) {
+    const s = solids[i];
+    if (!s || !isBit(above, i) || !overlapsX(body, s)) continue;
+    const top = surfaceUnder(s, body);
+    if (feet > top && (floor === null || top < floor)) floor = top;
+  }
+  if (floor === null) return;
+  body.y = floor - body.h;
+  body.vy = 0;
+  result.landed = true;
+  result.floorKind = 'ramp';
 }
 
 /** Lado em que o corpo está encostado num sólido (sondando 1 subpx): -1, 1 ou 0. */
