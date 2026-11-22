@@ -66,3 +66,48 @@ describe('confeitaria: o forno', () => {
     expect(d.y + d.h).toBe(forno.y);
   });
 });
+
+describe('confeitaria: a rampa de biscoito', () => {
+  /** Lutador 0 parado em `x` (px) na bancada; o outro longe. */
+  function setup(x: number) {
+    const g = createGame({ characters: ['darllan', 'crocko'], stage: CONFEITARIA_STAGE });
+    const [f, other] = g.fighters;
+    if (!f || !other) throw new Error('sem lutador');
+    other.x = px(-450);
+    f.x = px(x);
+    for (let i = 0; i < 30; i++) stepGame(g, [0, 0]);
+    expect(f.grounded).toBe(true);
+    return { g, f };
+  }
+
+  it('vai da bancada ao forno e volta só andando, sempre no chão', () => {
+    const forno = CONFEITARIA_STAGE.solids[1];
+    if (!forno) throw new Error('mapa sem forno');
+    const { g, f } = setup(-150);
+    expect(f.y + f.h).toBe(0);
+    let ticks = 0;
+    while (f.x < forno.x + px(60) && ticks < 200) {
+      stepGame(g, [Button.RIGHT, 0]);
+      expect(f.grounded, `tick ${String(ticks)}`).toBe(true);
+      ticks++;
+    }
+    expect(f.y + f.h).toBe(forno.y);
+    ticks = 0;
+    while (f.x > px(-150) && ticks < 200) {
+      stepGame(g, [Button.LEFT, 0]);
+      expect(f.grounded, `tick ${String(ticks)}`).toBe(true);
+      ticks++;
+    }
+    expect(f.y + f.h).toBe(0);
+  });
+
+  it('↓ em cima dela desce para a bancada', () => {
+    const { g, f } = setup(-150);
+    while (f.x < px(60)) stepGame(g, [Button.RIGHT, 0]);
+    expect(f.y + f.h).toBeLessThan(0);
+    stepGame(g, [Button.DOWN, 0]);
+    for (let i = 0; i < 40; i++) stepGame(g, [0, 0]);
+    expect(f.grounded).toBe(true);
+    expect(f.y + f.h).toBe(0);
+  });
+});

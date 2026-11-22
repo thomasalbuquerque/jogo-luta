@@ -77,18 +77,19 @@ Laje (o mapa de hoje)
 As medidas abaixo são o alvo das caixas de colisão, em px do jogo (x = 0 no meio, y = 0 no chão,
 para cima é negativo). Na hora de montar o mapa, o Claude acerta os números com a arte que saiu.
 
-| Mapa          | Chão sólido (x de … a …)                                   | Plataformas atravessáveis (x de … a …, altura)                    |
-| ------------- | ---------------------------------------------------------- | ----------------------------------------------------------------- |
-| Laje (hoje)   | −450 a 450                                                 | −380 a −150 e 150 a 380, as duas a 150 do chão                    |
-| Oficina       | −500 a 500                                                 | −190 a 190, a 150                                                 |
-| Pilates       | −450 a 450                                                 | −380 a −160, a 110; 160 a 380, a 210                              |
-| São Sebastião | −600 a 280 (areia)                                         | barco: 360 a 580, na altura da areia; prancha: −380 a −160, a 150 |
-| Prefeitura    | −460 a 460                                                 | −380 a −180 e 180 a 380, a 130; −110 a 110, a 250                 |
-| Quadra        | −575 a 575                                                 | cadeira do juiz: 350 a 480, a 150                                 |
-| Confeitaria   | bancada: −520 a 180; forno: 180 a 520, com o topo 65 acima | biscoito: −440 a −170, a 150                                      |
-| Concerto      | −400 a 400                                                 | camarotes: −640 a −440 e 440 a 640, a 110                         |
+| Mapa          | Chão sólido (x de … a …)                                   | Plataformas atravessáveis (x de … a …, altura)                      |
+| ------------- | ---------------------------------------------------------- | ------------------------------------------------------------------- |
+| Laje (hoje)   | −450 a 450                                                 | −380 a −150 e 150 a 380, as duas a 150 do chão                      |
+| Oficina       | −500 a 500                                                 | −190 a 190, a 150                                                   |
+| Pilates       | −450 a 450                                                 | −380 a −160, a 110; 160 a 380, a 210                                |
+| São Sebastião | −600 a 280 (areia)                                         | barco: 360 a 580, na altura da areia; prancha: −380 a −160, a 150   |
+| Prefeitura    | −460 a 460                                                 | −380 a −180 e 180 a 380, a 130; −110 a 110, a 250                   |
+| Quadra        | −575 a 575                                                 | cadeira do juiz: 350 a 480, a 150                                   |
+| Confeitaria   | bancada: −520 a 180; forno: 180 a 520, com o topo 65 acima | biscoito: −440 a −170, a 150; rampa (biscoito): 40 a 180, de 0 a 65 |
+| Concerto      | −400 a 400                                                 | camarotes: −640 a −440 e 440 a 640, a 110                           |
 
-O forno da confeitaria saiu baixo (65), para subir da bancada com um pulo só. Todas as alturas
+O forno da confeitaria saiu baixo (65), para subir da bancada com um pulo só. Depois ganhou uma rampa
+(outro biscoito, encostado na quina do forno, a uns 25°) para passar da bancada para o forno andando. Todas as alturas
 cabem no pulo de quem pula menos (Darllan: 162 px no primeiro pulo, 284 com o
 segundo). As de até 150 saem com um pulo só; as de 210 e 250 pedem o segundo pulo ou uma plataforma
 mais baixa no caminho.
@@ -482,5 +483,5 @@ mais no código:
 - **São Sebastião:** plataforma na altura do chão (o barco), a faixa de mar na frente e a camada do
   meio sem repetir espelhada.
 - **Quadra:** a plataforma é o topo de uma peça que vai até o chão (a cadeira do juiz).
-- **Confeitaria:** dois blocos sólidos encostados, com artes diferentes.
+- **Confeitaria:** dois blocos sólidos encostados, com artes diferentes, e uma rampa entre eles.
 - **Concerto:** plataformas fora do chão principal.

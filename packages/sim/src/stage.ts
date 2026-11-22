@@ -22,6 +22,11 @@ function solid(kind: Solid['kind'], x: number, y: number, w: number, h: number):
   return { kind, x: px(x), y: px(y), w: px(w), h: px(h) };
 }
 
+/** Rampa na diagonal da caixa, com o lado alto em `up` (ver `SolidKind`). */
+function ramp(x: number, y: number, w: number, h: number, up: -1 | 1): Solid {
+  return { ...solid('ramp', x, y, w, h), up };
+}
+
 /**
  * Mapa de teste: plataforma principal grossa (as laterais servem de parede para
  * wall jump e as quinas de cima são bordas que dá para agarrar) e 2 plataformas
@@ -75,8 +80,9 @@ export const OFICINA_STAGE: Stage = {
  * Confeitaria do Darllan: dois blocos sólidos encostados, a bancada comprida e,
  * na ponta direita, o forno, 65 px mais alto (um degrau baixo, de um pulo só,
  * onde também se luta). Os pés das duas caixas ficam na mesma linha. Por cima da
- * metade esquerda da bancada, um biscoito gigante atravessável. Ver
- * docs/CENARIOS.md.
+ * metade esquerda da bancada, um biscoito gigante atravessável. Outro biscoito,
+ * encostado no forno, é a rampa da bancada até o topo dele (uns 25°: sobe os 65 px
+ * em 140), para passar de um para o outro andando. Ver docs/CENARIOS.md.
  */
 export const CONFEITARIA_STAGE: Stage = {
   id: 'confeitaria',
@@ -84,10 +90,12 @@ export const CONFEITARIA_STAGE: Stage = {
     solid('solid', -520, 0, 700, 420),
     solid('solid', 180, -65, 340, 485),
     solid('platform', -440, -150, 270, 16),
+    ramp(40, -65, 140, 65, 1),
   ],
   spawns: [
     { x: px(-300), y: 0 },
-    { x: px(80), y: 0 },
+    // fora de baixo da rampa
+    { x: px(0), y: 0 },
     { x: px(-305), y: px(-150) },
     { x: px(350), y: px(-65) },
   ],
