@@ -401,7 +401,8 @@ export class StageView {
       this.layers.push({ art: layer, place, info, images, fill, floor });
     });
 
-    this.drawBuilding(stage, atlas, depths.stage);
+    // a rampa fica na frente dos enfeites (o biscoito encostado na frente do pote)
+    this.drawBuilding(stage, atlas, depths.stage, depths.decoration + 0.5);
     for (const d of art.decorations) {
       scene.add
         .image(d.x, d.y, atlas, d.frame)
@@ -488,7 +489,7 @@ export class StageView {
   }
 
   /** Prédio por cima da plataforma principal; tábuas por cima das plataformas finas e das rampas. */
-  private drawBuilding(stage: Stage, atlas: string, depth: number): void {
+  private drawBuilding(stage: Stage, atlas: string, depth: number, rampDepth: number): void {
     const scene = this.scene;
     const art = this.art;
     if (!art) return;
@@ -580,7 +581,7 @@ export class StageView {
           .setOrigin(a.pivot[0] / plank.width, a.pivot[1] / plank.height)
           .setScale(scale, Math.max(scale, thick))
           .setRotation(up * -Math.atan2(h, w))
-          .setDepth(depth);
+          .setDepth(rampDepth);
       } else {
         const a = anchorsOf(plank);
         const right = a.sockets.right ?? [plank.width, a.pivot[1]];
