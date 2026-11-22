@@ -259,9 +259,9 @@ const CONFEITARIA: StageArt = {
   blocks: [{ frame: 'building' }, { frame: 'oven', color: 0xb89d85, behind: true }],
   decorations: [
     // em cima da bancada e do forno, atrás dos lutadores
-    { frame: 'flour', x: -478, y: -4, scale: 0.3 / ART_RES / DECOR_RES },
+    { frame: 'flour', x: -440, y: -4, scale: 0.3 / ART_RES / DECOR_RES },
+    { frame: 'jar', x: -355, y: -4, scale: 0.28 / ART_RES / DECOR_RES },
     { frame: 'mixer', x: -60, y: -4, scale: 0.32 / ART_RES / DECOR_RES },
-    { frame: 'jar', x: 120, y: -4, scale: 0.28 / ART_RES / DECOR_RES },
     { frame: 'stand', x: 470, y: -69, scale: 0.3 / ART_RES / DECOR_RES },
   ],
 };
