@@ -401,7 +401,8 @@ export class StageView {
       this.layers.push({ art: layer, place, info, images, fill, floor });
     });
 
-    this.drawBuilding(stage, atlas, depths.stage);
+    // a rampa fica na frente dos enfeites (o biscoito encostado na frente do pote)
+    this.drawBuilding(stage, atlas, depths.stage, depths.decoration + 0.5);
     for (const d of art.decorations) {
       scene.add
         .image(d.x, d.y, atlas, d.frame)
@@ -487,8 +488,8 @@ export class StageView {
     for (let i = n; i < floor.tiles.length; i++) floor.tiles[i]?.setVisible(false);
   }
 
-  /** Prédio por cima da plataforma principal; tábuas por cima das plataformas finas. */
-  private drawBuilding(stage: Stage, atlas: string, depth: number): void {
+  /** Prédio por cima da plataforma principal; tábuas por cima das plataformas finas e das rampas. */
+  private drawBuilding(stage: Stage, atlas: string, depth: number, rampDepth: number): void {
     const scene = this.scene;
     const art = this.art;
     if (!art) return;
@@ -563,6 +564,24 @@ export class StageView {
         g.fillStyle(art.wall.outline, 1);
         g.fillRect(x, top, 3, deep);
         g.fillRect(x + w - 3, top, 3, deep);
+      } else if (s.kind === 'ramp') {
+        // a mesma tábua (o biscoito gigante, na confeitaria) deitada na diagonal:
+        // o topo dela, onde se pisa, vai da quina de baixo à de cima da caixa
+        const h = toPx(s.h);
+        const a = anchorsOf(plank);
+        const right = a.sockets.right ?? [plank.width, a.pivot[1]];
+        const scale = Math.hypot(w, h) / (right[0] - a.pivot[0]);
+        // grossa como a plataforma do mapa (a rampa é curta: na escala dela, a
+        // tábua viraria um palito); só o comprimento encolhe
+        const platform = stage.solids.find((p) => p.kind === 'platform');
+        const thick = platform ? toPx(platform.w) / (right[0] - a.pivot[0]) : scale;
+        const up = s.up ?? 1;
+        scene.add
+          .image(x, up === 1 ? y + h : y, atlas, 'plank')
+          .setOrigin(a.pivot[0] / plank.width, a.pivot[1] / plank.height)
+          .setScale(scale, Math.max(scale, thick))
+          .setRotation(up * -Math.atan2(h, w))
+          .setDepth(rampDepth);
       } else {
         const a = anchorsOf(plank);
         const right = a.sockets.right ?? [plank.width, a.pivot[1]];
@@ -619,6 +638,13 @@ export class StageView {
     const g = this.scene.add.graphics().setDepth(depth);
     for (const s of stage.solids) {
       g.fillStyle(s.kind === 'solid' ? 0x5c677d : 0x8d99ae, 1);
+      if (s.kind === 'ramp') {
+        const [x0, x1, y0, y1] = [toPx(s.x), toPx(s.x + s.w), toPx(s.y), toPx(s.y + s.h)];
+        // triângulo embaixo da diagonal
+        if (s.up === -1) g.fillTriangle(x0, y0, x1, y1, x0, y1);
+        else g.fillTriangle(x0, y1, x1, y0, x1, y1);
+        continue;
+      }
       g.fillRect(toPx(s.x), toPx(s.y), toPx(s.w), toPx(s.h));
     }
   }

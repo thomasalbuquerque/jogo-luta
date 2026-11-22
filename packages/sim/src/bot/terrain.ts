@@ -1,7 +1,7 @@
 import { px } from '../constants';
 import type { Fighter } from '../fighter';
 import { idiv } from '../math';
-import type { Box, Solid } from '../physics';
+import { surfaceAt, type Box, type Solid } from '../physics';
 import type { Stage } from '../stage';
 
 /**
@@ -67,14 +67,16 @@ export function terrainOf(stage: Stage): Terrain {
 }
 
 /**
- * Topo do chão mais alto embaixo do ponto (x, y): bloco ou plataforma que cobre x
- * com o topo em y ou mais embaixo. null = vazio embaixo.
+ * Topo do chão mais alto embaixo do ponto (x, y): bloco, plataforma ou rampa que
+ * cobre x com o chão em y ou mais embaixo. null = vazio embaixo.
  */
 export function floorTop(solids: readonly Solid[], x: number, y: number): number | null {
   let best: number | null = null;
   for (const s of solids) {
-    if (x < s.x || x >= s.x + s.w || s.y < y) continue;
-    if (best === null || s.y < best) best = s.y;
+    if (x < s.x || x >= s.x + s.w) continue;
+    const top = surfaceAt(s, x);
+    if (top < y) continue;
+    if (best === null || top < best) best = top;
   }
   return best;
 }

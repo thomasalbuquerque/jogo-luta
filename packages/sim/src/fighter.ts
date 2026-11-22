@@ -595,7 +595,7 @@ export const TELEPORT_EDGE_MARGIN = px(12);
 
 /**
  * Pontos sorteados para o teleporte: pés em cima de um chão do palco (bloco ou
- * plataforma), longe das pontas e sem o corpo entrar num bloco sólido. Cada
+ * plataforma; rampa não), longe das pontas e sem o corpo entrar num bloco sólido. Cada
  * ponto do chão tem a mesma chance. Devolve até `count` pontos (menos, se o
  * palco não tiver lugar).
  */
@@ -609,6 +609,7 @@ export function teleportSpots(
   const floors: { solid: Solid; minX: number; span: number }[] = [];
   let total = 0;
   for (const s of solids) {
+    if (s.kind === 'ramp') continue; // chão torto: fica de fora
     const minX = s.x + half + TELEPORT_EDGE_MARGIN;
     const span = s.x + s.w - half - TELEPORT_EDGE_MARGIN - minX + 1;
     if (span <= 0) continue;
@@ -1127,7 +1128,7 @@ function integrate(f: Fighter, input: InputMask, solids: readonly Solid[]): void
   const ownVy = f.vy;
   f.vx += f.kbx;
   f.vy += f.kby;
-  const result = moveAndCollide(f, solids, f.dropTicks > 0);
+  const result = moveAndCollide(f, solids, f.dropTicks > 0, wasGrounded);
   f.vx = ownVx;
   f.vy = ownVy;
   if (result.hitWall !== 0) {
@@ -1141,6 +1142,7 @@ function integrate(f: Fighter, input: InputMask, solids: readonly Solid[]): void
   if (result.hitCeiling) f.canCutJump = false;
 
   f.grounded = result.landed;
+  // só a plataforma se atravessa com ↓ (a rampa não)
   f.onPlatform = result.floorKind === 'platform';
   if (f.grounded) {
     refreshAirOptions(f);

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { moveAndCollide, overlaps, touchingWall, type Body, type Solid } from './physics';
+import {
+  moveAndCollide,
+  overlaps,
+  surfaceAt,
+  touchingWall,
+  type Body,
+  type Solid,
+} from './physics';
 
 const ground: Solid = { kind: 'solid', x: 0, y: 1000, w: 1000, h: 500 };
 const plat: Solid = { kind: 'platform', x: 0, y: 500, w: 300, h: 20 };
@@ -74,5 +81,97 @@ describe('physics', () => {
     const b = body(310, 480, -40, 0);
     expect(moveAndCollide(b, [plat], false).hitWall).toBe(0);
     expect(b.x).toBe(270);
+  });
+});
+
+describe('rampa', () => {
+  // chão em y 1000 até x 800; em cima dele, rampa de x 400 a 800 subindo 200 para a
+  // direita; degrau em y 800 depois dela
+  const floor: Solid = { kind: 'solid', x: 0, y: 1000, w: 800, h: 500 };
+  const ramp: Solid = { kind: 'ramp', x: 400, y: 800, w: 400, h: 200, up: 1 };
+  const step: Solid = { kind: 'solid', x: 800, y: 800, w: 400, h: 700 };
+  const world = [floor, ramp, step];
+
+  /** Anda no chão por `ticks` ticks com velocidade vx (gravidade 5); devolve se ficou no chão. */
+  function walk(b: Body, vx: number, ticks: number): boolean {
+    let grounded = true;
+    for (let i = 0; i < ticks; i++) {
+      b.vx = vx;
+      b.vy += 5;
+      const r = moveAndCollide(b, world, false, grounded);
+      if (!r.landed) return false;
+      grounded = true;
+    }
+    return grounded;
+  }
+
+  it('a altura é a da diagonal, e a da ponta fora dela', () => {
+    expect(surfaceAt(ramp, 400)).toBe(1000);
+    expect(surfaceAt(ramp, 600)).toBe(900);
+    expect(surfaceAt(ramp, 800)).toBe(800);
+    expect(surfaceAt(ramp, 0)).toBe(1000);
+    expect(surfaceAt({ ...ramp, up: -1 }, 600)).toBe(900);
+    expect(surfaceAt({ ...ramp, up: -1 }, 400)).toBe(800);
+  });
+
+  it('sobe andando do chão até o degrau, sem bater na quina', () => {
+    const b = body(300, 900, 0, 0);
+    expect(walk(b, 37, 18)).toBe(true);
+    expect(b.x).toBeGreaterThan(800);
+    expect(b.y + b.h).toBe(800);
+  });
+
+  it('desce andando colada, sem decolar', () => {
+    const b = body(1000, 700, 0, 0);
+    expect(walk(b, -37, 20)).toBe(true);
+    expect(b.x).toBeLessThan(400);
+    expect(b.y + b.h).toBe(1000);
+  });
+
+  it('quem anda no chão embaixo dela passa por baixo', () => {
+    const b = body(600, 900, 0, 0);
+    expect(walk(b, 20, 5)).toBe(true);
+    expect(b.y + b.h).toBe(1000);
+  });
+
+  it('segura quem cai por cima, na altura da diagonal', () => {
+    const b = body(560, 760, 0, 60);
+    const r = moveAndCollide(b, world, false);
+    expect(r.landed).toBe(true);
+    expect(r.floorKind).toBe('ramp');
+    // o pé do lado alto (x 610) fica na linha
+    expect(b.y + b.h).toBe(surfaceAt(ramp, 610));
+  });
+
+  it('deixa passar quem pula de baixo', () => {
+    const subindo = body(560, 950, 0, -80);
+    expect(moveAndCollide(subindo, world, false).hitCeiling).toBe(false);
+    expect(subindo.y).toBe(870);
+  });
+
+  it('quem estava nela e é jogado para o lado alto, mais deitado que ela, fica nela', () => {
+    // em pé na rampa (o pé do lado alto na linha)
+    const b = body(560, surfaceAt(ramp, 610) - 100, 60, -10);
+    const r = moveAndCollide(b, world, false);
+    expect(r.landed).toBe(true);
+    expect(r.floorKind).toBe('ramp');
+    expect(b.y + b.h).toBe(surfaceAt(ramp, 670));
+  });
+
+  it('quem é posto com o meio do pé acima da linha e anda fica nela', () => {
+    // o meio do pé (x 585) acima da linha, o lado alto (x 610) abaixo
+    const b = body(560, surfaceAt(ramp, 585) - 100, 30, 0);
+    const r = moveAndCollide(b, world, false);
+    expect(r.landed).toBe(true);
+    expect(b.y + b.h).toBe(surfaceAt(ramp, 640));
+  });
+
+  it('não se atravessa por cima, nem com dropThrough', () => {
+    const y = surfaceAt(ramp, 610) - 100;
+    const b = body(560, y, 0, 10);
+    const r = moveAndCollide(b, world, true, true);
+    expect(r.landed).toBe(true);
+    expect(r.floorKind).toBe('ramp');
+    expect(b.y).toBe(y);
   });
 });
