@@ -1279,6 +1279,12 @@ export class FightScene extends Phaser.Scene {
       // caixas de colisão do mapa
       d.lineStyle(2, STAGE_DEBUG_COLOR, 0.8);
       for (const s of getStage(this.state.stageId).solids) {
+        if (s.kind === 'ramp') {
+          // a rampa é a diagonal da caixa
+          const [y0, y1] = s.up === -1 ? [s.y, s.y + s.h] : [s.y + s.h, s.y];
+          d.lineBetween(toPx(s.x), toPx(y0), toPx(s.x + s.w), toPx(y1));
+          continue;
+        }
         d.strokeRect(toPx(s.x), toPx(s.y), toPx(s.w), toPx(s.h));
       }
     }
